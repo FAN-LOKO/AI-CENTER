@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Статистика агента</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/modules.css" />
+</head>
+<body>
+
+  <!-- Внутренняя навигация модуля Агента -->
+  <div class="module-tabs agent-tabs">
+  <button
+    class="module-tab module-tab--third"
+    onclick="navigateAgent('modules-agent/profile.html')"
+  >
+    Профиль
+  </button>
+  <button
+    class="module-tab module-tab--third"
+    onclick="navigateAgent('modules-agent/connect.html')"
+  >
+    Подключение
+  </button>
+  <button
+    class="module-tab module-tab--third"
+    onclick="navigateAgent('modules-agent/links.html')"
+  >
+    Ссылки
+  </button>
+  <button
+    class="module-tab module-tab--half module-tab--active"
+    onclick="navigateAgent('modules-agent/stats.html')"
+  >
+    Статистика
+  </button>
+  <button
+    class="module-tab module-tab--half"
+    onclick="navigateAgent('modules-agent/dialogs.html')"
+  >
+    Диалоги
+  </button>
+</div>
+
+
+  <div class="app-content">
+
+    <!-- Краткая статистика -->
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Краткая статистика</h2>
+        <p class="card-section-subtitle">Основные показатели работы агента</p>
+      </div>
+      <div class="card-section-body">
+        <div class="profile-row">
+          <span class="profile-label">Диалоги</span>
+          <span class="profile-value" id="statDialogsTotal">12</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Выданные реферальные ссылки</span>
+          <span class="profile-value" id="statRefLinksTotal">5</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Новых диалогов за сегодня</span>
+          <span class="profile-value" id="statDialogsToday">0</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Новых ссылок за сегодня</span>
+          <span class="profile-value" id="statRefLinksToday">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Детализация -->
+    <section class="card-section accordion-card">
+      <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+        <span class="card-section-title">Детализация</span>
+        <span class="accordion-icon">▼</span>
+      </div>
+      <div class="accordion-body open">
+
+        <!-- Список диалогов -->
+        <section class="card-section accordion-card">
+          <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+            <span class="card-section-title">Список диалогов</span>
+            <span class="accordion-icon">▼</span>
+          </div>
+          <div class="accordion-body open">
+            <p class="card-section-subtitle">
+              Кликните по диалогу, чтобы открыть его и продолжить общение с клиентом.
+            </p>
+
+            <div id="dialogsList">
+              <!-- Примеры карточек диалогов (заглушки) -->
+              <div class="dialog-item" onclick="openDialog('dlg-1', '@user1', 'Telegram')">
+                <div class="dialog-item-row">
+                  <span class="dialog-user">@user1</span>
+                  <span class="dialog-time">18.03.2026 • 10:45</span>
+                </div>
+                <div class="dialog-last-msg">
+                  Спасибо за инфо!
+                </div>
+              </div>
+
+              <div class="dialog-item" onclick="openDialog('dlg-2', '@user2', 'Telegram')">
+                <div class="dialog-item-row">
+                  <span class="dialog-user">@user2</span>
+                  <span class="dialog-time">18.03.2026 • 09:12</span>
+                </div>
+                <div class="dialog-last-msg">
+                  Можно подробнее про условия?
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Выданные ссылки -->
+        <section class="card-section accordion-card">
+          <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+            <span class="card-section-title">Выданные ссылки</span>
+            <span class="accordion-icon">▼</span>
+          </div>
+          <div class="accordion-body open">
+            <p class="card-section-subtitle">
+              Здесь будут отображаться последние выданные клиентам ссылки.
+            </p>
+            <div class="form-group">
+              <div class="profile-row">
+                <span class="profile-label">Кому</span>
+                <span class="profile-value">@user1</span>
+              </div>
+              <div class="profile-row">
+                <span class="profile-label">Тип ссылки</span>
+                <span class="profile-value">Клиентская ссылка</span>
+              </div>
+              <div class="profile-row">
+                <span class="profile-label">Время</span>
+                <span class="profile-value">10:45</span>
+              </div>
+            </div>
+            <!-- позже здесь тоже будет динамический список -->
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    function navigateAgent(page) {
+      try {
+        window.parent?.postMessage?.({
+          type: 'navigate',
+          page: page,
+          tab: 'modules'
+        }, '*');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function toggleAccordion(headerEl) {
+      const body = headerEl.nextElementSibling;
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      headerEl.classList.toggle('open', !isOpen);
+    }
+
+    function openDialog(dialogId, username, channel) {
+      try {
+        // сохраняем текущий диалог локально
+        sessionStorage.setItem('agentCurrentDialogId', dialogId);
+        sessionStorage.setItem('agentCurrentDialogUsername', username || '');
+        sessionStorage.setItem('agentCurrentDialogChannel', channel || '');
+
+        // можно сразу отправить мета-инфу наверх, если нужно
+        window.parent?.postMessage?.({
+          type: 'agent-open-dialog',
+          dialogId,
+          username,
+          channel
+        }, '*');
+
+        // навигация на страницу Диалоги
+        window.parent?.postMessage?.({
+          type: 'navigate',
+          page: 'modules-agent/dialogs.html',
+          tab: 'modules'
+        }, '*');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const tg = window.Telegram?.WebApp;
+      tg?.ready?.();
+
+      // Загружаем сохранённую агрегированную статистику (если будет приходить из n8n)
+      try {
+        const savedStatsRaw = localStorage.getItem('agentStats');
+        if (savedStatsRaw) {
+          const stats = JSON.parse(savedStatsRaw);
+          if (stats.dialogsTotal !== undefined) {
+            document.getElementById('statDialogsTotal').textContent = stats.dialogsTotal;
+          }
+          if (stats.refLinksTotal !== undefined) {
+            document.getElementById('statRefLinksTotal').textContent = stats.refLinksTotal;
+          }
+          if (stats.dialogsToday !== undefined) {
+            document.getElementById('statDialogsToday').textContent = stats.dialogsToday;
+          }
+          if (stats.refLinksToday !== undefined) {
+            document.getElementById('statRefLinksToday').textContent = stats.refLinksToday;
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      // позже сюда можно добавить загрузку реального списка диалогов из localStorage/API
+    });
+  </script>
+</body>
+</html>

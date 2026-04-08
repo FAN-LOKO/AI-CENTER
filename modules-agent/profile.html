@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Профиль агента</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/modules.css" />
+</head>
+<body>
+
+  <!-- Внутренняя навигация модуля Агента -->
+  <div class="module-tabs agent-tabs">
+  <button
+    class="module-tab module-tab--third module-tab--active"
+    onclick="navigateAgent('modules-agent/profile.html')"
+  >
+    Профиль
+  </button>
+  <button
+    class="module-tab module-tab--third"
+    onclick="navigateAgent('modules-agent/connect.html')"
+  >
+    Подключение
+  </button>
+  <button
+    class="module-tab module-tab--third"
+    onclick="navigateAgent('modules-agent/links.html')"
+  >
+    Ссылки
+  </button>
+  <button
+    class="module-tab module-tab--half"
+    onclick="navigateAgent('modules-agent/stats.html')"
+  >
+    Статистика
+  </button>
+  <button
+    class="module-tab module-tab--half"
+    onclick="navigateAgent('modules-agent/dialogs.html')"
+  >
+    Диалоги
+  </button>
+</div>
+
+
+
+
+  <div class="app-content">
+
+    <!-- Основная информация об агенте -->
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Профиль агента</h2>
+        <p class="card-section-subtitle">Основные данные вашего бота-агента</p>
+      </div>
+      <div class="card-section-body">
+        <div class="profile-row">
+          <span class="profile-label">Название агента</span>
+          <span class="profile-value">AI FIT Center Agent</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Username бота</span>
+          <span class="profile-value" id="agentBotUsername">@your_bot_username</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Статус агента</span>
+          <span class="profile-value">
+            <span class="status-badge status-offline" id="agentStatusBadge">Не подключен</span>
+          </span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">ID бота</span>
+          <span class="profile-value" id="agentBotId">—</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Настройки модуля -->
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Настройки модуля</h2>
+        <p class="card-section-subtitle">Базовые параметры работы агента</p>
+      </div>
+      <div class="card-section-body">
+        <div class="profile-row">
+          <span class="profile-label">Режим работы</span>
+          <span class="profile-value">
+            <select id="agentMode" class="profile-select">
+              <option value="light">Легкий</option>
+              <option value="medium" selected>Средний</option>
+              <option value="active">Активный</option>
+            </select>
+          </span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Язык</span>
+          <span class="profile-value">
+            <select id="agentLocale" class="profile-select">
+              <option value="ru" selected>Русский</option>
+              <option value="en">Английский</option>
+            </select>
+          </span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    function navigateAgent(page) {
+      try {
+        window.parent?.postMessage?.({
+          type: 'navigate',
+          page: page,
+          tab: 'modules'
+        }, '*');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const usernameEl = document.getElementById('agentBotUsername');
+        const statusBadgeEl = document.getElementById('agentStatusBadge');
+        const botIdEl = document.getElementById('agentBotId');
+        const modeSelect = document.getElementById('agentMode');
+        const localeSelect = document.getElementById('agentLocale');
+
+        // Загрузка сохраненного username и ID бота (из экрана подключения)
+        const savedUsername = localStorage.getItem('agentBotUsername');
+        const savedBotId = localStorage.getItem('agentBotId');
+        const savedConnected = localStorage.getItem('agentConnected') === 'true';
+
+        if (usernameEl && savedUsername) {
+          usernameEl.textContent = savedUsername;
+        }
+        if (botIdEl && savedBotId) {
+          botIdEl.textContent = savedBotId;
+        }
+
+        if (statusBadgeEl && savedConnected) {
+          statusBadgeEl.textContent = 'Подключен';
+          statusBadgeEl.classList.remove('status-offline');
+          statusBadgeEl.classList.add('status-online');
+        }
+
+        // Загрузка сохраненных настроек режима и языка
+        const savedMode = localStorage.getItem('agentMode');
+        const savedLocale = localStorage.getItem('agentLocale');
+
+        if (savedMode && modeSelect) modeSelect.value = savedMode;
+        if (savedLocale && localeSelect) localeSelect.value = savedLocale;
+
+        modeSelect?.addEventListener('change', () => {
+          localStorage.setItem('agentMode', modeSelect.value);
+          window.parent?.postMessage?.({
+            type: 'agent-mode-changed',
+            mode: modeSelect.value
+          }, '*');
+        });
+
+        localeSelect?.addEventListener('change', () => {
+          localStorage.setItem('agentLocale', localeSelect.value);
+          window.parent?.postMessage?.({
+            type: 'agent-locale-changed',
+            locale: localeSelect.value
+          }, '*');
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  </script>
+</body>
+</html>

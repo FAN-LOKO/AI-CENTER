@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Подключение агента</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/modules.css" />
+</head>
+<body>
+
+  <!-- Внутренняя навигация модуля Агента -->
+  <div class="module-tabs agent-tabs">
+  <button
+    class="module-tab module-tab--third"
+    onclick="navigateAgent('modules-agent/profile.html')"
+  >
+    Профиль
+  </button>
+  <button
+    class="module-tab module-tab--third module-tab--active"
+    onclick="navigateAgent('modules-agent/connect.html')"
+  >
+    Подключение
+  </button>
+  <button
+    class="module-tab module-tab--third"
+    onclick="navigateAgent('modules-agent/links.html')"
+  >
+    Ссылки
+  </button>
+  <button
+    class="module-tab module-tab--half"
+    onclick="navigateAgent('modules-agent/stats.html')"
+  >
+    Статистика
+  </button>
+  <button
+    class="module-tab module-tab--half"
+    onclick="navigateAgent('modules-agent/dialogs.html')"
+  >
+    Диалоги
+  </button>
+</div>
+
+
+  <div class="app-content">
+
+    <!-- Карточка статуса агента -->
+    <section class="card-section accordion-card">
+  <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+    <div>
+      <h2 class="card-section-title">Подключение агента</h2>
+      <p class="card-section-subtitle">Управляйте подключением агента к каналам</p>
+    </div>
+    <span class="accordion-icon">▼</span>
+  </div>
+  <div class="accordion-body open">
+    <div class="status-row">
+      <span class="status-label">Статус в Telegram</span>
+      <span class="status-badge status-offline" id="agentTelegramStatus">Не подключен</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Статус TikTok</span>
+      <span class="status-badge status-offline" id="agentTiktokStatus">Не подключен</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Статус Instagram</span>
+      <span class="status-badge status-offline" id="agentInstagramStatus">Не подключен</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Статус ВКонтакте</span>
+      <span class="status-badge status-offline" id="agentVkStatus">Не подключен</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Статус WhatsApp</span>
+      <span class="status-badge status-offline" id="agentWhatsappStatus">Не подключен</span>
+    </div>
+  </div>
+</section>
+
+
+    <!-- Telegram: общая карточка с вложенными аккордеонами -->
+<section class="card-section accordion-card">
+  <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+    <span class="card-section-title">Telegram</span>
+    <span class="accordion-icon">▼</span>
+  </div>
+  <div class="card-section-body accordion-body open">
+
+    <!-- Вложенный аккордеон 1: Как получить токен -->
+    <section class="card-section accordion-card">
+      <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+        <span class="card-section-title">Как получить токен</span>
+        <span class="accordion-icon">▼</span>
+      </div>
+      <div class="card-section-body accordion-body open">
+        <ol>
+          <li>Откройте @BotFather в Telegram.</li>
+          <li>Отправьте команду <code>/mybots</code> или <code>/newbot</code>, если создаёте нового.</li>
+          <li>Выберите вашего бота из списка.</li>
+          <li>Нажмите «API Token».</li>
+          <li>Скопируйте токен и вставьте его в поле ниже.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Вложенный аккордеон 2: Введите токен -->
+    <section class="card-section accordion-card">
+      <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+        <span class="card-section-title">Введите токен</span>
+        <span class="accordion-icon">▼</span>
+      </div>
+      <div class="card-section-body accordion-body open">
+        <div class="form-group">
+          <label class="form-label" for="botToken">API Token вашего бота</label>
+          <input
+            type="text"
+            id="botToken"
+            class="form-input"
+            placeholder="123456789:AAAbbbCCCdddEEEfffGGG"
+          />
+        </div>
+        <button class="btn btn-block" id="connectButton" disabled>
+          Подключить
+        </button>
+        <p id="connectMessage" class="connect-status-msg"></p>
+      </div>
+    </section>
+
+    <!-- Вложенный аккордеон 3: Инструкции -->
+    <section class="card-section accordion-card">
+      <div class="card-section-header accordion-header" onclick="toggleAccordion(this)">
+        <span class="card-section-title">Инструкции</span>
+        <span class="accordion-icon">▼</span>
+      </div>
+      <div class="card-section-body accordion-body">
+        <div class="form-group">
+          <p class="form-label">Видео-инструкция</p>
+          <a href="https://t.me/your_video_link" target="_blank" class="link-primary">
+            Открыть видео по подключению Telegram-бота
+          </a>
+        </div>
+        <div class="form-group">
+          <p class="form-label">Текстовая инструкция</p>
+          <a href="https://t.me/your_text_guide" target="_blank" class="link-primary">
+            Открыть подробную текстовую инструкцию
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+
+  <script>
+    function navigateAgent(page) {
+      try {
+        window.parent?.postMessage?.({
+          type: 'navigate',
+          page: page,
+          tab: 'modules'
+        }, '*');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function toggleAccordion(headerEl) {
+      const body = headerEl.nextElementSibling;
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      headerEl.classList.toggle('open', !isOpen);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const tg = window.Telegram?.WebApp;
+      const tokenInput = document.getElementById('botToken');
+      const connectBtn = document.getElementById('connectButton');
+      const msgEl = document.getElementById('connectMessage');
+      const statusBadge = document.getElementById('agentTelegramStatus');
+
+      try {
+        tg?.ready?.();
+      } catch (e) {}
+
+      // Подставляем сохранённые данные, если есть
+      const savedToken = localStorage.getItem('agentBotToken') || '';
+      const savedUsername = localStorage.getItem('agentBotUsername');
+      const savedBotId = localStorage.getItem('agentBotId');
+      const savedConnected = localStorage.getItem('agentConnected') === 'true';
+
+      if (tokenInput && savedToken) {
+        tokenInput.value = savedToken;
+      }
+
+      if (savedConnected && statusBadge) {
+        statusBadge.textContent = 'Подключен';
+        statusBadge.classList.remove('status-offline');
+        statusBadge.classList.add('status-online');
+      }
+
+      // Разблокировка кнопки по длине токена
+      const updateButtonState = () => {
+        const hasValue = tokenInput.value.trim().length > 10;
+        connectBtn.disabled = !hasValue;
+        connectBtn.style.opacity = hasValue ? '1' : '0.6';
+        connectBtn.style.cursor = hasValue ? 'pointer' : 'not-allowed';
+      };
+
+      tokenInput.addEventListener('input', updateButtonState);
+      updateButtonState();
+
+      connectBtn.addEventListener('click', async () => {
+        const token = tokenInput.value.trim();
+        if (!token) return;
+
+        msgEl.textContent = 'Проверяем токен...';
+        msgEl.className = 'connect-status-msg';
+
+        try {
+          tg?.HapticFeedback?.impactOccurred?.('medium');
+        } catch (e) {}
+
+        // Здесь вместо реального API пока имитируем успешное подключение
+        setTimeout(() => {
+          // Сохраняем состояние локально
+          localStorage.setItem('agentBotToken', token);
+          localStorage.setItem('agentConnected', 'true');
+          // Username и ID можно будет подставить с бэкенда / n8n
+          if (!savedUsername) {
+            localStorage.setItem('agentBotUsername', '@your_bot_username');
+          }
+          if (!savedBotId) {
+            localStorage.setItem('agentBotId', '—');
+          }
+
+          // Обновляем статус
+          if (statusBadge) {
+            statusBadge.textContent = 'Подключен';
+            statusBadge.classList.remove('status-offline');
+            statusBadge.classList.add('status-online');
+          }
+
+          msgEl.textContent = 'Агент успешно подключён к Telegram.';
+          msgEl.className = 'connect-status-msg success';
+
+          // Сообщаем оболочке / другим страницам модуля
+          try {
+            window.parent?.postMessage?.({
+              type: 'agent-bot-connected',
+              connected: true
+            }, '*');
+          } catch (e) {}
+        }, 800);
+      });
+    });
+  </script>
+</body>
+</html>
