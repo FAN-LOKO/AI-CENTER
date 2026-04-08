@@ -896,3 +896,153 @@ body {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* =========================================
+   SETTINGS PAGE
+   ========================================= */
+
+.settings-page {
+  padding: 0;
+}
+
+.settings-intro-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #6b7280;
+}
+
+.settings-profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0b3c78, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.settings-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.settings-profile-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.settings-profile-name {
+  margin: 0 0 3px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #111827;
+}
+
+.settings-profile-username,
+.settings-profile-id {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #6b7280;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.settings-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background: #f9fafb;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.settings-input:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.settings-input::placeholder {
+  color: #9ca3af;
+}
+
+.settings-helper-text {
+  margin: -2px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #6b7280;
+}
+
+.settings-success-text {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #166534;
+  font-weight: 600;
+}
+
+.settings-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.settings-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.settings-info-label {
+  color: #6b7280;
+}
+
+.settings-info-value {
+  color: #111827;
+}
