@@ -96,294 +96,301 @@
   </div>
 
   <script>
-    let APP_FEATURES = {
-      home: true,
-      myAgent: true,
-      modules: true,
-      sharedChat: true,
-      affiliate: true,
-      payments: true,
-      settings: true,
-      "ai-agent": true,
-      "knowledge-hub": true,
-      "support-desk": true,
-      "media-lab": true,
-      "leader-stage": true,
-      "lead-flow": true,
-      "business-room": true
-    };
+  let APP_FEATURES = {
+    home: true,
+    myAgent: true,
+    modules: true,
+    sharedChat: true,
+    affiliate: true,
+    payments: true,
+    settings: true,
+    'ai-agent': true,
+    'knowledge-hub': true,
+    'support-desk': true,
+    'media-lab': true,
+    'leader-stage': true,
+    'lead-flow': true,
+    'business-room': true
+  };
 
-    const MODULE_META = {
-      "ai-agent": {
-        title: "AI Агент",
-        page: "modules-agent-profile.html",
-        type: "required"
-      },
-      "knowledge-hub": {
-        title: "База знаний",
-        page: "modules-knowledge-hub-index.html",
-        type: "free"
-      },
-      "support-desk": {
-        title: "Поддержка",
-        page: "modules-support-desk-index.html",
-        type: "free"
-      },
-      "media-lab": {
-        title: "Медиа‑лаборатория",
-        page: "modules-media-lab-index.html",
-        type: "paid"
-      },
-      "leader-stage": {
-        title: "Сцена лидера",
-        page: "modules-leader-stage-index.html",
-        type: "paid"
-      },
-      "lead-flow": {
-        title: "Lead Flow",
-        page: "modules-lead-flow-index.html",
-        type: "paid"
-      },
-      "business-room": {
-        title: "Business Room",
-        page: "modules-business-room-index.html",
-        type: "paid"
-      }
-    };
+  const MODULE_META = {
+    'ai-agent': {
+      title: 'AI Агент',
+      page: 'modules-agent-profile.html',
+      type: 'required'
+    },
+    'knowledge-hub': {
+      title: 'База знаний',
+      page: 'modules-knowledge-hub-index.html',
+      type: 'free'
+    },
+    'support-desk': {
+      title: 'Support Desk',
+      page: 'modules-support-desk-index.html',
+      type: 'free'
+    },
+    'media-lab': {
+      title: 'Media Lab',
+      page: 'modules-media-lab-index.html',
+      type: 'paid'
+    },
+    'leader-stage': {
+      title: 'Leader Stage',
+      page: 'modules-leader-stage-index.html',
+      type: 'paid'
+    },
+    'lead-flow': {
+      title: 'Lead Flow',
+      page: 'modules-lead-flow-index.html',
+      type: 'paid'
+    },
+    'business-room': {
+      title: 'Business Room',
+      page: 'modules-business-room-index.html',
+      type: 'paid'
+    }
+  };
 
-    let USER_MODULES = [
-      { id: "ai-agent", visible: true, paid: false, frozen: true, daysLeft: 0 },
-      { id: "knowledge-hub", visible: true, paid: true, frozen: false, daysLeft: null },
-      { id: "support-desk", visible: true, paid: true, frozen: false, daysLeft: null },
-      { id: "media-lab", visible: true, paid: true, frozen: false, daysLeft: 27 },
-      { id: "leader-stage", visible: true, paid: true, frozen: false, daysLeft: 14 }
-    ];
+  let USER_MODULES = [
+    { id: 'ai-agent', visible: true, paid: false, frozen: true, daysLeft: 0 },
+    { id: 'knowledge-hub', visible: true, paid: true, frozen: false, daysLeft: null },
+    { id: 'support-desk', visible: true, paid: true, frozen: false, daysLeft: null },
+    { id: 'media-lab', visible: true, paid: true, frozen: false, daysLeft: 27 },
+    { id: 'leader-stage', visible: true, paid: true, frozen: false, daysLeft: 14 }
+  ];
 
-    function navigateFromHome(page, tab) {
-      window.parent?.postMessage?.(
-        {
-          type: "navigate",
-          page,
-          tab
-        },
-        "*"
-      );
+  function navigateFromHome(page, tab) {
+    window.parent?.postMessage?.({ type: 'navigate', page, tab }, '*');
+  }
+
+  function getModuleBadge(type) {
+    if (type === 'required') {
+      return { text: 'Обязательный', className: 'required' };
     }
 
-    function getModuleBadge(type) {
-      if (type === "required") {
-        return { text: "Обязательный", className: "required" };
-      }
-
-      if (type === "free") {
-        return { text: "Бесплатно", className: "free" };
-      }
-
-      return { text: "Платный", className: "paid" };
+    if (type === 'free') {
+      return { text: 'Бесплатный', className: 'free' };
     }
 
-    function getModuleStatusText(module, meta) {
-      if (meta.type === "free") {
-        return {
-          text: "Доступен сразу",
-          className: "is-free"
-        };
-      }
+    return { text: 'Платный', className: 'paid' };
+  }
 
-      if (module.frozen) {
-        return {
-          text: module.daysLeft === 0
-            ? "Доступ приостановлен"
-            : `Заморожен, осталось ${module.daysLeft} дн.`,
-          className: "is-warning"
-        };
-      }
+  function getModuleStatusText(module, meta) {
+    if (meta.type === 'free') {
+      return { text: 'Доступен сразу', className: 'is-free' };
+    }
 
-      if (typeof module.daysLeft === "number" && module.daysLeft > 0) {
-        return {
-          text: `Оплачен, осталось ${module.daysLeft} дн.`,
-          className: ""
-        };
-      }
-
+    if (module.frozen) {
       return {
-        text: "Активен",
-        className: ""
+        text: module.daysLeft === 0 ? 'Доступ заморожен' : 'Доступ заморожен',
+        className: 'is-warning'
       };
     }
 
-    function getVisibleHomeModules() {
-      return USER_MODULES.filter((module) => {
-        if (!module.visible) return false;
-
-        const meta = MODULE_META[module.id];
-        if (!meta) return false;
-
-        if (APP_FEATURES[module.id] === false) return false;
-
-        return true;
-      });
+    if (typeof module.daysLeft === 'number' && module.daysLeft > 0) {
+      return {
+        text: 'Осталось ' + module.daysLeft + ' дн.',
+        className: ''
+      };
     }
 
-    function renderHomeModules() {
-      const container = document.getElementById("homeModulesList");
-      if (!container) return;
+    return {
+      text: 'Активен',
+      className: ''
+    };
+  }
 
-      const visibleModules = getVisibleHomeModules();
+  function getVisibleHomeModules() {
+    return USER_MODULES.filter((module) => {
+      if (!module.visible) return false;
 
-      if (!visibleModules.length) {
-        container.innerHTML = `
-          <p class="home-empty-note">
-            Пока нет доступных модулей. После активации они появятся здесь автоматически.
-          </p>
-        `;
-        return;
-      }
+      const meta = MODULE_META[module.id];
+      if (!meta) return false;
 
-      container.innerHTML = visibleModules.map((module) => {
+      if (APP_FEATURES[module.id] === false) return false;
+
+      return true;
+    });
+  }
+
+  function renderHomeModules() {
+    const container = document.getElementById('homeModulesList');
+    if (!container) return;
+
+    const visibleModules = getVisibleHomeModules();
+
+    if (!visibleModules.length) {
+      container.innerHTML = '<p class="home-empty-note">Пока нет доступных модулей. Они появятся здесь автоматически.</p>';
+      return;
+    }
+
+    container.innerHTML = visibleModules
+      .map((module) => {
         const meta = MODULE_META[module.id];
         const badge = getModuleBadge(meta.type);
         const status = getModuleStatusText(module, meta);
         const isFrozen = !!module.frozen;
 
         return `
-          <div class="home-module-item ${isFrozen ? "is-frozen" : ""}">
+          <div class="home-module-item ${isFrozen ? 'is-frozen' : ''}">
             <div class="home-module-top">
               <div class="home-module-title">${meta.title}</div>
               <span class="home-module-badge ${badge.className}">${badge.text}</span>
             </div>
-
             <p class="home-module-status ${status.className}">${status.text}</p>
-
             <div class="home-module-actions">
               <button
                 type="button"
                 class="btn btn-block home-module-open-btn"
-                ${isFrozen ? "disabled" : ""}
-                onclick="${isFrozen ? "" : `navigateFromHome('${meta.page}', 'modules')`}"
+                ${isFrozen ? 'disabled' : ''}
+                onclick="${isFrozen ? '' : `navigateFromHome('${meta.page}', 'modules')`}"
               >
-                ${isFrozen ? "Недоступно" : "Открыть"}
+                ${isFrozen ? 'Недоступно' : 'Открыть'}
               </button>
             </div>
           </div>
         `;
-      }).join("");
+      })
+      .join('');
+  }
+
+  function applyHomeFeatures(features) {
+    APP_FEATURES = { ...APP_FEATURES, ...features };
+
+    const affiliateCard = document.getElementById('homeAffiliateCard');
+    if (affiliateCard) {
+      affiliateCard.style.display = APP_FEATURES.affiliate ? '' : 'none';
     }
 
-    function applyHomeFeatures(features) {
-      APP_FEATURES = { ...APP_FEATURES, ...features };
-
-      const affiliateCard = document.getElementById("homeAffiliateCard");
-      if (affiliateCard) {
-        affiliateCard.style.display = APP_FEATURES.affiliate ? "" : "none";
-      }
-
-      const modulesCard = document.getElementById("homeModulesCard");
-      if (modulesCard) {
-        modulesCard.style.display = APP_FEATURES.modules ? "" : "none";
-      }
-
-      renderHomeModules();
+    const modulesCard = document.getElementById('homeModulesCard');
+    if (modulesCard) {
+      modulesCard.style.display = APP_FEATURES.modules ? '' : 'none';
     }
 
-    function fillTelegramProfile() {
-      const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    renderHomeModules();
+  }
 
-      const nameEl = document.getElementById("homeProfileName");
-      const usernameEl = document.getElementById("homeProfileUsername");
-      const idEl = document.getElementById("homeProfileId");
-      const statusEl = document.getElementById("homeProfileStatus");
-      const noteEl = document.getElementById("homeProfileNote");
-      const avatarFallbackEl = document.getElementById("homeProfileAvatarFallback");
-      const avatarImageEl = document.getElementById("homeProfileAvatarImage");
+  function fillTelegramProfile() {
+    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
 
-      if (!user) {
-        if (nameEl) nameEl.textContent = "Пользователь";
-        if (usernameEl) usernameEl.textContent = "Без username";
-        if (idEl) idEl.textContent = "ID: —";
-        if (statusEl) statusEl.textContent = "GUEST";
-        if (noteEl) noteEl.textContent = "Данные Telegram пока недоступны.";
-        if (avatarFallbackEl) avatarFallbackEl.textContent = "U";
-        return;
-      }
+    const nameEl = document.getElementById('homeProfileName');
+    const usernameEl = document.getElementById('homeProfileUsername');
+    const idEl = document.getElementById('homeProfileId');
+    const emailEl = document.getElementById('homeProfileEmail');
+    const noteEl = document.getElementById('homeProfileNote');
+    const avatarFallbackEl = document.getElementById('homeProfileAvatarFallback');
+    const avatarImageEl = document.getElementById('homeProfileAvatarImage');
 
-      const fullName =
-        [user.first_name, user.last_name].filter(Boolean).join(" ") || "Пользователь";
+    const noteTextEl =
+      noteEl?.querySelector('.home-profile-note-text') ||
+      noteEl?.querySelector('span:last-child');
 
-      if (nameEl) {
-        nameEl.textContent = fullName;
-      }
-
-      if (usernameEl) {
-        usernameEl.textContent = user.username ? `@${user.username}` : "Без username";
-      }
-
-      if (idEl) {
-        idEl.textContent = user.id ? `ID: ${user.id}` : "ID: —";
-      }
-
-      if (statusEl) {
-        statusEl.textContent = "ONLINE";
-      }
-
-      if (noteEl) {
-        noteEl.textContent = "Профиль автоматически загружается из Telegram Mini App.";
-      }
-
+    if (!user) {
+      if (nameEl) nameEl.textContent = 'Пользователь';
+      if (usernameEl) usernameEl.textContent = '@username не указан';
+      if (idEl) idEl.textContent = 'ID: —';
+      if (emailEl) emailEl.textContent = 'Почта: не указана';
+      if (noteTextEl) noteTextEl.textContent = 'Почту можно указать в настройках';
       if (avatarFallbackEl) {
-        avatarFallbackEl.textContent = fullName.charAt(0).toUpperCase();
+        avatarFallbackEl.textContent = 'U';
+        avatarFallbackEl.hidden = false;
       }
+      if (avatarImageEl) {
+        avatarImageEl.hidden = true;
+        avatarImageEl.removeAttribute('src');
+      }
+      return;
+    }
 
-      if (avatarImageEl && user.photo_url) {
+    const firstName = user.first_name || '';
+    const lastName = user.last_name || '';
+    const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Пользователь';
+    const username = user.username ? '@' + user.username : '@username не указан';
+    const userId = user.id ? 'ID: ' + user.id : 'ID: —';
+
+    const email =
+      user.email ||
+      window.APP_USER_EMAIL ||
+      window.userEmail ||
+      'не указана';
+
+    if (nameEl) nameEl.textContent = fullName;
+    if (usernameEl) usernameEl.textContent = username;
+    if (idEl) idEl.textContent = userId;
+    if (emailEl) emailEl.textContent = 'Почта: ' + email;
+    if (noteTextEl) noteTextEl.textContent = 'Почту можно указать в настройках';
+
+    if (avatarFallbackEl) {
+      avatarFallbackEl.textContent = fullName.charAt(0).toUpperCase();
+      avatarFallbackEl.hidden = false;
+    }
+
+    if (avatarImageEl) {
+      if (user.photo_url) {
         avatarImageEl.src = user.photo_url;
         avatarImageEl.hidden = false;
 
-        if (avatarFallbackEl) {
-          avatarFallbackEl.hidden = true;
-        }
+        avatarImageEl.onload = function () {
+          if (avatarFallbackEl) {
+            avatarFallbackEl.hidden = true;
+          }
+        };
+
+        avatarImageEl.onerror = function () {
+          avatarImageEl.hidden = true;
+          avatarImageEl.removeAttribute('src');
+          if (avatarFallbackEl) {
+            avatarFallbackEl.hidden = false;
+          }
+        };
+      } else {
+        avatarImageEl.hidden = true;
+        avatarImageEl.removeAttribute('src');
       }
     }
+  }
 
-    window.addEventListener("message", (event) => {
-      const data = event.data;
-      if (!data || typeof data !== "object") return;
+  window.addEventListener('message', (event) => {
+    const data = event.data;
+    if (!data || typeof data !== 'object') return;
 
-      if (data.type === "app-features" && data.features) {
-        applyHomeFeatures(data.features);
-      }
+    if (data.type === 'app-features' && data.features) {
+      applyHomeFeatures(data.features);
+    }
 
-      if (data.type === "user-modules" && Array.isArray(data.modules)) {
-        USER_MODULES = data.modules;
-        renderHomeModules();
-      }
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const allModulesLink = document.getElementById("allModulesLink");
-      const paymentLink = document.getElementById("paymentLink");
-
-      if (allModulesLink) {
-        allModulesLink.addEventListener("click", () => {
-          navigateFromHome("modules.html", "modules");
-        });
-      }
-
-      if (paymentLink) {
-        paymentLink.addEventListener("click", () => {
-          navigateFromHome("payments.html", "payments");
-        });
-      }
-
-      fillTelegramProfile();
+    if (data.type === 'user-modules' && Array.isArray(data.modules)) {
+      USER_MODULES = data.modules;
       renderHomeModules();
+    }
 
-      window.parent?.postMessage?.(
-        {
-          type: "request-app-features"
-        },
-        "*"
-      );
-    });
-  </script>
+    if (data.type === 'user-profile' && data.email) {
+      window.APP_USER_EMAIL = data.email;
+      fillTelegramProfile();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const allModulesLink = document.getElementById('allModulesLink');
+    const paymentLink = document.getElementById('paymentLink');
+
+    if (allModulesLink) {
+      allModulesLink.addEventListener('click', () => {
+        navigateFromHome('modules.html', 'modules');
+      });
+    }
+
+    if (paymentLink) {
+      paymentLink.addEventListener('click', () => {
+        navigateFromHome('payments.html', 'payments');
+      });
+    }
+
+    fillTelegramProfile();
+    renderHomeModules();
+
+    window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+    window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
+  });
+</script>
 </body>
 </html>
