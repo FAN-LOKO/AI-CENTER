@@ -7,7 +7,7 @@
   </head>
   <body>
     <div class="screen">
-      <div class="page">
+      <div class="page settings-page">
         <!-- Карточка: заголовок страницы -->
         <section class="card-section">
           <div class="card-section-header">
@@ -17,13 +17,7 @@
             </p>
           </div>
           <div class="card-section-body">
-            <p
-              style="
-                margin: 0;
-                font-size: 13px;
-                color: #6b7280;
-              "
-            >
+            <p class="settings-intro-text">
               Здесь вы можете посмотреть данные профиля и закрыть приложение.
             </p>
           </div>
@@ -32,32 +26,74 @@
         <!-- Карточка: профиль -->
         <section class="card-section">
           <div class="card-section-header">
-            <h2 class="card-section-title">👤 Профиль</h2>
+            <h2 class="card-section-title">Профиль</h2>
             <p class="card-section-subtitle">
               Основная информация о пользователе
             </p>
           </div>
           <div class="card-section-body">
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                font-size: 13px;
-                color: #374151;
-              "
-            >
-              <div>
-                <span style="color:#6b7280;">Имя:</span>
-                <span><strong>Не указано</strong></span>
+            <div class="settings-profile-card">
+              <div class="settings-profile-top">
+                <div class="settings-profile-avatar" id="settingsProfileAvatar">
+                  <span id="settingsProfileAvatarFallback">U</span>
+                  <img
+                    id="settingsProfileAvatarImage"
+                    alt="Аватар пользователя"
+                    hidden
+                  />
+                </div>
+
+                <div class="settings-profile-meta">
+                  <div class="settings-profile-name" id="settingsProfileTelegramName">
+                    Не указано
+                  </div>
+                  <div class="settings-profile-username" id="settingsProfileTelegramUsername">
+                    @username
+                  </div>
+                  <div class="settings-profile-id" id="settingsProfileTelegramId">
+                    ID: —
+                  </div>
+                </div>
               </div>
-              <div>
-                <span style="color:#6b7280;">Username:</span>
-                <span><strong>@username</strong></span>
-              </div>
-              <div>
-                <span style="color:#6b7280;">ID:</span>
-                <span><strong>—</strong></span>
+
+              <div class="settings-form">
+                <div class="settings-field">
+                  <label class="settings-label" for="settingsFullNameInput">ФИО</label>
+                  <input
+                    id="settingsFullNameInput"
+                    class="settings-input"
+                    type="text"
+                    placeholder="Введите ФИО"
+                    autocomplete="name"
+                  />
+                </div>
+
+                <div class="settings-field">
+                  <label class="settings-label" for="settingsEmailInput">Почта</label>
+                  <input
+                    id="settingsEmailInput"
+                    class="settings-input"
+                    type="email"
+                    placeholder="Введите email"
+                    autocomplete="email"
+                  />
+                </div>
+
+                <p class="settings-helper-text" id="settingsProfileHelperText">
+                  ФИО и почта будут использоваться в карточке профиля и внутренних сценариях miniapp.
+                </p>
+
+                <button
+                  type="button"
+                  class="btn btn-block"
+                  id="settingsSaveProfileButton"
+                >
+                  Сохранить
+                </button>
+
+                <p class="settings-success-text" id="settingsSaveProfileSuccess" hidden>
+                  Данные профиля сохранены.
+                </p>
               </div>
             </div>
           </div>
@@ -72,22 +108,14 @@
             </p>
           </div>
           <div class="card-section-body">
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                font-size: 13px;
-                color: #374151;
-              "
-            >
-              <div>
-                <span style="color:#6b7280;">Версия:</span>
-                <span><strong>1.0.0</strong></span>
+            <div class="settings-info-list">
+              <div class="settings-info-row">
+                <span class="settings-info-label">Версия:</span>
+                <span class="settings-info-value"><strong>1.0.0</strong></span>
               </div>
-              <div>
-                <span style="color:#6b7280;">Разработчик:</span>
-                <span><strong>KadtsinDigital</strong></span>
+              <div class="settings-info-row">
+                <span class="settings-info-label">Разработчик:</span>
+                <span class="settings-info-value"><strong>KadtsinDigital</strong></span>
               </div>
             </div>
           </div>
@@ -104,7 +132,8 @@
           <div class="card-section-body">
             <button
               class="btn btn-logout btn-block"
-              onclick="closeApp()"
+              type="button"
+              id="settingsCloseAppButton"
             >
               Закрыть приложение
             </button>
@@ -119,14 +148,166 @@
         if (tg && tg.close) {
           tg.close();
         } else {
-          window.parent.postMessage(
-            {
-              type: "close",
-            },
-            "*"
-          );
+          window.parent?.postMessage?.({ type: "close" }, "*");
         }
       }
+
+      function getTelegramUser() {
+        return window.Telegram?.WebApp?.initDataUnsafe?.user || null;
+      }
+
+      function getTelegramFullName(user) {
+        if (!user) return "";
+        return [user.first_name || "", user.last_name || ""]
+          .filter(Boolean)
+          .join(" ")
+          .trim();
+      }
+
+      function setSettingsAvatar(user, fullName) {
+        const avatarFallback = document.getElementById("settingsProfileAvatarFallback");
+        const avatarImage = document.getElementById("settingsProfileAvatarImage");
+
+        const fallbackLetter = (fullName || "U").charAt(0).toUpperCase();
+
+        if (avatarFallback) {
+          avatarFallback.textContent = fallbackLetter;
+          avatarFallback.hidden = false;
+        }
+
+        if (avatarImage) {
+          avatarImage.hidden = true;
+          avatarImage.removeAttribute("src");
+        }
+
+        if (user?.photo_url && avatarImage) {
+          avatarImage.src = user.photo_url;
+          avatarImage.hidden = false;
+
+          if (avatarFallback) {
+            avatarFallback.hidden = true;
+          }
+        }
+      }
+
+      function fillTelegramProfileBlock() {
+        const user = getTelegramUser();
+
+        const nameEl = document.getElementById("settingsProfileTelegramName");
+        const usernameEl = document.getElementById("settingsProfileTelegramUsername");
+        const idEl = document.getElementById("settingsProfileTelegramId");
+        const fullNameInput = document.getElementById("settingsFullNameInput");
+
+        if (!user) {
+          if (nameEl) nameEl.textContent = "Не указано";
+          if (usernameEl) usernameEl.textContent = "@username";
+          if (idEl) idEl.textContent = "ID: —";
+          setSettingsAvatar(null, "U");
+          return;
+        }
+
+        const telegramFullName = getTelegramFullName(user);
+        const telegramUsername = user.username ? `@${user.username}` : "username не указан";
+        const telegramId = user.id ? `ID: ${user.id}` : "ID: —";
+
+        if (nameEl) {
+          nameEl.textContent = telegramFullName || "Не указано";
+        }
+
+        if (usernameEl) {
+          usernameEl.textContent = telegramUsername;
+        }
+
+        if (idEl) {
+          idEl.textContent = telegramId;
+        }
+
+        if (fullNameInput && !fullNameInput.value.trim()) {
+          fullNameInput.value = telegramFullName || "";
+        }
+
+        setSettingsAvatar(user, telegramFullName || "U");
+      }
+
+      function applyIncomingProfile(profile) {
+        if (!profile || typeof profile !== "object") return;
+
+        const fullNameInput = document.getElementById("settingsFullNameInput");
+        const emailInput = document.getElementById("settingsEmailInput");
+
+        if (fullNameInput && profile.fullName && !fullNameInput.value.trim()) {
+          fullNameInput.value = profile.fullName;
+        }
+
+        if (emailInput && profile.email) {
+          emailInput.value = profile.email;
+        }
+      }
+
+      function saveProfileSettings() {
+        const fullNameInput = document.getElementById("settingsFullNameInput");
+        const emailInput = document.getElementById("settingsEmailInput");
+        const successEl = document.getElementById("settingsSaveProfileSuccess");
+        const telegramUser = getTelegramUser();
+
+        const payload = {
+          fullName: fullNameInput?.value?.trim() || "",
+          email: emailInput?.value?.trim() || "",
+          telegramId: telegramUser?.id || null,
+          telegramUsername: telegramUser?.username || "",
+          telegramFirstName: telegramUser?.first_name || "",
+          telegramLastName: telegramUser?.last_name || "",
+          telegramPhotoUrl: telegramUser?.photo_url || ""
+        };
+
+        window.parent?.postMessage?.(
+          {
+            type: "save-user-profile",
+            profile: payload
+          },
+          "*"
+        );
+
+        if (successEl) {
+          successEl.hidden = false;
+          successEl.textContent = "Данные профиля сохранены.";
+
+          window.setTimeout(() => {
+            successEl.hidden = true;
+          }, 2500);
+        }
+      }
+
+      window.addEventListener("message", (event) => {
+        const data = event.data;
+        if (!data || typeof data !== "object") return;
+
+        if (data.type === "user-profile") {
+          applyIncomingProfile(data.profile || data);
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const closeButton = document.getElementById("settingsCloseAppButton");
+        const saveButton = document.getElementById("settingsSaveProfileButton");
+
+        if (closeButton) {
+          closeButton.addEventListener("click", closeApp);
+        }
+
+        if (saveButton) {
+          saveButton.addEventListener("click", saveProfileSettings);
+        }
+
+        fillTelegramProfileBlock();
+
+        window.parent?.postMessage?.(
+          {
+            type: "request-user-profile"
+          },
+          "*"
+        );
+      });
     </script>
   </body>
 </html>
