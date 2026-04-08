@@ -1,0 +1,788 @@
+/* ============ БАЗА ДЛЯ MINIAPP ============ */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #cfe9ff, #7ec8ff, #3b82f6, #0b3c78);
+  background-attachment: fixed;
+  background-size: 200% 200%;
+  color: #1a1a1a;
+}
+
+/* Оболочка miniapp — белая карточка по центру */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Контент: iframe + отступ под нижнюю навигацию */
+.app-content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 12px 12px 80px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+#pageFrame {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border: none;
+  display: block;
+  border-radius: 16px;
+  background: transparent;
+}
+
+.screen {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+.page {
+  width: 100%;
+  max-width: 456px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+/* ============ ШАБЛОН ВНУТРЕННИХ СТРАНИЦ ============ */
+
+
+
+.page-my-agent {
+  padding: 12px 16px 16px;
+}
+
+
+/* ============ НИЖНЯЯ НАВИГАЦИЯ (ИЗ старого app.html) ============ */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 8px 4px;
+  z-index: 1000;
+  height: 64px;
+}
+
+/* Кнопки табов */
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+  border-radius: 10px;
+  transition: all 0.2s;
+  font-family: inherit;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-btn:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.nav-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.nav-btn-label {
+  font-size: 11px;
+}
+
+.nav-btn.active {
+  color: #3b82f6;
+}
+
+.nav-btn.active svg path,
+.nav-btn.active svg rect,
+.nav-btn.active svg circle {
+  stroke: #3b82f6;
+}
+
+.nav-btn-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn-badge {
+  position: absolute;
+  top: -2px;
+  right: -6px;
+  min-width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: 0 0 0 2px #ffffff;
+  display: none; /* по умолчанию скрыт */
+}
+
+.nav-btn-badge--dot {
+  padding: 0;
+}
+
+/* ============ КАРТОЧКИ (ИЗ screen0.css) ============ */
+
+.card {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+}
+
+/* Профиль и модуль как частные случаи карточки */
+.profile-card {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.module-card {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+}
+
+.module-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+}
+
+/* Заголовок/подзаголовок/тело карточки */
+.module-header {
+  margin-bottom: 8px;
+}
+
+.module-header-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+}
+
+.module-header-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.module-body {
+  font-size: 14px;
+  color: #374151;
+}
+
+/* ============ КНОПКИ .btn (НА БАЗЕ ДОКУМЕНТА) ============ */
+
+/* Базовая красивая кнопка */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  font-family: inherit;
+  box-shadow:
+    0 4px 12px rgba(59, 130, 246, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 18px rgba(59, 130, 246, 0.5),
+    0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow:
+    0 3px 10px rgba(59, 130, 246, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Основное действие (оплаты и т.п.) — зелёный градиент */
+.btn-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow:
+    0 4px 12px rgba(16, 185, 129, 0.45),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+  box-shadow:
+    0 6px 18px rgba(16, 185, 129, 0.55),
+    0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* Кнопка выхода / опасного действия — красный градиент */
+.btn-logout {
+  background: linear-gradient(135deg, #f97373 0%, #ef4444 100%);
+  box-shadow:
+    0 4px 12px rgba(239, 68, 68, 0.45),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-logout:hover {
+  box-shadow:
+    0 6px 18px rgba(239, 68, 68, 0.55),
+    0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* Растянуть на всю ширину контейнера */
+.btn-block {
+  width: 100%;
+}
+
+/* ============ КАРТОЧКИ С СИНИМ ХЕДЕРОМ ============ */
+
+/* Общий контейнер карточки */
+.card-section {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+  background: #ffffff;
+  margin-bottom: 14px;
+}
+
+/* Синий заголовок карточки */
+.card-section-header {
+  background: linear-gradient(135deg, #0b3c78, #3b82f6);
+  color: #ffffff;
+  padding: 12px 16px;
+}
+
+.card-section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-section-subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Белое тело карточки */
+.card-section-body {
+  background: #ffffff;
+  padding: 14px 16px 16px;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* ============ АККОРДИОН-КАРТОЧКИ ============ */
+
+.accordion-card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+  background: #ffffff;
+  margin-bottom: 10px;
+}
+
+/* Кнопка-хедер аккордеона */
+.accordion-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #0b3c78, #3b82f6);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.accordion-header-title {
+  margin: 0;
+}
+
+.accordion-header-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Тело аккордеона (белое) */
+.accordion-body {
+  background: #ffffff;
+  padding: 10px 16px 14px;
+  font-size: 13px;
+  color: #374151;
+  display: none;
+}
+
+/* Открытое состояние */
+.accordion-card.open .accordion-body {
+  display: block;
+}
+
+
+/* Стили для названия миниап*/
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--tg-viewport-height, 100vh);
+}
+
+.app-header {
+  padding: 12px 16px;
+  padding-top: calc(12px + var(--tg-safe-area-inset-top, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #0b3c78, #3b82f6); /* как card-section-header */
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);        /* как у card-section */
+}
+
+.app-logo-text {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.app-header__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-button {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.icon-button:active {
+  opacity: 0.7;
+}
+
+.icon-bell::before,
+.icon-gear::before {
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.icon-bell::before {
+  content: "🔔";
+}
+
+.icon-gear::before {
+  content: "⚙️";
+}
+
+/* бейдж уведомлений */
+.notif-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 600;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-button.has-notifs .notif-badge {
+  display: inline-flex;
+}
+
+.icon-button {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.icon-button:active {
+  opacity: 0.7;
+}
+
+.icon-svg {
+  width: 18px;
+  height: 18px;
+}
+
+.icon-svg path {
+  stroke: #ffffff;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ===== ОБЩИЙ ЧАТ (используется и модулем, и страницей "Мой агент") ===== */
+
+/* поле ввода под чатом */
+.chat-input {
+  width: 100%;
+  resize: none;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 14px;
+  color: #111827;
+  box-sizing: border-box;
+  margin-top: 12px;
+}
+
+/* ряд кнопок под полем */
+.chat-input-actions-row {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* длинная кнопка Отправить слева */
+.btn.btn-send {
+  flex: 1;
+}
+
+/* круглая иконка (микрофон) справа */
+.btn.btn-icon {
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+/* делаем сам символ микрофона белым */
+.btn.btn-icon {
+  color: #ffffff;
+}
+
+.btn.btn-icon {
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #0b3c78; /* цвет фона кнопки */
+  border: none;
+}
+
+/* сама иконка микрофона внутри кнопки */
+.btn.btn-icon .icon-mic path {
+  fill: #ffffff; /* белая иконка */
+}
+
+.btn.btn-icon.recording {
+  background: #b91c1c; /* красный круг при записи, можно другой цвет */
+}
+
+/* ===== ОБЩИЙ ЧАТ — СТРАНИЦА ЗАГЛУШКА ===== */
+
+.shared-chat-coming {
+  text-align: center;
+}
+
+.shared-chat-coming-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0b3c78, #3b82f6);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+}
+
+.shared-chat-coming-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.shared-chat-coming-text {
+  margin: 0 auto 18px;
+  max-width: 320px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.shared-chat-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  text-align: left;
+}
+
+
+/* ============ HOME: СТРАНИЦА ГЛАВНАЯ ============ */
+
+.home-page {
+  padding: 12px 16px 16px;
+}
+
+.home-card-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #374151;
+  text-align: left;
+}
+
+.home-card-text + .home-card-text {
+  margin-top: 10px;
+}
+
+.home-card-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ============ HOME: СПИСОК МОДУЛЕЙ ============ */
+
+.home-module-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-module-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f8fbff;
+}
+
+.home-module-item.is-frozen {
+  background: #f3f4f6;
+}
+
+.home-module-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.home-module-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.25;
+}
+
+.home-module-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.home-module-badge.required {
+  background: #e0ecff;
+  color: #0b3c78;
+}
+
+.home-module-badge.free {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.home-module-badge.paid {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.home-module-status {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0 0 10px;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.home-module-status.is-warning {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.home-module-status.is-free {
+  color: #166534;
+  font-weight: 600;
+}
+
+.home-module-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.home-module-open-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ============ HOME: ССЫЛКИ И ПУСТОЕ СОСТОЯНИЕ ============ */
+
+.home-links-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.home-text-link {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.home-text-link:active {
+  opacity: 0.75;
+}
+
+.home-empty-note {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+  text-align: left;
+}
+
+/* ============ HOME: АДАПТИВ ============ */
+
+@media (max-width: 380px) {
+  .home-page {
+    padding: 10px 12px 16px;
+  }
+
+  .home-module-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .home-links-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
