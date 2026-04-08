@@ -84,7 +84,7 @@
     </section>
   </div>
 
-  <script>
+ <script>
   let APP_FEATURES = {
     home: true,
     myAgent: true,
@@ -198,7 +198,11 @@
 
       if (APP_FEATURES[module.id] === false) return false;
 
-      return true;
+      if (meta.type === 'free') {
+        return module.id === 'knowledge-hub' || module.id === 'support-desk';
+      }
+
+      return module.paid === true;
     });
   }
 
@@ -209,7 +213,7 @@
     const visibleModules = getVisibleHomeModules();
 
     if (!visibleModules.length) {
-      container.innerHTML = '<p class="home-empty-note">Пока нет доступных модулей. Они появятся здесь автоматически.</p>';
+      container.innerHTML = '<p class="home-empty-note">Пока нет доступных модулей. Бесплатные модули появятся сразу, а платные — после оплаты.</p>';
       return;
     }
 
@@ -219,6 +223,10 @@
         const badge = getModuleBadge(meta.type);
         const status = getModuleStatusText(module, meta);
         const isFrozen = !!module.frozen;
+        const buttonLabel = isFrozen ? 'Недоступно' : 'Открыть';
+        const buttonAttrs = isFrozen
+          ? 'disabled'
+          : `onclick="navigateFromHome('${meta.page}', 'modules')"`;
 
         return `
           <div class="home-module-item ${isFrozen ? 'is-frozen' : ''}">
@@ -231,10 +239,9 @@
               <button
                 type="button"
                 class="btn btn-block home-module-open-btn"
-                ${isFrozen ? 'disabled' : ''}
-                onclick="${isFrozen ? '' : `navigateFromHome('${meta.page}', 'modules')`}"
+                ${buttonAttrs}
               >
-                ${isFrozen ? 'Недоступно' : 'Открыть'}
+                ${buttonLabel}
               </button>
             </div>
           </div>
@@ -279,15 +286,18 @@
       if (usernameEl) usernameEl.textContent = '@username не указан';
       if (idEl) idEl.textContent = 'ID: —';
       if (emailEl) emailEl.textContent = 'Почта: не указана';
-      if (noteTextEl) noteTextEl.textContent = 'Почту можно указать в настройках';
+      if (noteTextEl) noteTextEl.textContent = 'Почту нужно добавить в Настройках';
+
       if (avatarFallbackEl) {
         avatarFallbackEl.textContent = 'U';
         avatarFallbackEl.hidden = false;
       }
+
       if (avatarImageEl) {
         avatarImageEl.hidden = true;
         avatarImageEl.removeAttribute('src');
       }
+
       return;
     }
 
@@ -307,7 +317,7 @@
     if (usernameEl) usernameEl.textContent = username;
     if (idEl) idEl.textContent = userId;
     if (emailEl) emailEl.textContent = 'Почта: ' + email;
-    if (noteTextEl) noteTextEl.textContent = 'Почту можно указать в настройках';
+    if (noteTextEl) noteTextEl.textContent = 'Почту нужно добавить в Настройках';
 
     if (avatarFallbackEl) {
       avatarFallbackEl.textContent = fullName.charAt(0).toUpperCase();
@@ -328,6 +338,7 @@
         avatarImageEl.onerror = function () {
           avatarImageEl.hidden = true;
           avatarImageEl.removeAttribute('src');
+
           if (avatarFallbackEl) {
             avatarFallbackEl.hidden = false;
           }
