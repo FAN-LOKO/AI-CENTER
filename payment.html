@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Оплата — AI FIT CENTER</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="screen">
+      <div class="page">
+        <!-- Заголовок страницы -->
+        <section class="card-section">
+          <div class="card-section-header">
+            <h1 class="card-section-title">Оплата</h1>
+            <p class="card-section-subtitle">
+              Управление подпиской на модули
+            </p>
+          </div>
+          <div class="card-section-body">
+            <p
+              style="
+                margin: 0;
+                font-size: 13px;
+                color: #6b7280;
+              "
+            >
+              Выберите тариф для модуля «Агент» и подтвердите согласие с офертой
+              перед оплатой.
+            </p>
+          </div>
+        </section>
+
+        <!-- Баланс -->
+        <section class="card-section">
+          <div class="card-section-header">
+            <h2 class="card-section-title">💰 Баланс</h2>
+            <p class="card-section-subtitle">
+              Текущий баланс вашего аккаунта
+            </p>
+          </div>
+          <div class="card-section-body">
+            <div
+              style="
+                display: flex;
+                align-items: baseline;
+                gap: 6px;
+                margin-bottom: 4px;
+              "
+            >
+              <span
+                style="
+                  font-size: 22px;
+                  font-weight: 700;
+                "
+                >0</span
+              >
+              <span
+                style="
+                  font-size: 14px;
+                  color: #6b7280;
+                "
+                >руб.</span
+              >
+            </div>
+            <p
+              style="
+                margin: 0;
+                font-size: 13px;
+                color: #6b7280;
+              "
+            >
+              Пополнение баланса и автоматические списания появятся позже.
+            </p>
+          </div>
+        </section>
+
+        <!-- Аккордеон: Модуль Агент с вариантами подписки -->
+        <section class="accordion-card open" id="agent-tariffs">
+          <button
+            class="accordion-header"
+            type="button"
+            onclick="toggleAccordion(this)"
+          >
+            <span class="accordion-header-title">📋 Модуль «Агент»</span>
+            <span class="accordion-header-icon">▾</span>
+          </button>
+          <div class="accordion-body">
+            <!-- Вариант 1: 30 дней -->
+            <div
+              style="
+                border-radius: 10px;
+                border: 1px solid rgba(148,163,184,0.35);
+                padding: 10px 12px;
+                margin-bottom: 10px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: baseline;
+                  margin-bottom: 4px;
+                "
+              >
+                <div
+                  style="
+                    font-size: 14px;
+                    font-weight: 600;
+                  "
+                >
+                  Подписка на 30 дней
+                </div>
+                <span
+                  style="
+                    font-size: 16px;
+                    font-weight: 700;
+                  "
+                >
+                  990 руб.
+                </span>
+              </div>
+              <div
+                style="
+                  font-size: 12px;
+                  color: #6b7280;
+                  margin-bottom: 8px;
+                "
+              >
+                Полный доступ к модулю «Агент» на 30 дней.
+              </div>
+
+              <label
+                style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 8px;
+                  font-size: 12px;
+                  color: #374151;
+                  margin-bottom: 8px;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="checkbox"
+                  id="offerCheckbox30"
+                  style="margin-top: 2px; cursor: pointer;"
+                />
+                <span>
+                  Согласен с
+                  <a
+                    href="#"
+                    target="_blank"
+                    style="color:#3b82f6; text-decoration: underline;"
+                  >
+                    условиями оферты
+                  </a>
+                </span>
+              </label>
+
+              <button
+                id="payButton30"
+                class="btn btn-primary btn-block"
+                onclick="startPayment('agent_30')"
+                disabled
+                style="opacity: 0.5; cursor: not-allowed; font-size: 13px;"
+              >
+                Оплатить 30 дней
+              </button>
+            </div>
+
+            <!-- Вариант 2: 3 месяца -->
+            <div
+              style="
+                border-radius: 10px;
+                border: 1px solid rgba(148,163,184,0.35);
+                padding: 10px 12px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: baseline;
+                  margin-bottom: 4px;
+                "
+              >
+                <div
+                  style="
+                    font-size: 14px;
+                    font-weight: 600;
+                  "
+                >
+                  Подписка на 3 месяца
+                </div>
+                <span
+                  style="
+                    font-size: 16px;
+                    font-weight: 700;
+                  "
+                >
+                  2490 руб.
+                </span>
+              </div>
+              <div
+                style="
+                  font-size: 12px;
+                  color: #6b7280;
+                  margin-bottom: 4px;
+                "
+              >
+                90 дней доступа с выгодой 16% по сравнению с помесячной
+                оплатой.
+              </div>
+              <div
+                style="
+                  font-size: 11px;
+                  color: #16a34a;
+                  margin-bottom: 8px;
+                "
+              >
+                Экономия по сравнению с 3 отдельными месяцами.
+              </div>
+
+              <label
+                style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 8px;
+                  font-size: 12px;
+                  color: #374151;
+                  margin-bottom: 8px;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="checkbox"
+                  id="offerCheckbox90"
+                  style="margin-top: 2px; cursor: pointer;"
+                />
+                <span>
+                  Согласен с
+                  <a
+                    href="#"
+                    target="_blank"
+                    style="color:#3b82f6; text-decoration: underline;"
+                  >
+                    условиями оферты
+                  </a>
+                </span>
+              </label>
+
+              <button
+                id="payButton90"
+                class="btn btn-primary btn-block"
+                onclick="startPayment('agent_90')"
+                disabled
+                style="opacity: 0.5; cursor: not-allowed; font-size: 13px;"
+              >
+                Оплатить 3 месяца
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      function toggleAccordion(button) {
+        const card = button.closest(".accordion-card");
+        const isOpen = card.classList.contains("open");
+        card.classList.toggle("open", !isOpen);
+
+        const icon = button.querySelector(".accordion-header-icon");
+        if (icon) {
+          icon.textContent = isOpen ? "▾" : "▴";
+        }
+      }
+
+      function bindOfferCheckbox(checkboxId, buttonId) {
+        const checkbox = document.getElementById(checkboxId);
+        const button = document.getElementById(buttonId);
+        if (!checkbox || !button) return;
+
+        function update() {
+          const enabled = checkbox.checked;
+          button.disabled = !enabled;
+          button.style.opacity = enabled ? "1" : "0.5";
+          button.style.cursor = enabled ? "pointer" : "not-allowed";
+        }
+
+        checkbox.addEventListener("change", update);
+        update();
+      }
+
+      bindOfferCheckbox("offerCheckbox30", "payButton30");
+      bindOfferCheckbox("offerCheckbox90", "payButton90");
+
+      function startPayment(tariffId) {
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
+          tg.HapticFeedback.impactOccurred("medium");
+        }
+
+        // Заглушка: сюда позже добавится интеграция с оплатой / backend
+        window.parent.postMessage(
+          {
+            type: "payment",
+            tariff: tariffId,
+          },
+          "*"
+        );
+      }
+    </script>
+  </body>
+</html>

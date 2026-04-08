@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Главная — AI FIT Center</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="page home-page">
+    <section class="card-section home-profile-card">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Профиль</h2>
+        <p class="card-section-subtitle">Telegram WebApp</p>
+      </div>
+
+      <div class="card-section-body">
+        <div class="home-profile-row">
+          <div class="home-profile-avatar" id="homeProfileAvatar">
+            <span id="homeProfileAvatarFallback">U</span>
+            <img id="homeProfileAvatarImage" alt="Аватар пользователя" hidden />
+          </div>
+
+          <div class="home-profile-main">
+            <div class="home-profile-name" id="homeProfileName">Пользователь</div>
+            <div class="home-profile-username" id="homeProfileUsername">Без username</div>
+            <div class="home-profile-id" id="homeProfileId">ID: —</div>
+          </div>
+
+          <div class="home-profile-status" id="homeProfileStatus">ONLINE</div>
+        </div>
+
+        <div class="home-profile-note" id="homeProfileNote">
+          Профиль автоматически загружается из Telegram Mini App.
+        </div>
+      </div>
+    </section>
+    
+    <section class="card-section" id="homeModulesCard">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Мои модули</h2>
+        <p class="card-section-subtitle">Только активные и доступные модули пользователя</p>
+      </div>
+
+      <div class="card-section-body">
+        <div id="homeModulesList" class="home-module-list"></div>
+
+        <div class="home-links-row">
+          <button type="button" class="home-text-link" id="allModulesLink">
+            Все модули
+          </button>
+
+          <button type="button" class="home-text-link" id="paymentLink">
+            Оплата
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section" id="homeAffiliateCard">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Партнёрка</h2>
+        <p class="card-section-subtitle">Быстрый доступ к партнёрскому разделу</p>
+      </div>
+
+      <div class="card-section-body">
+        <div class="home-card-stack">
+          <p class="home-card-text">
+            Здесь будут доступны инструменты партнёра, структура и связанные функции.
+          </p>
+
+          <button
+            type="button"
+            class="btn btn-block"
+            onclick="navigateFromHome('partner.html', 'affiliate')"
+          >
+            Открыть партнёрку
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let APP_FEATURES = {
+      home: true,
+      myAgent: true,
+      modules: true,
+      sharedChat: true,
+      affiliate: true,
+      payments: true,
+      settings: true,
+      "ai-agent": true,
+      "knowledge-hub": true,
+      "support-desk": true,
+      "media-lab": true,
+      "leader-stage": true,
+      "lead-flow": true,
+      "business-room": true
+    };
+
+    const MODULE_META = {
+      "ai-agent": {
+        title: "AI Агент",
+        page: "modules-agent-profile.html",
+        type: "required"
+      },
+      "knowledge-hub": {
+        title: "База знаний",
+        page: "modules-knowledge-hub-index.html",
+        type: "free"
+      },
+      "support-desk": {
+        title: "Поддержка",
+        page: "modules-support-desk-index.html",
+        type: "free"
+      },
+      "media-lab": {
+        title: "Медиа‑лаборатория",
+        page: "modules-media-lab-index.html",
+        type: "paid"
+      },
+      "leader-stage": {
+        title: "Сцена лидера",
+        page: "modules-leader-stage-index.html",
+        type: "paid"
+      },
+      "lead-flow": {
+        title: "Lead Flow",
+        page: "modules-lead-flow-index.html",
+        type: "paid"
+      },
+      "business-room": {
+        title: "Business Room",
+        page: "modules-business-room-index.html",
+        type: "paid"
+      }
+    };
+
+    let USER_MODULES = [
+      { id: "ai-agent", visible: true, paid: false, frozen: true, daysLeft: 0 },
+      { id: "knowledge-hub", visible: true, paid: true, frozen: false, daysLeft: null },
+      { id: "support-desk", visible: true, paid: true, frozen: false, daysLeft: null },
+      { id: "media-lab", visible: true, paid: true, frozen: false, daysLeft: 27 },
+      { id: "leader-stage", visible: true, paid: true, frozen: false, daysLeft: 14 }
+    ];
+
+    function navigateFromHome(page, tab) {
+      window.parent?.postMessage?.(
+        {
+          type: "navigate",
+          page,
+          tab
+        },
+        "*"
+      );
+    }
+
+    function getModuleBadge(type) {
+      if (type === "required") {
+        return { text: "Обязательный", className: "required" };
+      }
+
+      if (type === "free") {
+        return { text: "Бесплатно", className: "free" };
+      }
+
+      return { text: "Платный", className: "paid" };
+    }
+
+    function getModuleStatusText(module, meta) {
+      if (meta.type === "free") {
+        return {
+          text: "Доступен сразу",
+          className: "is-free"
+        };
+      }
+
+      if (module.frozen) {
+        return {
+          text: module.daysLeft === 0
+            ? "Доступ приостановлен"
+            : `Заморожен, осталось ${module.daysLeft} дн.`,
+          className: "is-warning"
+        };
+      }
+
+      if (typeof module.daysLeft === "number" && module.daysLeft > 0) {
+        return {
+          text: `Оплачен, осталось ${module.daysLeft} дн.`,
+          className: ""
+        };
+      }
+
+      return {
+        text: "Активен",
+        className: ""
+      };
+    }
+
+    function getVisibleHomeModules() {
+      return USER_MODULES.filter((module) => {
+        if (!module.visible) return false;
+
+        const meta = MODULE_META[module.id];
+        if (!meta) return false;
+
+        if (APP_FEATURES[module.id] === false) return false;
+
+        return true;
+      });
+    }
+
+    function renderHomeModules() {
+      const container = document.getElementById("homeModulesList");
+      if (!container) return;
+
+      const visibleModules = getVisibleHomeModules();
+
+      if (!visibleModules.length) {
+        container.innerHTML = `
+          <p class="home-empty-note">
+            Пока нет доступных модулей. После активации они появятся здесь автоматически.
+          </p>
+        `;
+        return;
+      }
+
+      container.innerHTML = visibleModules.map((module) => {
+        const meta = MODULE_META[module.id];
+        const badge = getModuleBadge(meta.type);
+        const status = getModuleStatusText(module, meta);
+        const isFrozen = !!module.frozen;
+
+        return `
+          <div class="home-module-item ${isFrozen ? "is-frozen" : ""}">
+            <div class="home-module-top">
+              <div class="home-module-title">${meta.title}</div>
+              <span class="home-module-badge ${badge.className}">${badge.text}</span>
+            </div>
+
+            <p class="home-module-status ${status.className}">${status.text}</p>
+
+            <div class="home-module-actions">
+              <button
+                type="button"
+                class="btn btn-block home-module-open-btn"
+                ${isFrozen ? "disabled" : ""}
+                onclick="${isFrozen ? "" : `navigateFromHome('${meta.page}', 'modules')`}"
+              >
+                ${isFrozen ? "Недоступно" : "Открыть"}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function applyHomeFeatures(features) {
+      APP_FEATURES = { ...APP_FEATURES, ...features };
+
+      const affiliateCard = document.getElementById("homeAffiliateCard");
+      if (affiliateCard) {
+        affiliateCard.style.display = APP_FEATURES.affiliate ? "" : "none";
+      }
+
+      const modulesCard = document.getElementById("homeModulesCard");
+      if (modulesCard) {
+        modulesCard.style.display = APP_FEATURES.modules ? "" : "none";
+      }
+
+      renderHomeModules();
+    }
+
+    function fillTelegramProfile() {
+      const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+      const nameEl = document.getElementById("homeProfileName");
+      const usernameEl = document.getElementById("homeProfileUsername");
+      const idEl = document.getElementById("homeProfileId");
+      const statusEl = document.getElementById("homeProfileStatus");
+      const noteEl = document.getElementById("homeProfileNote");
+      const avatarFallbackEl = document.getElementById("homeProfileAvatarFallback");
+      const avatarImageEl = document.getElementById("homeProfileAvatarImage");
+
+      if (!user) {
+        if (nameEl) nameEl.textContent = "Пользователь";
+        if (usernameEl) usernameEl.textContent = "Без username";
+        if (idEl) idEl.textContent = "ID: —";
+        if (statusEl) statusEl.textContent = "GUEST";
+        if (noteEl) noteEl.textContent = "Данные Telegram пока недоступны.";
+        if (avatarFallbackEl) avatarFallbackEl.textContent = "U";
+        return;
+      }
+
+      const fullName =
+        [user.first_name, user.last_name].filter(Boolean).join(" ") || "Пользователь";
+
+      if (nameEl) {
+        nameEl.textContent = fullName;
+      }
+
+      if (usernameEl) {
+        usernameEl.textContent = user.username ? `@${user.username}` : "Без username";
+      }
+
+      if (idEl) {
+        idEl.textContent = user.id ? `ID: ${user.id}` : "ID: —";
+      }
+
+      if (statusEl) {
+        statusEl.textContent = "ONLINE";
+      }
+
+      if (noteEl) {
+        noteEl.textContent = "Профиль автоматически загружается из Telegram Mini App.";
+      }
+
+      if (avatarFallbackEl) {
+        avatarFallbackEl.textContent = fullName.charAt(0).toUpperCase();
+      }
+
+      if (avatarImageEl && user.photo_url) {
+        avatarImageEl.src = user.photo_url;
+        avatarImageEl.hidden = false;
+
+        if (avatarFallbackEl) {
+          avatarFallbackEl.hidden = true;
+        }
+      }
+    }
+
+    window.addEventListener("message", (event) => {
+      const data = event.data;
+      if (!data || typeof data !== "object") return;
+
+      if (data.type === "app-features" && data.features) {
+        applyHomeFeatures(data.features);
+      }
+
+      if (data.type === "user-modules" && Array.isArray(data.modules)) {
+        USER_MODULES = data.modules;
+        renderHomeModules();
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const allModulesLink = document.getElementById("allModulesLink");
+      const paymentLink = document.getElementById("paymentLink");
+
+      if (allModulesLink) {
+        allModulesLink.addEventListener("click", () => {
+          navigateFromHome("modules.html", "modules");
+        });
+      }
+
+      if (paymentLink) {
+        paymentLink.addEventListener("click", () => {
+          navigateFromHome("payments.html", "payments");
+        });
+      }
+
+      fillTelegramProfile();
+      renderHomeModules();
+
+      window.parent?.postMessage?.(
+        {
+          type: "request-app-features"
+        },
+        "*"
+      );
+    });
+  </script>
+</body>
+</html>

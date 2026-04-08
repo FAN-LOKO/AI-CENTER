@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Модули</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/modules.css" />
+  <style>
+    .modules-summary-body {
+      text-align: left;
+    }
+
+    .modules-summary-body .profile-row {
+      align-items: flex-start;
+    }
+
+    .modules-summary-body .profile-label {
+      text-align: left;
+    }
+
+    .modules-summary-body .profile-value {
+      text-align: left;
+      word-break: normal;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+  <div class="page page-my-agent">
+    <!-- Блок: Заголовок страницы модулей -->
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Модули сервиса</h2>
+        <p class="card-section-subtitle">
+          Выберите инструмент для работы, обучения, контента и роста команды
+        </p>
+      </div>
+
+      <!-- Блок: Краткая информация о доступе к модулям -->
+      <div class="card-section-body modules-summary-body">
+        <div class="profile-row">
+          <span class="profile-label">Доступ</span>
+          <span class="profile-value" id="subscriptionStatusLabel">Проверка подписки...</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Открытие модулей</span>
+          <span class="profile-value">При активной подписке открывается модуль, без подписки пользователь переводится на страницу оплаты.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Блок: Список карточек модулей -->
+    <div id="modulesList"></div>
+  </div>
+
+  <script>
+    // Блок: Данные модулей
+    const MODULES = [
+      {
+        id: "ai-agent",
+        title: "AI Agent",
+        titleRu: "Агент с ИИ",
+        shortDescription: "Подключение соцсетей, обработка входящих сообщений и базовая статистика.",
+        fullDescription: [
+          "Подключение соцсетей (Telegram, Instagram, TikTok и др.).",
+          "Готовый ИИ-агент на вашей модели, без настройки API со стороны пользователя.",
+          "Обработка входящих сообщений, первичный рекрутинг и квалификация.",
+          "История диалогов и возможность вмешаться в общение.",
+          "Базовая статистика по диалогам и лидам."
+        ],
+        page: "modules-agent/profile.html"
+      },
+      {
+        id: "media-lab",
+        title: "Media Lab",
+        titleRu: "Медиа-лаборатория",
+        shortDescription: "Создание, публикация и анализ контента.",
+        fullDescription: [
+          "Генерация изображений и каруселей с лицом пользователя и продуктом.",
+          "Готовые сценарии постов, сториз и reels.",
+          "Подбор и адаптация трендовых идей по теме компании и продукта.",
+          "Публикация в несколько соцсетей, отложенный постинг и контент-календарь.",
+          "Анализ вовлечённости и комментариев."
+        ],
+        page: "modules-media-lab/index.html"
+      },
+      {
+        id: "leader-stage",
+        title: "Leader Stage",
+        titleRu: "Сцена лидера",
+        shortDescription: "Инструмент для лидеров и организаторов эфиров.",
+        fullDescription: [
+          "Создание комнат до 500 участников.",
+          "Роли: Organizer, Host, Co-host, Participant.",
+          "Видео, звук, демонстрация экрана и совместное ведение эфира.",
+          "Чат, Q&A, поднятие руки и приглашение на сцену.",
+          "Базовая аналитика по эфиру."
+        ],
+        page: "modules-leader-stage/index.html"
+      },
+      {
+        id: "lead-flow",
+        title: "Lead Flow",
+        titleRu: "Поток лидов",
+        shortDescription: "Мягкое привлечение лидов и трекинг источников.",
+        fullDescription: [
+          "Генерация AI-лендингов и лид-магнитов.",
+          "Формы захвата: квизы, мини-анкеты и выдача материалов.",
+          "Автоматизация первых касаний и реакций.",
+          "Трекинг каналов и атрибуция лидов по источникам.",
+          "Контроль реферальных цепочек и аналитика притока лидов."
+        ],
+        page: "modules-lead-flow/index.html"
+      },
+      {
+        id: "business-room",
+        title: "Business Room",
+        titleRu: "Бизнес-комната",
+        shortDescription: "Управление структурой, динамикой и развитием бизнеса.",
+        fullDescription: [
+          "Сегментация партнёров по рангу, активности и оборотам.",
+          "AI-рассылки и автоворонки: обучение, мотивация, события, реактивация.",
+          "Дерево структуры, отчёты и аналитика роста веток.",
+          "Подсказки лидерам: риски оттока, точки роста, кандидаты в лидеры.",
+          "Лидеборды и чек-листы действий."
+        ],
+        page: "modules-business-room/index.html"
+      },
+      {
+        id: "knowledge-hub",
+        title: "Knowledge Hub",
+        titleRu: "База знаний",
+        shortDescription: "База знаний и обучающая среда.",
+        fullDescription: [
+          "Материалы по продукту, бизнес-модели, скриптам и возражениям.",
+          "Презентации, записи эфиров и обучающие материалы.",
+          "Дорожки обучения: Новичок, Партнёр, Лидер.",
+          "AI-поиск по базе знаний.",
+          "Привязка материалов к другим модулям платформы."
+        ],
+        page: "modules-knowledge-hub/index.html"
+      },
+      {
+        id: "support-desk",
+        title: "Support Desk",
+        titleRu: "Центр поддержки",
+        shortDescription: "Поддержка пользователей и help-центр.",
+        fullDescription: [
+          "Встроенный help-центр с AI-помощником по платформе.",
+          "Создание и отслеживание тикетов.",
+          "Быстрые ответы и инструкции по ключевым вопросам.",
+          "Поддержка по технике, оплатам и интеграциям.",
+          "Канал обратной связи по продукту."
+        ],
+        page: "modules-support-desk/index.html"
+      }
+    ];
+
+    // Блок: Временная модель доступа пользователя
+    const USER_ACCESS = {
+      subscriptionActive: true
+    };
+
+    // Блок: Открытие модуля или перевод на оплату
+    function openModule(modulePage) {
+      if (USER_ACCESS.subscriptionActive) {
+        window.parent?.postMessage?.(
+          {
+            type: "navigate",
+            page: modulePage,
+            tab: "modules"
+          },
+          "*"
+        );
+      } else {
+        window.parent?.postMessage?.(
+          {
+            type: "navigate",
+            page: "payment.html",
+            tab: "payments"
+          },
+          "*"
+        );
+      }
+    }
+
+    // Блок: Закрытие всех раскрытых карточек
+    function closeAllModuleCards() {
+      document.querySelectorAll(".module-card-expanded.open").forEach((el) => {
+        el.classList.remove("open");
+      });
+
+      document.querySelectorAll(".module-accordion-card.open").forEach((el) => {
+        el.classList.remove("open");
+      });
+
+      document.querySelectorAll(".module-card-toggle").forEach((btn) => {
+        btn.setAttribute("aria-expanded", "false");
+      });
+
+      document.querySelectorAll(".module-card-chevron").forEach((icon) => {
+        icon.textContent = "▾";
+      });
+    }
+
+    // Блок: Создание одной карточки модуля
+    function createModuleCard(module) {
+      const section = document.createElement("section");
+      section.className = "card-section module-accordion-card";
+
+      section.innerHTML = `
+        <div class="card-section-header module-card-header">
+          <button class="module-card-toggle" type="button" aria-expanded="false">
+            <div class="module-card-header-text">
+              <h2 class="card-section-title module-card-title">
+                ${module.title}
+                <span class="module-card-title-ru">/ ${module.titleRu}</span>
+              </h2>
+            </div>
+            <span class="accordion-icon module-card-chevron">▾</span>
+          </button>
+        </div>
+
+        <div class="card-section-body module-card-main">
+          <p class="module-card-short-description">${module.shortDescription}</p>
+
+          <button
+            class="btn btn-block"
+            type="button"
+            data-module-page="${module.page}"
+          >
+            Открыть модуль
+          </button>
+        </div>
+
+        <div class="card-section-body accordion-body module-card-expanded">
+          <div class="module-card-expanded-title">Подробнее о модуле</div>
+          <ul class="module-card-description-list">
+            ${module.fullDescription.map((item) => `<li>${item}</li>`).join("")}
+          </ul>
+        </div>
+      `;
+
+      const toggleBtn = section.querySelector(".module-card-toggle");
+      const expandedBody = section.querySelector(".module-card-expanded");
+      const chevron = section.querySelector(".module-card-chevron");
+      const openBtn = section.querySelector(".btn");
+
+      toggleBtn.addEventListener("click", () => {
+        const isOpen = expandedBody.classList.contains("open");
+
+        closeAllModuleCards();
+
+        if (!isOpen) {
+          expandedBody.classList.add("open");
+          section.classList.add("open");
+          toggleBtn.setAttribute("aria-expanded", "true");
+          chevron.textContent = "▴";
+        }
+      });
+
+      openBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openModule(module.page);
+      });
+
+      return section;
+    }
+
+    // Блок: Инициализация страницы модулей
+    document.addEventListener("DOMContentLoaded", () => {
+      const modulesList = document.getElementById("modulesList");
+      const subscriptionStatusLabel = document.getElementById("subscriptionStatusLabel");
+
+      if (subscriptionStatusLabel) {
+        subscriptionStatusLabel.textContent = USER_ACCESS.subscriptionActive
+          ? "Подписка активна"
+          : "Подписка не активна";
+      }
+
+      if (modulesList) {
+        MODULES.forEach((module) => {
+          modulesList.appendChild(createModuleCard(module));
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Мой агент</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/modules.css">
+</head>
+<body>
+  <div class="page page-my-agent">
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Мой агент</h2>
+        <p class="card-section-subtitle">
+          Напишите свой вопрос, агент ответит прямо здесь.
+        </p>
+      </div>
+
+      <div class="card-section-body">
+        <!-- Диалоговое окно -->
+        <div class="chat-messages" id="clientChatMessages">
+          <div class="chat-message chat-message-agent">
+            <div class="chat-message-meta">
+              <span>Агент</span>
+              <span>12:00</span>
+            </div>
+            <div class="chat-bubble">
+              Привет! Чем могу помочь?
+            </div>
+          </div>
+        </div>
+
+        <!-- Поле ввода + кнопка отправки + глосовой -->
+        <div class="chat-messages" id="clientChatMessages">
+  <!-- сообщения -->
+</div>
+
+<!-- Поле ввода -->
+<textarea
+  id="clientMessageInput"
+  class="chat-input"
+  rows="2"
+  placeholder="Введите сообщение..."
+></textarea>
+
+<!-- Ряд кнопок под полем -->
+<div class="chat-input-actions-row">
+  <button
+    id="clientSendMessageButton"
+    class="btn btn-send"
+    type="button"
+  >
+    Отправить
+  </button>
+
+  <button
+  id="clientVoiceButton"
+  class="btn btn-icon"
+  type="button"
+  aria-label="Записать голосовое сообщение"
+>
+  <svg
+    class="icon-mic"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path
+      d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 1 1 2 0 7 7 0 0 1-6 6.92V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.08A7 7 0 0 1 5 11a1 1 0 1 1 2 0 5 5 0 0 0 10 0z"
+    />
+  </svg>
+</button>
+</div>
+
+<div
+  id="clientSendMessageStatus"
+  class="connect-status-msg"
+></div>
+
+        <div
+          id="clientSendMessageStatus"
+          class="connect-status-msg"
+        ></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+
+    function appendClientChatMessage(msg) {
+      const container = document.getElementById("clientChatMessages");
+      if (!container) return;
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "chat-message chat-message-client";
+
+      const meta = document.createElement("div");
+      meta.className = "chat-message-meta";
+
+      const author = document.createElement("span");
+      author.textContent = "Вы";
+
+      const time = document.createElement("span");
+      const now = new Date();
+      time.textContent = now.toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      meta.appendChild(author);
+      meta.appendChild(time);
+
+      const bubble = document.createElement("div");
+      bubble.className = "chat-bubble";
+      bubble.textContent = msg;
+
+      wrapper.appendChild(meta);
+      wrapper.appendChild(bubble);
+
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const input = document.getElementById("clientMessageInput");
+      const sendBtn = document.getElementById("clientSendMessageButton");
+      const statusEl = document.getElementById("clientSendMessageStatus");
+
+      function sendMessage() {
+        const text = (input.value || "").trim();
+        if (!text) return;
+
+        appendClientChatMessage(text);
+        input.value = "";
+        statusEl.textContent = "Сообщение отправлено агенту...";
+        statusEl.classList.remove("error");
+        statusEl.classList.add("success");
+
+        tg?.HapticFeedback?.impactOccurred?.("medium");
+
+        // Заглушка: прокинуть наверх в app.html / n8n
+        window.parent?.postMessage?.(
+          {
+            type: "client-send-message",
+            text,
+          },
+          "*"
+        );
+      }
+
+      if (sendBtn) {
+        sendBtn.addEventListener("click", sendMessage);
+      }
+
+      if (input) {
+        input.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+          }
+        });
+      }
+    });
+
+   // Инициализация Telegram WebApp (если есть)
+const tg = window.Telegram?.WebApp;
+
+// Состояние записи голоса
+let mediaRecorder = null;
+let recordedChunks = [];
+let mediaStream = null;
+let isRecording = false;
+
+// ================== УТИЛИТЫ СТАТУСА / ОШИБОК ==================
+
+function showClientStatus(message) {
+  const statusEl = document.getElementById("clientSendMessageStatus");
+  if (!statusEl) return;
+  statusEl.textContent = message;
+  statusEl.classList.remove("error");
+  statusEl.classList.add("success");
+}
+
+function showClientError(message) {
+  const statusEl = document.getElementById("clientSendMessageStatus");
+  if (!statusEl) {
+    alert(message);
+    return;
+  }
+  statusEl.textContent = message;
+  statusEl.classList.remove("success");
+  statusEl.classList.add("error");
+}
+
+// ================== РЕНДЕР СООБЩЕНИЙ В ЧАТЕ ==================
+
+function appendClientChatMessage(text) {
+  const container = document.getElementById("clientChatMessages");
+  if (!container) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "chat-message chat-message-client";
+
+  const meta = document.createElement("div");
+  meta.className = "chat-message-meta";
+
+  const author = document.createElement("span");
+  author.textContent = "Вы";
+
+  const time = document.createElement("span");
+  const now = new Date();
+  time.textContent = now.toLocaleTimeString("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  meta.appendChild(author);
+  meta.appendChild(time);
+
+  const bubble = document.createElement("div");
+  bubble.className = "chat-bubble";
+  bubble.textContent = text;
+
+  wrapper.appendChild(meta);
+  wrapper.appendChild(bubble);
+
+  container.appendChild(wrapper);
+  container.scrollTop = container.scrollHeight;
+}
+
+function appendClientVoiceMessage(label) {
+  const container = document.getElementById("clientChatMessages");
+  if (!container) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "chat-message chat-message-client";
+
+  const meta = document.createElement("div");
+  meta.className = "chat-message-meta";
+
+  const author = document.createElement("span");
+  author.textContent = "Вы (голосовое)";
+
+  const time = document.createElement("span");
+  const now = new Date();
+  time.textContent = now.toLocaleTimeString("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  meta.appendChild(author);
+  meta.appendChild(time);
+
+  const bubble = document.createElement("div");
+  bubble.className = "chat-bubble";
+  bubble.textContent = label || "Голосовое сообщение";
+
+  wrapper.appendChild(meta);
+  wrapper.appendChild(bubble);
+
+  container.appendChild(wrapper);
+  container.scrollTop = container.scrollHeight;
+}
+
+// ================== ОТПРАВКА ТЕКСТА ==================
+
+function sendClientTextMessage() {
+  const input = document.getElementById("clientMessageInput");
+  const statusEl = document.getElementById("clientSendMessageStatus");
+  if (!input) return;
+
+  const text = (input.value || "").trim();
+  if (!text) return;
+
+  appendClientChatMessage(text);
+  input.value = "";
+
+  if (statusEl) {
+    statusEl.textContent = "Сообщение отправлено агенту...";
+    statusEl.classList.remove("error");
+    statusEl.classList.add("success");
+  }
+
+  tg?.HapticFeedback?.impactOccurred?.("medium");
+
+  // Отправляем сообщение родительскому окну (для n8n / бэкенда)
+  window.parent?.postMessage?.(
+    {
+      type: "client-send-message",
+      text,
+    },
+    "*"
+  );
+}
+
+// ================== ВЫБОР MIME-TYPE ДЛЯ ЗАПИСИ ==================
+
+function getSupportedMimeType() {
+  const candidates = [
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/mp4",
+    "audio/m4a",
+    "audio/aac",
+    "audio/ogg",
+    "audio/wav",
+  ];
+
+  if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) {
+    return "";
+  }
+
+  for (const type of candidates) {
+    try {
+      if (MediaRecorder.isTypeSupported(type)) {
+        return type;
+      }
+    } catch (e) {
+      // игнорируем ошибку и пробуем следующий тип
+    }
+  }
+  return "";
+}
+
+// ================== ЗАПИСЬ ГОЛОСОВОГО ==================
+
+async function startVoiceRecording() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    showClientError("Запись голоса не поддерживается на этом устройстве/в этом браузере.");
+    return;
+  }
+
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recordedChunks = [];
+
+    const mimeType = getSupportedMimeType();
+    const options = mimeType ? { mimeType } : undefined;
+
+    mediaRecorder = new MediaRecorder(mediaStream, options);
+
+    mediaRecorder.addEventListener("dataavailable", (event) => {
+      if (event.data.size > 0) {
+        recordedChunks.push(event.data);
+      }
+    });
+
+    mediaRecorder.addEventListener("stop", () => {
+      const blobType = mimeType || "audio/webm";
+      const blob = new Blob(recordedChunks, { type: blobType });
+
+      appendClientVoiceMessage("Голосовое сообщение");
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Audio = reader.result; // data:audio/...;base64,...
+
+        window.parent?.postMessage?.(
+          {
+            type: "client-send-voice",
+            audio: base64Audio,
+            mimeType: blob.type || blobType,
+          },
+          "*"
+        );
+
+        showClientStatus("Голосовое отправлено агенту...");
+      };
+      reader.readAsDataURL(blob);
+
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((track) => track.stop());
+        mediaStream = null;
+      }
+    });
+
+    mediaRecorder.start();
+    isRecording = true;
+
+    const voiceBtn = document.getElementById("clientVoiceButton");
+    if (voiceBtn) {
+      voiceBtn.classList.add("recording");
+    }
+
+    tg?.HapticFeedback?.impactOccurred?.("medium");
+    showClientStatus("Идёт запись голосового...");
+  } catch (err) {
+    console.error(err);
+    showClientError("Не удалось получить доступ к микрофону. Проверьте разрешения в Telegram/браузере.");
+  }
+}
+
+function stopVoiceRecording() {
+  if (!mediaRecorder || !isRecording) return;
+
+  mediaRecorder.stop();
+  isRecording = false;
+
+  const voiceBtn = document.getElementById("clientVoiceButton");
+  if (voiceBtn) {
+    voiceBtn.classList.remove("recording");
+  }
+
+  showClientStatus("Обработка голосового сообщения...");
+}
+
+// ================== ИНИЦИАЛИЗАЦИЯ ОБРАБОТЧИКОВ ==================
+
+document.addEventListener("DOMContentLoaded", function () {
+  const input = document.getElementById("clientMessageInput");
+  const sendBtn = document.getElementById("clientSendMessageButton");
+  const voiceBtn = document.getElementById("clientVoiceButton");
+
+  // Отправка текста по кнопке
+  if (sendBtn) {
+    sendBtn.addEventListener("click", sendClientTextMessage);
+  }
+
+  // Отправка текста по Enter (Shift+Enter — перенос строки)
+  if (input) {
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendClientTextMessage();
+      }
+    });
+  }
+
+  // Удержание кнопки микрофона: пока держим — записываем
+  if (voiceBtn) {
+    const startEvents = ["mousedown", "touchstart"];
+    const stopEvents = ["mouseup", "mouseleave", "touchend", "touchcancel"];
+
+    startEvents.forEach((ev) => {
+      voiceBtn.addEventListener(ev, (e) => {
+        e.preventDefault();
+        if (!isRecording) {
+          startVoiceRecording();
+        }
+      });
+    });
+
+    stopEvents.forEach((ev) => {
+      voiceBtn.addEventListener(ev, (e) => {
+        e.preventDefault();
+        if (isRecording) {
+          stopVoiceRecording();
+        }
+      });
+    });
+  }
+});
+  </script>
+</body>
+</html>
