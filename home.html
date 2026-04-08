@@ -144,8 +144,10 @@
     { id: 'ai-agent', visible: true, paid: false, frozen: true, daysLeft: 0 },
     { id: 'knowledge-hub', visible: true, paid: true, frozen: false, daysLeft: null },
     { id: 'support-desk', visible: true, paid: true, frozen: false, daysLeft: null },
-    { id: 'media-lab', visible: true, paid: true, frozen: false, daysLeft: 27 },
-    { id: 'leader-stage', visible: true, paid: true, frozen: false, daysLeft: 14 }
+    { id: 'media-lab', visible: true, paid: false, frozen: false, daysLeft: null },
+    { id: 'leader-stage', visible: true, paid: false, frozen: false, daysLeft: null },
+    { id: 'lead-flow', visible: true, paid: false, frozen: false, daysLeft: null },
+    { id: 'business-room', visible: true, paid: false, frozen: false, daysLeft: null }
   ];
 
   function navigateFromHome(page, tab) {
@@ -166,12 +168,15 @@
 
   function getModuleStatusText(module, meta) {
     if (meta.type === 'free') {
-      return { text: 'Доступен сразу', className: 'is-free' };
+      return {
+        text: 'Доступен сразу',
+        className: 'is-free'
+      };
     }
 
     if (module.frozen) {
       return {
-        text: module.daysLeft === 0 ? 'Доступ заморожен' : 'Доступ заморожен',
+        text: 'Доступ заморожен',
         className: 'is-warning'
       };
     }
@@ -198,11 +203,15 @@
 
       if (APP_FEATURES[module.id] === false) return false;
 
-      if (meta.type === 'free') {
-        return module.id === 'knowledge-hub' || module.id === 'support-desk';
+      if (module.id === 'knowledge-hub' || module.id === 'support-desk') {
+        return true;
       }
 
-      return module.paid === true;
+      if (meta.type === 'paid') {
+        return module.paid === true;
+      }
+
+      return false;
     });
   }
 
@@ -213,20 +222,19 @@
     const visibleModules = getVisibleHomeModules();
 
     if (!visibleModules.length) {
-      container.innerHTML = '<p class="home-empty-note">Пока нет доступных модулей. Бесплатные модули появятся сразу, а платные — после оплаты.</p>';
+      container.innerHTML =
+        '<p class="home-empty-note">Пока нет доступных модулей. Бесплатные модули доступны сразу, платные появляются после оплаты.</p>';
       return;
     }
 
     container.innerHTML = visibleModules
       .map((module) => {
         const meta = MODULE_META[module.id];
+        if (!meta) return '';
+
         const badge = getModuleBadge(meta.type);
         const status = getModuleStatusText(module, meta);
         const isFrozen = !!module.frozen;
-        const buttonLabel = isFrozen ? 'Недоступно' : 'Открыть';
-        const buttonAttrs = isFrozen
-          ? 'disabled'
-          : `onclick="navigateFromHome('${meta.page}', 'modules')"`;
 
         return `
           <div class="home-module-item ${isFrozen ? 'is-frozen' : ''}">
@@ -234,14 +242,16 @@
               <div class="home-module-title">${meta.title}</div>
               <span class="home-module-badge ${badge.className}">${badge.text}</span>
             </div>
+
             <p class="home-module-status ${status.className}">${status.text}</p>
+
             <div class="home-module-actions">
               <button
                 type="button"
                 class="btn btn-block home-module-open-btn"
-                ${buttonAttrs}
+                ${isFrozen ? 'disabled' : `onclick="navigateFromHome('${meta.page}', 'modules')"`}
               >
-                ${buttonLabel}
+                ${isFrozen ? 'Недоступно' : 'Открыть'}
               </button>
             </div>
           </div>
@@ -389,6 +399,7 @@
     renderHomeModules();
 
     window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+    window.parent?.postMessage?.({ type: 'request-user-modules' }, '*');
     window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
   });
 </script>
