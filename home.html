@@ -8,11 +8,10 @@
   </head>
   <body>
     <div class="page home-page">
-      <!-- Профиль пользователя -->
       <section class="card-section home-profile-card">
         <div class="card-section-header">
           <h2 class="card-section-title">Профиль</h2>
-          <p class="card-section-subtitle">Telegram WebApp</p>
+          <p class="card-section-subtitle" id="homeProfileSubtitle">Telegram WebApp</p>
         </div>
         <div class="card-section-body">
           <div class="home-profile-row">
@@ -45,11 +44,10 @@
         </div>
       </section>
 
-      <!-- Карточка: модули -->
       <section class="card-section" id="homeModulesCard">
         <div class="card-section-header">
           <h2 class="card-section-title">Мои модули</h2>
-          <p class="card-section-subtitle">
+          <p class="card-section-subtitle" id="homeModulesSubtitle">
             Только активные и доступные модули пользователя
           </p>
         </div>
@@ -75,7 +73,6 @@
         </div>
       </section>
 
-      <!-- Карточка: партнёрка -->
       <section class="card-section" id="homeAffiliateCard">
         <div class="card-section-header">
           <h2 class="card-section-title">Партнёрская программа</h2>
@@ -86,13 +83,12 @@
         <div class="card-section-body">
           <div class="home-card-stack">
             <p class="home-card-text">
-              Здесь будут доступны инструменты партнёра, структура и связанные
-              функции.
+              Здесь будут доступны инструменты партнёра, структура и связанные функции.
             </p>
             <button
               type="button"
               class="btn btn-block"
-              onclick="navigateFromHome('partner.html', 'affiliate')"
+              id="openAffiliateButton"
             >
               Открыть партнёрский раздел
             </button>
@@ -102,7 +98,6 @@
     </div>
 
     <script>
-      // Feature flags и модули
       let APPFEATURES = {
         home: true,
         myAgent: true,
@@ -110,61 +105,55 @@
         sharedChat: true,
         affiliate: true,
         payments: true,
-        settings: true,
-        'ai-agent': true,
-        'knowledge-hub': true,
-        'support-desk': true,
-        'media-lab': true,
-        'leader-stage': true,
-        'lead-flow': true,
-        'business-room': true
+        settings: true
       };
 
-      const MODULEMETA = {
-        'ai-agent': {
-          title: 'AI Агент',
-          page: 'modules-agent-profile.html',
-          type: 'required'
-        },
-        'knowledge-hub': {
-          title: 'Knowledge Hub',
-          page: 'modules-knowledge-hub-index.html',
-          type: 'free'
-        },
-        'support-desk': {
-          title: 'Support Desk',
-          page: 'modules-support-desk-index.html',
-          type: 'free'
-        },
-        'media-lab': {
-          title: 'Media Lab',
-          page: 'modules-media-lab-index.html',
-          type: 'paid'
-        },
-        'leader-stage': {
-          title: 'Leader Stage',
-          page: 'modules-leader-stage-index.html',
-          type: 'paid'
-        },
-        'lead-flow': {
-          title: 'Lead Flow',
-          page: 'modules-lead-flow-index.html',
-          type: 'paid'
-        },
-        'business-room': {
-          title: 'Business Room',
-          page: 'modules-business-room-index.html',
-          type: 'paid'
-        }
-      };
+      let TENANTCONFIG = null;
+      let TENANTMODULES = [];
 
       let USERMODULES = [
-        { id: 'ai-agent', visible: true, paid: false, frozen: true, daysLeft: 0 },
-        { id: 'knowledge-hub', visible: true, paid: true, frozen: false, daysLeft: null },
-        { id: 'support-desk', visible: true, paid: true, frozen: false, daysLeft: null },
+        { id: 'ai-agent', visible: true, paid: false, frozen: false, daysLeft: null },
+        { id: 'knowledge-hub', visible: true, paid: false, frozen: false, daysLeft: null },
+        { id: 'support-desk', visible: true, paid: false, frozen: false, daysLeft: null },
         { id: 'media-lab', visible: true, paid: true, frozen: false, daysLeft: 27 },
         { id: 'leader-stage', visible: true, paid: true, frozen: false, daysLeft: 14 }
       ];
+
+      function getTenantConfig() {
+        try {
+          return window.parent?.AICAppShell?.getTenantConfig?.() || null;
+        } catch (error) {
+          console.error('[AI CENTER][Home] tenant config read failed', error);
+          return null;
+        }
+      }
+
+      function getTenantModules() {
+        try {
+          return window.parent?.AICAppShell?.getTenantModules?.() || [];
+        } catch (error) {
+          console.error('[AI CENTER][Home] tenant modules read failed', error);
+          return [];
+        }
+      }
+
+      function getTenantTexts() {
+        return TENANTCONFIG?.texts || {};
+      }
+
+      function getTenantModuleMetaMap() {
+        return TENANTMODULES.reduce((acc, module) => {
+          acc[module.id] = {
+            id: module.id,
+            title: module.titleRu || module.title || module.id,
+            page: module.page,
+            requiresPayment: !!module.requiresPayment,
+            enabled: module.enabled !== false,
+            category: module.category || 'core'
+          };
+          return acc;
+        }, {});
+      }
 
       function navigateFromHome(page, tab) {
         window.parent?.postMessage?.(
@@ -177,29 +166,33 @@
         );
       }
 
-      function getModuleBadge(type) {
-        if (type === 'required') {
-          return { text: 'Обязательный', className: 'required' };
-        }
-        if (type === 'free') {
+      function getModuleBadge(moduleMeta) {
+        if (!moduleMeta.requiresPayment) {
+          if (moduleMeta.category === 'core') {
+            return { text: 'Базовый', className: 'required' };
+          }
           return { text: 'Бесплатный', className: 'free' };
         }
+
         return { text: 'Платный', className: 'paid' };
       }
 
-      function getModuleStatusText(module, meta) {
-        if (meta.type === 'free') {
-          return { text: 'Доступен бесплатно', className: 'is-free' };
+      function getModuleStatusText(module, moduleMeta) {
+        if (!moduleMeta.requiresPayment) {
+          return { text: 'Доступен', className: 'is-free' };
         }
 
         if (module.frozen) {
           const days = typeof module.daysLeft === 'number' ? module.daysLeft : null;
+
           if (days === 0) {
             return { text: 'Пробный период завершён', className: 'is-warning' };
           }
+
           if (days !== null && days > 0) {
             return { text: `Пробный период, осталось ${days} дн.`, className: 'is-warning' };
           }
+
           return { text: 'Пробный период', className: 'is-warning' };
         }
 
@@ -211,13 +204,21 @@
       }
 
       function getVisibleHomeModules() {
+        const moduleMetaMap = getTenantModuleMetaMap();
+
         return USERMODULES.filter((module) => {
           if (!module.visible) return false;
-          const meta = MODULEMETA[module.id];
+
+          const meta = moduleMetaMap[module.id];
           if (!meta) return false;
-          if (APPFEATURES[module.id] === false) return false;
+          if (!meta.enabled) return false;
+          if (APPFEATURES.modules === false) return false;
+
           return true;
-        });
+        }).map((module) => ({
+          ...module,
+          meta: moduleMetaMap[module.id]
+        }));
       }
 
       function renderHomeModules() {
@@ -234,8 +235,8 @@
 
         container.innerHTML = visibleModules
           .map((module) => {
-            const meta = MODULEMETA[module.id];
-            const badge = getModuleBadge(meta.type);
+            const meta = module.meta;
+            const badge = getModuleBadge(meta);
             const status = getModuleStatusText(module, meta);
             const isFrozen = !!module.frozen;
 
@@ -251,7 +252,7 @@
                     type="button"
                     class="btn btn-block home-module-open-btn${isFrozen ? ' disabled' : ''}"
                     ${isFrozen ? 'disabled' : ''}
-                    onclick="${isFrozen ? '' : `navigateFromHome('${meta.page}', 'modules')`}"
+                    data-module-page="${meta.page}"
                   >
                     ${isFrozen ? 'Недоступен' : 'Открыть модуль'}
                   </button>
@@ -260,6 +261,14 @@
             `;
           })
           .join('');
+
+        container.querySelectorAll('[data-module-page]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const page = button.getAttribute('data-module-page');
+            if (!page) return;
+            navigateFromHome(page, 'modules');
+          });
+        });
       }
 
       function applyHomeFeatures(features) {
@@ -267,18 +276,48 @@
 
         const affiliateCard = document.getElementById('homeAffiliateCard');
         if (affiliateCard) {
-          affiliateCard.style.display = APPFEATURES.affiliate ? '' : 'none';
+          affiliateCard.hidden = APPFEATURES.affiliate === false;
         }
 
         const modulesCard = document.getElementById('homeModulesCard');
         if (modulesCard) {
-          modulesCard.style.display = APPFEATURES.modules ? '' : 'none';
+          modulesCard.hidden = APPFEATURES.modules === false;
         }
 
         renderHomeModules();
       }
 
-      // --- Профиль: Telegram + USERPROFILE ---
+      function applyTenantContent() {
+        TENANTCONFIG = getTenantConfig();
+        TENANTMODULES = getTenantModules();
+
+        const texts = getTenantTexts();
+
+        if (texts.appTitle) {
+          document.title = texts.appTitle;
+        }
+
+        const subtitleEl = document.getElementById('homeProfileSubtitle');
+        if (subtitleEl) {
+          subtitleEl.textContent = TENANTCONFIG?.appName || 'Telegram WebApp';
+        }
+
+        const modulesSubtitleEl = document.getElementById('homeModulesSubtitle');
+        if (modulesSubtitleEl) {
+          modulesSubtitleEl.textContent = 'Только активные и доступные модули пользователя';
+        }
+
+        const affiliateCard = document.getElementById('homeAffiliateCard');
+        const sections = TENANTCONFIG?.sections || {};
+        if (affiliateCard) {
+          const affiliateEnabled =
+            APPFEATURES.affiliate !== false &&
+            sections.partnerProgram !== false;
+          affiliateCard.hidden = !affiliateEnabled;
+        }
+
+        renderHomeModules();
+      }
 
       function getTelegramUser() {
         return window.Telegram?.WebApp?.initDataUnsafe?.user || null;
@@ -383,6 +422,7 @@
       document.addEventListener('DOMContentLoaded', () => {
         const allModulesLink = document.getElementById('allModulesLink');
         const paymentLink = document.getElementById('paymentLink');
+        const openAffiliateButton = document.getElementById('openAffiliateButton');
 
         if (allModulesLink) {
           allModulesLink.addEventListener('click', () => {
@@ -396,6 +436,13 @@
           });
         }
 
+        if (openAffiliateButton) {
+          openAffiliateButton.addEventListener('click', () => {
+            navigateFromHome('partner.html', 'affiliate');
+          });
+        }
+
+        applyTenantContent();
         fillTelegramProfile();
         renderHomeModules();
 
