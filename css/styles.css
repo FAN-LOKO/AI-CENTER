@@ -1118,3 +1118,106 @@ body {
 .modules-empty-state {
   text-align: left;
 }
+
+/* =========================================================
+   AUTH / INDEX PAGE
+   Стартовая страница авторизации
+========================================================= */
+
+:root {
+  --tenant-primary: #3b82f6;
+  --tenant-primary-dark: #0b3c78;
+  --tenant-primary-soft: #7ec8ff;
+  --tenant-bg-start: #cfe9ff;
+  --tenant-bg-mid: #7ec8ff;
+  --tenant-bg-accent: #3b82f6;
+  --tenant-bg-end: #0b3c78;
+}
+
+.auth-start-card {
+  overflow: hidden;
+}
+
+.auth-start-header {
+  text-align: center;
+}
+
+.auth-start-title {
+  margin: 0 0 8px;
+  font-size: 60px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.auth-start-line {
+  display: block;
+}
+
+.auth-start-line-light {
+  color: #f9fafb;
+  text-shadow:
+    0 3px 0 rgba(15, 23, 42, 0.9),
+    0 8px 18px rgba(15, 23, 42, 0.7);
+}
+
+.auth-start-line-accent {
+  color: var(--tenant-primary, #3b82f6);
+  text-shadow:
+    0 3px 0 rgba(15, 23, 42, 0.9),
+    0 8px 18px rgba(15, 23, 42, 0.7);
+}
+
+.auth-start-subtitle {
+  margin: 0;
+  font-size: 15px;
+  opacity: 0.95;
+}
+
+.auth-start-note {
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.auth-consent-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+}
+
+.auth-consent-item:last-of-type {
+  margin-bottom: 16px;
+}
+
+.auth-consent-checkbox {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.auth-consent-link {
+  color: var(--tenant-primary, #3b82f6);
+  text-decoration: underline;
+}
+
+.auth-start-button.is-disabled,
+.auth-start-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-start-footnote {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #9ca3af;
+}
