@@ -16,8 +16,17 @@
     return params.get('tenant');
   }
 
-  function getHostname() {
+    function getHostname() {
     return window.location.hostname || '';
+  }
+
+  function getHostDebugContext() {
+    return {
+      hostname: window.location.hostname || '',
+      host: window.location.host || '',
+      origin: window.location.origin || '',
+      search: window.location.search || ''
+    };
   }
 
   function isLocalhostHost(hostname) {
@@ -40,30 +49,67 @@
     return hostMap[hostname] || null;
   }
 
-  function resolveTenantId() {
+    function resolveTenantId() {
     const hostname = getHostname();
     const tenantFromHost = getTenantFromHostname();
+    const tenantFromQuery = getTenantFromQuery();
 
     if (tenantFromHost) {
+      console.info('[AI CENTER][Tenant] source=hostname', {
+        hostname,
+        tenantId: tenantFromHost
+      });
+
       return tenantFromHost;
     }
 
-    if (isLocalhostHost(hostname)) {
-      return getTenantFromQuery() || DEFAULT_TENANT;
+    if (isLocalhostHost(hostname) && tenantFromQuery) {
+      console.info('[AI CENTER][Tenant] source=query', {
+        hostname,
+        tenantId: tenantFromQuery
+      });
+
+      return tenantFromQuery;
     }
+
+    if (!isLocalhostHost(hostname) && tenantFromQuery) {
+      console.warn('[AI CENTER][Tenant] query tenant ignored on non-local host', {
+        hostname,
+        tenantId: tenantFromQuery
+      });
+    }
+
+    if (!isLocalhostHost(hostname) && !tenantFromHost) {
+      console.warn('[AI CENTER][Tenant] hostname is not mapped, fallback tenant used', {
+        hostname,
+        fallbackTenant: DEFAULT_TENANT
+      });
+    }
+
+    console.info('[AI CENTER][Tenant] source=fallback', {
+      hostname,
+      tenantId: DEFAULT_TENANT
+    });
 
     return DEFAULT_TENANT;
   }
-
+  
   /* =========================================================
      TENANT CONFIG LOADING / ЗАГРУЗКА TENANT-КОНФИГА
      Loads tenant JSON configuration from config/tenants/
      Загружает tenant JSON-конфиг из папки config/tenants/
   ========================================================= */
-  async function loadTenantConfig(tenantId) {
+    async function loadTenantConfig(tenantId) {
     const response = await fetch(`config/tenants/${tenantId}.json`, { cache: 'no-store' });
 
     if (!response.ok) {
+      console.error('[AI CENTER][Tenant] config fetch failed', {
+        tenantId,
+        status: response.status,
+        statusText: response.statusText,
+        ...getHostDebugContext()
+      });
+
       throw new Error(`Failed to load tenant config: ${tenantId}`);
     }
 
@@ -155,18 +201,33 @@
   const TenantLoader = {
     config: null,
 
-        async load() {
+            async load() {
       const tenantId = resolveTenantId();
       const config = await loadTenantConfig(tenantId);
 
       this.config = config;
       applyBranding(config);
 
+      console.info('[AI CENTER][Tenant] config loaded', {
+        tenantId: config.tenantId,
+        appName: config.appName,
+        primaryDomain: config.domains?.primary || null
+      });
+
       return config;
     },
 
-    getConfig() {
+        getConfig() {
       return this.config;
+    },
+
+    getDebugContext() {
+      return {
+        resolvedTenantId: this.config?.tenantId || null,
+        hostname: window.location.hostname || '',
+        origin: window.location.origin || '',
+        domains: this.config?.domains || {}
+      };
     },
 
     getDomains() {
