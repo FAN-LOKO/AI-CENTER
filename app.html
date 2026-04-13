@@ -222,5 +222,51 @@
     });
   }
 </script>
+    <script>
+  (async function () {
+    if (!window.AICTenant || !window.AICTenant.load) {
+      console.error('[AI CENTER][Shell] AICTenant is not available');
+      return;
+    }
+
+    try {
+      const config = await window.AICTenant.load();
+      const modules = window.AICTenant.getModules ? window.AICTenant.getModules() : [];
+      const sections = window.AICTenant.getSections ? window.AICTenant.getSections() : {};
+      const plans = window.AICTenant.getPlans ? window.AICTenant.getPlans() : [];
+
+      window.AICAppShell = {
+        navigate(page, tab) {
+          const frame = document.getElementById('pageFrame');
+          if (frame) {
+            frame.src = page;
+          }
+
+          if (tab && window.updateBottomNav) {
+            window.updateBottomNav(tab);
+          }
+        },
+        getCurrentTab: () =>
+          window.currentTab || 'home',
+        getFeatures: () =>
+          (config && config.features) || {},
+        getPageConfig: () =>
+          (typeof window.PAGECONFIG !== 'undefined' ? window.PAGECONFIG : {}),
+        getTenantConfig: () => config,
+        getTenantDomains: () => config.domains || {},
+        getTenantModules: () => modules || [],
+        getTenantPlans: () => plans || [],
+        getTenantSections: () => sections || {}
+      };
+
+      console.info('[AI CENTER][Shell] Tenant loaded in app shell', {
+        tenantId: config.tenantId,
+        modules: modules.length
+      });
+    } catch (error) {
+      console.error('[AI CENTER][Shell] Failed to initialize tenant in app shell', error);
+    }
+  })();
+</script>
   </body>
 </html>
