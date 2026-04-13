@@ -6,29 +6,9 @@
   <title>Модули</title>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/modules.css" />
-  <style>
-    .modules-summary-body {
-      text-align: left;
-    }
-
-    .modules-summary-body .profile-row {
-      align-items: flex-start;
-    }
-
-    .modules-summary-body .profile-label {
-      text-align: left;
-    }
-
-    .modules-summary-body .profile-value {
-      text-align: left;
-      word-break: normal;
-      line-height: 1.45;
-    }
-  </style>
 </head>
 <body>
   <div class="page page-my-agent">
-    <!-- Блок: Заголовок страницы модулей -->
     <section class="card-section">
       <div class="card-section-header">
         <h2 class="card-section-title">Модули сервиса</h2>
@@ -37,7 +17,6 @@
         </p>
       </div>
 
-      <!-- Блок: Краткая информация о доступе к модулям -->
       <div class="card-section-body modules-summary-body">
         <div class="profile-row">
           <span class="profile-label">Доступ</span>
@@ -52,12 +31,10 @@
       </div>
     </section>
 
-    <!-- Блок: Список карточек модулей -->
     <div id="modulesList"></div>
   </div>
 
   <script>
-    // Блок: Источник модулей tenant / Tenant module source
     function getTenantModules() {
       try {
         const shellModules =
@@ -88,12 +65,10 @@
 
     const MODULES = getTenantModules();
 
-    // Блок: Временная модель доступа пользователя / Temporary access model
     const USER_ACCESS = {
       subscriptionActive: true
     };
 
-    // Блок: Открытие модуля или перевод на оплату / Module open or payments redirect
     function openModule(module) {
       const needsPayment = !!module.requiresPayment;
       const hasAccess = !needsPayment || USER_ACCESS.subscriptionActive;
@@ -119,7 +94,6 @@
       }
     }
 
-    // Блок: Закрытие всех раскрытых карточек
     function closeAllModuleCards() {
       document.querySelectorAll(".module-card-expanded.open").forEach((el) => {
         el.classList.remove("open");
@@ -138,7 +112,6 @@
       });
     }
 
-    // Блок: Создание одной карточки модуля
     function createModuleCard(module) {
       const section = document.createElement("section");
       section.className = "card-section module-accordion-card";
@@ -200,7 +173,6 @@
       return section;
     }
 
-    // Блок: Инициализация страницы модулей
     document.addEventListener("DOMContentLoaded", () => {
       const modulesList = document.getElementById("modulesList");
       const subscriptionStatusLabel = document.getElementById("subscriptionStatusLabel");
@@ -215,7 +187,7 @@
         if (!MODULES.length) {
           modulesList.innerHTML = `
             <section class="card-section">
-              <div class="card-section-body">
+              <div class="card-section-body modules-empty-state">
                 <p class="module-card-short-description">
                   Для этого tenant пока не настроен список модулей.
                 </p>
