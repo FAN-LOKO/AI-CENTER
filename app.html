@@ -9,6 +9,8 @@
     <title>AI FIT CENTER</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="css/styles.css" />
+    <script src="js/runtime.js"></script>
+    <script src="js/tenant-loader.js"></script>
   </head>
   <body>
     <div class="screen">
@@ -17,7 +19,7 @@
         <!-- header -->
         <div class="app-header">
           <div class="app-header-left">
-            <span class="app-logo-text">Ai Fit Center</span>
+            <span class="app-logo-text" id="appLogoText">AI CENTER</span>
           </div>
           <div class="app-header-right">
             <button class="icon-button" id="notificationsButton" type="button">
@@ -194,21 +196,21 @@
     </div>
 
     <script>
-      const tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
+      const Runtime = window.AICRuntime;
+      Runtime.ready();
+      Runtime.expand();
 
       const frame = document.getElementById('pageFrame');
       const navBtns = document.querySelectorAll('.nav-btn');
 
-      const APPFEATURES = {
-        home: true,
-        myAgent: true,
-        modules: true,
-        sharedChat: true,
-        affiliate: false,
-        payments: true,
-        settings: true
+        let APPFEATURES = {
+          home: true,
+          myAgent: true,
+          modules: true,
+          sharedChat: true,
+          affiliate: false,
+          payments: true,
+          settings: true
       };
 
       const PAGECONFIG = {
@@ -276,6 +278,36 @@
         }
       }
 
+      document.addEventListener('DOMContentLoaded', async () => {
+  const settingsButton = document.getElementById('settingsButton');
+  const notificationsButton = document.getElementById('notificationsButton');
+
+  try {
+    const tenantConfig = await window.AICTenant.load();
+    APPFEATURES = tenantConfig.features || APPFEATURES;
+  } catch (error) {
+    console.error('Tenant config load failed:', error);
+  }
+
+  updateNavVisibility();
+
+  const initialTab = isTabEnabled('home') ? 'home' : getFallbackTab();
+  navigate(getPageByTab(initialTab), initialTab);
+
+  if (settingsButton) {
+    settingsButton.addEventListener('click', () => {
+      if (!isTabEnabled('settings')) return;
+      navigate(getPageByTab('settings'), 'settings');
+    });
+  }
+
+  if (notificationsButton) {
+    notificationsButton.addEventListener('click', () => {
+      Runtime.hapticNotify('success');
+    });
+  }
+});
+      
       function updateNavVisibility() {
         navBtns.forEach((btn) => {
           const tab = btn.dataset.tab;
@@ -308,9 +340,7 @@
         currentTab = targetTab;
         updateActiveNav();
 
-        if (tg.HapticFeedback && tg.HapticFeedback.selectionChanged) {
-          tg.HapticFeedback.selectionChanged();
-        }
+        Runtime.hapticSelection();
 
         if (currentTab === 'shared-chat') {
           const badge = document.getElementById('sharedChatBadge');
