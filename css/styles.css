@@ -231,10 +231,10 @@ body {
 }
 
 .module-card {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--surface-white-soft);
   border-radius: 14px;
   padding: 16px 18px;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-brand-sm);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   transition: all 0.2s ease;
@@ -244,7 +244,7 @@ body {
 .module-card:hover {
   background: rgba(255, 255, 255, 0.85);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+  box-shadow: var(--shadow-brand-md);
 }
 
 /* Заголовок/подзаголовок/тело карточки */
@@ -255,19 +255,19 @@ body {
 .module-header-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 4px;
 }
 
 .module-header-subtitle {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0;
 }
 
 .module-body {
   font-size: 14px;
-  color: #374151;
+  color: var(--text-body);
 }
 
 /* ============ КНОПКИ .btn (НА БАЗЕ ДОКУМЕНТА) ============ */
@@ -308,7 +308,7 @@ body {
 
 /* Основное действие (оплаты и т.п.) — зелёный градиент */
 .btn-primary {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--brand-success) 0%, var(--brand-success-dark) 100%);
   box-shadow:
     0 4px 12px rgba(16, 185, 129, 0.45),
     0 2px 4px rgba(0, 0, 0, 0.1);
@@ -322,7 +322,7 @@ body {
 
 /* Кнопка выхода / опасного действия — красный градиент */
 .btn-logout {
-  background: linear-gradient(135deg, #f97373 0%, #ef4444 100%);
+  background: linear-gradient(135deg, #f97373 0%, var(--brand-danger) 100%);
   box-shadow:
     0 4px 12px rgba(239, 68, 68, 0.45),
     0 2px 4px rgba(0, 0, 0, 0.1);
@@ -394,8 +394,8 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #0b3c78, #3b82f6);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary));
+  color: var(--brand-text-on-primary);
   border: none;
   cursor: pointer;
   font-family: inherit;
@@ -536,7 +536,7 @@ body {
 }
 
 .icon-svg path {
-  stroke: #ffffff;
+  stroke: var(--brand-text-on-primary);
   fill: none;
   stroke-width: 2;
   stroke-linecap: round;
@@ -787,7 +787,7 @@ body {
   margin: 0;
   font-size: 13px;
   font-weight: 600;
-  color: #2563eb;
+  color: var(--brand-primary);
   cursor: pointer;
   text-decoration: none;
   font-family: inherit;
