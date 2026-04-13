@@ -63,7 +63,19 @@
       }
     }
 
-    const MODULES = getTenantModules();
+    function waitForTenantModules(attempt = 0) {
+      const modules = getTenantModules();
+
+      if (modules.length || attempt >= 20) {
+        return Promise.resolve(modules);
+      }
+
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(waitForTenantModules(attempt + 1));
+        }, 150);
+      });
+    }
 
     const USER_ACCESS = {
       subscriptionActive: true
@@ -173,9 +185,10 @@
       return section;
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
       const modulesList = document.getElementById("modulesList");
       const subscriptionStatusLabel = document.getElementById("subscriptionStatusLabel");
+      const modules = await waitForTenantModules();
 
       if (subscriptionStatusLabel) {
         subscriptionStatusLabel.textContent = USER_ACCESS.subscriptionActive
@@ -184,7 +197,7 @@
       }
 
       if (modulesList) {
-        if (!MODULES.length) {
+        if (!modules.length) {
           modulesList.innerHTML = `
             <section class="card-section">
               <div class="card-section-body modules-empty-state">
@@ -195,7 +208,7 @@
             </section>
           `;
         } else {
-          MODULES.forEach((module) => {
+          modules.forEach((module) => {
             modulesList.appendChild(createModuleCard(module));
           });
         }
