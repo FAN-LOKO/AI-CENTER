@@ -11,7 +11,7 @@
 
   /* =========================================================
      SHELL STATE / СОСТОЯНИЕ SHELL
-     Global shell state: features, page config, active tab, user profile выкл/вкл (false/true)
+     Global shell state: features, page config, active tab, user profile (выкл/вкл страниц (false/true))
      Глобальное состояние shell: фичи, конфиг страниц, активная вкладка, профиль
   ========================================================= */
   let APPFEATURES = {
