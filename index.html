@@ -17,7 +17,7 @@
           <div class="card-section-header auth-start-header">
             <h1 class="card-section-title auth-start-title" id="authStartTitle">
               <span class="auth-start-line auth-start-line-light">AI</span>
-              <span class="auth-start-line auth-start-line-accent" id="authBrandLine">FIT</span>
+              <span class="auth-start-line auth-start-line-accent">FIT</span>
               <span class="auth-start-line auth-start-line-light">CENTER</span>
             </h1>
             <p class="card-section-subtitle auth-start-subtitle" id="authStartSubtitle">
@@ -36,11 +36,12 @@
                 type="checkbox"
                 class="auth-consent-checkbox"
               />
-              <span>
+              <span id="authPrivacyLabelWrap">
                 Согласен с
                 <a
                   href="#"
                   class="auth-consent-link"
+                  id="authPrivacyLink"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -55,7 +56,7 @@
                 type="checkbox"
                 class="auth-consent-checkbox"
               />
-              <span>
+              <span id="authPersonalDataLabel">
                 Согласен с обработкой персональных данных
               </span>
             </label>
@@ -115,13 +116,25 @@
         const tenantFromQuery = getTenantFromQuery();
 
         if (tenantFromHost) {
+          console.info('[AI CENTER][Index] tenant source=hostname', {
+            hostname,
+            tenantId: tenantFromHost
+          });
           return tenantFromHost;
         }
 
         if (isLocalhostHost(hostname) && tenantFromQuery) {
+          console.info('[AI CENTER][Index] tenant source=query', {
+            hostname,
+            tenantId: tenantFromQuery
+          });
           return tenantFromQuery;
         }
 
+        console.info('[AI CENTER][Index] tenant source=fallback', {
+          hostname,
+          tenantId: DEFAULT_TENANT
+        });
         return DEFAULT_TENANT;
       }
 
@@ -131,6 +144,11 @@
         });
 
         if (!response.ok) {
+          console.error('[AI CENTER][Index] tenant config fetch failed', {
+            tenantId,
+            status: response.status,
+            statusText: response.statusText
+          });
           throw new Error(`Failed to load tenant config: ${tenantId}`);
         }
 
@@ -147,11 +165,20 @@
         }
 
         const parts = appName.trim().split(/\s+/);
+
         if (parts.length >= 3) {
           return {
             top: parts[0],
             brand: parts[1],
             bottom: parts.slice(2).join(' ')
+          };
+        }
+
+        if (parts.length === 2) {
+          return {
+            top: parts[0],
+            brand: parts[1],
+            bottom: ''
           };
         }
 
@@ -194,13 +221,17 @@
         if (!config) return;
 
         const texts = config.texts || {};
-        const titleEl = document.getElementById('authStartTitle');
-        const subtitleEl = document.getElementById('authStartSubtitle');
-        const brandLineEl = document.getElementById('authBrandLine');
-        const consentIntroEl = document.getElementById('authConsentIntro');
-        const footnoteEl = document.getElementById('authStartFootnote');
+        const policyLinks = config.policyLinks || {};
 
         document.title = `${config.appName || 'AI CENTER'} — Старт`;
+
+        const titleEl = document.getElementById('authStartTitle');
+        const subtitleEl = document.getElementById('authStartSubtitle');
+        const consentIntroEl = document.getElementById('authConsentIntro');
+        const personalDataLabelEl = document.getElementById('authPersonalDataLabel');
+        const buttonEl = document.getElementById('startButton');
+        const footnoteEl = document.getElementById('authStartFootnote');
+        const privacyLinkEl = document.getElementById('authPrivacyLink');
 
         const titleParts = splitAppName(config.appName || 'AI CENTER');
 
@@ -208,12 +239,8 @@
           titleEl.innerHTML = `
             <span class="auth-start-line auth-start-line-light">${titleParts.top}</span>
             <span class="auth-start-line auth-start-line-accent">${titleParts.brand}</span>
-            <span class="auth-start-line auth-start-line-light">${titleParts.bottom}</span>
+            ${titleParts.bottom ? `<span class="auth-start-line auth-start-line-light">${titleParts.bottom}</span>` : ''}
           `;
-        }
-
-        if (brandLineEl) {
-          brandLineEl.textContent = titleParts.brand;
         }
 
         if (subtitleEl) {
@@ -226,10 +253,26 @@
             'Перед началом работы подтвердите согласие с политикой конфиденциальности и обработкой персональных данных.';
         }
 
+        if (personalDataLabelEl) {
+          personalDataLabelEl.textContent =
+            texts.authPersonalDataLabel ||
+            'Согласен с обработкой персональных данных';
+        }
+
+        if (buttonEl) {
+          buttonEl.textContent = texts.authButton || 'Авторизоваться';
+        }
+
         if (footnoteEl) {
           footnoteEl.textContent =
             texts.authFootnote ||
             'Нажимая «Авторизоваться», вы разрешаете приложению использовать данные вашего Telegram-профиля для авторизации.';
+        }
+
+        if (privacyLinkEl) {
+          privacyLinkEl.textContent =
+            texts.authPrivacyLabel || 'политикой конфиденциальности';
+          privacyLinkEl.href = policyLinks.privacy || '#';
         }
 
         applyTenantTheme(config.theme || null);
