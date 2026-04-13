@@ -28,12 +28,14 @@
   },
   "plans": [],
   "texts": {
-    "home": "Главная",
-    "myAgent": "Мой агент",
-    "sharedChat": "Чат",
-    "modules": "Модули",
-    "affiliate": "Партнер",
-    "payments": "Платежи",
-    "settings": "Настройки"
-  }
+  "appTitle": "AI FIT CENTER",
+  "headerTitle": "AI FIT CENTER",
+  "navHome": "Главная",
+  "navMyAgent": "Агент",
+  "navSharedChat": "Чат",
+  "navModules": "Модули",
+  "navAffiliate": "Партнер",
+  "navPayments": "Платежи",
+  "navSettings": "Настройки"
+}
 }
