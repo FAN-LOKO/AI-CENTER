@@ -11,6 +11,16 @@
     <link rel="stylesheet" href="css/styles.css" />
     <script src="js/runtime.js"></script>
     <script src="js/tenant-loader.js"></script>
+    <!-- =========================================================
+     PWA META / PWA-МЕТА
+     Manifest, theme color and mobile install behavior
+     Manifest, цвет темы и поведение установки на мобильных
+========================================================= -->
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#0b3c78" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="AI FIT CENTER" />
   </head>
   <body>
     <div class="screen">
@@ -198,5 +208,19 @@
 <script src="js/runtime.js"></script>
 <script src="js/tenant-loader.js"></script>
 <script src="js/app-shell.js"></script>
+<script>
+  /* =========================================================
+     SERVICE WORKER REGISTRATION / РЕГИСТРАЦИЯ SERVICE WORKER
+     Registers the service worker in supported browsers
+     Регистрирует service worker в поддерживаемых браузерах
+  ========================================================= */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('./sw.js')
+        .catch((error) => console.error('Service worker registration failed:', error));
+    });
+  }
+</script>
   </body>
 </html>
