@@ -1,0 +1,39 @@
+{
+  "tenantId": "fitline",
+  "brandKey": "fitline",
+  "brandLabel": "FIT",
+  "appName": "AI FIT CENTER",
+  "headerTitle": "AI FIT CENTER",
+  "logoMode": "text",
+  "theme": {
+    "primary": "#3b82f6",
+    "primaryDark": "#0b3c78",
+    "primarySoft": "#7ec8ff",
+    "bgStart": "#cfe9ff",
+    "bgMid": "#7ec8ff",
+    "bgAccent": "#3b82f6",
+    "bgEnd": "#0b3c78"
+  },
+  "features": {
+    "home": true,
+    "myAgent": true,
+    "modules": true,
+    "sharedChat": true,
+    "affiliate": false,
+    "payments": true,
+    "settings": true
+  },
+  "partnerProgram": {
+    "enabled": false
+  },
+  "plans": [],
+  "texts": {
+    "home": "Главная",
+    "myAgent": "Мой агент",
+    "sharedChat": "Чат",
+    "modules": "Модули",
+    "affiliate": "Партнер",
+    "payments": "Платежи",
+    "settings": "Настройки"
+  }
+}
