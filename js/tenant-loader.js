@@ -6,14 +6,53 @@
   ========================================================= */
   const DEFAULT_TENANT = 'fitline';
 
-  /* =========================================================
+    /* =========================================================
      TENANT RESOLUTION / ОПРЕДЕЛЕНИЕ TENANT
-     Resolves tenant id from URL query parameters
-     Определяет tenant id из query-параметров URL
+     Resolves tenant by hostname first, then by query param for dev mode
+     Сначала определяет tenant по hostname, затем по query param для dev-режима
   ========================================================= */
   function getTenantFromQuery() {
     const params = new URLSearchParams(window.location.search);
     return params.get('tenant');
+  }
+
+  function getHostname() {
+    return window.location.hostname || '';
+  }
+
+  function isLocalhostHost(hostname) {
+    return (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0'
+    );
+  }
+
+  function getTenantFromHostname() {
+    const hostname = getHostname();
+
+    const hostMap = {
+      'fit.ai-center.app': 'fitline',
+      'www.fit.ai-center.app': 'fitline',
+      'fitline.local': 'fitline'
+    };
+
+    return hostMap[hostname] || null;
+  }
+
+  function resolveTenantId() {
+    const hostname = getHostname();
+    const tenantFromHost = getTenantFromHostname();
+
+    if (tenantFromHost) {
+      return tenantFromHost;
+    }
+
+    if (isLocalhostHost(hostname)) {
+      return getTenantFromQuery() || DEFAULT_TENANT;
+    }
+
+    return DEFAULT_TENANT;
   }
 
   /* =========================================================
@@ -116,8 +155,8 @@
   const TenantLoader = {
     config: null,
 
-    async load() {
-      const tenantId = getTenantFromQuery() || DEFAULT_TENANT;
+        async load() {
+      const tenantId = resolveTenantId();
       const config = await loadTenantConfig(tenantId);
 
       this.config = config;
@@ -128,6 +167,10 @@
 
     getConfig() {
       return this.config;
+    },
+
+    getDomains() {
+      return this.config?.domains || {};
     },
 
     getFeatures() {
