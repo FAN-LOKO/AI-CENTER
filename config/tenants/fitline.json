@@ -32,7 +32,7 @@
     "settings": true
   },
   "sections": {
-    "partnerProgram": false,
+    "partnerProgram": true,
     "payments": true,
     "moduleCatalog": true
   },
@@ -161,6 +161,11 @@
     "enabled": true
   },
   "plans": [],
+  "policyLinks": {
+    "privacy": "https://fit.ai-center.app/privacy",
+    "personalData": "https://fit.ai-center.app/personal-data",
+    "terms": "https://fit.ai-center.app/terms"
+  },
   "texts": {
     "appTitle": "AI FIT CENTER",
     "headerTitle": "AI FIT CENTER",
@@ -170,6 +175,19 @@
     "navModules": "Модули",
     "navAffiliate": "Партнер",
     "navPayments": "Платежи",
-    "navSettings": "Настройки"
+    "navSettings": "Настройки",
+    "authWelcome": "Добро пожаловать!",
+    "authConsentIntro": "Перед началом работы подтвердите согласие с политикой конфиденциальности и обработкой персональных данных.",
+    "authPrivacyLabel": "Согласен с политикой конфиденциальности",
+    "authPersonalDataLabel": "Согласен с обработкой персональных данных",
+    "authButton": "Авторизоваться",
+    "authFootnote": "Нажимая «Авторизоваться», вы разрешаете приложению использовать данные вашего Telegram-профиля для авторизации.",
+    "authPwaWelcome": "Войдите, чтобы продолжить работу в веб-версии и PWA.",
+    "authOtpTitle": "Подтверждение входа",
+    "authOtpSubtitle": "Введите код, отправленный на email.",
+    "authEmailPlaceholder": "Введите email",
+    "authOtpPlaceholder": "Введите код подтверждения",
+    "authSendCode": "Получить код",
+    "authVerifyCode": "Подтвердить вход"
   }
 }
