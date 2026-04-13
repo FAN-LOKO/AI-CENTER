@@ -55,107 +55,36 @@
   </div>
 
   <script>
-    // Блок: Данные модулей
-    const MODULES = [
-      {
-        id: "ai-agent",
-        title: "AI Agent",
-        titleRu: "Агент с ИИ",
-        shortDescription: "Подключение соцсетей, обработка входящих сообщений и базовая статистика.",
-        fullDescription: [
-          "Подключение соцсетей (Telegram, Instagram, TikTok и др.).",
-          "Готовый ИИ-агент на вашей модели, без настройки API со стороны пользователя.",
-          "Обработка входящих сообщений, первичный рекрутинг и квалификация.",
-          "История диалогов и возможность вмешаться в общение.",
-          "Базовая статистика по диалогам и лидам."
-        ],
-        page: "modules-agent/profile.html"
-      },
-      {
-        id: "media-lab",
-        title: "Media Lab",
-        titleRu: "Медиа-лаборатория",
-        shortDescription: "Создание, публикация и анализ контента.",
-        fullDescription: [
-          "Генерация изображений и каруселей с лицом пользователя и продуктом.",
-          "Готовые сценарии постов, сториз и reels.",
-          "Подбор и адаптация трендовых идей по теме компании и продукта.",
-          "Публикация в несколько соцсетей, отложенный постинг и контент-календарь.",
-          "Анализ вовлечённости и комментариев."
-        ],
-        page: "modules-media-lab/index.html"
-      },
-      {
-        id: "leader-stage",
-        title: "Leader Stage",
-        titleRu: "Сцена лидера",
-        shortDescription: "Инструмент для лидеров и организаторов эфиров.",
-        fullDescription: [
-          "Создание комнат до 500 участников.",
-          "Роли: Organizer, Host, Co-host, Participant.",
-          "Видео, звук, демонстрация экрана и совместное ведение эфира.",
-          "Чат, Q&A, поднятие руки и приглашение на сцену.",
-          "Базовая аналитика по эфиру."
-        ],
-        page: "modules-leader-stage/index.html"
-      },
-      {
-        id: "lead-flow",
-        title: "Lead Flow",
-        titleRu: "Поток лидов",
-        shortDescription: "Мягкое привлечение лидов и трекинг источников.",
-        fullDescription: [
-          "Генерация AI-лендингов и лид-магнитов.",
-          "Формы захвата: квизы, мини-анкеты и выдача материалов.",
-          "Автоматизация первых касаний и реакций.",
-          "Трекинг каналов и атрибуция лидов по источникам.",
-          "Контроль реферальных цепочек и аналитика притока лидов."
-        ],
-        page: "modules-lead-flow/index.html"
-      },
-      {
-        id: "business-room",
-        title: "Business Room",
-        titleRu: "Бизнес-комната",
-        shortDescription: "Управление структурой, динамикой и развитием бизнеса.",
-        fullDescription: [
-          "Сегментация партнёров по рангу, активности и оборотам.",
-          "AI-рассылки и автоворонки: обучение, мотивация, события, реактивация.",
-          "Дерево структуры, отчёты и аналитика роста веток.",
-          "Подсказки лидерам: риски оттока, точки роста, кандидаты в лидеры.",
-          "Лидеборды и чек-листы действий."
-        ],
-        page: "modules-business-room/index.html"
-      },
-      {
-        id: "knowledge-hub",
-        title: "Knowledge Hub",
-        titleRu: "База знаний",
-        shortDescription: "База знаний и обучающая среда.",
-        fullDescription: [
-          "Материалы по продукту, бизнес-модели, скриптам и возражениям.",
-          "Презентации, записи эфиров и обучающие материалы.",
-          "Дорожки обучения: Новичок, Партнёр, Лидер.",
-          "AI-поиск по базе знаний.",
-          "Привязка материалов к другим модулям платформы."
-        ],
-        page: "modules-knowledge-hub/index.html"
-      },
-      {
-        id: "support-desk",
-        title: "Support Desk",
-        titleRu: "Центр поддержки",
-        shortDescription: "Поддержка пользователей и help-центр.",
-        fullDescription: [
-          "Встроенный help-центр с AI-помощником по платформе.",
-          "Создание и отслеживание тикетов.",
-          "Быстрые ответы и инструкции по ключевым вопросам.",
-          "Поддержка по технике, оплатам и интеграциям.",
-          "Канал обратной связи по продукту."
-        ],
-        page: "modules-support-desk/index.html"
-      }
-    ];
+    // Блок: Источник модулей tenant / Tenant module source
+function getTenantModules() {
+  try {
+    const shellModules =
+      window.parent?.AICAppShell?.getTenantModules?.() || [];
+
+    return shellModules
+      .filter((module) => module.enabled)
+      .map((module) => ({
+        id: module.id,
+        title: module.title,
+        titleRu: module.titleRu || module.title,
+        shortDescription:
+          module.shortDescription ||
+          "Описание модуля будет заполнено в tenant-конфиге.",
+        fullDescription:
+          module.fullDescription && module.fullDescription.length
+            ? module.fullDescription
+            : ["Описание модуля будет добавлено позже."],
+        page: module.page,
+        requiresPayment: !!module.requiresPayment,
+        category: module.category || "core"
+      }));
+  } catch (error) {
+    console.error("[AI CENTER][Modules] tenant modules read failed", error);
+    return [];
+  }
+}
+
+const MODULES = getTenantModules();
 
     // Блок: Временная модель доступа пользователя
     const USER_ACCESS = {
