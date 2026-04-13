@@ -238,6 +238,18 @@
       return this.config?.features || {};
     },
 
+    getModules() {
+      return this.config?.modules || [];
+    },
+
+    getSections() {
+      return this.config?.sections || {};
+    },
+
+    getPlans() {
+      return this.config?.plans || [];
+    },
+
     getTexts() {
       return this.config?.texts || {};
     },
