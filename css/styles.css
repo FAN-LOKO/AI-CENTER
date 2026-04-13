@@ -1,3 +1,34 @@
+:root {
+  --brand-primary: #3b82f6;
+  --brand-primary-dark: #0b3c78;
+  --brand-primary-soft: #7ec8ff;
+
+  --brand-bg-start: #cfe9ff;
+  --brand-bg-mid: #7ec8ff;
+  --brand-bg-accent: #3b82f6;
+  --brand-bg-end: #0b3c78;
+
+  --brand-text-on-primary: #ffffff;
+  --brand-danger: #ef4444;
+  --brand-success: #10b981;
+  --brand-success-dark: #059669;
+
+  --surface-white: #ffffff;
+  --surface-white-soft: rgba(255, 255, 255, 0.6);
+  --surface-white-strong: rgba(255, 255, 255, 0.8);
+
+  --text-primary: #1a1a1a;
+  --text-heading: #111827;
+  --text-body: #374151;
+  --text-muted: #6b7280;
+  --text-soft: #4b5563;
+
+  --border-soft: #e5e7eb;
+  --shadow-brand-sm: 0 4px 12px rgba(59, 130, 246, 0.25);
+  --shadow-brand-md: 0 6px 20px rgba(59, 130, 246, 0.35);
+  --shadow-dark-md: 0 6px 20px rgba(15, 23, 42, 0.18);
+}
+
 /* ============ БАЗА ДЛЯ MINIAPP ============ */
 
 html,
@@ -7,10 +38,16 @@ body {
   height: 100%;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", sans-serif;
-  background: linear-gradient(135deg, #cfe9ff, #7ec8ff, #3b82f6, #0b3c78);
+  background: linear-gradient(
+    135deg,
+    var(--brand-bg-start),
+    var(--brand-bg-mid),
+    var(--brand-bg-accent),
+    var(--brand-bg-end)
+  );
   background-attachment: fixed;
   background-size: 200% 200%;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 /* Оболочка miniapp — белая карточка по центру */
@@ -21,7 +58,7 @@ body {
   max-width: 480px;
   width: 100%;
   margin: 0 auto;
-  background: #ffffff;
+  background: var(--surface-white);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border-radius: 24px;
   overflow: hidden;
@@ -111,7 +148,7 @@ body {
   border-radius: 10px;
   transition: all 0.2s;
   font-family: inherit;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 11px;
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -132,13 +169,13 @@ body {
 }
 
 .nav-btn.active {
-  color: #3b82f6;
+  color: var(--brand-primary);
 }
 
 .nav-btn.active svg path,
 .nav-btn.active svg rect,
 .nav-btn.active svg circle {
-  stroke: #3b82f6;
+  stroke: var(--brand-primary);
 }
 
 .nav-btn-icon-wrapper {
@@ -167,19 +204,19 @@ body {
 /* ============ КАРТОЧКИ (ИЗ screen0.css) ============ */
 
 .card {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--surface-white-soft);
   border-radius: 12px;
   padding: 16px 18px;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-brand-sm);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition: all 0.2s ease;
 }
 
 .card:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface-white-strong);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+  box-shadow: var(--shadow-brand-md);
 }
 
 /* Профиль и модуль как частные случаи карточки */
@@ -240,8 +277,8 @@ body {
   display: block;
   width: 100%;
   padding: 10px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-dark) 100%);
+  color: var(--brand-text-on-primary);
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -315,8 +352,8 @@ body {
 
 /* Синий заголовок карточки */
 .card-section-header {
-  background: linear-gradient(135deg, #0b3c78, #3b82f6);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary));
+  color: var(--brand-text-on-primary);
   padding: 12px 16px;
 }
 
@@ -404,9 +441,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #0b3c78, #3b82f6); /* как card-section-header */
-  color: #ffffff;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);        /* как у card-section */
+  background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary));
+  color: var(--brand-text-on-primary);
+  box-shadow: var(--shadow-dark-md);
 }
 
 .app-logo-text {
