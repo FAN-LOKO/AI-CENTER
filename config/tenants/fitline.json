@@ -3,6 +3,14 @@
   "brandKey": "fitline",
   "brandLabel": "FIT",
   "appName": "AI FIT CENTER",
+  "domains": {
+  "primary": "fit.ai-center.app",
+  "aliases": [
+  "www.fit.ai-center.app",
+  "fitline.local",
+  "localhost"
+    ]
+  },
   "headerTitle": "AI FIT CENTER",
   "logoMode": "text",
   "theme": {
