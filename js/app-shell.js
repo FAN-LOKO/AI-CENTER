@@ -11,7 +11,7 @@
 
   /* =========================================================
      SHELL STATE / СОСТОЯНИЕ SHELL
-     Global shell state: features, page config, active tab, user profile
+     Global shell state: features, page config, active tab, user profile выкл/вкл (false/true)
      Глобальное состояние shell: фичи, конфиг страниц, активная вкладка, профиль
   ========================================================= */
   let APPFEATURES = {
@@ -19,7 +19,7 @@
     myAgent: true,
     modules: true,
     sharedChat: true,
-    affiliate: false,
+    affiliate: true,
     payments: true,
     settings: true
   };
