@@ -1091,3 +1091,30 @@ body {
 .settings-info-value {
   color: #111827;
 }
+
+/* =========================================================
+   MODULES PAGE / SUMMARY + EMPTY STATE
+   Общие стили страницы modules.html без inline-styles
+========================================================= */
+
+.modules-summary-body {
+  text-align: left;
+}
+
+.modules-summary-body .profile-row {
+  align-items: flex-start;
+}
+
+.modules-summary-body .profile-label {
+  text-align: left;
+}
+
+.modules-summary-body .profile-value {
+  text-align: left;
+  word-break: normal;
+  line-height: 1.45;
+}
+
+.modules-empty-state {
+  text-align: left;
+}
