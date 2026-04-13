@@ -51,20 +51,60 @@
   }
 
   /* =========================================================
+     TEXT APPLICATION / ПРИМЕНЕНИЕ ТЕКСТОВ
+     Applies tenant texts to shell title, header and navigation labels
+     Применяет tenant-тексты к title, header и подписям навигации
+  ========================================================= */
+  function applyTexts(texts, fallbackAppName) {
+    if (!texts) return;
+
+    document.title = texts.appTitle || fallbackAppName || 'AI CENTER';
+
+    const logoText = document.getElementById('appLogoText');
+    if (logoText) {
+      logoText.textContent = texts.headerTitle || fallbackAppName || 'AI CENTER';
+    }
+
+    const navLabelHome = document.getElementById('navLabelHome');
+    if (navLabelHome && texts.navHome) {
+      navLabelHome.textContent = texts.navHome;
+    }
+
+    const navLabelMyAgent = document.getElementById('navLabelMyAgent');
+    if (navLabelMyAgent && texts.navMyAgent) {
+      navLabelMyAgent.textContent = texts.navMyAgent;
+    }
+
+    const navLabelSharedChat = document.getElementById('navLabelSharedChat');
+    if (navLabelSharedChat && texts.navSharedChat) {
+      navLabelSharedChat.textContent = texts.navSharedChat;
+    }
+
+    const navLabelModules = document.getElementById('navLabelModules');
+    if (navLabelModules && texts.navModules) {
+      navLabelModules.textContent = texts.navModules;
+    }
+
+    const navLabelAffiliate = document.getElementById('navLabelAffiliate');
+    if (navLabelAffiliate && texts.navAffiliate) {
+      navLabelAffiliate.textContent = texts.navAffiliate;
+    }
+
+    const navLabelPayments = document.getElementById('navLabelPayments');
+    if (navLabelPayments && texts.navPayments) {
+      navLabelPayments.textContent = texts.navPayments;
+    }
+  }
+
+  /* =========================================================
      BRANDING APPLICATION / ПРИМЕНЕНИЕ БРЕНДИНГА
-     Applies tenant title, header title and theme to app shell
-     Применяет tenant title, заголовок header и тему к shell приложения
+     Applies title, shell texts and theme to app shell
+     Применяет title, shell-тексты и тему к shell приложения
   ========================================================= */
   function applyBranding(config) {
     if (!config) return;
 
-    document.title = config.appName || 'AI CENTER';
-
-    const logoText = document.getElementById('appLogoText');
-    if (logoText) {
-      logoText.textContent = config.headerTitle || config.appName || 'AI CENTER';
-    }
-
+    applyTexts(config.texts, config.appName || 'AI CENTER');
     applyTheme(config.theme);
   }
 
