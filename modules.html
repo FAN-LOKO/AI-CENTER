@@ -86,33 +86,36 @@ function getTenantModules() {
 
 const MODULES = getTenantModules();
 
-    // Блок: Временная модель доступа пользователя
-    const USER_ACCESS = {
-      subscriptionActive: true
-    };
+    // Блок: Временная модель доступа пользователя / Temporary access model
+const USER_ACCESS = {
+  subscriptionActive: true
+};
 
-    // Блок: Открытие модуля или перевод на оплату
-    function openModule(modulePage) {
-      if (USER_ACCESS.subscriptionActive) {
-        window.parent?.postMessage?.(
-          {
-            type: "navigate",
-            page: modulePage,
-            tab: "modules"
-          },
-          "*"
-        );
-      } else {
-        window.parent?.postMessage?.(
-          {
-            type: "navigate",
-            page: "payment.html",
-            tab: "payments"
-          },
-          "*"
-        );
-      }
-    }
+    // Блок: Открытие модуля или перевод на оплату / Module open or payments redirect
+function openModule(module) {
+  const needsPayment = !!module.requiresPayment;
+  const hasAccess = !needsPayment || USER_ACCESS.subscriptionActive;
+
+  if (hasAccess) {
+    window.parent?.postMessage?.(
+      {
+        type: "navigate",
+        page: module.page,
+        tab: "modules"
+      },
+      "*"
+    );
+  } else {
+    window.parent?.postMessage?.(
+      {
+        type: "navigate",
+        page: "payments.html",
+        tab: "payments"
+      },
+      "*"
+    );
+  }
+}
 
     // Блок: Закрытие всех раскрытых карточек
     function closeAllModuleCards() {
@@ -190,9 +193,9 @@ const MODULES = getTenantModules();
       });
 
       openBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        openModule(module.page);
-      });
+  e.stopPropagation();
+  openModule(module);
+});
 
       return section;
     }
@@ -203,16 +206,28 @@ const MODULES = getTenantModules();
       const subscriptionStatusLabel = document.getElementById("subscriptionStatusLabel");
 
       if (subscriptionStatusLabel) {
-        subscriptionStatusLabel.textContent = USER_ACCESS.subscriptionActive
-          ? "Подписка активна"
-          : "Подписка не активна";
-      }
+  subscriptionStatusLabel.textContent = USER_ACCESS.subscriptionActive
+    ? "Платные модули доступны"
+    : "Доступ только к базовым модулям";
+}
 
       if (modulesList) {
-        MODULES.forEach((module) => {
-          modulesList.appendChild(createModuleCard(module));
-        });
-      }
+  if (!MODULES.length) {
+    modulesList.innerHTML = `
+      <section class="card-section">
+        <div class="card-section-body">
+          <p class="module-card-short-description">
+            Для этого tenant пока не настроен список модулей.
+          </p>
+        </div>
+      </section>
+    `;
+  } else {
+    MODULES.forEach((module) => {
+      modulesList.appendChild(createModuleCard(module));
+    });
+  }
+}
     });
   </script>
 </body>
