@@ -1,9 +1,19 @@
 (function () {
+  /* =========================================================
+     SHELL DEPENDENCIES / ЗАВИСИМОСТИ SHELL
+     Runtime adapter, iframe reference, navigation buttons
+     Runtime-адаптер, iframe-контейнер, кнопки навигации
+  ========================================================= */
   const Runtime = window.AICRuntime;
 
   const frame = document.getElementById('pageFrame');
   const navBtns = document.querySelectorAll('.nav-btn');
 
+  /* =========================================================
+     SHELL STATE / СОСТОЯНИЕ SHELL
+     Global shell state: features, page config, active tab, user profile
+     Глобальное состояние shell: фичи, конфиг страниц, активная вкладка, профиль
+  ========================================================= */
   let APPFEATURES = {
     home: true,
     myAgent: true,
@@ -18,6 +28,11 @@
   let currentTab = 'home';
   let USERPROFILE = null;
 
+  /* =========================================================
+     PAGE CONFIGURATION / КОНФИГУРАЦИЯ СТРАНИЦ
+     Maps shell tabs to internal page files and feature access
+     Связывает tab shell с файлами страниц и доступностью по feature flags
+  ========================================================= */
   function buildPageConfig() {
     PAGECONFIG = {
       home: { page: 'home.html', enabled: APPFEATURES.home },
@@ -33,6 +48,11 @@
     };
   }
 
+  /* =========================================================
+     NAVIGATION HELPERS / ВСПОМОГАТЕЛЬНАЯ ЛОГИКА НАВИГАЦИИ
+     Checks tab availability, resolves fallback tab, maps tab <-> page
+     Проверяет доступность вкладок, определяет fallback, сопоставляет tab <-> page
+  ========================================================= */
   function isTabEnabled(tab) {
     return !!PAGECONFIG[tab] && !!PAGECONFIG[tab].enabled;
   }
@@ -54,6 +74,11 @@
     return null;
   }
 
+  /* =========================================================
+     SHELL -> PAGE MESSAGING / СООБЩЕНИЯ ОТ SHELL К СТРАНИЦАМ
+     Sends profile and feature flags into iframe pages
+     Отправляет профиль и feature flags во внутренние iframe-страницы
+  ========================================================= */
   function sendUserProfileToFrame() {
     if (!frame || !frame.contentWindow || !USERPROFILE) return;
 
@@ -82,6 +107,11 @@
     }
   }
 
+  /* =========================================================
+     SHELL UI STATE / UI-СОСТОЯНИЕ SHELL
+     Controls nav visibility, active nav state, unread badge state
+     Управляет видимостью навигации, активной вкладкой и unread badge
+  ========================================================= */
   function updateNavVisibility() {
     navBtns.forEach((btn) => {
       const tab = btn.dataset.tab;
@@ -103,6 +133,11 @@
     }
   }
 
+  /* =========================================================
+     NAVIGATION ACTIONS / ДЕЙСТВИЯ НАВИГАЦИИ
+     Main navigate action used by shell buttons and page messages
+     Основная функция навигации для shell-кнопок и сообщений со страниц
+  ========================================================= */
   function navigate(page, tab) {
     let targetTab = tab || getTabByPage(page) || currentTab;
 
@@ -128,6 +163,11 @@
     setTimeout(sendFeaturesToFrame, 150);
   }
 
+  /* =========================================================
+     NAV BUTTON BINDINGS / ПРИВЯЗКА КНОПОК НАВИГАЦИИ
+     Handles clicks on bottom navigation buttons
+     Обрабатывает клики по кнопкам нижней навигации
+  ========================================================= */
   function bindNavButtons() {
     navBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -140,6 +180,11 @@
     });
   }
 
+  /* =========================================================
+     SHELL HEADER ACTIONS / ДЕЙСТВИЯ HEADER В SHELL
+     Handles header buttons such as settings and notifications
+     Обрабатывает кнопки header, например settings и notifications
+  ========================================================= */
   function bindShellButtons() {
     const settingsButton = document.getElementById('settingsButton');
     const notificationsButton = document.getElementById('notificationsButton');
@@ -158,6 +203,11 @@
     }
   }
 
+  /* =========================================================
+     MESSAGE BUS / ШИНА СООБЩЕНИЙ
+     Receives messages from inner pages and routes shell actions
+     Принимает сообщения от внутренних страниц и запускает действия shell
+  ========================================================= */
   function bindMessageBus() {
     window.addEventListener('message', (e) => {
       const data = e.data;
@@ -214,6 +264,11 @@
     });
   }
 
+  /* =========================================================
+     BOOTSTRAP / ИНИЦИАЛИЗАЦИЯ
+     Initializes runtime, loads tenant config, builds shell and opens first page
+     Инициализирует runtime, загружает tenant-конфиг, собирает shell и открывает первую страницу
+  ========================================================= */
   async function bootstrap() {
     Runtime.ready();
     Runtime.expand();
@@ -237,6 +292,11 @@
 
   document.addEventListener('DOMContentLoaded', bootstrap);
 
+  /* =========================================================
+     PUBLIC SHELL API / ПУБЛИЧНОЕ API SHELL
+     Exposes minimal shell API for debugging and future integrations
+     Открывает минимальное API shell для отладки и будущих интеграций
+  ========================================================= */
   window.AICAppShell = {
     navigate,
     getCurrentTab: () => currentTab,
