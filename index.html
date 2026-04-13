@@ -2,7 +2,7 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <title>AI FIT CENTER — Старт</title>
+    <title>AI CENTER — Старт</title>
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
@@ -13,171 +13,64 @@
   <body>
     <div class="screen">
       <div class="page">
-        <!-- Стартовая карточка авторизации -->
-        <section class="card-section">
-          <div class="card-section-header" style="text-align:center;">
-  <h1
-    class="card-section-title"
-    style="
-      font-size: 60px;
-      font-weight: 800;
-      line-height: 1.05;
-      text-transform: uppercase;
-      margin: 0 0 8px;
-    "
-  >
-    <!-- AI -->
-    <span
-      style="
-        display:block;
-        color:#f9fafb;
-        text-shadow:
-          0 3px 0 rgba(15,23,42,0.9),
-          0 8px 18px rgba(15,23,42,0.7);
-      "
-    >
-      AI
-    </span>
-
-    <!-- FIT (алый) -->
-    <span
-      style="
-        display:block;
-        color:#ef4444; /* приятный алый */
-        text-shadow:
-          0 3px 0 rgba(15,23,42,0.9),
-          0 8px 18px rgba(15,23,42,0.7);
-      "
-    >
-      FIT
-    </span>
-
-    <!-- CENTER -->
-    <span
-      style="
-        display:block;
-        color:#f9fafb;
-        text-shadow:
-          0 3px 0 rgba(15,23,42,0.9),
-          0 8px 18px rgba(15,23,42,0.7);
-      "
-    >
-      CENTER
-    </span>
-  </h1>
-
-  <p
-    class="card-section-subtitle"
-    style="
-      margin: 0;
-      font-size: 15px;
-      opacity: 0.95;
-    "
-  >
-    Добро пожаловать!
-  </p>
-</div>
-
+        <section class="card-section auth-start-card">
+          <div class="card-section-header auth-start-header">
+            <h1 class="card-section-title auth-start-title" id="authStartTitle">
+              <span class="auth-start-line auth-start-line-light">AI</span>
+              <span class="auth-start-line auth-start-line-accent" id="authBrandLine">FIT</span>
+              <span class="auth-start-line auth-start-line-light">CENTER</span>
+            </h1>
+            <p class="card-section-subtitle auth-start-subtitle" id="authStartSubtitle">
+              Добро пожаловать!
+            </p>
+          </div>
 
           <div class="card-section-body">
-            <div
-              style="
-                font-size: 13px;
-                color: #6b7280;
-                margin-bottom: 14px;
-              "
-            >
-              Перед началом работы подтвердите согласие с политикой
-              конфиденциальности и обработкой персональных данных.
+            <div class="auth-start-note" id="authConsentIntro">
+              Перед началом работы подтвердите согласие с политикой конфиденциальности и обработкой персональных данных.
             </div>
 
-            <!-- Чекбоксы согласий -->
-            <label
-              style="
-                display: flex;
-                align-items: flex-start;
-                gap: 10px;
-                padding: 10px 12px;
-                border-radius: 10px;
-                background: rgba(255, 255, 255, 0.9);
-                box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
-                margin-bottom: 10px;
-                cursor: pointer;
-                font-size: 13px;
-                color: #374151;
-              "
-            >
+            <label class="auth-consent-item" for="privacyCheckbox">
               <input
                 id="privacyCheckbox"
                 type="checkbox"
-                style="
-                  margin-top: 2px;
-                  width: 18px;
-                  height: 18px;
-                  cursor: pointer;
-                "
+                class="auth-consent-checkbox"
               />
               <span>
                 Согласен с
                 <a
                   href="#"
-                  style="color:#3b82f6; text-decoration: underline;"
+                  class="auth-consent-link"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   политикой конфиденциальности
                 </a>
               </span>
             </label>
 
-            <label
-              style="
-                display: flex;
-                align-items: flex-start;
-                gap: 10px;
-                padding: 10px 12px;
-                border-radius: 10px;
-                background: rgba(255, 255, 255, 0.9);
-                box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
-                margin-bottom: 16px;
-                cursor: pointer;
-                font-size: 13px;
-                color: #374151;
-              "
-            >
+            <label class="auth-consent-item" for="dataCheckbox">
               <input
                 id="dataCheckbox"
                 type="checkbox"
-                style="
-                  margin-top: 2px;
-                  width: 18px;
-                  height: 18px;
-                  cursor: pointer;
-                "
+                class="auth-consent-checkbox"
               />
               <span>
                 Согласен с обработкой персональных данных
               </span>
             </label>
 
-            <!-- Кнопка авторизации -->
             <button
               id="startButton"
-              class="btn btn-primary btn-block"
+              class="btn btn-primary btn-block auth-start-button"
+              type="button"
               disabled
-              style="opacity: 0.5; cursor: not-allowed;"
             >
               Авторизоваться
             </button>
 
-            <div
-              style="
-                margin-top: 10px;
-                font-size: 11px;
-                color: #9ca3af;
-              "
-            >
-              Нажимая «Авторизоваться», вы разрешаете приложению использовать
-              данные вашего Telegram‑профиля для авторизации.
+            <div class="auth-start-footnote" id="authStartFootnote">
+              Нажимая «Авторизоваться», вы разрешаете приложению использовать данные вашего Telegram-профиля для авторизации.
             </div>
           </div>
         </section>
@@ -185,42 +78,207 @@
     </div>
 
     <script>
+      const DEFAULT_TENANT = 'fitline';
+
+      function getTenantFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('tenant');
+      }
+
+      function getHostname() {
+        return window.location.hostname || '';
+      }
+
+      function isLocalhostHost(hostname) {
+        return (
+          hostname === 'localhost' ||
+          hostname === '127.0.0.1' ||
+          hostname === '0.0.0.0'
+        );
+      }
+
+      function getTenantFromHostname() {
+        const hostname = getHostname();
+
+        const hostMap = {
+          'fit.ai-center.app': 'fitline',
+          'www.fit.ai-center.app': 'fitline',
+          'fitline.local': 'fitline'
+        };
+
+        return hostMap[hostname] || null;
+      }
+
+      function resolveTenantId() {
+        const hostname = getHostname();
+        const tenantFromHost = getTenantFromHostname();
+        const tenantFromQuery = getTenantFromQuery();
+
+        if (tenantFromHost) {
+          return tenantFromHost;
+        }
+
+        if (isLocalhostHost(hostname) && tenantFromQuery) {
+          return tenantFromQuery;
+        }
+
+        return DEFAULT_TENANT;
+      }
+
+      async function loadTenantConfig(tenantId) {
+        const response = await fetch(`config/tenants/${tenantId}.json`, {
+          cache: 'no-store'
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load tenant config: ${tenantId}`);
+        }
+
+        return response.json();
+      }
+
+      function splitAppName(appName) {
+        if (!appName || typeof appName !== 'string') {
+          return {
+            top: 'AI',
+            brand: 'FIT',
+            bottom: 'CENTER'
+          };
+        }
+
+        const parts = appName.trim().split(/\s+/);
+        if (parts.length >= 3) {
+          return {
+            top: parts[0],
+            brand: parts[1],
+            bottom: parts.slice(2).join(' ')
+          };
+        }
+
+        return {
+          top: 'AI',
+          brand: appName.trim(),
+          bottom: 'CENTER'
+        };
+      }
+
+      function applyTenantTheme(theme) {
+        if (!theme) return;
+
+        const root = document.documentElement;
+
+        if (theme.primary) {
+          root.style.setProperty('--tenant-primary', theme.primary);
+        }
+        if (theme.primaryDark) {
+          root.style.setProperty('--tenant-primary-dark', theme.primaryDark);
+        }
+        if (theme.primarySoft) {
+          root.style.setProperty('--tenant-primary-soft', theme.primarySoft);
+        }
+        if (theme.bgStart) {
+          root.style.setProperty('--tenant-bg-start', theme.bgStart);
+        }
+        if (theme.bgMid) {
+          root.style.setProperty('--tenant-bg-mid', theme.bgMid);
+        }
+        if (theme.bgAccent) {
+          root.style.setProperty('--tenant-bg-accent', theme.bgAccent);
+        }
+        if (theme.bgEnd) {
+          root.style.setProperty('--tenant-bg-end', theme.bgEnd);
+        }
+      }
+
+      function applyTenantContent(config) {
+        if (!config) return;
+
+        const texts = config.texts || {};
+        const titleEl = document.getElementById('authStartTitle');
+        const subtitleEl = document.getElementById('authStartSubtitle');
+        const brandLineEl = document.getElementById('authBrandLine');
+        const consentIntroEl = document.getElementById('authConsentIntro');
+        const footnoteEl = document.getElementById('authStartFootnote');
+
+        document.title = `${config.appName || 'AI CENTER'} — Старт`;
+
+        const titleParts = splitAppName(config.appName || 'AI CENTER');
+
+        if (titleEl) {
+          titleEl.innerHTML = `
+            <span class="auth-start-line auth-start-line-light">${titleParts.top}</span>
+            <span class="auth-start-line auth-start-line-accent">${titleParts.brand}</span>
+            <span class="auth-start-line auth-start-line-light">${titleParts.bottom}</span>
+          `;
+        }
+
+        if (brandLineEl) {
+          brandLineEl.textContent = titleParts.brand;
+        }
+
+        if (subtitleEl) {
+          subtitleEl.textContent = texts.authWelcome || 'Добро пожаловать!';
+        }
+
+        if (consentIntroEl) {
+          consentIntroEl.textContent =
+            texts.authConsentIntro ||
+            'Перед началом работы подтвердите согласие с политикой конфиденциальности и обработкой персональных данных.';
+        }
+
+        if (footnoteEl) {
+          footnoteEl.textContent =
+            texts.authFootnote ||
+            'Нажимая «Авторизоваться», вы разрешаете приложению использовать данные вашего Telegram-профиля для авторизации.';
+        }
+
+        applyTenantTheme(config.theme || null);
+      }
+
+      function buildAppUrl() {
+        const search = window.location.search || '';
+        return `app.html${search}`;
+      }
+
       const tg = window.Telegram && window.Telegram.WebApp;
       if (tg && tg.ready) {
         tg.ready();
         tg.expand();
       }
 
-      const privacyCheckbox = document.getElementById("privacyCheckbox");
-      const dataCheckbox = document.getElementById("dataCheckbox");
-      const startButton = document.getElementById("startButton");
+      const privacyCheckbox = document.getElementById('privacyCheckbox');
+      const dataCheckbox = document.getElementById('dataCheckbox');
+      const startButton = document.getElementById('startButton');
 
       function updateButtonState() {
-        const enabled =
-          privacyCheckbox.checked && dataCheckbox.checked;
-
+        const enabled = privacyCheckbox.checked && dataCheckbox.checked;
         startButton.disabled = !enabled;
-        if (enabled) {
-          startButton.style.opacity = "1";
-          startButton.style.cursor = "pointer";
-        } else {
-          startButton.style.opacity = "0.5";
-          startButton.style.cursor = "not-allowed";
-        }
+        startButton.classList.toggle('is-disabled', !enabled);
       }
 
-      privacyCheckbox.addEventListener("change", updateButtonState);
-      dataCheckbox.addEventListener("change", updateButtonState);
+      privacyCheckbox.addEventListener('change', updateButtonState);
+      dataCheckbox.addEventListener('change', updateButtonState);
 
-      startButton.addEventListener("click", function () {
+      startButton.addEventListener('click', function () {
         if (startButton.disabled) return;
 
         if (tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
-          tg.HapticFeedback.impactOccurred("medium");
+          tg.HapticFeedback.impactOccurred('medium');
         }
 
-        // Переход в основную оболочку miniapp
-        window.location.href = "app.html";
+        window.location.href = buildAppUrl();
+      });
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        updateButtonState();
+
+        try {
+          const tenantId = resolveTenantId();
+          const tenantConfig = await loadTenantConfig(tenantId);
+          applyTenantContent(tenantConfig);
+        } catch (error) {
+          console.error('[AI CENTER][Index] tenant config load failed', error);
+        }
       });
     </script>
   </body>
