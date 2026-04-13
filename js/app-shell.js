@@ -297,10 +297,15 @@
      Exposes minimal shell API for debugging and future integrations
      Открывает минимальное API shell для отладки и будущих интеграций
   ========================================================= */
-  window.AICAppShell = {
+    window.AICAppShell = {
     navigate,
     getCurrentTab: () => currentTab,
     getFeatures: () => APPFEATURES,
-    getPageConfig: () => PAGECONFIG
+    getPageConfig: () => PAGECONFIG,
+    getTenantConfig: () => (window.AICTenant ? window.AICTenant.getConfig() : null),
+    getTenantDomains: () => (window.AICTenant ? window.AICTenant.getDomains() : {}),
+    getTenantModules: () => (window.AICTenant ? window.AICTenant.getModules() : []),
+    getTenantPlans: () => (window.AICTenant ? window.AICTenant.getPlans() : []),
+    getTenantSections: () => (window.AICTenant ? window.AICTenant.getSections() : {})
   };
 })();
