@@ -41,11 +41,13 @@
       <div class="card-section-body modules-summary-body">
         <div class="profile-row">
           <span class="profile-label">Доступ</span>
-          <span class="profile-value" id="subscriptionStatusLabel">Проверка подписки...</span>
+          <span class="profile-value" id="subscriptionStatusLabel">Проверка доступа...</span>
         </div>
         <div class="profile-row">
           <span class="profile-label">Открытие модулей</span>
-          <span class="profile-value">При активной подписке открывается модуль, без подписки пользователь переводится на страницу оплаты.</span>
+          <span class="profile-value">
+            Базовые модули открываются сразу. Платные модули требуют активного доступа и при его отсутствии переводят пользователя на страницу оплаты.
+          </span>
         </div>
       </div>
     </section>
@@ -56,66 +58,66 @@
 
   <script>
     // Блок: Источник модулей tenant / Tenant module source
-function getTenantModules() {
-  try {
-    const shellModules =
-      window.parent?.AICAppShell?.getTenantModules?.() || [];
+    function getTenantModules() {
+      try {
+        const shellModules =
+          window.parent?.AICAppShell?.getTenantModules?.() || [];
 
-    return shellModules
-      .filter((module) => module.enabled)
-      .map((module) => ({
-        id: module.id,
-        title: module.title,
-        titleRu: module.titleRu || module.title,
-        shortDescription:
-          module.shortDescription ||
-          "Описание модуля будет заполнено в tenant-конфиге.",
-        fullDescription:
-          module.fullDescription && module.fullDescription.length
-            ? module.fullDescription
-            : ["Описание модуля будет добавлено позже."],
-        page: module.page,
-        requiresPayment: !!module.requiresPayment,
-        category: module.category || "core"
-      }));
-  } catch (error) {
-    console.error("[AI CENTER][Modules] tenant modules read failed", error);
-    return [];
-  }
-}
+        return shellModules
+          .filter((module) => module.enabled)
+          .map((module) => ({
+            id: module.id,
+            title: module.title,
+            titleRu: module.titleRu || module.title,
+            shortDescription:
+              module.shortDescription ||
+              "Описание модуля будет заполнено в tenant-конфиге.",
+            fullDescription:
+              module.fullDescription && module.fullDescription.length
+                ? module.fullDescription
+                : ["Описание модуля будет добавлено позже."],
+            page: module.page,
+            requiresPayment: !!module.requiresPayment,
+            category: module.category || "core"
+          }));
+      } catch (error) {
+        console.error("[AI CENTER][Modules] tenant modules read failed", error);
+        return [];
+      }
+    }
 
-const MODULES = getTenantModules();
+    const MODULES = getTenantModules();
 
     // Блок: Временная модель доступа пользователя / Temporary access model
-const USER_ACCESS = {
-  subscriptionActive: true
-};
+    const USER_ACCESS = {
+      subscriptionActive: true
+    };
 
     // Блок: Открытие модуля или перевод на оплату / Module open or payments redirect
-function openModule(module) {
-  const needsPayment = !!module.requiresPayment;
-  const hasAccess = !needsPayment || USER_ACCESS.subscriptionActive;
+    function openModule(module) {
+      const needsPayment = !!module.requiresPayment;
+      const hasAccess = !needsPayment || USER_ACCESS.subscriptionActive;
 
-  if (hasAccess) {
-    window.parent?.postMessage?.(
-      {
-        type: "navigate",
-        page: module.page,
-        tab: "modules"
-      },
-      "*"
-    );
-  } else {
-    window.parent?.postMessage?.(
-      {
-        type: "navigate",
-        page: "payments.html",
-        tab: "payments"
-      },
-      "*"
-    );
-  }
-}
+      if (hasAccess) {
+        window.parent?.postMessage?.(
+          {
+            type: "navigate",
+            page: module.page,
+            tab: "modules"
+          },
+          "*"
+        );
+      } else {
+        window.parent?.postMessage?.(
+          {
+            type: "navigate",
+            page: "payments.html",
+            tab: "payments"
+          },
+          "*"
+        );
+      }
+    }
 
     // Блок: Закрытие всех раскрытых карточек
     function closeAllModuleCards() {
@@ -140,7 +142,6 @@ function openModule(module) {
     function createModuleCard(module) {
       const section = document.createElement("section");
       section.className = "card-section module-accordion-card";
-
       section.innerHTML = `
         <div class="card-section-header module-card-header">
           <button class="module-card-toggle" type="button" aria-expanded="false">
@@ -156,10 +157,10 @@ function openModule(module) {
 
         <div class="card-section-body module-card-main">
           <p class="module-card-short-description">${module.shortDescription}</p>
-
           <button
             class="btn btn-block"
             type="button"
+            data-module-id="${module.id}"
             data-module-page="${module.page}"
           >
             Открыть модуль
@@ -181,7 +182,6 @@ function openModule(module) {
 
       toggleBtn.addEventListener("click", () => {
         const isOpen = expandedBody.classList.contains("open");
-
         closeAllModuleCards();
 
         if (!isOpen) {
@@ -193,9 +193,9 @@ function openModule(module) {
       });
 
       openBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  openModule(module);
-});
+        e.stopPropagation();
+        openModule(module);
+      });
 
       return section;
     }
@@ -206,28 +206,28 @@ function openModule(module) {
       const subscriptionStatusLabel = document.getElementById("subscriptionStatusLabel");
 
       if (subscriptionStatusLabel) {
-  subscriptionStatusLabel.textContent = USER_ACCESS.subscriptionActive
-    ? "Платные модули доступны"
-    : "Доступ только к базовым модулям";
-}
+        subscriptionStatusLabel.textContent = USER_ACCESS.subscriptionActive
+          ? "Платные модули доступны"
+          : "Доступ только к базовым модулям";
+      }
 
       if (modulesList) {
-  if (!MODULES.length) {
-    modulesList.innerHTML = `
-      <section class="card-section">
-        <div class="card-section-body">
-          <p class="module-card-short-description">
-            Для этого tenant пока не настроен список модулей.
-          </p>
-        </div>
-      </section>
-    `;
-  } else {
-    MODULES.forEach((module) => {
-      modulesList.appendChild(createModuleCard(module));
-    });
-  }
-}
+        if (!MODULES.length) {
+          modulesList.innerHTML = `
+            <section class="card-section">
+              <div class="card-section-body">
+                <p class="module-card-short-description">
+                  Для этого tenant пока не настроен список модулей.
+                </p>
+              </div>
+            </section>
+          `;
+        } else {
+          MODULES.forEach((module) => {
+            modulesList.appendChild(createModuleCard(module));
+          });
+        }
+      }
     });
   </script>
 </body>
