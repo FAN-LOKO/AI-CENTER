@@ -176,9 +176,9 @@
   /** true — модули уже были загружены из shell хотя бы раз */
   let _modulesReady = false;
 
-  /** Last rendered modules signature to avoid duplicate repaint */
- /** Сигнатура последнего рендера, чтобы не делать лишнюю перерисовку */
-let _lastHomeModulesSignature = '';
+  /** Last rendered modules signature to prevent duplicate repaint */
+  /** Сигнатура последнего рендера, чтобы не делать лишнюю перерисовку */
+  let _lastHomeModulesSignature = '';
 
   // ═══════════════════════════════════════════════════════════════
   //  SHELL HELPERS / ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ SHELL
@@ -397,32 +397,22 @@ let _lastHomeModulesSignature = '';
   // ═══════════════════════════════════════════════════════════════
 
   function getModuleBadge(mod) {
-    // Agent — base module
-    // Агент — базовый модуль
     if (mod.id === 'ai-agent') {
       return { text: 'Базовый модуль', cls: 'required' };
     }
 
-    // Always-free modules
-    // Всегда бесплатные модули
     if (HOME_FREE_VISIBLE_IDS.includes(mod.id)) {
       return { text: 'Бесплатный', cls: 'free' };
     }
 
-    // Other modules shown on Home are paid
-    // Остальные модули, попавшие на главную, считаем оплаченными
     return { text: 'Оплачен', cls: 'paid' };
   }
 
   function getModuleStatusText(mod) {
-    // Free modules — Knowledge Hub, Support
-    // Бесплатные модули — База знаний, Поддержка
     if (HOME_FREE_VISIBLE_IDS.includes(mod.id)) {
       return { text: 'Доступен бесплатно', cls: 'is-free' };
     }
 
-    // Agent module specific statuses
-    // Специальные статусы для модуля Агент
     if (mod.id === 'ai-agent') {
       const d = typeof mod.daysLeft === 'number' ? mod.daysLeft : null;
 
@@ -439,8 +429,6 @@ let _lastHomeModulesSignature = '';
       return { text: 'Активен', cls: '' };
     }
 
-    // Other paid modules
-    // Остальные платные модули
     if (typeof mod.daysLeft === 'number' && mod.daysLeft > 0) {
       return { text: `Оплачен, осталось ${mod.daysLeft} дн.`, cls: '' };
     }
@@ -478,25 +466,29 @@ let _lastHomeModulesSignature = '';
     if (!container) return;
 
     const visible = getVisibleHomeModules();
-    const nextSignature = JSON.stringify(
-  visible.map(mod => ({
-    id: mod.id,
-    frozen: !!mod.frozen,
-    paid: !!mod.paid,
-    daysLeft: typeof mod.daysLeft === 'number' ? mod.daysLeft : null
-  }))
-);
 
-if (_lastHomeModulesSignature === nextSignature) {
-  console.log('[HOME] renderHomeModules skipped: no changes');
-  return;
-}
-
-_lastHomeModulesSignature = nextSignature;
     console.log('[HOME] renderHomeModules', {
       visibleIds: visible.map(m => m.id),
       totalUserModules: USERMODULES.length
     });
+
+    const nextSignature = JSON.stringify(
+      visible.map(mod => ({
+        id: mod.id,
+        frozen: !!mod.frozen,
+        paid: !!mod.paid,
+        daysLeft: typeof mod.daysLeft === 'number' ? mod.daysLeft : null
+      }))
+    );
+
+    if (_lastHomeModulesSignature === nextSignature) {
+      console.log('[HOME] renderHomeModules skipped: no changes');
+      if (skeleton) skeleton.hidden = true;
+      container.hidden = false;
+      return;
+    }
+
+    _lastHomeModulesSignature = nextSignature;
 
     // Hide skeleton, show container
     // Скрываем skeleton, показываем контейнер
@@ -538,23 +530,17 @@ _lastHomeModulesSignature = nextSignature;
         </div>`;
     }).join('');
 
-    // Attach click handlers for module buttons
-    // Вешаем обработчики кликов по кнопкам модулей
     container.querySelectorAll('[data-module-page]').forEach(btn => {
       btn.addEventListener('click', () => {
         const page = btn.getAttribute('data-module-page');
         const moduleId = btn.getAttribute('data-module-id');
         const frozen = btn.getAttribute('data-frozen') === '1';
 
-        // Frozen Agent → go to payments
-        // Замороженный Агент → ведём на страницу оплат
         if (frozen && moduleId === 'ai-agent') {
           navigateFromHome('payments.html', 'payments');
           return;
         }
 
-        // Other frozen modules on Home are not clickable
-        // Остальные замороженные модули на главной не кликаем
         if (frozen) return;
 
         if (page) navigateFromHome(page, 'modules');
@@ -577,17 +563,13 @@ _lastHomeModulesSignature = nextSignature;
     const subtitleEl = document.getElementById('homeProfileSubtitle');
     if (subtitleEl) subtitleEl.textContent = TENANTCONFIG?.appName || 'Telegram WebApp';
 
-    // Partner section visibility from tenant sections config
-    // Видимость партнёрской секции из sections-конфига тенанта
-    const sections      = TENANTCONFIG?.sections || {};
+    const sections = TENANTCONFIG?.sections || {};
     const affiliateCard = document.getElementById('homeAffiliateCard');
     if (affiliateCard) {
       affiliateCard.hidden =
         APPFEATURES.affiliate === false || sections.partnerProgram === false;
     }
 
-    // Modules section visibility
-    // Видимость секции "Мои модули"
     const modulesCard = document.getElementById('homeModulesCard');
     if (modulesCard) modulesCard.hidden = APPFEATURES.modules === false;
   }
@@ -692,8 +674,6 @@ _lastHomeModulesSignature = nextSignature;
       applyHomeFeatures(data.features || {});
 
     } else if (data.type === 'user-modules' && Array.isArray(data.modules)) {
-      // Build access map from shell payload
-      // Собираем карту доступа из payload shell
       const accessMap = {};
 
       data.modules.forEach(mod => {
@@ -705,8 +685,6 @@ _lastHomeModulesSignature = nextSignature;
         };
       });
 
-      // Rebuild Home modules projection using tenant registry + access map
-      // Перестраиваем пользовательскую проекцию модулей для главной
       USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, accessMap);
       _modulesReady = true;
       renderHomeModules();
@@ -723,8 +701,6 @@ _lastHomeModulesSignature = nextSignature;
   // ═══════════════════════════════════════════════════════════════
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // Navigation buttons
-    // Навигационные кнопки
     document.getElementById('allModulesLink')?.addEventListener('click', () =>
       navigateFromHome('modules.html', 'modules'));
     document.getElementById('paymentLink')?.addEventListener('click', () =>
@@ -732,12 +708,8 @@ _lastHomeModulesSignature = nextSignature;
     document.getElementById('openAffiliateButton')?.addEventListener('click', () =>
       navigateFromHome('partner.html', 'affiliate'));
 
-    // Telegram profile — fill immediately
-    // Профиль Telegram — заполняем сразу
     fillTelegramProfile();
 
-    // Load tenant modules, build initial Home modules using default access mock
-    // Загружаем модули тенанта и строим первичный список с mock-доступом
     TENANTMODULES = await waitForTenantModules();
     console.log('[AI CENTER][Home] tenant modules loaded:', TENANTMODULES.length);
 
@@ -745,16 +717,9 @@ _lastHomeModulesSignature = nextSignature;
     USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, defaultAccessMap);
     _modulesReady = true;
 
-    // Apply tenant texts and sections visibility
-    // Применяем tenant-тексты и видимость секций
     applyTenantContent();
-
-    // Render modules on Home
-    // Рендерим модули на главной
     renderHomeModules();
 
-    // Request features and user profile from shell (async, non-blocking)
-    // Запрашиваем у shell фичи и профиль (async, не блокирующие)
     window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
     window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
   });
