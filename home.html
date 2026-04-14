@@ -93,10 +93,6 @@
     </div><!-- /.page -->
 
     <script>
-  // ═══════════════════════════════════════════════════════════════
-  //  STATE / СОСТОЯНИЕ
-  // ═══════════════════════════════════════════════════════════════
-
   let APPFEATURES = {
     home: true,
     myAgent: true,
@@ -113,9 +109,9 @@
   let _modulesReady = false;
   let _lastHomeModulesSignature = '';
 
-  // ═══════════════════════════════════════════════════════════════
-  //  DOM HELPERS / DOM-ХЕЛПЕРЫ
-  // ═══════════════════════════════════════════════════════════════
+  const HOME_ALWAYS_VISIBLE_IDS = ['ai-agent', 'knowledge-hub', 'support-desk'];
+  const HOME_FREE_VISIBLE_IDS = ['knowledge-hub', 'support-desk'];
+  const HOME_AGENT_ID = 'ai-agent';
 
   function getHomeModulesSkeletonEl() {
     return document.getElementById('homeModulesSkeleton');
@@ -125,7 +121,7 @@
     return document.getElementById('homeModulesList');
   }
 
-  function forceHideHomeModulesSkeleton(reason) {
+  function forceHideHomeModulesSkeleton() {
     const skeleton = getHomeModulesSkeletonEl();
     if (!skeleton) return;
 
@@ -134,8 +130,6 @@
     skeleton.style.visibility = 'hidden';
     skeleton.style.opacity = '0';
     skeleton.setAttribute('aria-hidden', 'true');
-
-    console.log('[HOME] skeleton force hidden:', reason);
   }
 
   function forceShowHomeModulesList() {
@@ -143,14 +137,10 @@
     if (!list) return;
 
     list.hidden = false;
-    list.style.display = '';
+    list.style.display = 'flex';
     list.style.visibility = 'visible';
     list.style.opacity = '1';
   }
-
-  // ═══════════════════════════════════════════════════════════════
-  //  SHELL HELPERS / ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ SHELL
-  // ═══════════════════════════════════════════════════════════════
 
   function getTenantConfig() {
     try {
@@ -167,12 +157,12 @@
       return raw
         .filter(m => m.enabled !== false)
         .map(m => ({
-          id:              m.id,
-          title:           m.titleRu || m.title || m.id,
-          page:            m.page,
+          id: m.id,
+          title: m.titleRu || m.title || m.id,
+          page: m.page,
           requiresPayment: !!m.requiresPayment,
-          enabled:         m.enabled !== false,
-          category:        m.category || 'core'
+          enabled: m.enabled !== false,
+          category: m.category || 'core'
         }));
     } catch (e) {
       console.error('[Home] tenant modules read failed', e);
@@ -200,14 +190,6 @@
     });
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  //  HOME RULES / ПРАВИЛА HOME
-  // ═══════════════════════════════════════════════════════════════
-
-  const HOME_ALWAYS_VISIBLE_IDS = ['ai-agent', 'knowledge-hub', 'support-desk'];
-  const HOME_FREE_VISIBLE_IDS = ['knowledge-hub', 'support-desk'];
-  const HOME_AGENT_ID = 'ai-agent';
-
   function getDefaultUserModuleAccess() {
     return {
       'ai-agent': {
@@ -229,6 +211,7 @@
     return tenantModules
       .filter(m => {
         if (!m || m.enabled === false) return false;
+
         if (HOME_ALWAYS_VISIBLE_IDS.includes(m.id)) return true;
 
         const access = normalizedAccess[m.id];
@@ -299,10 +282,6 @@
       });
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  //  BADGES & STATUS / БЕЙДЖИ И СТАТУСЫ
-  // ═══════════════════════════════════════════════════════════════
-
   function getModuleBadge(mod) {
     if (mod.id === 'ai-agent') {
       return { text: 'Базовый модуль', cls: 'required' };
@@ -343,17 +322,9 @@
     return { text: 'Оплачен', cls: '' };
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  //  NAVIGATION / НАВИГАЦИЯ
-  // ═══════════════════════════════════════════════════════════════
-
   function navigateFromHome(page, tab) {
     window.parent?.postMessage?.({ type: 'navigate', page, tab }, '*');
   }
-
-  // ═══════════════════════════════════════════════════════════════
-  //  RENDER / ОТРИСОВКА
-  // ═══════════════════════════════════════════════════════════════
 
   function getVisibleHomeModules() {
     return USERMODULES.filter(m => {
@@ -369,11 +340,6 @@
 
     const visible = getVisibleHomeModules();
 
-    console.log('[HOME] renderHomeModules', {
-      visibleIds: visible.map(m => m.id),
-      totalUserModules: USERMODULES.length
-    });
-
     const nextSignature = JSON.stringify(
       visible.map(mod => ({
         id: mod.id,
@@ -383,12 +349,10 @@
       }))
     );
 
-    forceHideHomeModulesSkeleton('before render');
+    forceHideHomeModulesSkeleton();
 
     if (_lastHomeModulesSignature === nextSignature) {
-      console.log('[HOME] renderHomeModules skipped: no changes');
       forceShowHomeModulesList();
-      forceHideHomeModulesSkeleton('skipped render');
       return;
     }
 
@@ -398,7 +362,7 @@
       container.innerHTML =
         '<p class="home-empty-note">Пока нет доступных модулей. Как только они появятся, вы увидите их здесь.</p>';
       forceShowHomeModulesList();
-      forceHideHomeModulesSkeleton('empty state');
+      forceHideHomeModulesSkeleton();
       return;
     }
 
@@ -449,12 +413,8 @@
     });
 
     forceShowHomeModulesList();
-    forceHideHomeModulesSkeleton('after render');
+    forceHideHomeModulesSkeleton();
   }
-
-  // ═══════════════════════════════════════════════════════════════
-  //  TENANT / FEATURES / ТЕНАНТ И ФИЧИ
-  // ═══════════════════════════════════════════════════════════════
 
   function applyTenantContent() {
     TENANTCONFIG = getTenantConfig();
@@ -488,10 +448,6 @@
     if (_modulesReady) renderHomeModules();
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  //  TELEGRAM PROFILE / ПРОФИЛЬ TELEGRAM
-  // ═══════════════════════════════════════════════════════════════
-
   function getTelegramUser() {
     return window.Telegram?.WebApp?.initDataUnsafe?.user || null;
   }
@@ -503,11 +459,18 @@
 
   function setHomeAvatar(user, fullName) {
     const fallbackEl = document.getElementById('homeProfileAvatarFallback');
-    const imgEl      = document.getElementById('homeProfileAvatarImage');
-    const letter     = (fullName || 'U').charAt(0).toUpperCase();
+    const imgEl = document.getElementById('homeProfileAvatarImage');
+    const letter = (fullName || 'U').charAt(0).toUpperCase();
 
-    if (fallbackEl) { fallbackEl.textContent = letter; fallbackEl.hidden = false; }
-    if (imgEl)      { imgEl.hidden = true; imgEl.removeAttribute('src'); }
+    if (fallbackEl) {
+      fallbackEl.textContent = letter;
+      fallbackEl.hidden = false;
+    }
+
+    if (imgEl) {
+      imgEl.hidden = true;
+      imgEl.removeAttribute('src');
+    }
 
     if (user?.photo_url && imgEl) {
       imgEl.src = user.photo_url;
@@ -517,29 +480,29 @@
   }
 
   function fillTelegramProfile() {
-    const user       = getTelegramUser();
-    const nameEl     = document.getElementById('homeProfileName');
+    const user = getTelegramUser();
+    const nameEl = document.getElementById('homeProfileName');
     const usernameEl = document.getElementById('homeProfileUsername');
-    const idEl       = document.getElementById('homeProfileId');
-    const statusEl   = document.getElementById('homeProfileStatus');
-    const noteEl     = document.getElementById('homeProfileNote');
+    const idEl = document.getElementById('homeProfileId');
+    const statusEl = document.getElementById('homeProfileStatus');
+    const noteEl = document.getElementById('homeProfileNote');
 
     if (!user) {
-      if (nameEl)     nameEl.textContent     = '';
+      if (nameEl) nameEl.textContent = '';
       if (usernameEl) usernameEl.textContent = 'username';
-      if (idEl)       idEl.textContent       = 'ID';
-      if (statusEl)   statusEl.textContent   = 'GUEST';
-      if (noteEl)     noteEl.textContent     = 'Telegram Mini App.';
+      if (idEl) idEl.textContent = 'ID';
+      if (statusEl) statusEl.textContent = 'GUEST';
+      if (noteEl) noteEl.textContent = 'Telegram Mini App.';
       setHomeAvatar(null, 'U');
       return;
     }
 
     const fullName = getTelegramFullName(user);
-    if (nameEl)     nameEl.textContent     = fullName;
+    if (nameEl) nameEl.textContent = fullName;
     if (usernameEl) usernameEl.textContent = user.username ? `@${user.username}` : 'username не указан';
-    if (idEl)       idEl.textContent       = user.id ? `ID: ${user.id}` : 'ID';
-    if (statusEl)   statusEl.textContent   = 'ONLINE';
-    if (noteEl)     noteEl.textContent     = 'Telegram Mini App.';
+    if (idEl) idEl.textContent = user.id ? `ID: ${user.id}` : 'ID';
+    if (statusEl) statusEl.textContent = 'ONLINE';
+    if (noteEl) noteEl.textContent = 'Telegram Mini App.';
     setHomeAvatar(user, fullName || 'U');
   }
 
@@ -551,15 +514,11 @@
     if (profile.email && noteEl) noteEl.textContent = profile.email;
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  //  MESSAGE BUS / ОБРАБОТКА postMessage
-  // ═══════════════════════════════════════════════════════════════
-
   window.addEventListener('message', event => {
     const data = event.data;
     if (!data || typeof data !== 'object') return;
 
-    forceHideHomeModulesSkeleton('message received');
+    forceHideHomeModulesSkeleton();
 
     if (data.type === 'app-features') {
       applyHomeFeatures(data.features || {});
@@ -583,24 +542,21 @@
     }
   });
 
-  // ═══════════════════════════════════════════════════════════════
-  //  INIT / ИНИЦИАЛИЗАЦИЯ
-  // ═══════════════════════════════════════════════════════════════
-
   document.addEventListener('DOMContentLoaded', async () => {
-    forceHideHomeModulesSkeleton('DOMContentLoaded start');
+    forceHideHomeModulesSkeleton();
 
     document.getElementById('allModulesLink')?.addEventListener('click', () =>
       navigateFromHome('modules.html', 'modules'));
+
     document.getElementById('paymentLink')?.addEventListener('click', () =>
       navigateFromHome('payments.html', 'payments'));
+
     document.getElementById('openAffiliateButton')?.addEventListener('click', () =>
       navigateFromHome('partner.html', 'affiliate'));
 
     fillTelegramProfile();
 
     TENANTMODULES = await waitForTenantModules();
-    console.log('[AI CENTER][Home] tenant modules loaded:', TENANTMODULES.length);
 
     const defaultAccessMap = getDefaultUserModuleAccess();
     USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, defaultAccessMap);
@@ -609,14 +565,12 @@
     applyTenantContent();
     renderHomeModules();
 
-    forceHideHomeModulesSkeleton('after initial render');
-
     window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
     window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
   });
 
   window.addEventListener('load', () => {
-    forceHideHomeModulesSkeleton('window load');
+    forceHideHomeModulesSkeleton();
   });
 </script>
   </body>
