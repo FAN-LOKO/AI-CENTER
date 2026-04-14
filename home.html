@@ -5,9 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI FIT Center</title>
     <link rel="stylesheet" href="css/styles.css" />
+    <style>
+      /* ── skeleton loader ──────────────────────────────────────── */
+      @keyframes shimmer {
+        0%   { background-position: -200% 0; }
+        100% { background-position:  200% 0; }
+      }
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--color-surface-offset, #eee) 25%,
+          var(--color-surface-dynamic, #ddd) 50%,
+          var(--color-surface-offset, #eee) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.4s ease-in-out infinite;
+        border-radius: 6px;
+      }
+      .skeleton-line {
+        height: 1em;
+        margin-bottom: 8px;
+        border-radius: 4px;
+      }
+      .skeleton-line:last-child { width: 60%; }
+      .skeleton-btn {
+        height: 38px;
+        width: 100%;
+        border-radius: 8px;
+        margin-top: 8px;
+      }
+      .home-modules-skeleton {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 4px 0;
+      }
+      .home-modules-skeleton-item {
+        padding: 12px;
+        border: 1px solid var(--color-border, #e0e0e0);
+        border-radius: 10px;
+      }
+    </style>
   </head>
   <body>
     <div class="page home-page">
+
+      <!-- Профиль -->
       <section class="card-section home-profile-card">
         <div class="card-section-header">
           <h2 class="card-section-title">Профиль</h2>
@@ -17,218 +60,244 @@
           <div class="home-profile-row">
             <div class="home-profile-avatar" id="homeProfileAvatar">
               <span id="homeProfileAvatarFallback">U</span>
-              <img
-                id="homeProfileAvatarImage"
-                alt="Аватар пользователя"
-                hidden
-              />
+              <img id="homeProfileAvatarImage" alt="Аватар пользователя" hidden />
             </div>
-
             <div class="home-profile-main">
-              <div class="home-profile-name" id="homeProfileName"></div>
-              <div class="home-profile-username" id="homeProfileUsername">
-                username
-              </div>
-              <div class="home-profile-id" id="homeProfileId">ID</div>
+              <div class="home-profile-name"    id="homeProfileName"></div>
+              <div class="home-profile-username" id="homeProfileUsername">username</div>
+              <div class="home-profile-id"       id="homeProfileId">ID</div>
             </div>
           </div>
-
           <div class="home-profile-extra">
-            <div class="home-profile-status" id="homeProfileStatus">
-              ONLINE
-            </div>
-            <div class="home-profile-note" id="homeProfileNote">
-              Telegram Mini App.
-            </div>
+            <div class="home-profile-status" id="homeProfileStatus">ONLINE</div>
+            <div class="home-profile-note"   id="homeProfileNote">Telegram Mini App.</div>
           </div>
         </div>
       </section>
 
+      <!-- Мои модули -->
       <section class="card-section" id="homeModulesCard">
         <div class="card-section-header">
           <h2 class="card-section-title">Мои модули</h2>
           <p class="card-section-subtitle" id="homeModulesSubtitle">
-            Только активные и доступные модули пользователя
+            Активные и доступные модули
           </p>
         </div>
         <div class="card-section-body">
-          <div id="homeModulesList" class="home-module-list"></div>
+          <!-- skeleton показывается до загрузки модулей -->
+          <div id="homeModulesSkeleton" class="home-modules-skeleton">
+            <div class="home-modules-skeleton-item">
+              <div class="skeleton skeleton-line" style="width:55%"></div>
+              <div class="skeleton skeleton-line" style="width:80%"></div>
+              <div class="skeleton skeleton-btn"></div>
+            </div>
+            <div class="home-modules-skeleton-item">
+              <div class="skeleton skeleton-line" style="width:45%"></div>
+              <div class="skeleton skeleton-line" style="width:70%"></div>
+              <div class="skeleton skeleton-btn"></div>
+            </div>
+          </div>
+
+          <div id="homeModulesList" class="home-module-list" hidden></div>
 
           <div class="home-links-row">
-            <button
-              type="button"
-              class="home-text-link"
-              id="allModulesLink"
-            >
-              Все модули
-            </button>
-            <button
-              type="button"
-              class="home-text-link"
-              id="paymentLink"
-            >
-              Перейти к оплатам
-            </button>
+            <button type="button" class="home-text-link" id="allModulesLink">Все модули</button>
+            <button type="button" class="home-text-link" id="paymentLink">Перейти к оплатам</button>
           </div>
         </div>
       </section>
 
+      <!-- Партнёрская программа -->
       <section class="card-section" id="homeAffiliateCard">
         <div class="card-section-header">
           <h2 class="card-section-title">Партнёрская программа</h2>
-          <p class="card-section-subtitle">
-            Быстрый доступ к партнёрскому разделу
-          </p>
+          <p class="card-section-subtitle">Быстрый доступ к партнёрскому разделу</p>
         </div>
         <div class="card-section-body">
           <div class="home-card-stack">
             <p class="home-card-text">
               Здесь будут доступны инструменты партнёра, структура и связанные функции.
             </p>
-            <button
-              type="button"
-              class="btn btn-block"
-              id="openAffiliateButton"
-            >
+            <button type="button" class="btn btn-block" id="openAffiliateButton">
               Открыть партнёрский раздел
             </button>
           </div>
         </div>
       </section>
-    </div>
+
+    </div><!-- /.page -->
 
     <script>
+      // ═══════════════════════════════════════════════════════════════
+      //  STATE
+      // ═══════════════════════════════════════════════════════════════
+
+      /** Флаги фич — перезаписываются из shell через postMessage */
       let APPFEATURES = {
-        home: true,
-        myAgent: true,
-        modules: true,
-        sharedChat: true,
-        affiliate: true,
-        payments: true,
-        settings: true
+        home: true, myAgent: true, modules: true,
+        sharedChat: true, affiliate: true, payments: true, settings: true
       };
 
+      /** Конфиг текущего тенанта (fitline.json) */
       let TENANTCONFIG = null;
+
+      /**
+       * Модули из tenant-конфига.
+       * Структура каждого элемента:
+       *   { id, title, titleRu, page, requiresPayment, enabled, category }
+       *
+       * Это единственный источник истины — никакого hardcoded USERMODULES.
+       * После загрузки TENANTMODULES функция buildUserModulesFromTenant()
+       * строит список для отображения на главной.
+       */
       let TENANTMODULES = [];
 
-      let USERMODULES = [
-        { id: 'ai-agent', visible: true, paid: false, frozen: false, daysLeft: null },
-        { id: 'knowledge-hub', visible: true, paid: false, frozen: false, daysLeft: null },
-        { id: 'support-desk', visible: true, paid: false, frozen: false, daysLeft: null },
-        { id: 'media-lab', visible: true, paid: true, frozen: false, daysLeft: 27 },
-        { id: 'leader-stage', visible: true, paid: true, frozen: false, daysLeft: 14 }
-      ];
+      /**
+       * Список модулей для отображения на главной.
+       * Каждый элемент: { id, title, page, requiresPayment, category,
+       *                    paid, frozen, daysLeft }
+       * Изначально строится из TENANTMODULES.
+       * Может быть перезаписан через postMessage type='user-modules'.
+       */
+      let USERMODULES = [];
 
-      // ── helpers ──────────────────────────────────────────────────────────
+      /** true — модули уже были загружены из shell хотя бы раз */
+      let _modulesReady = false;
+
+      // ═══════════════════════════════════════════════════════════════
+      //  HELPERS — чтение из shell
+      // ═══════════════════════════════════════════════════════════════
 
       function getTenantConfig() {
         try {
           return window.parent?.AICAppShell?.getTenantConfig?.() || null;
         } catch (e) {
-          console.error('[AI CENTER][Home] tenant config read failed', e);
+          console.error('[Home] tenant config read failed', e);
           return null;
         }
       }
 
+      /**
+       * Читает raw-модули из shell: фильтр enabled, маппинг в нашу структуру.
+       * Аналогично getTenantModules() из modules.html.
+       */
       function getTenantModulesRaw() {
         try {
-          const modules = window.parent?.AICAppShell?.getTenantModules?.() || [];
-          return modules
-            .filter((m) => m.enabled !== false)
-            .map((m) => ({
-              id: m.id,
-              title: m.titleRu || m.title || m.id,
-              page: m.page,
+          const raw = window.parent?.AICAppShell?.getTenantModules?.() || [];
+          return raw
+            .filter(m => m.enabled !== false)
+            .map(m => ({
+              id:              m.id,
+              title:           m.titleRu || m.title || m.id,
+              page:            m.page,
               requiresPayment: !!m.requiresPayment,
-              enabled: m.enabled !== false,
-              category: m.category || 'core'
+              enabled:         m.enabled !== false,
+              category:        m.category || 'core'
             }));
         } catch (e) {
-          console.error('[AI CENTER][Home] tenant modules read failed', e);
+          console.error('[Home] tenant modules read failed', e);
           return [];
         }
       }
 
       /**
-       * Retry-loop — ждём, пока shell не загрузит модули (до 20 попыток × 150 мс = 3 сек).
-       * Аналог waitForTenantModules() из modules.html.
+       * Retry-loop: ждём, пока shell загрузит tenant-конфиг (до 20×150 мс = 3 с).
+       * После успеха возвращает массив модулей.
        */
       function waitForTenantModules(attempt) {
         attempt = attempt || 0;
-        return new Promise((resolve) => {
-          const modules = getTenantModulesRaw();
-          if (modules.length > 0) {
-            resolve(modules);
+        return new Promise(resolve => {
+          const mods = getTenantModulesRaw();
+          if (mods.length > 0) {
+            resolve(mods);
           } else if (attempt < 20) {
-            setTimeout(() => {
-              waitForTenantModules(attempt + 1).then(resolve);
-            }, 150);
+            setTimeout(() => waitForTenantModules(attempt + 1).then(resolve), 150);
           } else {
-            console.warn('[AI CENTER][Home] tenant modules not available after 20 attempts');
+            console.warn('[Home] tenant modules not available after 20 attempts');
             resolve([]);
           }
         });
       }
 
-      function getTenantTexts() {
-        return TENANTCONFIG?.texts || {};
+      // ═══════════════════════════════════════════════════════════════
+      //  BUILD USERMODULES FROM TENANT
+      // ═══════════════════════════════════════════════════════════════
+
+      /**
+       * Строит USERMODULES из TENANTMODULES.
+       * Пока у нас нет реального CRM-состояния пользователя — все модули
+       * считаются активными (paid=false/frozen=false).
+       * Когда появится API — подменять здесь.
+       */
+      function buildUserModulesFromTenant(tenantModules) {
+        return tenantModules.map(m => ({
+          id:              m.id,
+          title:           m.title,
+          page:            m.page,
+          requiresPayment: m.requiresPayment,
+          category:        m.category,
+          visible:  true,
+          paid:     m.requiresPayment,   // платный → paid:true
+          frozen:   false,
+          daysLeft: null
+        }));
       }
 
-      function getTenantModuleMetaMap() {
-        return TENANTMODULES.reduce((acc, m) => {
-          acc[m.id] = m;
-          return acc;
-        }, {});
+      // ═══════════════════════════════════════════════════════════════
+      //  BADGES / STATUS
+      // ═══════════════════════════════════════════════════════════════
+
+      function getModuleBadge(mod) {
+        if (!mod.requiresPayment) {
+          return mod.category === 'core'
+            ? { text: 'Базовый',    cls: 'required' }
+            : { text: 'Бесплатный', cls: 'free' };
+        }
+        return { text: 'Платный', cls: 'paid' };
       }
+
+      function getModuleStatusText(mod) {
+        if (!mod.requiresPayment) return { text: 'Доступен', cls: 'is-free' };
+        if (mod.frozen) {
+          const d = typeof mod.daysLeft === 'number' ? mod.daysLeft : null;
+          if (d === 0)        return { text: 'Пробный период завершён', cls: 'is-warning' };
+          if (d !== null && d > 0) return { text: `Пробный период, осталось ${d} дн.`, cls: 'is-warning' };
+          return { text: 'Пробный период', cls: 'is-warning' };
+        }
+        if (typeof mod.daysLeft === 'number' && mod.daysLeft > 0) {
+          return { text: `Оплачено, осталось ${mod.daysLeft} дн.`, cls: '' };
+        }
+        return { text: 'Активен', cls: '' };
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      //  NAVIGATION
+      // ═══════════════════════════════════════════════════════════════
 
       function navigateFromHome(page, tab) {
         window.parent?.postMessage?.({ type: 'navigate', page, tab }, '*');
       }
 
-      // ── badges / status ───────────────────────────────────────────────────
-
-      function getModuleBadge(moduleMeta) {
-        if (!moduleMeta.requiresPayment) {
-          return moduleMeta.category === 'core'
-            ? { text: 'Базовый', className: 'required' }
-            : { text: 'Бесплатный', className: 'free' };
-        }
-        return { text: 'Платный', className: 'paid' };
-      }
-
-      function getModuleStatusText(module, moduleMeta) {
-        if (!moduleMeta.requiresPayment) {
-          return { text: 'Доступен', className: 'is-free' };
-        }
-        if (module.frozen) {
-          const days = typeof module.daysLeft === 'number' ? module.daysLeft : null;
-          if (days === 0) return { text: 'Пробный период завершён', className: 'is-warning' };
-          if (days !== null && days > 0)
-            return { text: `Пробный период, осталось ${days} дн.`, className: 'is-warning' };
-          return { text: 'Пробный период', className: 'is-warning' };
-        }
-        if (typeof module.daysLeft === 'number' && module.daysLeft > 0) {
-          return { text: `Оплачено, осталось ${module.daysLeft} дн.`, className: '' };
-        }
-        return { text: 'Активен', className: '' };
-      }
-
-      // ── render ────────────────────────────────────────────────────────────
+      // ═══════════════════════════════════════════════════════════════
+      //  RENDER
+      // ═══════════════════════════════════════════════════════════════
 
       function getVisibleHomeModules() {
-        const metaMap = getTenantModuleMetaMap();
-        return USERMODULES.filter((m) => {
+        return USERMODULES.filter(m => {
           if (!m.visible) return false;
-          const meta = metaMap[m.id];
-          if (!meta || !meta.enabled) return false;
           if (APPFEATURES.modules === false) return false;
           return true;
-        }).map((m) => ({ ...m, meta: metaMap[m.id] }));
+        });
       }
 
       function renderHomeModules() {
+        const skeleton  = document.getElementById('homeModulesSkeleton');
         const container = document.getElementById('homeModulesList');
         if (!container) return;
+
+        // скрываем skeleton, показываем список
+        if (skeleton) skeleton.hidden = true;
+        container.hidden = false;
 
         const visible = getVisibleHomeModules();
 
@@ -238,35 +307,31 @@
           return;
         }
 
-        container.innerHTML = visible
-          .map((module) => {
-            const meta = module.meta;
-            const badge = getModuleBadge(meta);
-            const status = getModuleStatusText(module, meta);
-            const isFrozen = !!module.frozen;
-            return `
-              <div class="home-module-item${isFrozen ? ' is-frozen' : ''}">
-                <div class="home-module-top">
-                  <div class="home-module-title">${meta.title}</div>
-                  <span class="home-module-badge ${badge.className}">${badge.text}</span>
-                </div>
-                <p class="home-module-status ${status.className}">${status.text}</p>
-                <div class="home-module-actions">
-                  <button
-                    type="button"
-                    class="btn btn-block home-module-open-btn${isFrozen ? ' disabled' : ''}"
-                    ${isFrozen ? 'disabled' : ''}
-                    data-module-page="${meta.page}"
-                  >
-                    ${isFrozen ? 'Недоступен' : 'Открыть модуль'}
-                  </button>
-                </div>
+        container.innerHTML = visible.map(mod => {
+          const badge  = getModuleBadge(mod);
+          const status = getModuleStatusText(mod);
+          const frozen = !!mod.frozen;
+          return `
+            <div class="home-module-item${frozen ? ' is-frozen' : ''}">
+              <div class="home-module-top">
+                <div class="home-module-title">${mod.title}</div>
+                <span class="home-module-badge ${badge.cls}">${badge.text}</span>
               </div>
-            `;
-          })
-          .join('');
+              <p class="home-module-status ${status.cls}">${status.text}</p>
+              <div class="home-module-actions">
+                <button
+                  type="button"
+                  class="btn btn-block home-module-open-btn${frozen ? ' disabled' : ''}"
+                  ${frozen ? 'disabled' : ''}
+                  data-module-page="${mod.page}"
+                >
+                  ${frozen ? 'Недоступен' : 'Открыть модуль'}
+                </button>
+              </div>
+            </div>`;
+        }).join('');
 
-        container.querySelectorAll('[data-module-page]').forEach((btn) => {
+        container.querySelectorAll('[data-module-page]').forEach(btn => {
           btn.addEventListener('click', () => {
             const page = btn.getAttribute('data-module-page');
             if (page) navigateFromHome(page, 'modules');
@@ -274,8 +339,37 @@
         });
       }
 
-      // ── features / tenant ─────────────────────────────────────────────────
+      // ═══════════════════════════════════════════════════════════════
+      //  TENANT / FEATURES
+      // ═══════════════════════════════════════════════════════════════
 
+      function applyTenantContent() {
+        TENANTCONFIG = getTenantConfig();
+        const texts = TENANTCONFIG?.texts || {};
+
+        if (texts.appTitle) document.title = texts.appTitle;
+
+        const subtitleEl = document.getElementById('homeProfileSubtitle');
+        if (subtitleEl) subtitleEl.textContent = TENANTCONFIG?.appName || 'Telegram WebApp';
+
+        // visibility секции партнёрки из sections-конфига тенанта
+        const sections     = TENANTCONFIG?.sections || {};
+        const affiliateCard = document.getElementById('homeAffiliateCard');
+        if (affiliateCard) {
+          affiliateCard.hidden =
+            APPFEATURES.affiliate === false || sections.partnerProgram === false;
+        }
+
+        // visibility секции модулей
+        const modulesCard = document.getElementById('homeModulesCard');
+        if (modulesCard) modulesCard.hidden = APPFEATURES.modules === false;
+      }
+
+      /**
+       * Применяет фичи из shell.
+       * Вызывается из postMessage. НЕ перезаписывает USERMODULES —
+       * только обновляет APPFEATURES и перерисовывает UI.
+       */
       function applyHomeFeatures(features) {
         APPFEATURES = { ...APPFEATURES, ...(features || {}) };
 
@@ -285,29 +379,13 @@
         const modulesCard = document.getElementById('homeModulesCard');
         if (modulesCard) modulesCard.hidden = APPFEATURES.modules === false;
 
-        renderHomeModules();
+        // Перерисовываем только если модули уже загружены
+        if (_modulesReady) renderHomeModules();
       }
 
-      function applyTenantContent() {
-        TENANTCONFIG = getTenantConfig();
-
-        const texts = getTenantTexts();
-        if (texts.appTitle) document.title = texts.appTitle;
-
-        const subtitleEl = document.getElementById('homeProfileSubtitle');
-        if (subtitleEl) subtitleEl.textContent = TENANTCONFIG?.appName || 'Telegram WebApp';
-
-        const affiliateCard = document.getElementById('homeAffiliateCard');
-        const sections = TENANTCONFIG?.sections || {};
-        if (affiliateCard) {
-          affiliateCard.hidden =
-            APPFEATURES.affiliate === false || sections.partnerProgram === false;
-        }
-
-        renderHomeModules();
-      }
-
-      // ── Telegram profile ──────────────────────────────────────────────────
+      // ═══════════════════════════════════════════════════════════════
+      //  TELEGRAM PROFILE
+      // ═══════════════════════════════════════════════════════════════
 
       function getTelegramUser() {
         return window.Telegram?.WebApp?.initDataUnsafe?.user || null;
@@ -320,11 +398,11 @@
 
       function setHomeAvatar(user, fullName) {
         const fallbackEl = document.getElementById('homeProfileAvatarFallback');
-        const imgEl = document.getElementById('homeProfileAvatarImage');
-        const letter = (fullName || 'U').charAt(0).toUpperCase();
+        const imgEl      = document.getElementById('homeProfileAvatarImage');
+        const letter     = (fullName || 'U').charAt(0).toUpperCase();
 
         if (fallbackEl) { fallbackEl.textContent = letter; fallbackEl.hidden = false; }
-        if (imgEl) { imgEl.hidden = true; imgEl.removeAttribute('src'); }
+        if (imgEl)      { imgEl.hidden = true; imgEl.removeAttribute('src'); }
 
         if (user?.photo_url && imgEl) {
           imgEl.src = user.photo_url;
@@ -334,29 +412,29 @@
       }
 
       function fillTelegramProfile() {
-        const user = getTelegramUser();
-        const nameEl = document.getElementById('homeProfileName');
+        const user       = getTelegramUser();
+        const nameEl     = document.getElementById('homeProfileName');
         const usernameEl = document.getElementById('homeProfileUsername');
-        const idEl = document.getElementById('homeProfileId');
-        const statusEl = document.getElementById('homeProfileStatus');
-        const noteEl = document.getElementById('homeProfileNote');
+        const idEl       = document.getElementById('homeProfileId');
+        const statusEl   = document.getElementById('homeProfileStatus');
+        const noteEl     = document.getElementById('homeProfileNote');
 
         if (!user) {
-          if (nameEl) nameEl.textContent = '';
+          if (nameEl)     nameEl.textContent     = '';
           if (usernameEl) usernameEl.textContent = 'username';
-          if (idEl) idEl.textContent = 'ID';
-          if (statusEl) statusEl.textContent = 'GUEST';
-          if (noteEl) noteEl.textContent = 'Telegram Mini App.';
+          if (idEl)       idEl.textContent       = 'ID';
+          if (statusEl)   statusEl.textContent   = 'GUEST';
+          if (noteEl)     noteEl.textContent     = 'Telegram Mini App.';
           setHomeAvatar(null, 'U');
           return;
         }
 
         const fullName = getTelegramFullName(user);
-        if (nameEl) nameEl.textContent = fullName;
+        if (nameEl)     nameEl.textContent     = fullName;
         if (usernameEl) usernameEl.textContent = user.username ? `@${user.username}` : 'username не указан';
-        if (idEl) idEl.textContent = user.id ? `ID: ${user.id}` : 'ID';
-        if (statusEl) statusEl.textContent = 'ONLINE';
-        if (noteEl) noteEl.textContent = 'Telegram Mini App.';
+        if (idEl)       idEl.textContent       = user.id ? `ID: ${user.id}` : 'ID';
+        if (statusEl)   statusEl.textContent   = 'ONLINE';
+        if (noteEl)     noteEl.textContent     = 'Telegram Mini App.';
         setHomeAvatar(user, fullName || 'U');
       }
 
@@ -365,48 +443,62 @@
         const nameEl = document.getElementById('homeProfileName');
         const noteEl = document.getElementById('homeProfileNote');
         if (profile.fullName && nameEl) nameEl.textContent = profile.fullName;
-        if (profile.email && noteEl) noteEl.textContent = profile.email;
+        if (profile.email    && noteEl) noteEl.textContent = profile.email;
       }
 
-      // ── postMessage handler ───────────────────────────────────────────────
+      // ═══════════════════════════════════════════════════════════════
+      //  postMessage handler
+      // ═══════════════════════════════════════════════════════════════
 
-      window.addEventListener('message', (event) => {
+      window.addEventListener('message', event => {
         const data = event.data;
         if (!data || typeof data !== 'object') return;
 
         if (data.type === 'app-features') {
           applyHomeFeatures(data.features || {});
+
         } else if (data.type === 'user-modules' && Array.isArray(data.modules)) {
+          // CRM-overwrite: shell отдал реальные данные пользователя
           USERMODULES = data.modules;
+          _modulesReady = true;
           renderHomeModules();
+
         } else if (data.type === 'user-profile') {
           applyUserProfileOnHome(data.profile || data);
         }
       });
 
-      // ── init ──────────────────────────────────────────────────────────────
+      // ═══════════════════════════════════════════════════════════════
+      //  INIT
+      // ═══════════════════════════════════════════════════════════════
 
       document.addEventListener('DOMContentLoaded', async () => {
-        // Кнопки навигации
-        document.getElementById('allModulesLink')?.addEventListener('click', () => {
-          navigateFromHome('modules.html', 'modules');
-        });
-        document.getElementById('paymentLink')?.addEventListener('click', () => {
-          navigateFromHome('payments.html', 'payments');
-        });
-        document.getElementById('openAffiliateButton')?.addEventListener('click', () => {
-          navigateFromHome('partner.html', 'affiliate');
-        });
+        // Навигационные кнопки
+        document.getElementById('allModulesLink')?.addEventListener('click', () =>
+          navigateFromHome('modules.html', 'modules'));
+        document.getElementById('paymentLink')?.addEventListener('click', () =>
+          navigateFromHome('payments.html', 'payments'));
+        document.getElementById('openAffiliateButton')?.addEventListener('click', () =>
+          navigateFromHome('partner.html', 'affiliate'));
 
+        // Профиль Telegram — сразу, без ожидания
         fillTelegramProfile();
 
-        // Ждём, пока AICAppShell загрузит модули из tenant-конфига
+        // ── Ключевой порядок: ждём модули → строим → рендерим ──────
         TENANTMODULES = await waitForTenantModules();
         console.log('[AI CENTER][Home] tenant modules loaded:', TENANTMODULES.length);
 
+        // Строим USERMODULES из tenant-конфига (заглушка без CRM)
+        USERMODULES = buildUserModulesFromTenant(TENANTMODULES);
+        _modulesReady = true;
+
+        // Применяем тексты/видимость секций из tenant
         applyTenantContent();
 
-        // Запросить фичи и профиль из shell
+        // Рендерим модули
+        renderHomeModules();
+
+        // Запрашиваем у shell фичи и профиль (async, не блокирующие)
         window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
         window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
       });
