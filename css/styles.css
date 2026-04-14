@@ -153,10 +153,6 @@ img {
   padding: 12px 16px 16px;
 }
 
-.settings-page {
-  padding-top: 16px;
-}
-
 /* =========================================================
    4. APP SHELL
    Совместимо с текущим app.html
@@ -1095,7 +1091,7 @@ img {
 ========================================================= */
 
 .settings-page {
-  padding: 0;
+  padding: 12px 16px 16px;
 }
 
 .settings-intro-text {
