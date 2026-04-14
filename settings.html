@@ -13,57 +13,55 @@
   <div class="page settings-page">
     <!-- ДАННЫЕ ПРОФИЛЯ -->
     <section class="card-section">
-      <div class="card-section-header">
-        <h2 class="card-section-title">Данные профиля</h2>
-        <p class="card-section-subtitle">
-          Эти данные используются для авторизации в PWA и коммуникации
+  <div class="card-section-header">
+    <h2 class="card-section-title">Данные профиля</h2>
+    <p class="card-section-subtitle">
+      Эти данные используются для авторизации в PWA и коммуникации
+    </p>
+  </div>
+
+  <div class="card-section-body">
+    <form class="settings-form" id="profileForm" novalidate>
+      <div class="settings-field">
+        <label for="profileFullName" class="settings-label">ФИО</label>
+        <input
+          id="profileFullName"
+          name="fullName"
+          type="text"
+          class="settings-input"
+          autocomplete="name"
+          placeholder="Введите ФИО"
+        />
+      </div>
+
+      <div class="settings-field">
+        <label for="profileEmail" class="settings-label">Email</label>
+        <input
+          id="profileEmail"
+          name="email"
+          type="email"
+          class="settings-input"
+          autocomplete="email"
+          placeholder="you@example.com"
+          required
+        />
+        <p class="settings-helper-text">
+          Email используется для входа в PWA и восстановления доступа.
         </p>
       </div>
 
-      <div class="card-section-body">
-        <form class="settings-form" id="profileForm" novalidate>
-          <div class="settings-form-group">
-            <label for="profileFullName" class="settings-form-label">ФИО</label>
-            <input
-              id="profileFullName"
-              name="fullName"
-              type="text"
-              class="settings-form-input"
-              autocomplete="name"
-              placeholder="Введите ФИО"
-            />
-          </div>
+      <button
+        type="submit"
+        class="btn btn-primary btn-block"
+        id="profileSaveButton"
+      >
+        Сохранить
+      </button>
 
-          <div class="settings-form-group">
-            <label for="profileEmail" class="settings-form-label">Email</label>
-            <input
-              id="profileEmail"
-              name="email"
-              type="email"
-              class="settings-form-input"
-              autocomplete="email"
-              placeholder="you@example.com"
-              required
-            />
-            <p class="settings-form-hint">
-              Email используется для входа в PWA и восстановления доступа.
-            </p>
-          </div>
-
-          <div class="settings-form-actions">
-            <button
-              type="submit"
-              class="btn btn-primary btn-block"
-              id="profileSaveButton"
-            >
-              Сохранить
-            </button>
-          </div>
-
-          <p class="settings-form-status" id="profileStatusMessage"></p>
-        </form>
-      </div>
-    </section>
+      <p class="settings-success-text" id="profileStatusMessage" hidden></p>
+    </form>
+  </div>
+</section>
 
     <!-- О ПРИЛОЖЕНИИ -->
     <section class="card-section">
@@ -215,12 +213,19 @@
         if (!form || !emailInput || !saveBtn) return;
 
         function setStatus(message, type) {
-          if (!statusEl) return;
-          statusEl.textContent = message || "";
-          statusEl.classList.remove("is-success", "is-error");
-          if (type === "success") statusEl.classList.add("is-success");
-          if (type === "error") statusEl.classList.add("is-error");
-        }
+  if (!statusEl) return;
+
+  statusEl.hidden = !message;
+  statusEl.textContent = message || "";
+
+  statusEl.classList.remove("settings-success-text", "settings-helper-text");
+
+  if (type === "success") {
+    statusEl.classList.add("settings-success-text");
+  } else if (type === "error") {
+    statusEl.classList.add("settings-helper-text");
+  }
+}
 
         form.addEventListener("submit", function (event) {
           event.preventDefault();
