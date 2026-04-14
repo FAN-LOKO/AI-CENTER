@@ -1,40 +1,21 @@
 (function () {
   /* =========================================================
-     AI CENTER / APP SHELL
-     Совместимый и аккуратно очищенный shell-контроллер.
-
-     Отвечает за:
-     - tenant feature flags
-     - маршрутизацию вкладок shell
-     - навигацию iframe-страниц
-     - message bus shell <-> inner pages
-     - публичное API window.AICAppShell
+     SHELL DEPENDENCIES / ЗАВИСИМОСТИ SHELL
+     Runtime adapter, iframe reference, navigation buttons
+     Runtime-адаптер, iframe-контейнер, кнопки навигации
   ========================================================= */
 
-  /* =========================================================
-     1. DEPENDENCIES / ЗАВИСИМОСТИ
-     Базовые ссылки на runtime и DOM shell.
-  ========================================================= */
-
-  const Runtime = window.AICRuntime || {
-    ready() {},
-    expand() {},
-    hapticSelection() {},
-    hapticNotify() {}
-  };
-
+  const Runtime = window.AICRuntime;
   const frame = document.getElementById('pageFrame');
-  const navButtons = Array.from(document.querySelectorAll('.nav-btn'));
-  const settingsButton = document.getElementById('settingsButton');
-  const notificationsButton = document.getElementById('notificationsButton');
-  const sharedChatBadge = document.getElementById('sharedChatBadge');
+  const navBtns = document.querySelectorAll('.nav-btn');
 
   /* =========================================================
-     2. STATE / СОСТОЯНИЕ SHELL
-     Глобальное состояние оболочки.
+     SHELL STATE / СОСТОЯНИЕ SHELL
+     Global shell state: features, page config, active tab, user profile
+     Глобальное состояние shell: фичи, конфиг страниц, активная вкладка, профиль
   ========================================================= */
 
-  const DEFAULT_FEATURES = {
+  let APPFEATURES = {
     home: true,
     myAgent: true,
     modules: true,
@@ -44,57 +25,41 @@
     settings: true
   };
 
-  let APP_FEATURES = { ...DEFAULT_FEATURES };
-  let PAGE_CONFIG = {};
+  let PAGECONFIG = {};
   let currentTab = 'home';
-  let USER_PROFILE = null;
-  let tenantConfigCache = null;
+  let USERPROFILE = null;
 
   /* =========================================================
-     3. PAGE MAP / КАРТА СТРАНИЦ
-     Связывает tab shell с html-страницей и feature-флагом.
+     PAGE CONFIGURATION / КОНФИГУРАЦИЯ СТРАНИЦ
+     Maps shell tabs to internal page files and feature access
+     Связывает tab shell с файлами страниц и доступностью по feature flags
   ========================================================= */
 
   function buildPageConfig() {
-    PAGE_CONFIG = {
-      home: {
-        page: 'home.html',
-        enabled: APP_FEATURES.home
-      },
-      'my-agent': {
-        page: 'my-agent.html',
-        enabled: APP_FEATURES.myAgent
-      },
-      modules: {
-        page: 'modules.html',
-        enabled: APP_FEATURES.modules
-      },
+    PAGECONFIG = {
+      home: { page: 'home.html', enabled: APPFEATURES.home },
+      'my-agent': { page: 'my-agent.html', enabled: APPFEATURES.myAgent },
+      modules: { page: 'modules.html', enabled: APPFEATURES.modules },
       'shared-chat': {
         page: 'shared-chat.html',
-        enabled: APP_FEATURES.sharedChat
+        enabled: APPFEATURES.sharedChat
       },
-      affiliate: {
-        page: 'partner.html',
-        enabled: APP_FEATURES.affiliate
-      },
-      payments: {
-        page: 'payments.html',
-        enabled: APP_FEATURES.payments
-      },
-      settings: {
-        page: 'settings.html',
-        enabled: APP_FEATURES.settings
-      }
+      affiliate: { page: 'partner.html', enabled: APPFEATURES.affiliate },
+      payments: { page: 'payments.html', enabled: APPFEATURES.payments },
+      settings: { page: 'settings.html', enabled: APPFEATURES.settings }
     };
+
+    window.PAGECONFIG = PAGECONFIG;
   }
 
   /* =========================================================
-     4. HELPERS / ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-     Проверка доступности вкладок, fallback, tab <-> page.
+     NAVIGATION HELPERS / ВСПОМОГАТЕЛЬНАЯ ЛОГИКА НАВИГАЦИИ
+     Checks tab availability, resolves fallback tab, maps tab <-> page
+     Проверяет доступность вкладок, определяет fallback, сопоставляет tab <-> page
   ========================================================= */
 
   function isTabEnabled(tab) {
-    return !!PAGE_CONFIG[tab] && !!PAGE_CONFIG[tab].enabled;
+    return !!PAGECONFIG[tab] && !!PAGECONFIG[tab].enabled;
   }
 
   function getFallbackTab() {
@@ -103,127 +68,149 @@
   }
 
   function getPageByTab(tab) {
-    return PAGE_CONFIG[tab] ? PAGE_CONFIG[tab].page : null;
+    if (!PAGECONFIG[tab]) return null;
+    return PAGECONFIG[tab].page;
   }
 
   function getTabByPage(page) {
-    for (const [tab, config] of Object.entries(PAGE_CONFIG)) {
-      if (config.page === page) {
-        return tab;
-      }
+    for (const [tab, config] of Object.entries(PAGECONFIG)) {
+      if (config.page === page) return tab;
     }
     return null;
   }
 
-  function getSafeTargetTab(page, tab) {
-    const resolvedTab = tab || getTabByPage(page) || currentTab;
-    return isTabEnabled(resolvedTab) ? resolvedTab : getFallbackTab();
-  }
-
-  function getSafeTargetPage(page, tab) {
-    const resolvedTab = getSafeTargetTab(page, tab);
-    return page || getPageByTab(resolvedTab);
-  }
-
   /* =========================================================
-     5. SHELL -> PAGE MESSAGING
-     Отправка данных во внутренние iframe-страницы.
+     SHELL -> PAGE MESSAGING / СООБЩЕНИЯ ОТ SHELL К СТРАНИЦАМ
+     Sends profile and feature flags into iframe pages
+     Отправляет профиль и feature flags во внутренние iframe-страницы
   ========================================================= */
 
-  function postToFrame(payload) {
-    if (!frame || !frame.contentWindow) return;
-    frame.contentWindow.postMessage(payload, '*');
-  }
-
   function sendUserProfileToFrame() {
-    if (!USER_PROFILE) return;
-    postToFrame({
-      type: 'user-profile',
-      profile: USER_PROFILE
-    });
+    if (!frame || !frame.contentWindow || !USERPROFILE) return;
+
+    frame.contentWindow.postMessage(
+      {
+        type: 'user-profile',
+        profile: USERPROFILE
+      },
+      '*'
+    );
   }
 
   function sendFeaturesToFrame() {
-    postToFrame({
-      type: 'app-features',
-      features: APP_FEATURES
-    });
+    if (!frame || !frame.contentWindow) return;
+
+    frame.contentWindow.postMessage(
+      {
+        type: 'app-features',
+        features: APPFEATURES
+      },
+      '*'
+    );
+
+    if (USERPROFILE) {
+      sendUserProfileToFrame();
+    }
   }
 
   /* =========================================================
-     6. UI STATE / UI-СОСТОЯНИЕ SHELL
-     Видимость вкладок, активная кнопка, unread badge.
+     SHELL UI STATE / UI-СОСТОЯНИЕ SHELL
+     Controls nav visibility, active nav state, unread badge state
+     Управляет видимостью навигации, активной вкладкой и unread badge
   ========================================================= */
 
   function updateNavVisibility() {
-    navButtons.forEach((button) => {
-      const tab = button.dataset.tab;
-      button.style.display = isTabEnabled(tab) ? '' : 'none';
+    navBtns.forEach((btn) => {
+      const tab = btn.dataset.tab;
+      const enabled = isTabEnabled(tab);
+      btn.style.display = enabled ? '' : 'none';
     });
   }
 
   function updateActiveNav() {
-    navButtons.forEach((button) => {
-      button.classList.toggle('active', button.dataset.tab === currentTab);
+    navBtns.forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.tab === currentTab);
     });
+
+    window.currentTab = currentTab;
+  }
+
+  function updateBottomNav(tab) {
+    currentTab = tab || currentTab;
+    updateActiveNav();
   }
 
   function hideSharedChatBadge() {
-    if (!sharedChatBadge) return;
-    sharedChatBadge.style.display = 'none';
+    const badge = document.getElementById('sharedChatBadge');
+    if (badge) {
+      badge.style.display = 'none';
+    }
   }
 
-  function setSharedChatBadgeVisible(visible) {
-    if (!sharedChatBadge) return;
-    sharedChatBadge.style.display = visible ? 'block' : 'none';
-  }
+  window.updateBottomNav = updateBottomNav;
 
   /* =========================================================
-     7. NAVIGATION / НАВИГАЦИЯ
-     Главная функция переключения вкладок и страниц.
+     NAVIGATION ACTIONS / ДЕЙСТВИЯ НАВИГАЦИИ
+     Main navigate action used by shell buttons and page messages
+     Основная функция навигации для shell-кнопок и сообщений со страниц
   ========================================================= */
 
   function navigate(page, tab) {
-    const targetTab = getSafeTargetTab(page, tab);
-    const targetPage = getSafeTargetPage(page, targetTab);
+    let targetTab = tab || getTabByPage(page) || currentTab;
 
-    if (!targetPage) return;
+    if (!isTabEnabled(targetTab)) {
+      targetTab = getFallbackTab();
+    }
 
-    if (frame && frame.getAttribute('src') !== targetPage) {
-      frame.setAttribute('src', targetPage);
+    const finalPage = page || getPageByTab(targetTab);
+    if (!finalPage) return;
+
+    if (frame && frame.getAttribute('src') !== finalPage) {
+      frame.setAttribute('src', finalPage);
     }
 
     currentTab = targetTab;
     updateActiveNav();
-    Runtime.hapticSelection();
+
+    if (Runtime && typeof Runtime.hapticSelection === 'function') {
+      Runtime.hapticSelection();
+    }
 
     if (currentTab === 'shared-chat') {
       hideSharedChatBadge();
     }
 
-    setTimeout(() => {
-      sendFeaturesToFrame();
-      sendUserProfileToFrame();
-    }, 150);
+    setTimeout(sendFeaturesToFrame, 150);
   }
 
   /* =========================================================
-     8. BUTTON BINDINGS / ПРИВЯЗКА КНОПОК
-     Нижняя навигация и header actions.
+     NAV BUTTON BINDINGS / ПРИВЯЗКА КНОПОК НАВИГАЦИИ
+     Handles clicks on bottom navigation buttons
+     Обрабатывает клики по кнопкам нижней навигации
   ========================================================= */
 
   function bindNavButtons() {
-    navButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        const tab = button.dataset.tab;
+    navBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
         if (!isTabEnabled(tab)) return;
 
-        navigate(getPageByTab(tab), tab);
+        const page = getPageByTab(tab);
+        navigate(page, tab);
       });
     });
   }
 
-  function bindHeaderButtons() {
+  /* =========================================================
+     SHELL HEADER ACTIONS / ДЕЙСТВИЯ HEADER В SHELL
+     Handles header buttons such as settings and notifications
+     Обрабатывает кнопки header, например settings и notifications
+  ========================================================= */
+
+  function bindShellButtons() {
+    const settingsButton = document.getElementById('settingsButton');
+    const notificationsButton = document.getElementById('notificationsButton');
+
     if (settingsButton) {
       settingsButton.addEventListener('click', () => {
         if (!isTabEnabled('settings')) return;
@@ -233,46 +220,65 @@
 
     if (notificationsButton) {
       notificationsButton.addEventListener('click', () => {
-        Runtime.hapticNotify('success');
+        if (Runtime && typeof Runtime.hapticNotify === 'function') {
+          Runtime.hapticNotify('success');
+        }
       });
     }
   }
 
   /* =========================================================
-     9. MESSAGE BUS / ШИНА СООБЩЕНИЙ
-     Принимает сообщения от внутренних страниц.
+     MESSAGE BUS / ШИНА СООБЩЕНИЙ
+     Receives messages from inner pages and routes shell actions
+     Принимает сообщения от внутренних страниц и запускает действия shell
   ========================================================= */
 
   function bindMessageBus() {
-    window.addEventListener('message', (event) => {
-      const data = event.data;
-
+    window.addEventListener('message', (e) => {
+      const data = e.data;
       if (!data || typeof data !== 'object') return;
 
       if (data.type === 'navigate') {
-        const targetTab = getSafeTargetTab(data.page, data.tab);
-        const targetPage = getSafeTargetPage(data.page, targetTab);
-        navigate(targetPage, targetTab);
+        const targetTab = data.tab || getTabByPage(data.page) || currentTab;
+
+        if (!isTabEnabled(targetTab)) {
+          const fallbackTab = getFallbackTab();
+          navigate(getPageByTab(fallbackTab), fallbackTab);
+          return;
+        }
+
+        navigate(data.page || getPageByTab(targetTab), targetTab);
         return;
       }
 
       if (data.type === 'shared-chat-unread') {
+        const badge = document.getElementById('sharedChatBadge');
+        if (!badge) return;
+
         if (currentTab === 'shared-chat') {
-          hideSharedChatBadge();
+          badge.style.display = 'none';
           return;
         }
 
-        setSharedChatBadgeVisible(!!data.hasUnread);
+        badge.style.display = data.hasUnread ? 'block' : 'none';
         return;
       }
 
       if (data.type === 'request-user-profile') {
-        sendUserProfileToFrame();
+        if (USERPROFILE && frame && frame.contentWindow) {
+          frame.contentWindow.postMessage(
+            {
+              type: 'user-profile',
+              profile: USERPROFILE
+            },
+            '*'
+          );
+        }
         return;
       }
 
       if (data.type === 'save-user-profile') {
-        USER_PROFILE = data.profile || data;
+        USERPROFILE = data.profile || data;
         sendUserProfileToFrame();
         return;
       }
@@ -284,43 +290,31 @@
   }
 
   /* =========================================================
-     10. TENANT / TENANT-КОНФИГ
-     Загружает tenant и применяет feature-флаги shell.
-  ========================================================= */
-
-  async function loadTenantConfig() {
-    try {
-      if (!window.AICTenant || typeof window.AICTenant.load !== 'function') {
-        console.warn('[AI CENTER][Shell] AICTenant is not available');
-        return null;
-      }
-
-      tenantConfigCache = await window.AICTenant.load();
-      APP_FEATURES = tenantConfigCache.features || { ...DEFAULT_FEATURES };
-      return tenantConfigCache;
-    } catch (error) {
-      console.error('[AI CENTER][Shell] Tenant config load failed:', error);
-      APP_FEATURES = { ...DEFAULT_FEATURES };
-      return null;
-    }
-  }
-
-  /* =========================================================
-     11. BOOTSTRAP / ИНИЦИАЛИЗАЦИЯ
-     Поднимает runtime, tenant, nav и стартовую страницу.
+     BOOTSTRAP / ИНИЦИАЛИЗАЦИЯ
+     Initializes runtime, loads tenant config, builds shell and opens first page
+     Инициализирует runtime, загружает tenant-конфиг, собирает shell и открывает первую страницу
   ========================================================= */
 
   async function bootstrap() {
-    Runtime.ready();
-    Runtime.expand();
+    if (Runtime && typeof Runtime.ready === 'function') {
+      Runtime.ready();
+    }
 
-    await loadTenantConfig();
+    if (Runtime && typeof Runtime.expand === 'function') {
+      Runtime.expand();
+    }
+
+    try {
+      const tenantConfig = await window.AICTenant.load();
+      APPFEATURES = tenantConfig.features || APPFEATURES;
+    } catch (error) {
+      console.error('Tenant config load failed:', error);
+    }
 
     buildPageConfig();
     updateNavVisibility();
-    updateActiveNav();
     bindNavButtons();
-    bindHeaderButtons();
+    bindShellButtons();
     bindMessageBus();
 
     const initialTab = isTabEnabled('home') ? 'home' : getFallbackTab();
@@ -330,44 +324,21 @@
   document.addEventListener('DOMContentLoaded', bootstrap);
 
   /* =========================================================
-     12. PUBLIC API / ПУБЛИЧНОЕ API SHELL
-     Внешний доступ для внутренних страниц и отладки.
+     PUBLIC SHELL API / ПУБЛИЧНОЕ API SHELL
+     Exposes minimal shell API for debugging and future integrations
+     Открывает минимальное API shell для отладки и будущих интеграций
   ========================================================= */
 
   window.AICAppShell = {
     navigate,
     getCurrentTab: () => currentTab,
-    getFeatures: () => APP_FEATURES,
-    getPageConfig: () => PAGE_CONFIG,
-    getTenantConfig: () => (
-      window.AICTenant && typeof window.AICTenant.getConfig === 'function'
-        ? window.AICTenant.getConfig()
-        : tenantConfigCache
-    ),
-    getTenantDebugContext: () => (
-      window.AICTenant && typeof window.AICTenant.getDebugContext === 'function'
-        ? window.AICTenant.getDebugContext()
-        : null
-    ),
-    getTenantDomains: () => (
-      window.AICTenant && typeof window.AICTenant.getDomains === 'function'
-        ? window.AICTenant.getDomains()
-        : {}
-    ),
-    getTenantModules: () => (
-      window.AICTenant && typeof window.AICTenant.getModules === 'function'
-        ? window.AICTenant.getModules()
-        : []
-    ),
-    getTenantPlans: () => (
-      window.AICTenant && typeof window.AICTenant.getPlans === 'function'
-        ? window.AICTenant.getPlans()
-        : []
-    ),
-    getTenantSections: () => (
-      window.AICTenant && typeof window.AICTenant.getSections === 'function'
-        ? window.AICTenant.getSections()
-        : {}
-    )
+    getFeatures: () => APPFEATURES,
+    getPageConfig: () => PAGECONFIG,
+    getTenantConfig: () => (window.AICTenant ? window.AICTenant.getConfig() : null),
+    getTenantDebugContext: () => (window.AICTenant ? window.AICTenant.getDebugContext() : null),
+    getTenantDomains: () => (window.AICTenant ? window.AICTenant.getDomains() : {}),
+    getTenantModules: () => (window.AICTenant ? window.AICTenant.getModules() : []),
+    getTenantPlans: () => (window.AICTenant ? window.AICTenant.getPlans() : []),
+    getTenantSections: () => (window.AICTenant ? window.AICTenant.getSections() : {})
   };
 })();
