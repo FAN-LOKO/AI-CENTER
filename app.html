@@ -161,7 +161,9 @@
     }
 
     function setText(el, value) {
-      if (el) el.textContent = value;
+      if (el) {
+        el.textContent = value;
+      }
     }
 
     function setShellBrandMark(config) {
@@ -169,10 +171,11 @@
       const shellLoaderMark = getEl('shellLoaderMark');
 
       const label =
-        config.brandLabel ||
-        config.brandKey ||
-        (config.appName || 'AI').replace(/AI\s*/i, '').trim().slice(0, 3) ||
-        'AI';
+        (config && (config.brandLabel || config.brandKey)) ||
+        (config && config.appName
+          ? config.appName.replace(/AI\s*/i, '').trim().slice(0, 3)
+          : '') ||
+        'FIT';
 
       const value = String(label).toUpperCase();
 
@@ -182,9 +185,15 @@
 
     function applyShellMeta(config) {
       const appBrandSubtitle = getEl('appBrandSubtitle');
-      const texts = config.texts || {};
+      const appLogoText = getEl('appLogoText');
+      const texts = (config && config.texts) || {};
 
-      document.title = texts.appTitle || config.appName || 'AI CENTER';
+      document.title = texts.appTitle || (config && config.appName) || 'AI FIT CENTER';
+
+      if (appLogoText) {
+        appLogoText.textContent =
+          texts.headerTitle || (config && config.appName) || 'AI FIT CENTER';
+      }
 
       if (appBrandSubtitle) {
         appBrandSubtitle.textContent = isTelegramWebApp()
@@ -192,7 +201,7 @@
           : (isStandalonePWA() ? 'PWA / Standalone' : 'Web App');
       }
 
-      setShellBrandMark(config);
+      setShellBrandMark(config || {});
     }
 
     function setupEnvironmentFlags() {
@@ -234,13 +243,6 @@
       }
     }
 
-    function setShellLoadingError(message) {
-      const shellLoadingText = getEl('shellLoadingText');
-      if (shellLoadingText) {
-        shellLoadingText.textContent = message;
-      }
-    }
-
     function initTelegramShell() {
       if (!isTelegramWebApp()) return;
 
@@ -268,6 +270,20 @@
       }
     }
 
+    function applyFallbackBranding() {
+      applyShellMeta({
+        brandLabel: 'FIT',
+        brandKey: 'fitline',
+        appName: 'AI FIT CENTER',
+        texts: {
+          appTitle: 'AI FIT CENTER',
+          headerTitle: 'AI FIT CENTER'
+        }
+      });
+
+      hideShellLoading();
+    }
+
     async function bootstrapShellMeta() {
       showShellLoading('Загружаем рабочее пространство бренда...');
 
@@ -281,7 +297,7 @@
         hideShellLoading();
       } catch (error) {
         console.error('[AI CENTER][App] tenant load failed', error);
-        setShellLoadingError('Не удалось загрузить конфигурацию бренда.');
+        applyFallbackBranding();
       }
     }
 
