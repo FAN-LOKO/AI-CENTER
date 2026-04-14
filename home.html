@@ -123,10 +123,25 @@
     if (!skeleton) return;
 
     skeleton.hidden = true;
+    skeleton.setAttribute('hidden', '');
+    skeleton.setAttribute('aria-hidden', 'true');
+
     skeleton.style.display = 'none';
     skeleton.style.visibility = 'hidden';
     skeleton.style.opacity = '0';
-    skeleton.setAttribute('aria-hidden', 'true');
+    skeleton.style.height = '0';
+    skeleton.style.minHeight = '0';
+    skeleton.style.maxHeight = '0';
+    skeleton.style.overflow = 'hidden';
+    skeleton.style.padding = '0';
+    skeleton.style.margin = '0';
+    skeleton.style.border = '0';
+
+    skeleton.classList.remove('home-modules-skeleton');
+
+    if (skeleton.innerHTML.trim() !== '') {
+      skeleton.innerHTML = '';
+    }
   }
 
   function forceShowHomeModulesList() {
@@ -134,6 +149,7 @@
     if (!list) return;
 
     list.hidden = false;
+    list.removeAttribute('hidden');
     list.style.display = 'flex';
     list.style.visibility = 'visible';
     list.style.opacity = '1';
@@ -173,10 +189,6 @@
       const mods = getTenantModulesRaw();
 
       if (mods.length > 0) {
-        console.log('[HOME] waitForTenantModules resolved', {
-          attempt,
-          ids: mods.map(m => m.id)
-        });
         resolve(mods);
       } else if (attempt < 20) {
         setTimeout(() => waitForTenantModules(attempt + 1).then(resolve), 150);
@@ -208,7 +220,6 @@
     return tenantModules
       .filter(m => {
         if (!m || m.enabled === false) return false;
-
         if (HOME_ALWAYS_VISIBLE_IDS.includes(m.id)) return true;
 
         const access = normalizedAccess[m.id];
@@ -335,8 +346,9 @@
     const container = getHomeModulesListEl();
     if (!container) return;
 
-    const visible = getVisibleHomeModules();
+    forceHideHomeModulesSkeleton();
 
+    const visible = getVisibleHomeModules();
     const nextSignature = JSON.stringify(
       visible.map(mod => ({
         id: mod.id,
@@ -346,10 +358,9 @@
       }))
     );
 
-    forceHideHomeModulesSkeleton();
-
     if (_lastHomeModulesSignature === nextSignature) {
       forceShowHomeModulesList();
+      forceHideHomeModulesSkeleton();
       return;
     }
 
@@ -542,6 +553,9 @@
   document.addEventListener('DOMContentLoaded', async () => {
     forceHideHomeModulesSkeleton();
 
+    const skeletonEl = getHomeModulesSkeletonEl();
+    if (skeletonEl) skeletonEl.innerHTML = '';
+
     document.getElementById('allModulesLink')?.addEventListener('click', () =>
       navigateFromHome('modules.html', 'modules'));
 
@@ -562,12 +576,17 @@
     applyTenantContent();
     renderHomeModules();
 
+    forceHideHomeModulesSkeleton();
+
     window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
     window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
   });
 
   window.addEventListener('load', () => {
     forceHideHomeModulesSkeleton();
+
+    const skeletonEl = getHomeModulesSkeletonEl();
+    if (skeletonEl) skeletonEl.innerHTML = '';
   });
 </script>
   </body>
