@@ -1,32 +1,45 @@
 (function () {
+  'use strict';
+
   /* =========================================================
      TENANT DEFAULTS / ЗНАЧЕНИЯ TENANT ПО УМОЛЧАНИЮ
-     Fallback tenant used when no explicit tenant is passed
-     Tenant по умолчанию, если tenant явно не передан
-  ========================================================= */
+     ========================================================= */
   const DEFAULT_TENANT = 'fitline';
+  const TENANT_CONFIG_BASE = 'config/tenants';
 
-    /* =========================================================
-     TENANT RESOLUTION / ОПРЕДЕЛЕНИЕ TENANT
-     Resolves tenant by hostname first, then by query param for dev mode
-     Сначала определяет tenant по hostname, затем по query param для dev-режима
-  ========================================================= */
-  function getTenantFromQuery() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('tenant');
-  }
+  /* =========================================================
+     HOST MAP / МАППИНГ ДОМЕНОВ НА TENANT
+     Один shell — много брендов. Источник резолва по hostname.
+     ========================================================= */
+  const HOST_MAP = {
+    'fit.ai-center.app': 'fitline',
+    'www.fit.ai-center.app': 'fitline',
+    'fitline.local': 'fitline'
+  };
 
-    function getHostname() {
+  /* =========================================================
+     HELPERS / ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+     ========================================================= */
+  function getHostname() {
     return window.location.hostname || '';
   }
 
-  function getHostDebugContext() {
-    return {
-      hostname: window.location.hostname || '',
-      host: window.location.host || '',
-      origin: window.location.origin || '',
-      search: window.location.search || ''
-    };
+  function getHost() {
+    return window.location.host || '';
+  }
+
+  function getOrigin() {
+    return window.location.origin || '';
+  }
+
+  function getSearch() {
+    return window.location.search || '';
+  }
+
+  function getTenantFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get('tenant');
+    return value ? value.trim() : null;
   }
 
   function isLocalhostHost(hostname) {
@@ -39,17 +52,26 @@
 
   function getTenantFromHostname() {
     const hostname = getHostname();
-
-    const hostMap = {
-      'fit.ai-center.app': 'fitline',
-      'www.fit.ai-center.app': 'fitline',
-      'fitline.local': 'fitline'
-    };
-
-    return hostMap[hostname] || null;
+    return HOST_MAP[hostname] || null;
   }
 
-    function resolveTenantId() {
+  function getHostDebugContext() {
+    return {
+      hostname: getHostname(),
+      host: getHost(),
+      origin: getOrigin(),
+      search: getSearch()
+    };
+  }
+
+  /* =========================================================
+     TENANT RESOLUTION / ОПРЕДЕЛЕНИЕ TENANT
+     Приоритет:
+     1) hostname
+     2) ?tenant=... только на localhost
+     3) fallback tenant
+     ========================================================= */
+  function resolveTenantId() {
     const hostname = getHostname();
     const tenantFromHost = getTenantFromHostname();
     const tenantFromQuery = getTenantFromQuery();
@@ -59,7 +81,6 @@
         hostname,
         tenantId: tenantFromHost
       });
-
       return tenantFromHost;
     }
 
@@ -68,7 +89,6 @@
         hostname,
         tenantId: tenantFromQuery
       });
-
       return tenantFromQuery;
     }
 
@@ -79,7 +99,7 @@
       });
     }
 
-    if (!isLocalhostHost(hostname) && !tenantFromHost) {
+    if (!tenantFromHost) {
       console.warn('[AI CENTER][Tenant] hostname is not mapped, fallback tenant used', {
         hostname,
         fallbackTenant: DEFAULT_TENANT
@@ -93,139 +113,169 @@
 
     return DEFAULT_TENANT;
   }
-  
+
   /* =========================================================
-     TENANT CONFIG LOADING / ЗАГРУЗКА TENANT-КОНФИГА
-     Loads tenant JSON configuration from config/tenants/
-     Загружает tenant JSON-конфиг из папки config/tenants/
-  ========================================================= */
-    async function loadTenantConfig(tenantId) {
-    const response = await fetch(`config/tenants/${tenantId}.json`, { cache: 'no-store' });
+     CONFIG LOADING / ЗАГРУЗКА TENANT-КОНФИГА
+     ========================================================= */
+  async function loadTenantConfig(tenantId) {
+    const configUrl = `${TENANT_CONFIG_BASE}/${tenantId}.json`;
+    const response = await fetch(configUrl, { cache: 'no-store' });
 
     if (!response.ok) {
       console.error('[AI CENTER][Tenant] config fetch failed', {
         tenantId,
         status: response.status,
         statusText: response.statusText,
+        configUrl,
         ...getHostDebugContext()
       });
 
       throw new Error(`Failed to load tenant config: ${tenantId}`);
     }
 
-    return response.json();
+    const config = await response.json();
+
+    if (!config || typeof config !== 'object') {
+      throw new Error(`Invalid tenant config payload: ${tenantId}`);
+    }
+
+    return config;
   }
 
   /* =========================================================
      THEME APPLICATION / ПРИМЕНЕНИЕ ТЕМЫ
-     Applies tenant theme values into CSS custom properties
-     Применяет тему tenant в CSS custom properties
-  ========================================================= */
+     Применяет tenant theme в CSS custom properties
+     ========================================================= */
   function applyTheme(theme) {
-    if (!theme) return;
+    if (!theme || typeof theme !== 'object') return;
 
     const root = document.documentElement;
 
-    if (theme.primary) root.style.setProperty('--brand-primary', theme.primary);
-    if (theme.primaryDark) root.style.setProperty('--brand-primary-dark', theme.primaryDark);
-    if (theme.primarySoft) root.style.setProperty('--brand-primary-soft', theme.primarySoft);
-    if (theme.bgStart) root.style.setProperty('--brand-bg-start', theme.bgStart);
-    if (theme.bgMid) root.style.setProperty('--brand-bg-mid', theme.bgMid);
-    if (theme.bgAccent) root.style.setProperty('--brand-bg-accent', theme.bgAccent);
-    if (theme.bgEnd) root.style.setProperty('--brand-bg-end', theme.bgEnd);
+    if (theme.primary) {
+      root.style.setProperty('--brand-primary', theme.primary);
+    }
+
+    if (theme.primaryDark) {
+      root.style.setProperty('--brand-primary-dark', theme.primaryDark);
+    }
+
+    if (theme.primarySoft) {
+      root.style.setProperty('--brand-primary-soft', theme.primarySoft);
+    }
+
+    if (theme.bgStart) {
+      root.style.setProperty('--brand-bg-start', theme.bgStart);
+    }
+
+    if (theme.bgMid) {
+      root.style.setProperty('--brand-bg-mid', theme.bgMid);
+    }
+
+    if (theme.bgAccent) {
+      root.style.setProperty('--brand-bg-accent', theme.bgAccent);
+    }
+
+    if (theme.bgEnd) {
+      root.style.setProperty('--brand-bg-end', theme.bgEnd);
+    }
+
+    if (theme.primary) {
+      let themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (!themeMeta) {
+        themeMeta = document.createElement('meta');
+        themeMeta.setAttribute('name', 'theme-color');
+        document.head.appendChild(themeMeta);
+      }
+      themeMeta.setAttribute('content', theme.primary);
+    }
   }
 
   /* =========================================================
      TEXT APPLICATION / ПРИМЕНЕНИЕ ТЕКСТОВ
-     Applies tenant texts to shell title, header and navigation labels
-     Применяет tenant-тексты к title, header и подписям навигации
-  ========================================================= */
+     Безопасно обновляет shell-элементы, если они есть на странице
+     ========================================================= */
+  function setTextIfExists(id, value) {
+    if (!value) return;
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = value;
+    }
+  }
+
   function applyTexts(texts, fallbackAppName) {
-    if (!texts) return;
+    if (!texts || typeof texts !== 'object') return;
 
     document.title = texts.appTitle || fallbackAppName || 'AI CENTER';
 
-    const logoText = document.getElementById('appLogoText');
-    if (logoText) {
-      logoText.textContent = texts.headerTitle || fallbackAppName || 'AI CENTER';
-    }
-
-    const navLabelHome = document.getElementById('navLabelHome');
-    if (navLabelHome && texts.navHome) {
-      navLabelHome.textContent = texts.navHome;
-    }
-
-    const navLabelMyAgent = document.getElementById('navLabelMyAgent');
-    if (navLabelMyAgent && texts.navMyAgent) {
-      navLabelMyAgent.textContent = texts.navMyAgent;
-    }
-
-    const navLabelSharedChat = document.getElementById('navLabelSharedChat');
-    if (navLabelSharedChat && texts.navSharedChat) {
-      navLabelSharedChat.textContent = texts.navSharedChat;
-    }
-
-    const navLabelModules = document.getElementById('navLabelModules');
-    if (navLabelModules && texts.navModules) {
-      navLabelModules.textContent = texts.navModules;
-    }
-
-    const navLabelAffiliate = document.getElementById('navLabelAffiliate');
-    if (navLabelAffiliate && texts.navAffiliate) {
-      navLabelAffiliate.textContent = texts.navAffiliate;
-    }
-
-    const navLabelPayments = document.getElementById('navLabelPayments');
-    if (navLabelPayments && texts.navPayments) {
-      navLabelPayments.textContent = texts.navPayments;
-    }
+    setTextIfExists('appLogoText', texts.headerTitle || fallbackAppName || 'AI CENTER');
+    setTextIfExists('navLabelHome', texts.navHome);
+    setTextIfExists('navLabelMyAgent', texts.navMyAgent);
+    setTextIfExists('navLabelSharedChat', texts.navSharedChat);
+    setTextIfExists('navLabelModules', texts.navModules);
+    setTextIfExists('navLabelAffiliate', texts.navAffiliate);
+    setTextIfExists('navLabelPayments', texts.navPayments);
+    setTextIfExists('navLabelSettings', texts.navSettings);
   }
 
   /* =========================================================
      BRANDING APPLICATION / ПРИМЕНЕНИЕ БРЕНДИНГА
-     Applies title, shell texts and theme to app shell
-     Применяет title, shell-тексты и тему к shell приложения
-  ========================================================= */
+     ========================================================= */
   function applyBranding(config) {
-    if (!config) return;
+    if (!config || typeof config !== 'object') return;
 
-    applyTexts(config.texts, config.appName || 'AI CENTER');
-    applyTheme(config.theme);
+    applyTexts(config.texts || {}, config.appName || 'AI CENTER');
+    applyTheme(config.theme || {});
   }
 
   /* =========================================================
      TENANT LOADER API / API ЗАГРУЗЧИКА TENANT
-     Stores tenant config and provides accessors for shell usage
-     Хранит tenant-конфиг и предоставляет аксессоры для shell
-  ========================================================= */
+     ========================================================= */
   const TenantLoader = {
     config: null,
+    tenantId: null,
+    loadPromise: null,
 
-            async load() {
-      const tenantId = resolveTenantId();
-      const config = await loadTenantConfig(tenantId);
+    async load() {
+      if (this.loadPromise) {
+        return this.loadPromise;
+      }
 
-      this.config = config;
-      applyBranding(config);
+      this.loadPromise = (async () => {
+        const tenantId = resolveTenantId();
+        const config = await loadTenantConfig(tenantId);
 
-      console.info('[AI CENTER][Tenant] config loaded', {
-        tenantId: config.tenantId,
-        appName: config.appName,
-        primaryDomain: config.domains?.primary || null
-      });
+        this.tenantId = tenantId;
+        this.config = config;
 
-      return config;
+        applyBranding(config);
+
+        console.info('[AI CENTER][Tenant] config loaded', {
+          tenantId: config.tenantId || tenantId,
+          appName: config.appName || 'AI CENTER',
+          primaryDomain: config.domains?.primary || null
+        });
+
+        return config;
+      })();
+
+      return this.loadPromise;
     },
 
-        getConfig() {
+    getConfig() {
       return this.config;
+    },
+
+    getTenantId() {
+      return this.config?.tenantId || this.tenantId || null;
     },
 
     getDebugContext() {
       return {
-        resolvedTenantId: this.config?.tenantId || null,
-        hostname: window.location.hostname || '',
-        origin: window.location.origin || '',
+        resolvedTenantId: this.getTenantId(),
+        hostname: getHostname(),
+        host: getHost(),
+        origin: getOrigin(),
+        search: getSearch(),
         domains: this.config?.domains || {}
       };
     },
@@ -256,13 +306,25 @@
 
     getAppName() {
       return this.config?.appName || 'AI CENTER';
+    },
+
+    getPolicyLinks() {
+      return this.config?.policyLinks || {};
+    },
+
+    getTheme() {
+      return this.config?.theme || {};
+    },
+
+    reset() {
+      this.config = null;
+      this.tenantId = null;
+      this.loadPromise = null;
     }
   };
 
   /* =========================================================
      GLOBAL EXPORT / ГЛОБАЛЬНЫЙ ЭКСПОРТ
-     Exposes tenant loader to shell and other platform layers
-     Открывает tenant-loader для shell и других слоев платформы
-  ========================================================= */
+     ========================================================= */
   window.AICTenant = TenantLoader;
 })();
