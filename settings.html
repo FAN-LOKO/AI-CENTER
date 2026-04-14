@@ -11,64 +11,66 @@
 </head>
 <body>
   <div class="page settings-page">
-    <!-- ДАННЫЕ ПРОФИЛЯ -->
     <section class="card-section">
-  <div class="card-section-header">
-    <h2 class="card-section-title">Данные профиля</h2>
-    <p class="card-section-subtitle">
-      Эти данные используются для авторизации в PWA и коммуникации
-    </p>
-  </div>
-
-  <div class="card-section-body">
-    <form class="settings-form" id="profileForm" novalidate>
-      <div class="settings-field">
-        <label for="profileFullName" class="settings-label">ФИО</label>
-        <input
-          id="profileFullName"
-          name="fullName"
-          type="text"
-          class="settings-input"
-          autocomplete="name"
-          placeholder="Введите ФИО"
-        />
-      </div>
-
-      <div class="settings-field">
-        <label for="profileEmail" class="settings-label">Email</label>
-        <input
-          id="profileEmail"
-          name="email"
-          type="email"
-          class="settings-input"
-          autocomplete="email"
-          placeholder="you@example.com"
-          required
-        />
-        <p class="settings-helper-text">
-          Email используется для входа в PWA и восстановления доступа.
+      <div class="card-section-header">
+        <h2 class="card-section-title">Данные профиля</h2>
+        <p class="card-section-subtitle">
+          Эти данные используются для авторизации в PWA и коммуникации
         </p>
       </div>
 
-      <button
-        type="submit"
-        class="btn btn-primary btn-block"
-        id="profileSaveButton"
-      >
-        Сохранить
-      </button>
+      <div class="card-section-body">
+        <form class="settings-form" id="profileForm" novalidate>
+          <div class="settings-field">
+            <label for="profileFullName" class="settings-label">ФИО</label>
+            <input
+              id="profileFullName"
+              name="fullName"
+              type="text"
+              class="settings-input"
+              autocomplete="name"
+              placeholder="Введите ФИО"
+            />
+          </div>
 
-      <p class="settings-success-text" id="profileStatusMessage" hidden></p>
-    </form>
-  </div>
-</section>
+          <div class="settings-field">
+            <label for="profileEmail" class="settings-label">Email</label>
+            <input
+              id="profileEmail"
+              name="email"
+              type="email"
+              class="settings-input"
+              autocomplete="email"
+              placeholder="you@example.com"
+              required
+            />
+            <p class="settings-helper-text">
+              Email используется для входа в PWA и восстановления доступа.
+            </p>
+          </div>
 
-    <!-- О ПРИЛОЖЕНИИ -->
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            id="profileSaveButton"
+          >
+            Сохранить
+          </button>
+
+          <p
+            class="settings-success-text"
+            id="profileStatusMessage"
+            hidden
+          ></p>
+        </form>
+      </div>
+    </section>
+
     <section class="card-section">
       <div class="card-section-header">
         <h2 class="card-section-title">О приложении</h2>
         <p class="card-section-subtitle">
-          Общая информация о платформе AI CENTER Miniapp
+          Общая информация о платформе AI FIT CENTER
         </p>
       </div>
 
@@ -95,8 +97,8 @@
           </div>
 
           <div class="settings-info-row">
-            <span class="settings-info-label">Источник версии</span>
-            <span class="settings-info-value" id="settingsVersionSource">—</span>
+            <span class="settings-info-label">Tenant</span>
+            <span class="settings-info-value" id="settingsTenantId">fitline</span>
           </div>
         </div>
       </div>
@@ -104,208 +106,167 @@
   </div>
 
   <script>
-    (function initSettingsPage() {
-      function safeGetShell() {
-        try {
-          return window.parent && window.parent.AICAppShell
-            ? window.parent.AICAppShell
-            : null;
-        } catch (e) {
-          console.error("Settings: parent shell access failed", e);
-          return null;
-        }
+    function getShell() {
+      try {
+        return window.parent?.AICAppShell || null;
+      } catch (error) {
+        console.error("Settings shell access failed:", error);
+        return null;
+      }
+    }
+
+    function requestUserProfile() {
+      try {
+        window.parent?.postMessage?.({ type: "request-user-profile" }, "*");
+      } catch (error) {
+        console.error("Settings request-user-profile failed:", error);
+      }
+    }
+
+    function applyUserProfile(profile) {
+      if (!profile || typeof profile !== "object") return;
+
+      const fullNameInput = document.getElementById("profileFullName");
+      const emailInput = document.getElementById("profileEmail");
+
+      if (fullNameInput && typeof profile.fullName === "string") {
+        fullNameInput.value = profile.fullName;
       }
 
-      function readVersionInfo(shell) {
-        if (!shell || typeof shell.getVersionInfo !== "function") {
-          const runtime =
-            window.parent && window.parent.AICRuntime
-              ? window.parent.AICRuntime
-              : null;
-          return runtime && runtime.version ? runtime.version : null;
-        }
+      if (emailInput && typeof profile.email === "string") {
+        emailInput.value = profile.email;
+      }
+    }
 
-        try {
-          return shell.getVersionInfo() || null;
-        } catch (e) {
-          console.error("Settings: getVersionInfo failed", e);
-          return null;
-        }
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function setStatus(message, type) {
+      const statusEl = document.getElementById("profileStatusMessage");
+      if (!statusEl) return;
+
+      if (!message) {
+        statusEl.hidden = true;
+        statusEl.textContent = "";
+        statusEl.className = "settings-success-text";
+        return;
       }
 
-      function formatDate(value) {
-        if (!value) return "—";
-        try {
-          const d = new Date(value);
-          if (Number.isNaN(d.getTime())) return value;
-          const yyyy = d.getFullYear();
-          const mm = String(d.getMonth() + 1).padStart(2, "0");
-          const dd = String(d.getDate()).padStart(2, "0");
-          const hh = String(d.getHours()).padStart(2, "0");
-          const mi = String(d.getMinutes()).padStart(2, "0");
-          return `${dd}.${mm}.${yyyy} ${hh}:${mi} UTC`;
-        } catch {
-          return value;
-        }
+      statusEl.hidden = false;
+      statusEl.textContent = message;
+
+      if (type === "error") {
+        statusEl.className = "settings-helper-text";
+      } else {
+        statusEl.className = "settings-success-text";
       }
+    }
 
-      function fillVersionBlock(shell) {
-        const version = readVersionInfo(shell) || {};
+    function fillVersionInfo() {
+      const shell = getShell();
+      const version =
+        shell && typeof shell.getVersionInfo === "function"
+          ? shell.getVersionInfo()
+          : window.parent?.AICRuntime?.version || null;
 
+      const tenantConfig =
+        shell && typeof shell.getTenantConfig === "function"
+          ? shell.getTenantConfig()
+          : null;
+
+      if (version) {
         const appVersionEl = document.getElementById("settingsAppVersion");
         const buildVersionEl = document.getElementById("settingsBuildVersion");
         const commitHashEl = document.getElementById("settingsCommitHash");
         const builtAtEl = document.getElementById("settingsBuiltAt");
-        const sourceEl = document.getElementById("settingsVersionSource");
 
-        if (appVersionEl) appVersionEl.textContent = version.appVersion || "—";
-        if (buildVersionEl) buildVersionEl.textContent = version.buildVersion || "—";
-        if (commitHashEl) commitHashEl.textContent = version.commitHash || "—";
-        if (builtAtEl) builtAtEl.textContent = formatDate(version.builtAt);
-        if (sourceEl) sourceEl.textContent = version.source || "—";
+        if (appVersionEl) {
+          appVersionEl.textContent = version.appVersion || "—";
+        }
+
+        if (buildVersionEl) {
+          buildVersionEl.textContent = version.buildVersion || "—";
+        }
+
+        if (commitHashEl) {
+          commitHashEl.textContent = version.commitHash || "—";
+        }
+
+        if (builtAtEl) {
+          builtAtEl.textContent = version.builtAt || "—";
+        }
       }
 
-      function validateEmail(value) {
-        if (!value) return false;
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(value.trim());
+      if (tenantConfig) {
+        const tenantIdEl = document.getElementById("settingsTenantId");
+        if (tenantIdEl) {
+          tenantIdEl.textContent = tenantConfig.tenantId || "—";
+        }
       }
+    }
 
-      function fillProfileFormFromShell() {
+    function bindProfileForm() {
+      const form = document.getElementById("profileForm");
+      if (!form) return;
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
         const fullNameInput = document.getElementById("profileFullName");
         const emailInput = document.getElementById("profileEmail");
-        if (!fullNameInput && !emailInput) return;
 
-        function applyProfile(profile) {
-          if (!profile || typeof profile !== "object") return;
-          if (fullNameInput && profile.fullName) {
-            fullNameInput.value = profile.fullName;
-          }
-          if (emailInput && profile.email) {
-            emailInput.value = profile.email;
-          }
+        const fullName = fullNameInput?.value?.trim() || "";
+        const email = emailInput?.value?.trim() || "";
+
+        if (!email) {
+          setStatus("Укажите email для входа в PWA", "error");
+          emailInput?.focus();
+          return;
         }
+
+        if (!validateEmail(email)) {
+          setStatus("Введите корректный email", "error");
+          emailInput?.focus();
+          return;
+        }
+
+        const profile = {
+          fullName,
+          email
+        };
 
         try {
-          const shell = safeGetShell();
-          if (!shell) return;
+          window.parent?.postMessage?.(
+            {
+              type: "save-user-profile",
+              profile
+            },
+            "*"
+          );
 
-          const runtime =
-            window.parent && window.parent.AICRuntime
-              ? window.parent.AICRuntime
-              : null;
-
-          if (runtime && runtime.userProfile) {
-            applyProfile(runtime.userProfile);
-          }
-        } catch (e) {
-          console.error("Settings: fillProfileFormFromShell failed", e);
+          setStatus("Данные профиля сохранены", "success");
+        } catch (error) {
+          console.error("Settings save-user-profile failed:", error);
+          setStatus("Не удалось сохранить профиль", "error");
         }
-      }
-
-      function setupProfileForm(shell) {
-        const form = document.getElementById("profileForm");
-        const fullNameInput = document.getElementById("profileFullName");
-        const emailInput = document.getElementById("profileEmail");
-        const statusEl = document.getElementById("profileStatusMessage");
-        const saveBtn = document.getElementById("profileSaveButton");
-
-        if (!form || !emailInput || !saveBtn) return;
-
-        function setStatus(message, type) {
-  if (!statusEl) return;
-
-  statusEl.hidden = !message;
-  statusEl.textContent = message || "";
-
-  statusEl.classList.remove("settings-success-text", "settings-helper-text");
-
-  if (type === "success") {
-    statusEl.classList.add("settings-success-text");
-  } else if (type === "error") {
-    statusEl.classList.add("settings-helper-text");
-  }
-}
-
-        form.addEventListener("submit", function (event) {
-          event.preventDefault();
-
-          const fullName = fullNameInput ? fullNameInput.value.trim() : "";
-          const email = emailInput.value.trim();
-
-          if (!validateEmail(email)) {
-            setStatus("Введите корректный email", "error");
-            emailInput.focus();
-            return;
-          }
-
-          const profile = {
-            fullName: fullName || null,
-            email,
-            updatedAt: new Date().toISOString()
-          };
-
-          try {
-            if (window.parent && window.parent.postMessage) {
-              window.parent.postMessage(
-                {
-                  type: "save-user-profile",
-                  profile
-                },
-                "*"
-              );
-            }
-            setStatus("Профиль сохранён", "success");
-          } catch (e) {
-            console.error("Settings: save-user-profile postMessage failed", e);
-            setStatus("Не удалось сохранить профиль", "error");
-          }
-        });
-      }
-
-      function bindProfileListener() {
-        const fullNameInput = document.getElementById("profileFullName");
-        const emailInput = document.getElementById("profileEmail");
-        if (!fullNameInput && !emailInput) return;
-
-        function applyProfile(profile) {
-          if (!profile || typeof profile !== "object") return;
-          if (fullNameInput && profile.fullName) {
-            fullNameInput.value = profile.fullName;
-          }
-          if (emailInput && profile.email) {
-            emailInput.value = profile.email;
-          }
-        }
-
-        window.addEventListener("message", function (event) {
-          const data = event.data;
-          if (!data || typeof data !== "object") return;
-          if (data.type === "user-profile") {
-            applyProfile(data.profile);
-          }
-        });
-
-        try {
-          if (window.parent && window.parent.postMessage) {
-            window.parent.postMessage(
-              { type: "request-user-profile" },
-              "*"
-            );
-          }
-        } catch (e) {
-          console.error("Settings: request-user-profile failed", e);
-        }
-      }
-
-      document.addEventListener("DOMContentLoaded", function () {
-        const shell = safeGetShell();
-        fillVersionBlock(shell);
-        fillProfileFormFromShell();
-        setupProfileForm(shell);
-        bindProfileListener();
       });
-    })();
+    }
+
+    window.addEventListener("message", function (event) {
+      const data = event.data;
+      if (!data || typeof data !== "object") return;
+
+      if (data.type === "user-profile") {
+        applyUserProfile(data.profile);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      fillVersionInfo();
+      bindProfileForm();
+      requestUserProfile();
+    });
   </script>
 </body>
 </html>
