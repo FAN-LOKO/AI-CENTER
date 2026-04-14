@@ -176,6 +176,10 @@
   /** true — модули уже были загружены из shell хотя бы раз */
   let _modulesReady = false;
 
+  /** Last rendered modules signature to avoid duplicate repaint */
+ /** Сигнатура последнего рендера, чтобы не делать лишнюю перерисовку */
+let _lastHomeModulesSignature = '';
+
   // ═══════════════════════════════════════════════════════════════
   //  SHELL HELPERS / ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ SHELL
   //  Helpers to read tenant config and modules from parent shell.
@@ -474,6 +478,21 @@
     if (!container) return;
 
     const visible = getVisibleHomeModules();
+    const nextSignature = JSON.stringify(
+  visible.map(mod => ({
+    id: mod.id,
+    frozen: !!mod.frozen,
+    paid: !!mod.paid,
+    daysLeft: typeof mod.daysLeft === 'number' ? mod.daysLeft : null
+  }))
+);
+
+if (_lastHomeModulesSignature === nextSignature) {
+  console.log('[HOME] renderHomeModules skipped: no changes');
+  return;
+}
+
+_lastHomeModulesSignature = nextSignature;
     console.log('[HOME] renderHomeModules', {
       visibleIds: visible.map(m => m.id),
       totalUserModules: USERMODULES.length
