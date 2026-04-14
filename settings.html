@@ -1,437 +1,193 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Настройки</title>
-    <link rel="stylesheet" href="css/styles.css" />
-  </head>
-  <body>
-    <div class="screen">
-      <div class="page settings-page">
-        <!-- =========================================================
-             SETTINGS / PAGE HEADER
-        ========================================================== -->
-        <section class="card-section">
-          <div class="card-section-header">
-            <h1 class="card-section-title" id="settingsPageTitle">Настройки</h1>
-            <p class="card-section-subtitle" id="settingsPageSubtitle">
-              Профиль, данные аккаунта и параметры приложения
-            </p>
-          </div>
-          <div class="card-section-body">
-            <p class="settings-intro-text" id="settingsIntroText">
-              Здесь можно проверить данные профиля, обновить контактную информацию и завершить текущую сессию.
-            </p>
-          </div>
-        </section>
-
-        <!-- =========================================================
-             SETTINGS / PROFILE
-        ========================================================== -->
-        <section class="card-section">
-          <div class="card-section-header">
-            <h2 class="card-section-title">Профиль</h2>
-            <p class="card-section-subtitle" id="settingsProfileCardSubtitle">
-              Основная информация пользователя
-            </p>
-          </div>
-          <div class="card-section-body">
-            <div class="settings-profile-card">
-              <div class="settings-profile-top">
-                <div class="settings-profile-avatar" id="settingsProfileAvatar">
-                  <span id="settingsProfileAvatarFallback">U</span>
-                  <img
-                    id="settingsProfileAvatarImage"
-                    alt="Аватар пользователя"
-                    hidden
-                  />
-                </div>
-
-                <div class="settings-profile-meta">
-                  <div
-                    class="settings-profile-name"
-                    id="settingsProfileTelegramName"
-                  >
-                    Не указано
-                  </div>
-                  <div
-                    class="settings-profile-username"
-                    id="settingsProfileTelegramUsername"
-                  >
-                    @username
-                  </div>
-                  <div
-                    class="settings-profile-id"
-                    id="settingsProfileTelegramId"
-                  >
-                    ID: —
-                  </div>
-                </div>
-              </div>
-
-              <div class="settings-form">
-                <div class="settings-field">
-                  <label class="settings-label" for="settingsFullNameInput">
-                    ФИО
-                  </label>
-                  <input
-                    id="settingsFullNameInput"
-                    class="settings-input"
-                    type="text"
-                    placeholder="Введите ФИО"
-                    autocomplete="name"
-                  />
-                </div>
-
-                <div class="settings-field">
-                  <label class="settings-label" for="settingsEmailInput">
-                    Почта
-                  </label>
-                  <input
-                    id="settingsEmailInput"
-                    class="settings-input"
-                    type="email"
-                    placeholder="Введите email"
-                    autocomplete="email"
-                  />
-                </div>
-
-                <p
-                  class="settings-helper-text"
-                  id="settingsProfileHelperText"
-                >
-                  Эти данные используются в карточке профиля и во внутренних сценариях приложения.
-                </p>
-
-                <button
-                  type="button"
-                  class="btn btn-block"
-                  id="settingsSaveProfileButton"
-                >
-                  Сохранить данные
-                </button>
-
-                <p
-                  class="settings-success-text"
-                  id="settingsSaveProfileSuccess"
-                  hidden
-                >
-                  Данные профиля сохранены.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- =========================================================
-             SETTINGS / ABOUT APP
-        ========================================================== -->
-        <section class="card-section">
-          <div class="card-section-header">
-            <h2 class="card-section-title">О приложении</h2>
-            <p class="card-section-subtitle" id="settingsAboutSubtitle">
-              Служебная информация о текущей сборке и бренде
-            </p>
-          </div>
-          <div class="card-section-body">
-            <div class="settings-info-list">
-              <div class="settings-info-row">
-                <span class="settings-info-label">Приложение:</span>
-                <span class="settings-info-value" id="settingsAboutAppName">
-                  —
-                </span>
-              </div>
-
-              <div class="settings-info-row">
-                <span class="settings-info-label">Tenant:</span>
-                <span class="settings-info-value" id="settingsAboutTenantId">
-                  —
-                </span>
-              </div>
-
-              <div class="settings-info-row">
-                <span class="settings-info-label">Версия:</span>
-                <span class="settings-info-value" id="settingsAboutVersion">
-                  1.0.0
-                </span>
-              </div>
-
-              <div class="settings-info-row">
-                <span class="settings-info-label">Среда:</span>
-                <span class="settings-info-value" id="settingsAboutRuntime">
-                  Telegram Mini App
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- =========================================================
-             SETTINGS / ACTIONS
-        ========================================================== -->
-        <section class="card-section">
-          <div class="card-section-header">
-            <h2 class="card-section-title">Действия</h2>
-            <p class="card-section-subtitle">
-              Управление текущей сессией
-            </p>
-          </div>
-          <div class="card-section-body">
-            <button
-              class="btn btn-logout btn-block"
-              type="button"
-              id="settingsCloseAppButton"
-            >
-              Закрыть приложение
-            </button>
-          </div>
-        </section>
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  />
+  <title>Настройки</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="page settings-page">
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">О приложении</h2>
+        <p class="card-section-subtitle">
+          Общая информация о платформе AI CENTER Miniapp
+        </p>
       </div>
-    </div>
 
-    <script>
-      function closeApp() {
-        const tg = window.Telegram && window.Telegram.WebApp;
-        if (tg && tg.close) {
-          tg.close();
-        } else {
-          window.parent?.postMessage?.({ type: "close" }, "*");
-        }
-      }
+      <div class="card-section-body">
+        <div class="settings-info-list">
+          <div class="settings-info-row">
+            <span class="settings-info-label">Версия платформы</span>
+            <span class="settings-info-value" id="settingsAppVersion">—</span>
+          </div>
 
-      function getTelegramUser() {
-        return window.Telegram?.WebApp?.initDataUnsafe?.user || null;
-      }
+          <div class="settings-info-row">
+            <span class="settings-info-label">Сборка</span>
+            <span class="settings-info-value" id="settingsBuildVersion">—</span>
+          </div>
 
-      function getTelegramFullName(user) {
-        if (!user) return "";
-        return [user.first_name || "", user.last_name || ""]
-          .filter(Boolean)
-          .join(" ")
-          .trim();
-      }
+          <div class="settings-info-row">
+            <span class="settings-info-label">Commit</span>
+            <span class="settings-info-value" id="settingsCommitHash">—</span>
+          </div>
 
-      function getTenantConfig() {
+          <div class="settings-info-row">
+            <span class="settings-info-label">Дата сборки</span>
+            <span class="settings-info-value" id="settingsBuiltAt">—</span>
+          </div>
+
+          <div class="settings-info-row">
+            <span class="settings-info-label">Источник версии</span>
+            <span class="settings-info-value" id="settingsVersionSource">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Компания</h2>
+        <p class="card-section-subtitle">
+          Текущий бренд и конфигурация tenant
+        </p>
+      </div>
+
+      <div class="card-section-body">
+        <div class="settings-info-list">
+          <div class="settings-info-row">
+            <span class="settings-info-label">Tenant ID</span>
+            <span class="settings-info-value" id="settingsTenantId">—</span>
+          </div>
+
+          <div class="settings-info-row">
+            <span class="settings-info-label">Название приложения</span>
+            <span class="settings-info-value" id="settingsAppName">—</span>
+          </div>
+
+          <div class="settings-info-row">
+            <span class="settings-info-label">Основной домен</span>
+            <span class="settings-info-value" id="settingsPrimaryDomain">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (function initSettingsPage() {
+      function safeGetShell() {
         try {
-          return window.parent?.AICAppShell?.getTenantConfig?.() || null;
-        } catch (error) {
-          console.error("Settings tenant config read failed", error);
+          return window.parent && window.parent.AICAppShell
+            ? window.parent.AICAppShell
+            : null;
+        } catch (e) {
+          console.error("Settings: parent shell access failed", e);
           return null;
         }
       }
 
-      function isTelegramRuntime() {
-        return !!(window.Telegram && window.Telegram.WebApp);
-      }
-
-      function isStandalonePWA() {
-        return (
-          window.matchMedia?.("(display-mode: standalone)")?.matches ||
-          window.navigator.standalone === true
-        );
-      }
-
-      function getRuntimeLabel() {
-        if (isTelegramRuntime()) return "Telegram Mini App";
-        if (isStandalonePWA()) return "PWA / Standalone";
-        return "Web App";
-      }
-
-      function applyTenantMeta() {
-        const tenantConfig = getTenantConfig();
-        const texts = tenantConfig?.texts || {};
-        const appName =
-          texts.appTitle ||
-          texts.headerTitle ||
-          tenantConfig?.appName ||
-          "AI CENTER";
-        const tenantId = tenantConfig?.tenantId || "default";
-
-        document.title = `Настройки — ${appName}`;
-
-        const pageTitle = document.getElementById("settingsPageTitle");
-        const pageSubtitle = document.getElementById("settingsPageSubtitle");
-        const introText = document.getElementById("settingsIntroText");
-        const profileSubtitle = document.getElementById("settingsProfileCardSubtitle");
-        const aboutAppName = document.getElementById("settingsAboutAppName");
-        const aboutTenantId = document.getElementById("settingsAboutTenantId");
-        const aboutRuntime = document.getElementById("settingsAboutRuntime");
-
-        if (pageTitle) {
-          pageTitle.textContent = "Настройки";
+      function readVersionInfo(shell) {
+        if (!shell || typeof shell.getVersionInfo !== "function") {
+          const runtime = window.parent && window.parent.AICRuntime
+            ? window.parent.AICRuntime
+            : null;
+          return runtime && runtime.version ? runtime.version : null;
         }
 
-        if (pageSubtitle) {
-          pageSubtitle.textContent = `Профиль и параметры ${appName}`;
-        }
-
-        if (introText) {
-          introText.textContent =
-            "Здесь можно проверить данные профиля, обновить контактную информацию и завершить текущую сессию.";
-        }
-
-        if (profileSubtitle) {
-          profileSubtitle.textContent = "Основная информация пользователя";
-        }
-
-        if (aboutAppName) {
-          aboutAppName.textContent = appName;
-        }
-
-        if (aboutTenantId) {
-          aboutTenantId.textContent = tenantId;
-        }
-
-        if (aboutRuntime) {
-          aboutRuntime.textContent = getRuntimeLabel();
+        try {
+          return shell.getVersionInfo() || null;
+        } catch (e) {
+          console.error("Settings: getVersionInfo failed", e);
+          return null;
         }
       }
 
-      function setSettingsAvatar(user, fullName) {
-        const avatarFallback = document.getElementById("settingsProfileAvatarFallback");
-        const avatarImage = document.getElementById("settingsProfileAvatarImage");
-
-        const fallbackLetter = (fullName || "U").charAt(0).toUpperCase();
-
-        if (avatarFallback) {
-          avatarFallback.textContent = fallbackLetter;
-          avatarFallback.hidden = false;
+      function readTenantInfo(shell) {
+        if (!shell || typeof shell.getTenantConfig !== "function") {
+          return null;
         }
 
-        if (avatarImage) {
-          avatarImage.hidden = true;
-          avatarImage.removeAttribute("src");
-        }
-
-        if (user?.photo_url && avatarImage) {
-          avatarImage.src = user.photo_url;
-          avatarImage.hidden = false;
-
-          if (avatarFallback) {
-            avatarFallback.hidden = true;
-          }
+        try {
+          return shell.getTenantConfig() || null;
+        } catch (e) {
+          console.error("Settings: getTenantConfig failed", e);
+          return null;
         }
       }
 
-      function fillTelegramProfileBlock() {
-        const user = getTelegramUser();
-
-        const nameEl = document.getElementById("settingsProfileTelegramName");
-        const usernameEl = document.getElementById("settingsProfileTelegramUsername");
-        const idEl = document.getElementById("settingsProfileTelegramId");
-        const fullNameInput = document.getElementById("settingsFullNameInput");
-
-        if (!user) {
-          if (nameEl) nameEl.textContent = "Не указано";
-          if (usernameEl) usernameEl.textContent = "@username";
-          if (idEl) idEl.textContent = "ID: —";
-          setSettingsAvatar(null, "U");
-          return;
-        }
-
-        const telegramFullName = getTelegramFullName(user);
-        const telegramUsername = user.username ? `@${user.username}` : "username не указан";
-        const telegramId = user.id ? `ID: ${user.id}` : "ID: —";
-
-        if (nameEl) {
-          nameEl.textContent = telegramFullName || "Не указано";
-        }
-
-        if (usernameEl) {
-          usernameEl.textContent = telegramUsername;
-        }
-
-        if (idEl) {
-          idEl.textContent = telegramId;
-        }
-
-        if (fullNameInput && !fullNameInput.value.trim()) {
-          fullNameInput.value = telegramFullName || "";
-        }
-
-        setSettingsAvatar(user, telegramFullName || "U");
-      }
-
-      function applyIncomingProfile(profile) {
-        if (!profile || typeof profile !== "object") return;
-
-        const fullNameInput = document.getElementById("settingsFullNameInput");
-        const emailInput = document.getElementById("settingsEmailInput");
-
-        if (fullNameInput && profile.fullName && !fullNameInput.value.trim()) {
-          fullNameInput.value = profile.fullName;
-        }
-
-        if (emailInput && profile.email) {
-          emailInput.value = profile.email;
+      function formatDate(value) {
+        if (!value) return "—";
+        try {
+          const d = new Date(value);
+          if (Number.isNaN(d.getTime())) return value;
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, "0");
+          const dd = String(d.getDate()).padStart(2, "0");
+          const hh = String(d.getHours()).padStart(2, "0");
+          const mi = String(d.getMinutes()).padStart(2, "0");
+          return `${dd}.${mm}.${yyyy} ${hh}:${mi} UTC`;
+        } catch {
+          return value;
         }
       }
 
-      function saveProfileSettings() {
-        const fullNameInput = document.getElementById("settingsFullNameInput");
-        const emailInput = document.getElementById("settingsEmailInput");
-        const successEl = document.getElementById("settingsSaveProfileSuccess");
-        const telegramUser = getTelegramUser();
+      document.addEventListener("DOMContentLoaded", function () {
+        const shell = safeGetShell();
 
-        const payload = {
-          fullName: fullNameInput?.value?.trim() || "",
-          email: emailInput?.value?.trim() || "",
-          telegramId: telegramUser?.id || null,
-          telegramUsername: telegramUser?.username || "",
-          telegramFirstName: telegramUser?.first_name || "",
-          telegramLastName: telegramUser?.last_name || "",
-          telegramPhotoUrl: telegramUser?.photo_url || ""
-        };
+        const version = readVersionInfo(shell) || {};
+        const appVersionEl = document.getElementById("settingsAppVersion");
+        const buildVersionEl = document.getElementById("settingsBuildVersion");
+        const commitHashEl = document.getElementById("settingsCommitHash");
+        const builtAtEl = document.getElementById("settingsBuiltAt");
+        const sourceEl = document.getElementById("settingsVersionSource");
 
-        window.parent?.postMessage?.(
-          {
-            type: "save-user-profile",
-            profile: payload
-          },
-          "*"
-        );
-
-        if (successEl) {
-          successEl.hidden = false;
-          successEl.textContent = "Данные профиля сохранены.";
-
-          window.setTimeout(() => {
-            successEl.hidden = true;
-          }, 2500);
+        if (appVersionEl) {
+          appVersionEl.textContent = version.appVersion || "—";
         }
-      }
 
-      window.addEventListener("message", (event) => {
-        const data = event.data;
-        if (!data || typeof data !== "object") return;
+        if (buildVersionEl) {
+          buildVersionEl.textContent = version.buildVersion || "—";
+        }
 
-        if (data.type === "user-profile") {
-          applyIncomingProfile(data.profile || data);
+        if (commitHashEl) {
+          commitHashEl.textContent = version.commitHash || "—";
+        }
+
+        if (builtAtEl) {
+          builtAtEl.textContent = formatDate(version.builtAt);
+        }
+
+        if (sourceEl) {
+          sourceEl.textContent = version.source || "—";
+        }
+
+        const tenant = readTenantInfo(shell) || {};
+        const tenantIdEl = document.getElementById("settingsTenantId");
+        const appNameEl = document.getElementById("settingsAppName");
+        const primaryDomainEl = document.getElementById("settingsPrimaryDomain");
+
+        if (tenantIdEl) {
+          tenantIdEl.textContent = tenant.tenantId || "—";
+        }
+
+        if (appNameEl) {
+          appNameEl.textContent = tenant.appName || "—";
+        }
+
+        if (primaryDomainEl) {
+          const primary =
+            tenant.domains && tenant.domains.primary
+              ? tenant.domains.primary
+              : null;
+          primaryDomainEl.textContent = primary || "—";
         }
       });
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const closeButton = document.getElementById("settingsCloseAppButton");
-        const saveButton = document.getElementById("settingsSaveProfileButton");
-
-        if (closeButton) {
-          closeButton.addEventListener("click", closeApp);
-        }
-
-        if (saveButton) {
-          saveButton.addEventListener("click", saveProfileSettings);
-        }
-
-        applyTenantMeta();
-        fillTelegramProfileBlock();
-
-        window.parent?.postMessage?.(
-          {
-            type: "request-user-profile"
-          },
-          "*"
-        );
-      });
-    </script>
-  </body>
+    })();
+  </script>
+</body>
 </html>
