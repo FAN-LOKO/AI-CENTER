@@ -1,6 +1,6 @@
 /* =========================================================
-   AI CENTER / MAIN STYLES (COMPATIBLE VERSION)
-   Совместимый styles.css под текущую разметку проекта.
+   AI CENTER / COMPATIBLE MAIN STYLES
+   Финальная совместимая версия styles.css
 
    Покрывает:
    - index.html
@@ -14,20 +14,16 @@
    - settings.html
 
    Принцип:
-   - не ломаем текущий DOM
-   - не переименовываем рабочие классы
-   - чистим дубли
-   - разделяем блоки по ответственности
+   - текущая HTML-разметка = источник правды
+   - ничего не переименовываем
+   - возвращаем рабочий визуал shell и базовых страниц
 ========================================================= */
 
 /* =========================================================
-   1. ROOT TOKENS / БАЗОВЫЕ ПЕРЕМЕННЫЕ
-   Общие цветовые, текстовые и layout-переменные.
-   Tenant-loader может переопределять tenant-* переменные.
+   1. ROOT TOKENS
 ========================================================= */
 
 :root {
-  /* Brand */
   --brand-primary: #3b82f6;
   --brand-primary-dark: #0b3c78;
   --brand-primary-soft: #7ec8ff;
@@ -37,7 +33,6 @@
   --brand-bg-accent: #3b82f6;
   --brand-bg-end: #0b3c78;
 
-  /* Tenant aliases */
   --tenant-primary: var(--brand-primary);
   --tenant-primary-dark: var(--brand-primary-dark);
   --tenant-primary-soft: var(--brand-primary-soft);
@@ -46,43 +41,38 @@
   --tenant-bg-accent: var(--brand-bg-accent);
   --tenant-bg-end: var(--brand-bg-end);
 
-  /* Semantic */
   --brand-text-on-primary: #ffffff;
   --brand-danger: #ef4444;
   --brand-success: #10b981;
   --brand-success-dark: #059669;
 
-  /* Surfaces */
   --surface-white: #ffffff;
-  --surface-white-soft: rgba(255, 255, 255, 0.60);
-  --surface-white-strong: rgba(255, 255, 255, 0.80);
+  --surface-white-soft: rgba(255, 255, 255, 0.68);
+  --surface-white-strong: rgba(255, 255, 255, 0.86);
   --surface-app: #ffffff;
 
-  /* Text */
   --text-primary: #1a1a1a;
   --text-heading: #111827;
   --text-body: #374151;
   --text-muted: #6b7280;
   --text-soft: #4b5563;
 
-  /* Borders and shadows */
   --border-soft: #e5e7eb;
-  --shadow-brand-sm: 0 4px 12px rgba(59, 130, 246, 0.25);
-  --shadow-brand-md: 0 6px 20px rgba(59, 130, 246, 0.35);
-  --shadow-dark-md: 0 6px 20px rgba(15, 23, 42, 0.18);
-  --shadow-shell: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --border-mid: rgba(148, 163, 184, 0.45);
 
-  /* Layout */
+  --shadow-brand-sm: 0 4px 12px rgba(59, 130, 246, 0.22);
+  --shadow-brand-md: 0 8px 22px rgba(59, 130, 246, 0.28);
+  --shadow-dark-md: 0 8px 24px rgba(15, 23, 42, 0.14);
+  --shadow-shell: 0 10px 32px rgba(15, 23, 42, 0.10);
+
   --app-max-width: 480px;
   --shell-radius: 24px;
   --content-radius: 16px;
-  --bottom-nav-height: 64px;
-  --bottom-nav-gap: 4px;
+  --bottom-nav-height: 68px;
 }
 
 /* =========================================================
-   2. BASE / БАЗОВЫЙ СЛОЙ
-   Reset, базовая типографика, общий фон приложения.
+   2. BASE
 ========================================================= */
 
 *,
@@ -101,15 +91,16 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", sans-serif;
   color: var(--text-primary);
-  background: linear-gradient(
-    135deg,
-    var(--tenant-bg-start),
-    var(--tenant-bg-mid),
-    var(--tenant-bg-accent),
-    var(--tenant-bg-end)
-  );
-  background-attachment: fixed;
+  background:
+    linear-gradient(
+      135deg,
+      var(--tenant-bg-start),
+      var(--tenant-bg-mid),
+      var(--tenant-bg-accent),
+      var(--tenant-bg-end)
+    );
   background-size: 200% 200%;
+  background-attachment: fixed;
 }
 
 body {
@@ -130,8 +121,8 @@ button {
 }
 
 img {
-  max-width: 100%;
   display: block;
+  max-width: 100%;
 }
 
 [hidden] {
@@ -139,16 +130,15 @@ img {
 }
 
 /* =========================================================
-   3. BASE CONTAINERS / БАЗОВЫЕ КОНТЕЙНЕРЫ СТРАНИЦ
-   Общие контейнеры для стартовой страницы и внутренних экранов.
+   3. GENERIC PAGE CONTAINERS
 ========================================================= */
 
 .screen {
-  min-height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   padding: 16px;
-  box-sizing: border-box;
   background: transparent;
 }
 
@@ -156,7 +146,6 @@ img {
   width: 100%;
   max-width: 456px;
   margin: 0 auto;
-  box-sizing: border-box;
   background: transparent;
 }
 
@@ -165,43 +154,43 @@ img {
 }
 
 /* =========================================================
-   4. APP SHELL / ОБОЛОЧКА APP.HTML
-   Совместимо с текущим app.html:
-   - .screen
-   - .app-shell
-   - .app-header
-   - .app-header-left / .app-header-right
-   - .app-logo-text
-   - .app-content
-   - iframe.pageFrame
+   4. APP SHELL
+   Совместимо с текущим app.html
 ========================================================= */
 
 .app-shell {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
+  height: calc(100vh - 32px);
+  height: calc(100dvh - 32px);
   max-width: var(--app-max-width);
   width: 100%;
   margin: 0 auto;
-  background: var(--surface-app);
-  box-shadow: var(--shadow-shell);
+  background: rgba(255, 255, 255, 0.38);
   border-radius: var(--shell-radius);
+  box-shadow: var(--shadow-shell);
   overflow: hidden;
   position: relative;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .app-header {
-  padding: 12px 16px;
-  padding-top: calc(12px + var(--tg-safe-area-inset-top, 0px));
+  min-height: 76px;
+  padding: 14px 16px;
+  padding-top: calc(14px + var(--tg-safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
+  background: linear-gradient(
+    135deg,
+    var(--tenant-primary-dark),
+    var(--tenant-primary)
+  );
   color: var(--brand-text-on-primary);
-  box-shadow: var(--shadow-dark-md);
+  box-shadow: 0 6px 22px rgba(11, 60, 120, 0.30);
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 .app-header-left {
@@ -220,8 +209,8 @@ img {
 
 .app-logo-text {
   font-size: 20px;
-  font-weight: 600;
-  color: var(--brand-text-on-primary);
+  font-weight: 700;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -231,49 +220,43 @@ img {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 12px 12px 80px;
-  box-sizing: border-box;
+  padding: 12px 12px calc(var(--bottom-nav-height) + 18px);
   display: flex;
   flex-direction: column;
-  background: transparent;
 }
 
 #pageFrame,
 .pageFrame {
   width: 100%;
+  height: 100%;
   flex: 1;
   min-height: 0;
-  border: none;
   display: block;
+  border: none;
   border-radius: var(--content-radius);
   background: transparent;
 }
 
 /* =========================================================
-   5. HEADER ICON BUTTONS / КНОПКИ В HEADER
-   Совместимо с:
-   - .icon-button
-   - .icon-svg
-   - .notif-badge
+   5. HEADER BUTTONS
 ========================================================= */
 
 .icon-button {
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 999px;
-  border: none;
-  background: rgba(15, 23, 42, 0.35);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  background: rgba(15, 23, 42, 0.24);
   color: #ffffff;
   cursor: pointer;
+  padding: 0;
 }
 
 .icon-button:active {
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .icon-svg {
@@ -282,7 +265,7 @@ img {
 }
 
 .icon-svg path {
-  stroke: var(--brand-text-on-primary);
+  stroke: #ffffff;
   fill: none;
   stroke-width: 2;
   stroke-linecap: round;
@@ -300,7 +283,7 @@ img {
   background: var(--brand-danger);
   color: #ffffff;
   font-size: 9px;
-  font-weight: 600;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -308,80 +291,65 @@ img {
 }
 
 /* =========================================================
-   6. BOTTOM NAV / НИЖНЯЯ НАВИГАЦИЯ
-   Совместимо с текущим app.html:
-   - .bottom-nav
-   - .nav-btn
-   - .nav-btn-label
-   - .nav-btn-icon-wrapper
-   - .nav-btn-badge
+   6. BOTTOM NAV
 ========================================================= */
 
 .bottom-nav {
-  position: fixed;
+  position: absolute;
+  left: 0;
+  right: 0;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: var(--app-max-width);
+  min-height: var(--bottom-nav-height);
   display: flex;
   justify-content: space-around;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  align-items: stretch;
   padding: 8px 4px calc(8px + var(--tg-safe-area-inset-bottom, 0px));
-  z-index: 1000;
-  min-height: var(--bottom-nav-height);
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 4;
 }
 
 .nav-btn {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  background: none;
-  border: none;
-  cursor: pointer;
+  gap: 4px;
   padding: 4px 2px;
   border-radius: 10px;
-  transition: all 0.2s;
-  font-family: inherit;
+  cursor: pointer;
   color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 500;
+  transition: all 0.18s ease;
 }
 
 .nav-btn:hover {
   background: rgba(59, 130, 246, 0.06);
 }
 
+.nav-btn:active {
+  transform: scale(0.98);
+}
+
 .nav-btn svg {
-  width: 22px;
-  height: 22px;
+  width: 21px;
+  height: 21px;
+  display: block;
+}
+
+.nav-btn svg path,
+.nav-btn svg rect,
+.nav-btn svg circle,
+.nav-btn svg line,
+.nav-btn svg polyline {
+  stroke: currentColor;
 }
 
 .nav-btn.active {
   color: var(--tenant-primary);
-}
-
-.nav-btn.active svg path,
-.nav-btn.active svg rect,
-.nav-btn.active svg circle,
-.nav-btn.active svg polyline,
-.nav-btn.active svg line {
-  stroke: var(--tenant-primary);
-}
-
-.nav-btn-label {
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.1;
-  text-align: center;
-  white-space: nowrap;
 }
 
 .nav-btn-icon-wrapper {
@@ -389,6 +357,14 @@ img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.nav-btn-label {
+  font-size: 11px;
+  line-height: 1.1;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .nav-btn-badge {
@@ -408,51 +384,32 @@ img {
 }
 
 /* =========================================================
-   7. COMMON CARDS / ОБЩИЕ КАРТОЧКИ
-   Базовые карточки для внутренних экранов.
+   7. GENERIC CARDS
 ========================================================= */
 
-.card {
+.card,
+.profile-card,
+.module-card {
   background: var(--surface-white-soft);
-  border-radius: 12px;
-  padding: 16px 18px;
-  box-shadow: var(--shadow-brand-sm);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
+  box-shadow: var(--shadow-brand-sm);
 }
 
-.card:hover {
-  background: var(--surface-white-strong);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-brand-md);
+.card {
+  border-radius: 12px;
+  padding: 16px 18px;
 }
 
 .profile-card {
-  background: rgba(255, 255, 255, 0.7);
   border-radius: 16px;
   padding: 16px 18px;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
 }
 
 .module-card {
-  background: var(--surface-white-soft);
   border-radius: 14px;
   padding: 16px 18px;
-  box-shadow: var(--shadow-brand-sm);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  transition: all 0.2s ease;
   margin-bottom: 12px;
-}
-
-.module-card:hover {
-  background: rgba(255, 255, 255, 0.85);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-brand-md);
 }
 
 .module-header {
@@ -461,15 +418,15 @@ img {
 
 .module-header-title {
   font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 700;
+  color: var(--text-heading);
   margin: 0 0 4px;
 }
 
 .module-header-subtitle {
+  margin: 0;
   font-size: 13px;
   color: var(--text-muted);
-  margin: 0;
 }
 
 .module-body {
@@ -478,67 +435,54 @@ img {
 }
 
 /* =========================================================
-   8. BUTTONS / ОБЩИЕ КНОПКИ
-   Кнопки для страниц и действий.
+   8. BUTTONS
 ========================================================= */
 
 .btn {
   display: block;
   width: 100%;
-  padding: 10px;
-  background: linear-gradient(135deg, var(--tenant-primary) 0%, var(--tenant-primary-dark) 100%);
-  color: var(--brand-text-on-primary);
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 11px 12px;
+  border-radius: 10px;
   cursor: pointer;
   text-align: center;
-  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(
+    135deg,
+    var(--tenant-primary),
+    var(--tenant-primary-dark)
+  );
   box-shadow:
-    0 4px 12px rgba(59, 130, 246, 0.4),
-    0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+    0 4px 12px rgba(59, 130, 246, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.18s ease;
 }
 
 .btn:hover {
   transform: translateY(-1px);
-  box-shadow:
-    0 6px 18px rgba(59, 130, 246, 0.5),
-    0 3px 6px rgba(0, 0, 0, 0.12);
 }
 
 .btn:active {
   transform: translateY(0);
-  box-shadow:
-    0 3px 10px rgba(59, 130, 246, 0.35),
-    0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--brand-success) 0%, var(--brand-success-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--brand-success),
+    var(--brand-success-dark)
+  );
   box-shadow:
-    0 4px 12px rgba(16, 185, 129, 0.45),
-    0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn-primary:hover {
-  box-shadow:
-    0 6px 18px rgba(16, 185, 129, 0.55),
-    0 3px 6px rgba(0, 0, 0, 0.12);
+    0 4px 12px rgba(16, 185, 129, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .btn-logout {
-  background: linear-gradient(135deg, #f97373 0%, var(--brand-danger) 100%);
+  background: linear-gradient(135deg, #f97373, var(--brand-danger));
   box-shadow:
-    0 4px 12px rgba(239, 68, 68, 0.45),
-    0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn-logout:hover {
-  box-shadow:
-    0 6px 18px rgba(239, 68, 68, 0.55),
-    0 3px 6px rgba(0, 0, 0, 0.12);
+    0 4px 12px rgba(239, 68, 68, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .btn-block {
@@ -546,95 +490,50 @@ img {
 }
 
 /* =========================================================
-   9. CARD SECTIONS / КАРТОЧКИ С ЦВЕТНЫМ ХЕДЕРОМ
-   Для home, settings, modules и других страниц.
+   9. CARD SECTION
 ========================================================= */
 
 .card-section {
   border-radius: 16px;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.82);
   box-shadow: var(--shadow-dark-md);
-  background: #ffffff;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   margin-bottom: 14px;
 }
 
 .card-section-header {
-  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
-  color: var(--brand-text-on-primary);
   padding: 12px 16px;
+  background: linear-gradient(
+    135deg,
+    var(--tenant-primary-dark),
+    var(--tenant-primary)
+  );
+  color: #ffffff;
 }
 
 .card-section-title {
   margin: 0;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .card-section-subtitle {
   margin: 4px 0 0;
   font-size: 12px;
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 .card-section-body {
-  background: #ffffff;
   padding: 14px 16px 16px;
+  background: transparent;
   font-size: 14px;
   color: #374151;
 }
 
 /* =========================================================
-   10. ACCORDIONS / АККОРДИОНЫ
-   Универсальные раскрывающиеся карточки.
-========================================================= */
-
-.accordion-card {
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
-  background: #ffffff;
-  margin-bottom: 10px;
-}
-
-.accordion-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
-  color: var(--brand-text-on-primary);
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.accordion-header-title {
-  margin: 0;
-}
-
-.accordion-header-icon {
-  font-size: 16px;
-  line-height: 1;
-}
-
-.accordion-body {
-  background: #ffffff;
-  padding: 10px 16px 14px;
-  font-size: 13px;
-  color: #374151;
-  display: none;
-}
-
-.accordion-card.open .accordion-body {
-  display: block;
-}
-
-/* =========================================================
-   11. AUTH / INDEX PAGE
-   Стартовая страница авторизации.
+   10. AUTH / INDEX
 ========================================================= */
 
 .auth-start-card {
@@ -648,8 +547,8 @@ img {
 .auth-start-title {
   margin: 0 0 8px;
   font-size: 60px;
+  line-height: 1.02;
   font-weight: 800;
-  line-height: 1.05;
   text-transform: uppercase;
 }
 
@@ -674,7 +573,7 @@ img {
 .auth-start-subtitle {
   margin: 0;
   font-size: 15px;
-  opacity: 0.95;
+  opacity: 0.96;
 }
 
 .auth-start-note {
@@ -690,8 +589,8 @@ img {
   padding: 10px 12px;
   margin-bottom: 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.10);
   cursor: pointer;
   font-size: 13px;
   color: #374151;
@@ -715,7 +614,7 @@ img {
 
 .auth-start-button.is-disabled,
 .auth-start-button:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
@@ -726,101 +625,7 @@ img {
 }
 
 /* =========================================================
-   12. CHAT / ОБЩИЙ ЧАТ И MY AGENT
-   Поле ввода, кнопки, заглушки.
-========================================================= */
-
-.chat-input {
-  width: 100%;
-  resize: none;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  font-size: 14px;
-  color: #111827;
-  box-sizing: border-box;
-  margin-top: 12px;
-}
-
-.chat-input-actions-row {
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.btn.btn-send {
-  flex: 1;
-}
-
-.btn.btn-icon {
-  padding: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  color: #ffffff;
-  background: var(--tenant-primary-dark);
-  border: none;
-}
-
-.btn.btn-icon .icon-mic path {
-  fill: #ffffff;
-}
-
-.btn.btn-icon.recording {
-  background: #b91c1c;
-}
-
-.shared-chat-coming {
-  text-align: center;
-}
-
-.shared-chat-coming-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  margin-bottom: 14px;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
-}
-
-.shared-chat-coming-title {
-  margin: 0 0 8px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.shared-chat-coming-text {
-  margin: 0 auto 18px;
-  max-width: 320px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #4b5563;
-}
-
-.shared-chat-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 16px;
-  text-align: left;
-}
-
-/* =========================================================
-   13. HOME PAGE / ГЛАВНАЯ СТРАНИЦА
-   Основные блоки home.html.
+   11. HOME
 ========================================================= */
 
 .home-page {
@@ -839,12 +644,7 @@ img {
   margin-top: 10px;
 }
 
-.home-card-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
+.home-card-stack,
 .home-module-list {
   display: flex;
   flex-direction: column;
@@ -852,7 +652,7 @@ img {
 }
 
 .home-module-item {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   padding: 12px;
   background: #f8fbff;
@@ -884,7 +684,7 @@ img {
   padding: 3px 8px;
   border-radius: 999px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -943,33 +743,27 @@ img {
 }
 
 .home-text-link {
-  border: none;
-  background: none;
   padding: 0;
   margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--tenant-primary);
+  border: none;
+  background: none;
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tenant-primary);
   text-decoration: none;
-  font-family: inherit;
-}
-
-.home-text-link:active {
-  opacity: 0.75;
 }
 
 .home-empty-note {
   margin: 0;
   font-size: 13px;
-  color: #6b7280;
   line-height: 1.4;
+  color: #6b7280;
   text-align: left;
 }
 
 /* =========================================================
-   14. HOME PROFILE / ПРОФИЛЬ НА ГЛАВНОЙ
-   Верхняя карточка профиля в home.html.
+   12. HOME PROFILE
 ========================================================= */
 
 .home-profile-card {
@@ -992,23 +786,26 @@ img {
   width: 56px;
   height: 56px;
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
+  background: linear-gradient(
+    135deg,
+    var(--tenant-primary-dark),
+    var(--tenant-primary)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  font-weight: 700;
   font-size: 18px;
+  font-weight: 700;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-brand-sm);
 }
 
 .home-profile-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 .home-profile-main {
@@ -1022,7 +819,6 @@ img {
   font-weight: 700;
   line-height: 1.25;
   color: #111827;
-  white-space: normal;
   word-break: break-word;
 }
 
@@ -1052,10 +848,6 @@ img {
   color: #6b7280;
 }
 
-.home-profile-note-text {
-  display: inline;
-}
-
 .home-profile-note-icon {
   width: 16px;
   height: 16px;
@@ -1078,7 +870,6 @@ img {
   stroke-linejoin: round;
 }
 
-/* Дополнительные элементы, которые уже есть в home.html */
 .home-profile-extra {
   margin-top: 10px;
 }
@@ -1096,8 +887,7 @@ img {
 }
 
 /* =========================================================
-   15. SETTINGS PAGE / НАСТРОЙКИ
-   Стили страницы settings.html.
+   13. SETTINGS
 ========================================================= */
 
 .settings-page {
@@ -1127,7 +917,11 @@ img {
   width: 48px;
   height: 48px;
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
+  background: linear-gradient(
+    135deg,
+    var(--tenant-primary-dark),
+    var(--tenant-primary)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1142,7 +936,6 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 .settings-profile-meta {
@@ -1189,28 +982,25 @@ img {
   min-height: 42px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  background: rgba(248, 250, 252, 0.85);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-  font-family: inherit;
-  font-size: 14px;
+  border: 1px solid var(--border-mid);
+  background: rgba(248, 250, 252, 0.90);
   color: #111827;
-  box-sizing: border-box;
+  font-size: 14px;
+  font-family: inherit;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
   outline: none;
   transition:
     border-color 0.16s ease-out,
     box-shadow 0.16s ease-out,
-    background-color 0.16s ease-out,
-    transform 0.12s ease-out;
+    background-color 0.16s ease-out;
 }
 
 .settings-input:focus {
   border-color: var(--tenant-primary);
-  background-color: #ffffff;
+  background: #ffffff;
   box-shadow:
     0 0 0 1px rgba(59, 130, 246, 0.35),
     0 6px 18px rgba(15, 23, 42, 0.08);
-  transform: translateY(-1px);
 }
 
 .settings-input::placeholder {
@@ -1255,8 +1045,101 @@ img {
 }
 
 /* =========================================================
-   16. MODULES PAGE / СТРАНИЦА MODULES
-   Базовые layout-стили modules.html.
+   14. CHAT / MY AGENT / SHARED CHAT
+========================================================= */
+
+.chat-input {
+  width: 100%;
+  resize: none;
+  padding: 8px 10px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: #f9fafb;
+  color: #111827;
+  font-size: 14px;
+}
+
+.chat-input-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn.btn-send {
+  flex: 1;
+}
+
+.btn.btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tenant-primary-dark);
+  color: #ffffff;
+  font-size: 18px;
+}
+
+.btn.btn-icon.recording {
+  background: #b91c1c;
+}
+
+.btn.btn-icon .icon-mic path {
+  fill: #ffffff;
+}
+
+.shared-chat-coming {
+  text-align: center;
+}
+
+.shared-chat-coming-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  margin-bottom: 14px;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    var(--tenant-primary-dark),
+    var(--tenant-primary)
+  );
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+}
+
+.shared-chat-coming-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.shared-chat-coming-text {
+  margin: 0 auto 18px;
+  max-width: 320px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.shared-chat-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  text-align: left;
+}
+
+/* =========================================================
+   15. MODULES PAGE HELPERS
 ========================================================= */
 
 .modules-summary-body {
@@ -1267,23 +1150,18 @@ img {
   align-items: flex-start;
 }
 
-.modules-summary-body .profile-label {
-  text-align: left;
-}
-
-.modules-summary-body .profile-value {
-  text-align: left;
-  word-break: normal;
-  line-height: 1.45;
-}
-
+.modules-summary-body .profile-label,
+.modules-summary-body .profile-value,
 .modules-empty-state {
   text-align: left;
 }
 
+.modules-summary-body .profile-value {
+  line-height: 1.45;
+}
+
 /* =========================================================
-   17. SKELETONS / СКЕЛЕТОНЫ
-   Loading-состояния для home и других страниц.
+   16. SKELETONS
 ========================================================= */
 
 @keyframes shimmer {
@@ -1296,12 +1174,7 @@ img {
 }
 
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    #ececec 25%,
-    #f6f6f6 50%,
-    #ececec 75%
-  );
+  background: linear-gradient(90deg, #ececec 25%, #f6f6f6 50%, #ececec 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
   border-radius: 6px;
@@ -1338,13 +1211,89 @@ img {
 }
 
 /* =========================================================
-   18. RESPONSIVE / АДАПТИВ
-   Мобильные корректировки под текущую структуру.
+   17. SERVICE LAYERS / FALLBACK UI
+   Если эти блоки есть в app.html — не ломаем shell.
+========================================================= */
+
+#pwaBanner {
+  display: none;
+}
+
+#pwaBanner.visible {
+  display: block;
+  width: 100%;
+  max-width: var(--app-max-width);
+  margin: 0 auto 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.90);
+  color: #1f2937;
+  box-shadow: var(--shadow-dark-md);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+#pwaBannerClose {
+  margin-top: 8px;
+  color: var(--tenant-primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#shellLoading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(207, 233, 255, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+}
+
+#shellLoading.hidden {
+  display: none !important;
+}
+
+#shellLoading > * {
+  width: 100%;
+  max-width: 320px;
+  padding: 20px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow-dark-md);
+  text-align: center;
+}
+
+#shellLoaderMark,
+#appBrandMark {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--tenant-primary-dark);
+}
+
+#shellLoadingText,
+#appBrandSubtitle {
+  margin-top: 8px;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   18. RESPONSIVE
 ========================================================= */
 
 @media (max-width: 380px) {
   .screen {
     padding: 12px;
+  }
+
+  .app-shell {
+    height: calc(100vh - 24px);
+    height: calc(100dvh - 24px);
   }
 
   .home-page {
@@ -1365,6 +1314,10 @@ img {
   .nav-btn-label {
     font-size: 10px;
   }
+
+  .auth-start-title {
+    font-size: 48px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -1373,10 +1326,6 @@ img {
   }
 
   .app-shell {
-    max-width: var(--app-max-width);
-  }
-
-  .bottom-nav {
     max-width: var(--app-max-width);
   }
 }
