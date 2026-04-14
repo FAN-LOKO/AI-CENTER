@@ -9,484 +9,27 @@
   <meta name="theme-color" content="#3b82f6" />
   <title>AI CENTER</title>
 
-  <style>
-    :root {
-      --brand-primary: #3b82f6;
-      --brand-primary-dark: #0b3c78;
-      --brand-primary-soft: #7ec8ff;
-      --brand-bg-start: #cfe9ff;
-      --brand-bg-mid: #7ec8ff;
-      --brand-bg-accent: #3b82f6;
-      --brand-bg-end: #0b3c78;
-
-      --text-main: #10233f;
-      --text-soft: rgba(16, 35, 63, 0.82);
-      --text-muted: rgba(16, 35, 63, 0.60);
-      --text-faint: rgba(16, 35, 63, 0.44);
-      --text-inverse: #ffffff;
-
-      --surface-app: rgba(255, 255, 255, 0.42);
-      --surface-shell: rgba(255, 255, 255, 0.68);
-      --surface-card: rgba(255, 255, 255, 0.76);
-      --surface-border: rgba(255, 255, 255, 0.44);
-      --surface-divider: rgba(16, 35, 63, 0.08);
-
-      --shadow-shell: 0 20px 50px rgba(11, 60, 120, 0.18);
-      --shadow-nav: 0 -8px 24px rgba(11, 60, 120, 0.12);
-      --shadow-button: 0 12px 22px rgba(59, 130, 246, 0.18);
-
-      --radius-shell: 28px;
-      --radius-card: 22px;
-      --radius-button: 16px;
-      --radius-pill: 999px;
-
-      --header-height: 64px;
-      --nav-height: 82px;
-      --app-max-width: 480px;
-
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      min-height: 100%;
-      overflow: hidden;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        linear-gradient(
-          135deg,
-          var(--brand-bg-start) 0%,
-          var(--brand-bg-mid) 34%,
-          var(--brand-bg-accent) 66%,
-          var(--brand-bg-end) 100%
-        );
-      color: var(--text-main);
-    }
-
-    body {
-      min-height: 100vh;
-      min-height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .background-glow {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .background-glow::before,
-    .background-glow::after {
-      content: "";
-      position: absolute;
-      border-radius: 999px;
-      filter: blur(50px);
-      opacity: 0.28;
-      animation: shellGlow 14s ease-in-out infinite;
-    }
-
-    .background-glow::before {
-      width: 320px;
-      height: 320px;
-      background: rgba(255, 255, 255, 0.24);
-      top: -60px;
-      left: -80px;
-    }
-
-    .background-glow::after {
-      width: 280px;
-      height: 280px;
-      background: rgba(255, 255, 255, 0.18);
-      right: -80px;
-      bottom: 10%;
-      animation-delay: 2.8s;
-    }
-
-    @keyframes shellGlow {
-      0%, 100% {
-        transform: translate3d(0, 0, 0) scale(1);
-      }
-      50% {
-        transform: translate3d(0, -18px, 0) scale(1.06);
-      }
-    }
-
-    .app-shell {
-      width: 100%;
-      max-width: var(--app-max-width);
-      height: 100vh;
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      z-index: 1;
-      background: var(--surface-app);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border-left: 1px solid rgba(255, 255, 255, 0.28);
-      border-right: 1px solid rgba(255, 255, 255, 0.28);
-      box-shadow: var(--shadow-shell);
-      overflow: hidden;
-    }
-
-    .app-header {
-      min-height: calc(var(--header-height) + var(--safe-top));
-      padding:
-        calc(var(--safe-top) + 10px)
-        16px
-        12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      position: relative;
-      z-index: 3;
-      background: rgba(255, 255, 255, 0.38);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.28);
-    }
-
-    .app-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-      flex: 1;
-    }
-
-    .app-brand-mark {
-      width: 42px;
-      height: 42px;
-      min-width: 42px;
-      border-radius: 14px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.24), rgba(255,255,255,0.10)),
-        rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.36);
-      color: var(--text-inverse);
-      font-weight: 800;
-      font-size: 16px;
-      letter-spacing: 0.08em;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.26);
-    }
-
-    .app-brand-copy {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .app-brand-title {
-      margin: 0;
-      font-size: 16px;
-      line-height: 1.1;
-      font-weight: 800;
-      color: var(--text-main);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .app-brand-subtitle {
-      margin: 0;
-      font-size: 12px;
-      line-height: 1.2;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .icon-button {
-      width: 42px;
-      height: 42px;
-      border: none;
-      border-radius: 14px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.70);
-      color: var(--text-main);
-      cursor: pointer;
-      position: relative;
-      box-shadow: 0 8px 18px rgba(11, 60, 120, 0.10);
-      transition: transform 0.16s ease, background 0.16s ease;
-    }
-
-    .icon-button:active {
-      transform: scale(0.97);
-    }
-
-    .icon-button svg {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-    }
-
-    .badge-count {
-      position: absolute;
-      top: 7px;
-      right: 7px;
-      min-width: 16px;
-      height: 16px;
-      padding: 0 4px;
-      border-radius: 999px;
-      background: var(--brand-primary);
-      color: #fff;
-      font-size: 10px;
-      line-height: 16px;
-      font-weight: 800;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.28);
-    }
-
-    .shell-main {
-      position: relative;
-      flex: 1;
-      min-height: 0;
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .frame-wrap {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.22);
-    }
-
-    .page-frame {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-      background: #f7fbff;
-    }
-
-    .shell-loading {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      padding: 24px;
-      text-align: center;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0.28));
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: opacity 0.22s ease, visibility 0.22s ease;
-    }
-
-    .shell-loading.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .loader-mark {
-      width: 58px;
-      height: 58px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.76);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--brand-primary-dark);
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      box-shadow: 0 14px 30px rgba(11, 60, 120, 0.12);
-    }
-
-    .loader-text {
-      font-size: 14px;
-      line-height: 1.5;
-      color: var(--text-soft);
-      max-width: 28ch;
-    }
-
-    .bottom-nav {
-      min-height: calc(var(--nav-height) + var(--safe-bottom));
-      padding:
-        10px
-        10px
-        calc(10px + var(--safe-bottom));
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-      align-items: stretch;
-      background: rgba(255, 255, 255, 0.58);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255, 255, 255, 0.28);
-      box-shadow: var(--shadow-nav);
-      position: relative;
-      z-index: 3;
-    }
-
-    .nav-btn {
-      border: none;
-      border-radius: 18px;
-      background: transparent;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      min-height: 62px;
-      padding: 8px 4px;
-      cursor: pointer;
-      position: relative;
-      transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
-    }
-
-    .nav-btn:active {
-      transform: scale(0.97);
-    }
-
-    .nav-btn.active {
-      background: rgba(255, 255, 255, 0.76);
-      color: var(--brand-primary-dark);
-      box-shadow: 0 10px 22px rgba(11, 60, 120, 0.10);
-    }
-
-    .nav-btn svg {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-    }
-
-    .nav-label {
-      font-size: 11px;
-      line-height: 1.1;
-      font-weight: 700;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    .nav-badge {
-      position: absolute;
-      top: 6px;
-      right: 14px;
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: var(--brand-primary);
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.75);
-      display: none;
-    }
-
-    .pwa-top-banner {
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      top: calc(var(--safe-top) + 8px);
-      z-index: 5;
-      display: none;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      background: rgba(16, 35, 63, 0.82);
-      color: #fff;
-      box-shadow: 0 16px 30px rgba(11, 60, 120, 0.22);
-    }
-
-    .pwa-top-banner.visible {
-      display: flex;
-    }
-
-    .pwa-top-banner p {
-      margin: 0;
-      font-size: 13px;
-      line-height: 1.4;
-      color: rgba(255,255,255,0.88);
-    }
-
-    .pwa-top-banner button {
-      border: none;
-      border-radius: 999px;
-      padding: 10px 14px;
-      background: #fff;
-      color: var(--brand-primary-dark);
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    @media (min-width: 768px) {
-      body {
-        padding: 18px;
-      }
-
-      .app-shell {
-        max-width: 430px;
-        height: min(920px, calc(100vh - 36px));
-        height: min(920px, calc(100dvh - 36px));
-        border-radius: var(--radius-shell);
-        border: 1px solid rgba(255, 255, 255, 0.34);
-      }
-    }
-
-    @media (max-width: 380px) {
-      .nav-label {
-        font-size: 10px;
-      }
-
-      .bottom-nav {
-        gap: 6px;
-        padding-left: 8px;
-        padding-right: 8px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="./styles.css" />
 
   <script src="./tenant-loader.js"></script>
 </head>
-<body>
+<body class="app-shell-page">
   <div class="background-glow" aria-hidden="true"></div>
 
   <div class="app-shell" id="appShell">
     <div class="pwa-top-banner" id="pwaBanner">
-      <p>Для быстрого доступа открой приложение в режиме PWA или добавь его на главный экран.</p>
-      <button type="button" id="pwaBannerClose">Понятно</button>
+      <p class="pwa-top-banner-text">
+        Для быстрого доступа открой приложение в режиме PWA или добавь его на главный экран.
+      </p>
+      <button type="button" class="pwa-top-banner-close" id="pwaBannerClose">
+        Понятно
+      </button>
     </div>
 
     <header class="app-header">
       <div class="app-brand">
         <div class="app-brand-mark" id="appBrandMark" aria-hidden="true">FIT</div>
+
         <div class="app-brand-copy">
           <h1 class="app-brand-title" id="appLogoText">AI CENTER</h1>
           <p class="app-brand-subtitle" id="appBrandSubtitle">AI-консультант и рабочий shell</p>
@@ -501,7 +44,7 @@
           aria-label="Уведомления"
         >
           <span class="badge-count" id="notificationsCount">3</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"></path>
             <path d="M10 21a2 2 0 0 0 4 0"></path>
           </svg>
@@ -513,7 +56,7 @@
           type="button"
           aria-label="Настройки"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82L4.21 7.2a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01A1.65 1.65 0 0 0 10 3.25V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
@@ -533,14 +76,16 @@
 
         <div class="shell-loading" id="shellLoading">
           <div class="loader-mark" id="shellLoaderMark">FIT</div>
-          <div class="loader-text" id="shellLoadingText">Загружаем рабочее пространство бренда...</div>
+          <div class="loader-text" id="shellLoadingText">
+            Загружаем рабочее пространство бренда...
+          </div>
         </div>
       </div>
     </main>
 
     <nav class="bottom-nav" aria-label="Основная навигация">
       <button class="nav-btn active" type="button" data-tab="home" aria-label="Главная">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 10.5 12 3l9 7.5"></path>
           <path d="M5 9.5V21h14V9.5"></path>
         </svg>
@@ -548,7 +93,7 @@
       </button>
 
       <button class="nav-btn" type="button" data-tab="my-agent" aria-label="Мой агент">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="7" y="8" width="10" height="8" rx="2"></rect>
           <path d="M9 16v2"></path>
           <path d="M15 16v2"></path>
@@ -562,14 +107,14 @@
 
       <button class="nav-btn" type="button" data-tab="shared-chat" aria-label="Чат">
         <span class="nav-badge" id="sharedChatBadge"></span>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.52 0-2.95-.4-4.18-1.1L3 20l1.28-4.64A8.47 8.47 0 0 1 4 11.5 8.5 8.5 0 1 1 21 11.5Z"></path>
         </svg>
         <span class="nav-label" id="navLabelSharedChat">Чат</span>
       </button>
 
       <button class="nav-btn" type="button" data-tab="modules" aria-label="Модули">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="3" y="3" width="7" height="7" rx="2"></rect>
           <rect x="14" y="3" width="7" height="7" rx="2"></rect>
           <rect x="3" y="14" width="7" height="7" rx="2"></rect>
@@ -579,7 +124,7 @@
       </button>
 
       <button class="nav-btn" type="button" data-tab="affiliate" aria-label="Партнер">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 21s-6.5-4.35-8.5-7.5A5 5 0 0 1 12 6a5 5 0 0 1 8.5 7.5C18.5 16.65 12 21 12 21Z"></path>
           <path d="M12 10.5v3"></path>
           <path d="M10.5 12h3"></path>
@@ -588,7 +133,7 @@
       </button>
 
       <button class="nav-btn" type="button" data-tab="payments" aria-label="Платежи">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="2.5" y="5" width="19" height="14" rx="3"></rect>
           <path d="M2.5 10h19"></path>
           <path d="M7 15h3"></path>
@@ -600,7 +145,6 @@
 
   <script>
     (function () {
-      const docEl = document.documentElement;
       const body = document.body;
       const pwaBanner = document.getElementById('pwaBanner');
       const pwaBannerClose = document.getElementById('pwaBannerClose');
@@ -616,7 +160,10 @@
       }
 
       function isStandalonePWA() {
-        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        return (
+          window.matchMedia('(display-mode: standalone)').matches ||
+          window.navigator.standalone === true
+        );
       }
 
       function setShellBrandMark(config) {
@@ -634,9 +181,11 @@
       function applyShellMeta(config) {
         const texts = config.texts || {};
         document.title = texts.appTitle || config.appName || 'AI CENTER';
+
         appBrandSubtitle.textContent = isTelegramWebApp()
           ? 'Telegram Mini App'
           : (isStandalonePWA() ? 'PWA / Standalone' : 'Web App');
+
         setShellBrandMark(config);
       }
 
@@ -677,14 +226,18 @@
       }
 
       function bindLocalUI() {
-        pwaBannerClose.addEventListener('click', function () {
-          pwaBanner.classList.remove('visible');
-        });
+        if (pwaBannerClose) {
+          pwaBannerClose.addEventListener('click', function () {
+            pwaBanner.classList.remove('visible');
+          });
+        }
 
-        notificationsCount.textContent = '3';
+        if (notificationsCount) {
+          notificationsCount.textContent = '3';
+        }
       }
 
-      async function bootstrapShellFrame() {
+      async function bootstrapShellMeta() {
         showShellLoading('Загружаем рабочее пространство бренда...');
 
         try {
@@ -704,7 +257,7 @@
         bindLocalUI();
         initTelegramShell();
         setupPWABanner();
-        bootstrapShellFrame();
+        bootstrapShellMeta();
       });
     })();
   </script>
