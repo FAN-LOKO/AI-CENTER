@@ -11,6 +11,61 @@
 </head>
 <body>
   <div class="page settings-page">
+    <!-- ДАННЫЕ ПРОФИЛЯ -->
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Данные профиля</h2>
+        <p class="card-section-subtitle">
+          Эти данные используются для авторизации в PWA и коммуникации
+        </p>
+      </div>
+
+      <div class="card-section-body">
+        <form class="settings-form" id="profileForm" novalidate>
+          <div class="settings-form-group">
+            <label for="profileFullName" class="settings-form-label">ФИО</label>
+            <input
+              id="profileFullName"
+              name="fullName"
+              type="text"
+              class="settings-form-input"
+              autocomplete="name"
+              placeholder="Введите ФИО"
+            />
+          </div>
+
+          <div class="settings-form-group">
+            <label for="profileEmail" class="settings-form-label">Email</label>
+            <input
+              id="profileEmail"
+              name="email"
+              type="email"
+              class="settings-form-input"
+              autocomplete="email"
+              placeholder="you@example.com"
+              required
+            />
+            <p class="settings-form-hint">
+              Email используется для входа в PWA и восстановления доступа.
+            </p>
+          </div>
+
+          <div class="settings-form-actions">
+            <button
+              type="submit"
+              class="btn btn-primary btn-block"
+              id="profileSaveButton"
+            >
+              Сохранить
+            </button>
+          </div>
+
+          <p class="settings-form-status" id="profileStatusMessage"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- О ПРИЛОЖЕНИИ -->
     <section class="card-section">
       <div class="card-section-header">
         <h2 class="card-section-title">О приложении</h2>
@@ -48,34 +103,6 @@
         </div>
       </div>
     </section>
-
-    <section class="card-section">
-      <div class="card-section-header">
-        <h2 class="card-section-title">Компания</h2>
-        <p class="card-section-subtitle">
-          Текущий бренд и конфигурация tenant
-        </p>
-      </div>
-
-      <div class="card-section-body">
-        <div class="settings-info-list">
-          <div class="settings-info-row">
-            <span class="settings-info-label">Tenant ID</span>
-            <span class="settings-info-value" id="settingsTenantId">—</span>
-          </div>
-
-          <div class="settings-info-row">
-            <span class="settings-info-label">Название приложения</span>
-            <span class="settings-info-value" id="settingsAppName">—</span>
-          </div>
-
-          <div class="settings-info-row">
-            <span class="settings-info-label">Основной домен</span>
-            <span class="settings-info-value" id="settingsPrimaryDomain">—</span>
-          </div>
-        </div>
-      </div>
-    </section>
   </div>
 
   <script>
@@ -93,9 +120,10 @@
 
       function readVersionInfo(shell) {
         if (!shell || typeof shell.getVersionInfo !== "function") {
-          const runtime = window.parent && window.parent.AICRuntime
-            ? window.parent.AICRuntime
-            : null;
+          const runtime =
+            window.parent && window.parent.AICRuntime
+              ? window.parent.AICRuntime
+              : null;
           return runtime && runtime.version ? runtime.version : null;
         }
 
@@ -103,19 +131,6 @@
           return shell.getVersionInfo() || null;
         } catch (e) {
           console.error("Settings: getVersionInfo failed", e);
-          return null;
-        }
-      }
-
-      function readTenantInfo(shell) {
-        if (!shell || typeof shell.getTenantConfig !== "function") {
-          return null;
-        }
-
-        try {
-          return shell.getTenantConfig() || null;
-        } catch (e) {
-          console.error("Settings: getTenantConfig failed", e);
           return null;
         }
       }
@@ -136,56 +151,154 @@
         }
       }
 
-      document.addEventListener("DOMContentLoaded", function () {
-        const shell = safeGetShell();
-
+      function fillVersionBlock(shell) {
         const version = readVersionInfo(shell) || {};
+
         const appVersionEl = document.getElementById("settingsAppVersion");
         const buildVersionEl = document.getElementById("settingsBuildVersion");
         const commitHashEl = document.getElementById("settingsCommitHash");
         const builtAtEl = document.getElementById("settingsBuiltAt");
         const sourceEl = document.getElementById("settingsVersionSource");
 
-        if (appVersionEl) {
-          appVersionEl.textContent = version.appVersion || "—";
+        if (appVersionEl) appVersionEl.textContent = version.appVersion || "—";
+        if (buildVersionEl) buildVersionEl.textContent = version.buildVersion || "—";
+        if (commitHashEl) commitHashEl.textContent = version.commitHash || "—";
+        if (builtAtEl) builtAtEl.textContent = formatDate(version.builtAt);
+        if (sourceEl) sourceEl.textContent = version.source || "—";
+      }
+
+      function validateEmail(value) {
+        if (!value) return false;
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(value.trim());
+      }
+
+      function fillProfileFormFromShell() {
+        const fullNameInput = document.getElementById("profileFullName");
+        const emailInput = document.getElementById("profileEmail");
+        if (!fullNameInput && !emailInput) return;
+
+        function applyProfile(profile) {
+          if (!profile || typeof profile !== "object") return;
+          if (fullNameInput && profile.fullName) {
+            fullNameInput.value = profile.fullName;
+          }
+          if (emailInput && profile.email) {
+            emailInput.value = profile.email;
+          }
         }
 
-        if (buildVersionEl) {
-          buildVersionEl.textContent = version.buildVersion || "—";
-        }
+        try {
+          const shell = safeGetShell();
+          if (!shell) return;
 
-        if (commitHashEl) {
-          commitHashEl.textContent = version.commitHash || "—";
-        }
-
-        if (builtAtEl) {
-          builtAtEl.textContent = formatDate(version.builtAt);
-        }
-
-        if (sourceEl) {
-          sourceEl.textContent = version.source || "—";
-        }
-
-        const tenant = readTenantInfo(shell) || {};
-        const tenantIdEl = document.getElementById("settingsTenantId");
-        const appNameEl = document.getElementById("settingsAppName");
-        const primaryDomainEl = document.getElementById("settingsPrimaryDomain");
-
-        if (tenantIdEl) {
-          tenantIdEl.textContent = tenant.tenantId || "—";
-        }
-
-        if (appNameEl) {
-          appNameEl.textContent = tenant.appName || "—";
-        }
-
-        if (primaryDomainEl) {
-          const primary =
-            tenant.domains && tenant.domains.primary
-              ? tenant.domains.primary
+          const runtime =
+            window.parent && window.parent.AICRuntime
+              ? window.parent.AICRuntime
               : null;
-          primaryDomainEl.textContent = primary || "—";
+
+          if (runtime && runtime.userProfile) {
+            applyProfile(runtime.userProfile);
+          }
+        } catch (e) {
+          console.error("Settings: fillProfileFormFromShell failed", e);
         }
+      }
+
+      function setupProfileForm(shell) {
+        const form = document.getElementById("profileForm");
+        const fullNameInput = document.getElementById("profileFullName");
+        const emailInput = document.getElementById("profileEmail");
+        const statusEl = document.getElementById("profileStatusMessage");
+        const saveBtn = document.getElementById("profileSaveButton");
+
+        if (!form || !emailInput || !saveBtn) return;
+
+        function setStatus(message, type) {
+          if (!statusEl) return;
+          statusEl.textContent = message || "";
+          statusEl.classList.remove("is-success", "is-error");
+          if (type === "success") statusEl.classList.add("is-success");
+          if (type === "error") statusEl.classList.add("is-error");
+        }
+
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const fullName = fullNameInput ? fullNameInput.value.trim() : "";
+          const email = emailInput.value.trim();
+
+          if (!validateEmail(email)) {
+            setStatus("Введите корректный email", "error");
+            emailInput.focus();
+            return;
+          }
+
+          const profile = {
+            fullName: fullName || null,
+            email,
+            updatedAt: new Date().toISOString()
+          };
+
+          try {
+            if (window.parent && window.parent.postMessage) {
+              window.parent.postMessage(
+                {
+                  type: "save-user-profile",
+                  profile
+                },
+                "*"
+              );
+            }
+            setStatus("Профиль сохранён", "success");
+          } catch (e) {
+            console.error("Settings: save-user-profile postMessage failed", e);
+            setStatus("Не удалось сохранить профиль", "error");
+          }
+        });
+      }
+
+      function bindProfileListener() {
+        const fullNameInput = document.getElementById("profileFullName");
+        const emailInput = document.getElementById("profileEmail");
+        if (!fullNameInput && !emailInput) return;
+
+        function applyProfile(profile) {
+          if (!profile || typeof profile !== "object") return;
+          if (fullNameInput && profile.fullName) {
+            fullNameInput.value = profile.fullName;
+          }
+          if (emailInput && profile.email) {
+            emailInput.value = profile.email;
+          }
+        }
+
+        window.addEventListener("message", function (event) {
+          const data = event.data;
+          if (!data || typeof data !== "object") return;
+          if (data.type === "user-profile") {
+            applyProfile(data.profile);
+          }
+        });
+
+        try {
+          if (window.parent && window.parent.postMessage) {
+            window.parent.postMessage(
+              { type: "request-user-profile" },
+              "*"
+            );
+          }
+        } catch (e) {
+          console.error("Settings: request-user-profile failed", e);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const shell = safeGetShell();
+        fillVersionBlock(shell);
+        fillProfileFormFromShell();
+        setupProfileForm(shell);
+        bindProfileListener();
       });
     })();
   </script>
