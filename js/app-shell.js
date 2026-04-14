@@ -330,15 +330,43 @@
   ========================================================= */
 
   window.AICAppShell = {
-    navigate,
-    getCurrentTab: () => currentTab,
-    getFeatures: () => APPFEATURES,
-    getPageConfig: () => PAGECONFIG,
-    getTenantConfig: () => (window.AICTenant ? window.AICTenant.getConfig() : null),
-    getTenantDebugContext: () => (window.AICTenant ? window.AICTenant.getDebugContext() : null),
-    getTenantDomains: () => (window.AICTenant ? window.AICTenant.getDomains() : {}),
-    getTenantModules: () => (window.AICTenant ? window.AICTenant.getModules() : []),
-    getTenantPlans: () => (window.AICTenant ? window.AICTenant.getPlans() : []),
-    getTenantSections: () => (window.AICTenant ? window.AICTenant.getSections() : {})
-  };
+  navigate,
+  getCurrentTab: () => currentTab,
+  getFeatures: () => APPFEATURES,
+  getPageConfig: () => PAGECONFIG,
+
+  getVersionInfo: () =>
+    (window.AICRuntime && typeof window.AICRuntime.getVersionInfo === 'function'
+      ? window.AICRuntime.getVersionInfo()
+      : window.AICRuntime?.version || null),
+
+  getRuntimeInfo: () => ({
+    version:
+      window.AICRuntime && typeof window.AICRuntime.getVersionInfo === 'function'
+        ? window.AICRuntime.getVersionInfo()
+        : window.AICRuntime?.version || null,
+    tenant:
+      window.AICTenant && typeof window.AICTenant.getConfig === 'function'
+        ? window.AICTenant.getConfig()
+        : null
+  }),
+
+  getTenantConfig: () =>
+    (window.AICTenant ? window.AICTenant.getConfig() : null),
+
+  getTenantDebugContext: () =>
+    (window.AICTenant ? window.AICTenant.getDebugContext() : null),
+
+  getTenantDomains: () =>
+    (window.AICTenant ? window.AICTenant.getDomains() : {}),
+
+  getTenantModules: () =>
+    (window.AICTenant ? window.AICTenant.getModules() : []),
+
+  getTenantPlans: () =>
+    (window.AICTenant ? window.AICTenant.getPlans() : []),
+
+  getTenantSections: () =>
+    (window.AICTenant ? window.AICTenant.getSections() : {})
+};
 })();
