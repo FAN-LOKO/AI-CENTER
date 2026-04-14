@@ -162,13 +162,8 @@
   let _modulesReady = false;
   let _lastHomeModulesSignature = '';
 
-  let _homeModulesLoading = true;
-  let _homeModulesSkeletonTimer = null;
-
-  const HOME_SKELETON_DELAY_MS = 280;
-
   // ═══════════════════════════════════════════════════════════════
-  //  UI HELPERS / UI-ХЕЛПЕРЫ
+  //  DOM HELPERS / DOM-ХЕЛПЕРЫ
   // ═══════════════════════════════════════════════════════════════
 
   function getHomeModulesSkeletonEl() {
@@ -179,46 +174,27 @@
     return document.getElementById('homeModulesList');
   }
 
-  function showHomeModulesSkeleton() {
+  function forceHideHomeModulesSkeleton(reason) {
     const skeleton = getHomeModulesSkeletonEl();
+    if (!skeleton) return;
+
+    skeleton.hidden = true;
+    skeleton.style.display = 'none';
+    skeleton.style.visibility = 'hidden';
+    skeleton.style.opacity = '0';
+    skeleton.setAttribute('aria-hidden', 'true');
+
+    console.log('[HOME] skeleton force hidden:', reason);
+  }
+
+  function forceShowHomeModulesList() {
     const list = getHomeModulesListEl();
-    if (skeleton) skeleton.hidden = false;
-    if (list) list.hidden = true;
-  }
+    if (!list) return;
 
-  function hideHomeModulesSkeleton() {
-    const skeleton = getHomeModulesSkeletonEl();
-    if (skeleton) skeleton.hidden = true;
-  }
-
-  function showHomeModulesList() {
-    const list = getHomeModulesListEl();
-    if (list) list.hidden = false;
-  }
-
-  function scheduleHomeModulesSkeleton() {
-    clearHomeModulesSkeletonTimer();
-
-    _homeModulesSkeletonTimer = setTimeout(() => {
-      if (_homeModulesLoading) {
-        console.log('[HOME] skeleton shown after delay');
-        showHomeModulesSkeleton();
-      }
-    }, HOME_SKELETON_DELAY_MS);
-  }
-
-  function clearHomeModulesSkeletonTimer() {
-    if (_homeModulesSkeletonTimer) {
-      clearTimeout(_homeModulesSkeletonTimer);
-      _homeModulesSkeletonTimer = null;
-    }
-  }
-
-  function finishHomeModulesLoading() {
-    _homeModulesLoading = false;
-    clearHomeModulesSkeletonTimer();
-    hideHomeModulesSkeleton();
-    showHomeModulesList();
+    list.hidden = false;
+    list.style.display = '';
+    list.style.visibility = 'visible';
+    list.style.opacity = '1';
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -456,9 +432,12 @@
       }))
     );
 
+    forceHideHomeModulesSkeleton('before render');
+
     if (_lastHomeModulesSignature === nextSignature) {
       console.log('[HOME] renderHomeModules skipped: no changes');
-      finishHomeModulesLoading();
+      forceShowHomeModulesList();
+      forceHideHomeModulesSkeleton('skipped render');
       return;
     }
 
@@ -467,7 +446,8 @@
     if (!visible.length) {
       container.innerHTML =
         '<p class="home-empty-note">Пока нет доступных модулей. Как только они появятся, вы увидите их здесь.</p>';
-      finishHomeModulesLoading();
+      forceShowHomeModulesList();
+      forceHideHomeModulesSkeleton('empty state');
       return;
     }
 
@@ -517,7 +497,8 @@
       });
     });
 
-    finishHomeModulesLoading();
+    forceShowHomeModulesList();
+    forceHideHomeModulesSkeleton('after render');
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -616,7 +597,7 @@
     const nameEl = document.getElementById('homeProfileName');
     const noteEl = document.getElementById('homeProfileNote');
     if (profile.fullName && nameEl) nameEl.textContent = profile.fullName;
-    if (profile.email    && noteEl) noteEl.textContent = profile.email;
+    if (profile.email && noteEl) noteEl.textContent = profile.email;
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -626,6 +607,8 @@
   window.addEventListener('message', event => {
     const data = event.data;
     if (!data || typeof data !== 'object') return;
+
+    forceHideHomeModulesSkeleton('message received');
 
     if (data.type === 'app-features') {
       applyHomeFeatures(data.features || {});
@@ -654,6 +637,8 @@
   // ═══════════════════════════════════════════════════════════════
 
   document.addEventListener('DOMContentLoaded', async () => {
+    forceHideHomeModulesSkeleton('DOMContentLoaded start');
+
     document.getElementById('allModulesLink')?.addEventListener('click', () =>
       navigateFromHome('modules.html', 'modules'));
     document.getElementById('paymentLink')?.addEventListener('click', () =>
@@ -662,9 +647,6 @@
       navigateFromHome('partner.html', 'affiliate'));
 
     fillTelegramProfile();
-
-    _homeModulesLoading = true;
-    scheduleHomeModulesSkeleton();
 
     TENANTMODULES = await waitForTenantModules();
     console.log('[AI CENTER][Home] tenant modules loaded:', TENANTMODULES.length);
@@ -676,8 +658,14 @@
     applyTenantContent();
     renderHomeModules();
 
+    forceHideHomeModulesSkeleton('after initial render');
+
     window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
     window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
+  });
+
+  window.addEventListener('load', () => {
+    forceHideHomeModulesSkeleton('window load');
   });
 </script>
   </body>
