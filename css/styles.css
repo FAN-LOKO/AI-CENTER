@@ -1,4 +1,29 @@
+/* =========================================================
+   AI CENTER / MAIN STYLES
+   Единый styles.css для:
+   - index.html (стартовая страница)
+   - app.html (shell / оболочка)
+   - home.html
+   - my-agent.html
+   - shared-chat.html
+   - modules.html
+   - partner.html
+   - payments.html
+   - settings.html
+
+   Правило:
+   - Общие страницы и shell → styles.css
+   - Стили модульных каталогов / отдельных модулей → modules.css
+========================================================= */
+
+/* =========================================================
+   1. DESIGN TOKENS / ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+   Брендовые цвета и базовые токены интерфейса.
+   Tenant-loader может переопределять CSS custom properties.
+========================================================= */
+
 :root {
+  /* Brand / tenant */
   --brand-primary: #3b82f6;
   --brand-primary-dark: #0b3c78;
   --brand-primary-soft: #7ec8ff;
@@ -8,83 +33,125 @@
   --brand-bg-accent: #3b82f6;
   --brand-bg-end: #0b3c78;
 
+  --tenant-primary: var(--brand-primary);
+  --tenant-primary-dark: var(--brand-primary-dark);
+  --tenant-primary-soft: var(--brand-primary-soft);
+  --tenant-bg-start: var(--brand-bg-start);
+  --tenant-bg-mid: var(--brand-bg-mid);
+  --tenant-bg-accent: var(--brand-bg-accent);
+  --tenant-bg-end: var(--brand-bg-end);
+
+  /* Semantic colors */
   --brand-text-on-primary: #ffffff;
   --brand-danger: #ef4444;
   --brand-success: #10b981;
   --brand-success-dark: #059669;
 
+  /* Surfaces */
   --surface-white: #ffffff;
-  --surface-white-soft: rgba(255, 255, 255, 0.6);
-  --surface-white-strong: rgba(255, 255, 255, 0.8);
+  --surface-white-soft: rgba(255, 255, 255, 0.60);
+  --surface-white-strong: rgba(255, 255, 255, 0.80);
 
+  --surface-app: rgba(255, 255, 255, 0.42);
+  --surface-shell: rgba(255, 255, 255, 0.68);
+  --surface-card: rgba(255, 255, 255, 0.76);
+  --surface-border: rgba(255, 255, 255, 0.44);
+  --surface-divider: rgba(17, 24, 39, 0.08);
+
+  /* Text */
   --text-primary: #1a1a1a;
   --text-heading: #111827;
   --text-body: #374151;
   --text-muted: #6b7280;
   --text-soft: #4b5563;
+  --text-inverse: #ffffff;
 
+  /* Borders / shadows */
   --border-soft: #e5e7eb;
   --shadow-brand-sm: 0 4px 12px rgba(59, 130, 246, 0.25);
   --shadow-brand-md: 0 6px 20px rgba(59, 130, 246, 0.35);
   --shadow-dark-md: 0 6px 20px rgba(15, 23, 42, 0.18);
+  --shadow-shell: 0 20px 50px rgba(11, 60, 120, 0.18);
+  --shadow-nav: 0 -8px 24px rgba(11, 60, 120, 0.12);
+  --shadow-button: 0 12px 22px rgba(59, 130, 246, 0.18);
+
+  /* Radius */
+  --radius-shell: 28px;
+  --radius-card: 22px;
+  --radius-button: 16px;
+  --radius-pill: 999px;
+
+  /* Shell metrics */
+  --app-max-width: 480px;
+  --header-height: 64px;
+  --nav-height: 82px;
+
+  /* Safe areas */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* ============ БАЗА ДЛЯ MINIAPP ============ */
+/* =========================================================
+   2. BASE / БАЗОВЫЙ СЛОЙ
+   Базовые reset и фон приложения.
+========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 
 html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", sans-serif;
+  color: var(--text-primary);
   background: linear-gradient(
     135deg,
-    var(--brand-bg-start),
-    var(--brand-bg-mid),
-    var(--brand-bg-accent),
-    var(--brand-bg-end)
+    var(--tenant-bg-start),
+    var(--tenant-bg-mid),
+    var(--tenant-bg-accent),
+    var(--tenant-bg-end)
   );
   background-attachment: fixed;
   background-size: 200% 200%;
-  color: var(--text-primary);
 }
 
-/* Оболочка miniapp — белая карточка по центру */
-.app-shell {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  max-width: 480px;
-  width: 100%;
-  margin: 0 auto;
-  background: var(--surface-white);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  border-radius: 24px;
-  overflow: hidden;
-  position: relative;
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
-/* Контент: iframe + отступ под нижнюю навигацию */
-.app-content {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  padding: 12px 12px 80px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
-#pageFrame {
-  width: 100%;
-  flex: 1;
-  min-height: 0;
+button {
   border: none;
-  display: block;
-  border-radius: 16px;
-  background: transparent;
+  background: none;
 }
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* =========================================================
+   3. PAGE BASE / БАЗА ВНУТРЕННИХ СТРАНИЦ
+   Общие контейнеры для страниц внутри iframe.
+========================================================= */
 
 .screen {
   min-height: 100%;
@@ -103,105 +170,403 @@ body {
   background: transparent;
 }
 
-/* ============ ШАБЛОН ВНУТРЕННИХ СТРАНИЦ ============ */
-
-
-
 .page-my-agent {
   padding: 12px 16px 16px;
 }
 
+/* =========================================================
+   4. APP SHELL / ОБОЛОЧКА APP.HTML
+   Единый shell для one shell / many brands.
+========================================================= */
 
-/* ============ НИЖНЯЯ НАВИГАЦИЯ (ИЗ старого app.html) ============ */
-
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
+.app-shell-page {
+  overflow: hidden;
   display: flex;
-  justify-content: space-around;
   align-items: center;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  padding: 8px 4px;
-  z-index: 1000;
-  height: 64px;
+  justify-content: center;
+  position: relative;
 }
 
-/* Кнопки табов */
-.nav-btn {
+.background-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.background-glow::before,
+.background-glow::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(50px);
+  opacity: 0.28;
+  animation: shellGlow 14s ease-in-out infinite;
+}
+
+.background-glow::before {
+  width: 320px;
+  height: 320px;
+  background: rgba(255, 255, 255, 0.24);
+  top: -60px;
+  left: -80px;
+}
+
+.background-glow::after {
+  width: 280px;
+  height: 280px;
+  background: rgba(255, 255, 255, 0.18);
+  right: -80px;
+  bottom: 10%;
+  animation-delay: 2.8s;
+}
+
+@keyframes shellGlow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -18px, 0) scale(1.06);
+  }
+}
+
+.app-shell {
+  width: 100%;
+  max-width: var(--app-max-width);
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  background: var(--surface-app);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-left: 1px solid rgba(255, 255, 255, 0.28);
+  border-right: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: var(--shadow-shell);
+  overflow: hidden;
+}
+
+.app-header {
+  min-height: calc(var(--header-height) + var(--safe-top));
+  padding: calc(var(--safe-top) + 10px) 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
   flex: 1;
+}
+
+.app-brand-mark {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.24), rgba(255,255,255,0.10)),
+    rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.36);
+  color: var(--text-inverse);
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.26);
+}
+
+.app-brand-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-brand-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-brand-subtitle {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.icon-button {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.70);
+  color: var(--text-heading);
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 8px 18px rgba(11, 60, 120, 0.10);
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+.icon-button:active {
+  transform: scale(0.97);
+}
+
+.icon-button svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+
+.badge-count {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--tenant-primary);
+  color: #fff;
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 800;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.28);
+}
+
+.shell-main {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.frame-wrap {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.page-frame,
+#pageFrame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #f7fbff;
+}
+
+.shell-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  background: none;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0.28));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.shell-loading.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-mark {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tenant-primary-dark);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: 0 14px 30px rgba(11, 60, 120, 0.12);
+}
+
+.loader-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-soft);
+  max-width: 28ch;
+}
+
+/* =========================================================
+   5. SHELL BOTTOM NAV / НИЖНЯЯ НАВИГАЦИЯ ОБОЛОЧКИ
+   Общая навигация shell для основных страниц.
+========================================================= */
+
+.bottom-nav {
+  min-height: calc(var(--nav-height) + var(--safe-bottom));
+  padding: 10px 10px calc(10px + var(--safe-bottom));
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: var(--shadow-nav);
+  position: relative;
+  z-index: 3;
+}
+
+.nav-btn {
   border: none;
-  cursor: pointer;
-  padding: 4px 2px;
-  border-radius: 10px;
-  transition: all 0.2s;
-  font-family: inherit;
+  border-radius: 18px;
+  background: transparent;
   color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 62px;
+  padding: 8px 4px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
 }
 
-.nav-btn:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
-}
-
-.nav-btn svg {
-  width: 22px;
-  height: 22px;
-}
-
-.nav-btn-label {
-  font-size: 11px;
+.nav-btn:active {
+  transform: scale(0.97);
 }
 
 .nav-btn.active {
-  color: var(--brand-primary);
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--tenant-primary-dark);
+  box-shadow: 0 10px 22px rgba(11, 60, 120, 0.10);
 }
 
-.nav-btn.active svg path,
-.nav-btn.active svg rect,
-.nav-btn.active svg circle {
-  stroke: var(--brand-primary);
+.nav-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
 }
 
-.nav-btn-icon-wrapper {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.nav-label,
+.nav-btn-label {
+  font-size: 11px;
+  line-height: 1.1;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
 }
 
+.nav-badge,
 .nav-btn-badge {
   position: absolute;
-  top: -2px;
-  right: -6px;
-  min-width: 10px;
+  top: 6px;
+  right: 14px;
+  width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: #ef4444;
-  box-shadow: 0 0 0 2px #ffffff;
-  display: none; /* по умолчанию скрыт */
+  background: var(--brand-danger);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.75);
+  display: none;
 }
 
 .nav-btn-badge--dot {
   padding: 0;
 }
 
-/* ============ КАРТОЧКИ (ИЗ screen0.css) ============ */
+/* =========================================================
+   6. PWA BANNER / ПОДСКАЗКА ДЛЯ PWA-РЕЖИМА
+   Баннер внутри shell для web-режима.
+========================================================= */
+
+.pwa-top-banner {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: calc(var(--safe-top) + 8px);
+  z-index: 5;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(16, 35, 63, 0.82);
+  color: #fff;
+  box-shadow: 0 16px 30px rgba(11, 60, 120, 0.22);
+}
+
+.pwa-top-banner.visible {
+  display: flex;
+}
+
+.pwa-top-banner-text,
+.pwa-top-banner p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: rgba(255,255,255,0.88);
+}
+
+.pwa-top-banner-close,
+.pwa-top-banner button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #fff;
+  color: var(--tenant-primary-dark);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   7. COMMON UI / ОБЩИЕ КОМПОНЕНТЫ
+   Карточки, кнопки, секции, аккордеоны.
+========================================================= */
 
 .card {
   background: var(--surface-white-soft);
@@ -219,12 +584,11 @@ body {
   box-shadow: var(--shadow-brand-md);
 }
 
-/* Профиль и модуль как частные случаи карточки */
 .profile-card {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 16px;
   padding: 16px 18px;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-brand-sm);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition: all 0.2s ease;
@@ -247,7 +611,6 @@ body {
   box-shadow: var(--shadow-brand-md);
 }
 
-/* Заголовок/подзаголовок/тело карточки */
 .module-header {
   margin-bottom: 8px;
 }
@@ -270,14 +633,16 @@ body {
   color: var(--text-body);
 }
 
-/* ============ КНОПКИ .btn (НА БАЗЕ ДОКУМЕНТА) ============ */
+/* =========================================================
+   8. BUTTONS / КНОПКИ
+   Общие кнопки для страниц.
+========================================================= */
 
-/* Базовая красивая кнопка */
 .btn {
   display: block;
   width: 100%;
   padding: 10px;
-  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-dark) 100%);
+  background: linear-gradient(135deg, var(--tenant-primary) 0%, var(--tenant-primary-dark) 100%);
   color: var(--brand-text-on-primary);
   border: none;
   border-radius: 8px;
@@ -306,7 +671,6 @@ body {
     0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Основное действие (оплаты и т.п.) — зелёный градиент */
 .btn-primary {
   background: linear-gradient(135deg, var(--brand-success) 0%, var(--brand-success-dark) 100%);
   box-shadow:
@@ -320,7 +684,6 @@ body {
     0 3px 6px rgba(0, 0, 0, 0.12);
 }
 
-/* Кнопка выхода / опасного действия — красный градиент */
 .btn-logout {
   background: linear-gradient(135deg, #f97373 0%, var(--brand-danger) 100%);
   box-shadow:
@@ -334,25 +697,25 @@ body {
     0 3px 6px rgba(0, 0, 0, 0.12);
 }
 
-/* Растянуть на всю ширину контейнера */
 .btn-block {
   width: 100%;
 }
 
-/* ============ КАРТОЧКИ С СИНИМ ХЕДЕРОМ ============ */
+/* =========================================================
+   9. CARD SECTIONS / КАРТОЧКИ С ХЕДЕРОМ
+   Секции вида header + body.
+========================================================= */
 
-/* Общий контейнер карточки */
 .card-section {
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+  box-shadow: var(--shadow-dark-md);
   background: #ffffff;
   margin-bottom: 14px;
 }
 
-/* Синий заголовок карточки */
 .card-section-header {
-  background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary));
+  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
   color: var(--brand-text-on-primary);
   padding: 12px 16px;
 }
@@ -369,7 +732,6 @@ body {
   opacity: 0.9;
 }
 
-/* Белое тело карточки */
 .card-section-body {
   background: #ffffff;
   padding: 14px 16px 16px;
@@ -377,24 +739,26 @@ body {
   color: #374151;
 }
 
-/* ============ АККОРДИОН-КАРТОЧКИ ============ */
+/* =========================================================
+   10. ACCORDION / АККОРДИОНЫ
+   Универсальный паттерн разворачиваемых блоков.
+========================================================= */
 
 .accordion-card {
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+  box-shadow: var(--shadow-dark-md);
   background: #ffffff;
   margin-bottom: 10px;
 }
 
-/* Кнопка-хедер аккордеона */
 .accordion-header {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary));
+  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
   color: var(--brand-text-on-primary);
   border: none;
   cursor: pointer;
@@ -412,7 +776,6 @@ body {
   line-height: 1;
 }
 
-/* Тело аккордеона (белое) */
 .accordion-body {
   background: #ffffff;
   padding: 10px 16px 14px;
@@ -421,131 +784,15 @@ body {
   display: none;
 }
 
-/* Открытое состояние */
 .accordion-card.open .accordion-body {
   display: block;
 }
 
+/* =========================================================
+   11. CHAT UI / ОБЩИЙ ЧАТ
+   Используется в my-agent и shared-chat.
+========================================================= */
 
-/* Стили для названия миниап*/
-
-.app-shell {
-  display: flex;
-  flex-direction: column;
-  min-height: var(--tg-viewport-height, 100vh);
-}
-
-.app-header {
-  padding: 12px 16px;
-  padding-top: calc(12px + var(--tg-safe-area-inset-top, 0px));
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary));
-  color: var(--brand-text-on-primary);
-  box-shadow: var(--shadow-dark-md);
-}
-
-.app-logo-text {
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.app-header__right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.icon-button {
-  position: relative;
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  border: none;
-  background: rgba(15, 23, 42, 0.35);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  color: #ffffff;
-  cursor: pointer;
-}
-
-.icon-button:active {
-  opacity: 0.7;
-}
-
-.icon-bell::before,
-.icon-gear::before {
-  font-size: 18px;
-  color: #ffffff;
-}
-
-.icon-bell::before {
-  content: "🔔";
-}
-
-.icon-gear::before {
-  content: "⚙️";
-}
-
-/* бейдж уведомлений */
-.notif-badge {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  min-width: 14px;
-  height: 14px;
-  padding: 0 3px;
-  border-radius: 999px;
-  background: #ef4444;
-  color: #ffffff;
-  font-size: 9px;
-  font-weight: 600;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-button.has-notifs .notif-badge {
-  display: inline-flex;
-}
-
-.icon-button {
-  position: relative;
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  border: none;
-  background: rgba(15, 23, 42, 0.35);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  cursor: pointer;
-}
-
-.icon-button:active {
-  opacity: 0.7;
-}
-
-.icon-svg {
-  width: 18px;
-  height: 18px;
-}
-
-.icon-svg path {
-  stroke: var(--brand-text-on-primary);
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* ===== ОБЩИЙ ЧАТ (используется и модулем, и страницей "Мой агент") ===== */
-
-/* поле ввода под чатом */
 .chat-input {
   width: 100%;
   resize: none;
@@ -559,7 +806,6 @@ body {
   margin-top: 12px;
 }
 
-/* ряд кнопок под полем */
 .chat-input-actions-row {
   margin-top: 8px;
   display: flex;
@@ -567,12 +813,10 @@ body {
   align-items: center;
 }
 
-/* длинная кнопка Отправить слева */
 .btn.btn-send {
   flex: 1;
 }
 
-/* круглая иконка (микрофон) справа */
 .btn.btn-icon {
   padding: 0;
   width: 40px;
@@ -582,35 +826,22 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 18px;
-}
-
-/* делаем сам символ микрофона белым */
-.btn.btn-icon {
   color: #ffffff;
-}
-
-.btn.btn-icon {
-  padding: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #0b3c78; /* цвет фона кнопки */
+  background: var(--tenant-primary-dark);
   border: none;
 }
 
-/* сама иконка микрофона внутри кнопки */
 .btn.btn-icon .icon-mic path {
-  fill: #ffffff; /* белая иконка */
+  fill: #ffffff;
 }
 
 .btn.btn-icon.recording {
-  background: #b91c1c; /* красный круг при записи, можно другой цвет */
+  background: #b91c1c;
 }
 
-/* ===== ОБЩИЙ ЧАТ — СТРАНИЦА ЗАГЛУШКА ===== */
+/* =========================================================
+   12. SHARED CHAT PLACEHOLDER / ЗАГЛУШКА ОБЩЕГО ЧАТА
+========================================================= */
 
 .shared-chat-coming {
   text-align: center;
@@ -622,7 +853,7 @@ body {
   justify-content: center;
   padding: 6px 14px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #0b3c78, #3b82f6);
+  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
   color: #ffffff;
   font-size: 12px;
   font-weight: 700;
@@ -654,8 +885,9 @@ body {
   text-align: left;
 }
 
-
-/* ============ HOME: СТРАНИЦА ГЛАВНАЯ ============ */
+/* =========================================================
+   13. HOME PAGE / ГЛАВНАЯ СТРАНИЦА
+========================================================= */
 
 .home-page {
   padding: 12px 16px 16px;
@@ -678,8 +910,6 @@ body {
   flex-direction: column;
   gap: 10px;
 }
-
-/* ============ HOME: СПИСОК МОДУЛЕЙ ============ */
 
 .home-module-list {
   display: flex;
@@ -769,8 +999,6 @@ body {
   transform: none;
 }
 
-/* ============ HOME: ССЫЛКИ И ПУСТОЕ СОСТОЯНИЕ ============ */
-
 .home-links-row {
   display: flex;
   justify-content: space-between;
@@ -787,7 +1015,7 @@ body {
   margin: 0;
   font-size: 13px;
   font-weight: 600;
-  color: var(--brand-primary);
+  color: var(--tenant-primary);
   cursor: pointer;
   text-decoration: none;
   font-family: inherit;
@@ -805,28 +1033,9 @@ body {
   text-align: left;
 }
 
-/* ============ HOME: АДАПТИВ ============ */
-
-@media (max-width: 380px) {
-  .home-page {
-    padding: 10px 12px 16px;
-  }
-
-  .home-module-top {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .home-links-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-}
-
-/* =========================================
-   ГЛАВНАЯ СТРАНИЦА — КАРТОЧКА ПРОФИЛЯ
-   ========================================= */
+/* =========================================================
+   14. HOME PROFILE CARD / ПРОФИЛЬ НА ГЛАВНОЙ
+========================================================= */
 
 .home-profile-card {
   margin-bottom: 14px;
@@ -848,7 +1057,7 @@ body {
   width: 56px;
   height: 56px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #0b3c78, #3b82f6);
+  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -857,7 +1066,7 @@ body {
   font-size: 18px;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-brand-sm);
 }
 
 .home-profile-avatar img {
@@ -934,9 +1143,9 @@ body {
   stroke-linejoin: round;
 }
 
-/* =========================================
-   SETTINGS PAGE
-   ========================================= */
+/* =========================================================
+   15. SETTINGS PAGE / СТРАНИЦА НАСТРОЕК
+========================================================= */
 
 .settings-page {
   padding: 0;
@@ -965,7 +1174,7 @@ body {
   width: 48px;
   height: 48px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #0b3c78, #3b82f6);
+  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1027,9 +1236,9 @@ body {
   min-height: 42px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.6);       /* slate-400 с прозрачностью */
-  background: rgba(248, 250, 252, 0.85);           /* чуть «стеклянный» фон */
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);    /* легкая тень как у карточек */
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: rgba(248, 250, 252, 0.85);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
   font-family: inherit;
   font-size: 14px;
   color: #111827;
@@ -1043,7 +1252,7 @@ body {
 }
 
 .settings-input:focus {
-  border-color: #3b82f6;
+  border-color: var(--tenant-primary);
   background-color: #ffffff;
   box-shadow:
     0 0 0 1px rgba(59, 130, 246, 0.35),
@@ -1093,8 +1302,8 @@ body {
 }
 
 /* =========================================================
-   MODULES PAGE / SUMMARY + EMPTY STATE
-   Общие стили страницы modules.html без inline-styles
+   16. MODULES PAGE / СТРАНИЦА MODULES
+   Только общие layout-стили страницы modules.html.
 ========================================================= */
 
 .modules-summary-body {
@@ -1120,19 +1329,9 @@ body {
 }
 
 /* =========================================================
-   AUTH / INDEX PAGE
-   Стартовая страница авторизации
+   17. AUTH / INDEX PAGE
+   Стартовая страница index.html.
 ========================================================= */
-
-:root {
-  --tenant-primary: #3b82f6;
-  --tenant-primary-dark: #0b3c78;
-  --tenant-primary-soft: #7ec8ff;
-  --tenant-bg-start: #cfe9ff;
-  --tenant-bg-mid: #7ec8ff;
-  --tenant-bg-accent: #3b82f6;
-  --tenant-bg-end: #0b3c78;
-}
 
 .auth-start-card {
   overflow: hidden;
@@ -1162,7 +1361,7 @@ body {
 }
 
 .auth-start-line-accent {
-  color: var(--tenant-primary, #3b82f6);
+  color: var(--tenant-primary);
   text-shadow:
     0 3px 0 rgba(15, 23, 42, 0.9),
     0 8px 18px rgba(15, 23, 42, 0.7);
@@ -1206,7 +1405,7 @@ body {
 }
 
 .auth-consent-link {
-  color: var(--tenant-primary, #3b82f6);
+  color: var(--tenant-primary);
   text-decoration: underline;
 }
 
@@ -1222,23 +1421,26 @@ body {
   color: #9ca3af;
 }
 
-/* ── Home / skeleton loader ───────────────────────────────────── */
-
-[hidden] {
-  display: none !important;
-}
+/* =========================================================
+   18. SKELETONS / СКЕЛЕТОНЫ И LOADING-СТЕЙТЫ
+   Используются в home и других страницах.
+========================================================= */
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton {
   background: linear-gradient(
     90deg,
-    var(--color-surface-offset, #eee) 25%,
-    var(--color-surface-dynamic, #ddd) 50%,
-    var(--color-surface-offset, #eee) 75%
+    var(--surface-divider, #eee) 25%,
+    rgba(255,255,255,0.8) 50%,
+    var(--surface-divider, #eee) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
@@ -1271,6 +1473,53 @@ body {
 
 .home-modules-skeleton-item {
   padding: 12px;
-  border: 1px solid var(--color-border, #e0e0e0);
+  border: 1px solid var(--border-soft);
   border-radius: 10px;
+}
+
+/* =========================================================
+   19. RESPONSIVE / АДАПТИВ
+   Общие адаптивные корректировки.
+========================================================= */
+
+@media (min-width: 768px) {
+  .app-shell-page {
+    padding: 18px;
+  }
+
+  .app-shell {
+    max-width: 430px;
+    height: min(920px, calc(100vh - 36px));
+    height: min(920px, calc(100dvh - 36px));
+    border-radius: var(--radius-shell);
+    border: 1px solid rgba(255, 255, 255, 0.34);
+  }
+}
+
+@media (max-width: 380px) {
+  .home-page {
+    padding: 10px 12px 16px;
+  }
+
+  .home-module-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .home-links-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .nav-label,
+  .nav-btn-label {
+    font-size: 10px;
+  }
+
+  .bottom-nav {
+    gap: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 }
