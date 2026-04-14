@@ -1,8 +1,10 @@
 /* =========================================================
-   AI CENTER / MAIN STYLES
-   Единый styles.css для:
-   - index.html (стартовая страница)
-   - app.html (shell / оболочка)
+   AI CENTER / MAIN STYLES (COMPATIBLE VERSION)
+   Совместимый styles.css под текущую разметку проекта.
+
+   Покрывает:
+   - index.html
+   - app.html
    - home.html
    - my-agent.html
    - shared-chat.html
@@ -11,19 +13,21 @@
    - payments.html
    - settings.html
 
-   Правило:
-   - Общие страницы и shell → styles.css
-   - Стили модульных каталогов / отдельных модулей → modules.css
+   Принцип:
+   - не ломаем текущий DOM
+   - не переименовываем рабочие классы
+   - чистим дубли
+   - разделяем блоки по ответственности
 ========================================================= */
 
 /* =========================================================
-   1. DESIGN TOKENS / ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-   Брендовые цвета и базовые токены интерфейса.
-   Tenant-loader может переопределять CSS custom properties.
+   1. ROOT TOKENS / БАЗОВЫЕ ПЕРЕМЕННЫЕ
+   Общие цветовые, текстовые и layout-переменные.
+   Tenant-loader может переопределять tenant-* переменные.
 ========================================================= */
 
 :root {
-  /* Brand / tenant */
+  /* Brand */
   --brand-primary: #3b82f6;
   --brand-primary-dark: #0b3c78;
   --brand-primary-soft: #7ec8ff;
@@ -33,6 +37,7 @@
   --brand-bg-accent: #3b82f6;
   --brand-bg-end: #0b3c78;
 
+  /* Tenant aliases */
   --tenant-primary: var(--brand-primary);
   --tenant-primary-dark: var(--brand-primary-dark);
   --tenant-primary-soft: var(--brand-primary-soft);
@@ -41,7 +46,7 @@
   --tenant-bg-accent: var(--brand-bg-accent);
   --tenant-bg-end: var(--brand-bg-end);
 
-  /* Semantic colors */
+  /* Semantic */
   --brand-text-on-primary: #ffffff;
   --brand-danger: #ef4444;
   --brand-success: #10b981;
@@ -51,12 +56,7 @@
   --surface-white: #ffffff;
   --surface-white-soft: rgba(255, 255, 255, 0.60);
   --surface-white-strong: rgba(255, 255, 255, 0.80);
-
-  --surface-app: rgba(255, 255, 255, 0.42);
-  --surface-shell: rgba(255, 255, 255, 0.68);
-  --surface-card: rgba(255, 255, 255, 0.76);
-  --surface-border: rgba(255, 255, 255, 0.44);
-  --surface-divider: rgba(17, 24, 39, 0.08);
+  --surface-app: #ffffff;
 
   /* Text */
   --text-primary: #1a1a1a;
@@ -64,36 +64,25 @@
   --text-body: #374151;
   --text-muted: #6b7280;
   --text-soft: #4b5563;
-  --text-inverse: #ffffff;
 
-  /* Borders / shadows */
+  /* Borders and shadows */
   --border-soft: #e5e7eb;
   --shadow-brand-sm: 0 4px 12px rgba(59, 130, 246, 0.25);
   --shadow-brand-md: 0 6px 20px rgba(59, 130, 246, 0.35);
   --shadow-dark-md: 0 6px 20px rgba(15, 23, 42, 0.18);
-  --shadow-shell: 0 20px 50px rgba(11, 60, 120, 0.18);
-  --shadow-nav: 0 -8px 24px rgba(11, 60, 120, 0.12);
-  --shadow-button: 0 12px 22px rgba(59, 130, 246, 0.18);
+  --shadow-shell: 0 8px 32px rgba(0, 0, 0, 0.08);
 
-  /* Radius */
-  --radius-shell: 28px;
-  --radius-card: 22px;
-  --radius-button: 16px;
-  --radius-pill: 999px;
-
-  /* Shell metrics */
+  /* Layout */
   --app-max-width: 480px;
-  --header-height: 64px;
-  --nav-height: 82px;
-
-  /* Safe areas */
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --shell-radius: 24px;
+  --content-radius: 16px;
+  --bottom-nav-height: 64px;
+  --bottom-nav-gap: 4px;
 }
 
 /* =========================================================
    2. BASE / БАЗОВЫЙ СЛОЙ
-   Базовые reset и фон приложения.
+   Reset, базовая типографика, общий фон приложения.
 ========================================================= */
 
 *,
@@ -108,6 +97,7 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
+  height: 100%;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", sans-serif;
   color: var(--text-primary);
@@ -149,8 +139,8 @@ img {
 }
 
 /* =========================================================
-   3. PAGE BASE / БАЗА ВНУТРЕННИХ СТРАНИЦ
-   Общие контейнеры для страниц внутри iframe.
+   3. BASE CONTAINERS / БАЗОВЫЕ КОНТЕЙНЕРЫ СТРАНИЦ
+   Общие контейнеры для стартовой страницы и внутренних экранов.
 ========================================================= */
 
 .screen {
@@ -176,339 +166,240 @@ img {
 
 /* =========================================================
    4. APP SHELL / ОБОЛОЧКА APP.HTML
-   Единый shell для one shell / many brands.
+   Совместимо с текущим app.html:
+   - .screen
+   - .app-shell
+   - .app-header
+   - .app-header-left / .app-header-right
+   - .app-logo-text
+   - .app-content
+   - iframe.pageFrame
 ========================================================= */
 
-.app-shell-page {
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.background-glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.background-glow::before,
-.background-glow::after {
-  content: "";
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(50px);
-  opacity: 0.28;
-  animation: shellGlow 14s ease-in-out infinite;
-}
-
-.background-glow::before {
-  width: 320px;
-  height: 320px;
-  background: rgba(255, 255, 255, 0.24);
-  top: -60px;
-  left: -80px;
-}
-
-.background-glow::after {
-  width: 280px;
-  height: 280px;
-  background: rgba(255, 255, 255, 0.18);
-  right: -80px;
-  bottom: 10%;
-  animation-delay: 2.8s;
-}
-
-@keyframes shellGlow {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(0, -18px, 0) scale(1.06);
-  }
-}
-
 .app-shell {
-  width: 100%;
-  max-width: var(--app-max-width);
-  height: 100vh;
-  height: 100dvh;
   display: flex;
   flex-direction: column;
-  position: relative;
-  z-index: 1;
+  height: 100vh;
+  height: 100dvh;
+  max-width: var(--app-max-width);
+  width: 100%;
+  margin: 0 auto;
   background: var(--surface-app);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  border-left: 1px solid rgba(255, 255, 255, 0.28);
-  border-right: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow: var(--shadow-shell);
+  border-radius: var(--shell-radius);
   overflow: hidden;
+  position: relative;
 }
 
 .app-header {
-  min-height: calc(var(--header-height) + var(--safe-top));
-  padding: calc(var(--safe-top) + 10px) 16px 12px;
+  padding: 12px 16px;
+  padding-top: calc(12px + var(--tg-safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
+  color: var(--brand-text-on-primary);
+  box-shadow: var(--shadow-dark-md);
   position: relative;
-  z-index: 3;
-  background: rgba(255, 255, 255, 0.38);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  z-index: 2;
 }
 
-.app-brand {
+.app-header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
   min-width: 0;
   flex: 1;
 }
 
-.app-brand-mark {
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.24), rgba(255,255,255,0.10)),
-    rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.36);
-  color: var(--text-inverse);
-  font-weight: 800;
-  font-size: 16px;
-  letter-spacing: 0.08em;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.26);
-}
-
-.app-brand-copy {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.app-brand-title {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.1;
-  font-weight: 800;
-  color: var(--text-heading);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.app-brand-subtitle {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.2;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.header-actions {
+.app-header-right {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
 }
 
-.icon-button {
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.70);
-  color: var(--text-heading);
-  cursor: pointer;
-  position: relative;
-  box-shadow: 0 8px 18px rgba(11, 60, 120, 0.10);
-  transition: transform 0.16s ease, background 0.16s ease;
+.app-logo-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--brand-text-on-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.icon-button:active {
-  transform: scale(0.97);
-}
-
-.icon-button svg {
-  width: 20px;
-  height: 20px;
-  stroke: currentColor;
-}
-
-.badge-count {
-  position: absolute;
-  top: 7px;
-  right: 7px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: 999px;
-  background: var(--tenant-primary);
-  color: #fff;
-  font-size: 10px;
-  line-height: 16px;
-  font-weight: 800;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.28);
-}
-
-.shell-main {
-  position: relative;
+.app-content {
   flex: 1;
   min-height: 0;
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.frame-wrap {
-  width: 100%;
-  height: 100%;
-  position: relative;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.22);
-}
-
-.page-frame,
-#pageFrame {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-  background: #f7fbff;
-}
-
-.shell-loading {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+  padding: 12px 12px 80px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 24px;
-  text-align: center;
-  background: linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0.28));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: opacity 0.22s ease, visibility 0.22s ease;
+  background: transparent;
 }
 
-.shell-loading.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.loader-mark {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--tenant-primary-dark);
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  box-shadow: 0 14px 30px rgba(11, 60, 120, 0.12);
-}
-
-.loader-text {
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-soft);
-  max-width: 28ch;
+#pageFrame,
+.pageFrame {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border: none;
+  display: block;
+  border-radius: var(--content-radius);
+  background: transparent;
 }
 
 /* =========================================================
-   5. SHELL BOTTOM NAV / НИЖНЯЯ НАВИГАЦИЯ ОБОЛОЧКИ
-   Общая навигация shell для основных страниц.
+   5. HEADER ICON BUTTONS / КНОПКИ В HEADER
+   Совместимо с:
+   - .icon-button
+   - .icon-svg
+   - .notif-badge
+========================================================= */
+
+.icon-button {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.icon-button:active {
+  opacity: 0.7;
+}
+
+.icon-svg {
+  width: 18px;
+  height: 18px;
+}
+
+.icon-svg path {
+  stroke: var(--brand-text-on-primary);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--brand-danger);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+/* =========================================================
+   6. BOTTOM NAV / НИЖНЯЯ НАВИГАЦИЯ
+   Совместимо с текущим app.html:
+   - .bottom-nav
+   - .nav-btn
+   - .nav-btn-label
+   - .nav-btn-icon-wrapper
+   - .nav-btn-badge
 ========================================================= */
 
 .bottom-nav {
-  min-height: calc(var(--nav-height) + var(--safe-bottom));
-  padding: 10px 10px calc(10px + var(--safe-bottom));
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-  align-items: stretch;
-  background: rgba(255, 255, 255, 0.58);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow: var(--shadow-nav);
-  position: relative;
-  z-index: 3;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--app-max-width);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 8px 4px calc(8px + var(--tg-safe-area-inset-bottom, 0px));
+  z-index: 1000;
+  min-height: var(--bottom-nav-height);
 }
 
 .nav-btn {
-  border: none;
-  border-radius: 18px;
-  background: transparent;
-  color: var(--text-muted);
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  min-height: 62px;
-  padding: 8px 4px;
+  gap: 3px;
+  background: none;
+  border: none;
   cursor: pointer;
-  position: relative;
-  transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
+  padding: 4px 2px;
+  border-radius: 10px;
+  transition: all 0.2s;
+  font-family: inherit;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
 }
 
-.nav-btn:active {
-  transform: scale(0.97);
-}
-
-.nav-btn.active {
-  background: rgba(255, 255, 255, 0.76);
-  color: var(--tenant-primary-dark);
-  box-shadow: 0 10px 22px rgba(11, 60, 120, 0.10);
+.nav-btn:hover {
+  background: rgba(59, 130, 246, 0.06);
 }
 
 .nav-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke: currentColor;
+  width: 22px;
+  height: 22px;
 }
 
-.nav-label,
+.nav-btn.active {
+  color: var(--tenant-primary);
+}
+
+.nav-btn.active svg path,
+.nav-btn.active svg rect,
+.nav-btn.active svg circle,
+.nav-btn.active svg polyline,
+.nav-btn.active svg line {
+  stroke: var(--tenant-primary);
+}
+
 .nav-btn-label {
   font-size: 11px;
+  font-weight: 600;
   line-height: 1.1;
-  font-weight: 700;
   text-align: center;
   white-space: nowrap;
 }
 
-.nav-badge,
+.nav-btn-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .nav-btn-badge {
   position: absolute;
-  top: 6px;
-  right: 14px;
-  width: 10px;
+  top: -2px;
+  right: -6px;
+  min-width: 10px;
   height: 10px;
   border-radius: 999px;
   background: var(--brand-danger);
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.75);
+  box-shadow: 0 0 0 2px #ffffff;
   display: none;
 }
 
@@ -517,55 +408,8 @@ img {
 }
 
 /* =========================================================
-   6. PWA BANNER / ПОДСКАЗКА ДЛЯ PWA-РЕЖИМА
-   Баннер внутри shell для web-режима.
-========================================================= */
-
-.pwa-top-banner {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  top: calc(var(--safe-top) + 8px);
-  z-index: 5;
-  display: none;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: rgba(16, 35, 63, 0.82);
-  color: #fff;
-  box-shadow: 0 16px 30px rgba(11, 60, 120, 0.22);
-}
-
-.pwa-top-banner.visible {
-  display: flex;
-}
-
-.pwa-top-banner-text,
-.pwa-top-banner p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.4;
-  color: rgba(255,255,255,0.88);
-}
-
-.pwa-top-banner-close,
-.pwa-top-banner button {
-  border: none;
-  border-radius: 999px;
-  padding: 10px 14px;
-  background: #fff;
-  color: var(--tenant-primary-dark);
-  font-size: 13px;
-  font-weight: 800;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-/* =========================================================
-   7. COMMON UI / ОБЩИЕ КОМПОНЕНТЫ
-   Карточки, кнопки, секции, аккордеоны.
+   7. COMMON CARDS / ОБЩИЕ КАРТОЧКИ
+   Базовые карточки для внутренних экранов.
 ========================================================= */
 
 .card {
@@ -588,7 +432,7 @@ img {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 16px;
   padding: 16px 18px;
-  box-shadow: var(--shadow-brand-sm);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition: all 0.2s ease;
@@ -634,8 +478,8 @@ img {
 }
 
 /* =========================================================
-   8. BUTTONS / КНОПКИ
-   Общие кнопки для страниц.
+   8. BUTTONS / ОБЩИЕ КНОПКИ
+   Кнопки для страниц и действий.
 ========================================================= */
 
 .btn {
@@ -702,8 +546,8 @@ img {
 }
 
 /* =========================================================
-   9. CARD SECTIONS / КАРТОЧКИ С ХЕДЕРОМ
-   Секции вида header + body.
+   9. CARD SECTIONS / КАРТОЧКИ С ЦВЕТНЫМ ХЕДЕРОМ
+   Для home, settings, modules и других страниц.
 ========================================================= */
 
 .card-section {
@@ -740,14 +584,14 @@ img {
 }
 
 /* =========================================================
-   10. ACCORDION / АККОРДИОНЫ
-   Универсальный паттерн разворачиваемых блоков.
+   10. ACCORDIONS / АККОРДИОНЫ
+   Универсальные раскрывающиеся карточки.
 ========================================================= */
 
 .accordion-card {
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--shadow-dark-md);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
   background: #ffffff;
   margin-bottom: 10px;
 }
@@ -789,8 +633,101 @@ img {
 }
 
 /* =========================================================
-   11. CHAT UI / ОБЩИЙ ЧАТ
-   Используется в my-agent и shared-chat.
+   11. AUTH / INDEX PAGE
+   Стартовая страница авторизации.
+========================================================= */
+
+.auth-start-card {
+  overflow: hidden;
+}
+
+.auth-start-header {
+  text-align: center;
+}
+
+.auth-start-title {
+  margin: 0 0 8px;
+  font-size: 60px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.auth-start-line {
+  display: block;
+}
+
+.auth-start-line-light {
+  color: #f9fafb;
+  text-shadow:
+    0 3px 0 rgba(15, 23, 42, 0.9),
+    0 8px 18px rgba(15, 23, 42, 0.7);
+}
+
+.auth-start-line-accent {
+  color: var(--tenant-primary);
+  text-shadow:
+    0 3px 0 rgba(15, 23, 42, 0.9),
+    0 8px 18px rgba(15, 23, 42, 0.7);
+}
+
+.auth-start-subtitle {
+  margin: 0;
+  font-size: 15px;
+  opacity: 0.95;
+}
+
+.auth-start-note {
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.auth-consent-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+}
+
+.auth-consent-item:last-of-type {
+  margin-bottom: 16px;
+}
+
+.auth-consent-checkbox {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.auth-consent-link {
+  color: var(--tenant-primary);
+  text-decoration: underline;
+}
+
+.auth-start-button.is-disabled,
+.auth-start-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-start-footnote {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* =========================================================
+   12. CHAT / ОБЩИЙ ЧАТ И MY AGENT
+   Поле ввода, кнопки, заглушки.
 ========================================================= */
 
 .chat-input {
@@ -839,10 +776,6 @@ img {
   background: #b91c1c;
 }
 
-/* =========================================================
-   12. SHARED CHAT PLACEHOLDER / ЗАГЛУШКА ОБЩЕГО ЧАТА
-========================================================= */
-
 .shared-chat-coming {
   text-align: center;
 }
@@ -887,6 +820,7 @@ img {
 
 /* =========================================================
    13. HOME PAGE / ГЛАВНАЯ СТРАНИЦА
+   Основные блоки home.html.
 ========================================================= */
 
 .home-page {
@@ -1034,7 +968,8 @@ img {
 }
 
 /* =========================================================
-   14. HOME PROFILE CARD / ПРОФИЛЬ НА ГЛАВНОЙ
+   14. HOME PROFILE / ПРОФИЛЬ НА ГЛАВНОЙ
+   Верхняя карточка профиля в home.html.
 ========================================================= */
 
 .home-profile-card {
@@ -1066,7 +1001,7 @@ img {
   font-size: 18px;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: var(--shadow-brand-sm);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }
 
 .home-profile-avatar img {
@@ -1091,12 +1026,6 @@ img {
   word-break: break-word;
 }
 
-.home-profile-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
 .home-profile-username,
 .home-profile-id,
 .home-profile-email {
@@ -1105,6 +1034,12 @@ img {
   line-height: 1.3;
   color: #4b5563;
   word-break: break-word;
+}
+
+.home-profile-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .home-profile-note {
@@ -1143,8 +1078,26 @@ img {
   stroke-linejoin: round;
 }
 
+/* Дополнительные элементы, которые уже есть в home.html */
+.home-profile-extra {
+  margin-top: 10px;
+}
+
+.home-profile-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
 /* =========================================================
-   15. SETTINGS PAGE / СТРАНИЦА НАСТРОЕК
+   15. SETTINGS PAGE / НАСТРОЙКИ
+   Стили страницы settings.html.
 ========================================================= */
 
 .settings-page {
@@ -1303,7 +1256,7 @@ img {
 
 /* =========================================================
    16. MODULES PAGE / СТРАНИЦА MODULES
-   Только общие layout-стили страницы modules.html.
+   Базовые layout-стили modules.html.
 ========================================================= */
 
 .modules-summary-body {
@@ -1329,101 +1282,8 @@ img {
 }
 
 /* =========================================================
-   17. AUTH / INDEX PAGE
-   Стартовая страница index.html.
-========================================================= */
-
-.auth-start-card {
-  overflow: hidden;
-}
-
-.auth-start-header {
-  text-align: center;
-}
-
-.auth-start-title {
-  margin: 0 0 8px;
-  font-size: 60px;
-  font-weight: 800;
-  line-height: 1.05;
-  text-transform: uppercase;
-}
-
-.auth-start-line {
-  display: block;
-}
-
-.auth-start-line-light {
-  color: #f9fafb;
-  text-shadow:
-    0 3px 0 rgba(15, 23, 42, 0.9),
-    0 8px 18px rgba(15, 23, 42, 0.7);
-}
-
-.auth-start-line-accent {
-  color: var(--tenant-primary);
-  text-shadow:
-    0 3px 0 rgba(15, 23, 42, 0.9),
-    0 8px 18px rgba(15, 23, 42, 0.7);
-}
-
-.auth-start-subtitle {
-  margin: 0;
-  font-size: 15px;
-  opacity: 0.95;
-}
-
-.auth-start-note {
-  margin-bottom: 14px;
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.auth-consent-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
-  cursor: pointer;
-  font-size: 13px;
-  color: #374151;
-}
-
-.auth-consent-item:last-of-type {
-  margin-bottom: 16px;
-}
-
-.auth-consent-checkbox {
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  cursor: pointer;
-}
-
-.auth-consent-link {
-  color: var(--tenant-primary);
-  text-decoration: underline;
-}
-
-.auth-start-button.is-disabled,
-.auth-start-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.auth-start-footnote {
-  margin-top: 10px;
-  font-size: 11px;
-  color: #9ca3af;
-}
-
-/* =========================================================
-   18. SKELETONS / СКЕЛЕТОНЫ И LOADING-СТЕЙТЫ
-   Используются в home и других страницах.
+   17. SKELETONS / СКЕЛЕТОНЫ
+   Loading-состояния для home и других страниц.
 ========================================================= */
 
 @keyframes shimmer {
@@ -1438,9 +1298,9 @@ img {
 .skeleton {
   background: linear-gradient(
     90deg,
-    var(--surface-divider, #eee) 25%,
-    rgba(255,255,255,0.8) 50%,
-    var(--surface-divider, #eee) 75%
+    #ececec 25%,
+    #f6f6f6 50%,
+    #ececec 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
@@ -1478,25 +1338,15 @@ img {
 }
 
 /* =========================================================
-   19. RESPONSIVE / АДАПТИВ
-   Общие адаптивные корректировки.
+   18. RESPONSIVE / АДАПТИВ
+   Мобильные корректировки под текущую структуру.
 ========================================================= */
 
-@media (min-width: 768px) {
-  .app-shell-page {
-    padding: 18px;
-  }
-
-  .app-shell {
-    max-width: 430px;
-    height: min(920px, calc(100vh - 36px));
-    height: min(920px, calc(100dvh - 36px));
-    border-radius: var(--radius-shell);
-    border: 1px solid rgba(255, 255, 255, 0.34);
-  }
-}
-
 @media (max-width: 380px) {
+  .screen {
+    padding: 12px;
+  }
+
   .home-page {
     padding: 10px 12px 16px;
   }
@@ -1512,14 +1362,21 @@ img {
     gap: 10px;
   }
 
-  .nav-label,
   .nav-btn-label {
     font-size: 10px;
   }
+}
+
+@media (min-width: 768px) {
+  .screen {
+    align-items: center;
+  }
+
+  .app-shell {
+    max-width: var(--app-max-width);
+  }
 
   .bottom-nav {
-    gap: 6px;
-    padding-left: 8px;
-    padding-right: 8px;
+    max-width: var(--app-max-width);
   }
 }
