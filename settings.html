@@ -2,33 +2,37 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <title>Настройки — AI FIT CENTER</title>
+    <title>Настройки</title>
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
     <div class="screen">
       <div class="page settings-page">
-        <!-- Карточка: заголовок страницы -->
+        <!-- =========================================================
+             SETTINGS / PAGE HEADER
+        ========================================================== -->
         <section class="card-section">
           <div class="card-section-header">
-            <h1 class="card-section-title">Настройки</h1>
-            <p class="card-section-subtitle">
-              Управление профилем и приложением
+            <h1 class="card-section-title" id="settingsPageTitle">Настройки</h1>
+            <p class="card-section-subtitle" id="settingsPageSubtitle">
+              Профиль, данные аккаунта и параметры приложения
             </p>
           </div>
           <div class="card-section-body">
-            <p class="settings-intro-text">
-              Здесь вы можете посмотреть данные профиля и закрыть приложение.
+            <p class="settings-intro-text" id="settingsIntroText">
+              Здесь можно проверить данные профиля, обновить контактную информацию и завершить текущую сессию.
             </p>
           </div>
         </section>
 
-        <!-- Карточка: профиль -->
+        <!-- =========================================================
+             SETTINGS / PROFILE
+        ========================================================== -->
         <section class="card-section">
           <div class="card-section-header">
             <h2 class="card-section-title">Профиль</h2>
-            <p class="card-section-subtitle">
-              Основная информация о пользователе
+            <p class="card-section-subtitle" id="settingsProfileCardSubtitle">
+              Основная информация пользователя
             </p>
           </div>
           <div class="card-section-body">
@@ -44,13 +48,22 @@
                 </div>
 
                 <div class="settings-profile-meta">
-                  <div class="settings-profile-name" id="settingsProfileTelegramName">
+                  <div
+                    class="settings-profile-name"
+                    id="settingsProfileTelegramName"
+                  >
                     Не указано
                   </div>
-                  <div class="settings-profile-username" id="settingsProfileTelegramUsername">
+                  <div
+                    class="settings-profile-username"
+                    id="settingsProfileTelegramUsername"
+                  >
                     @username
                   </div>
-                  <div class="settings-profile-id" id="settingsProfileTelegramId">
+                  <div
+                    class="settings-profile-id"
+                    id="settingsProfileTelegramId"
+                  >
                     ID: —
                   </div>
                 </div>
@@ -58,7 +71,9 @@
 
               <div class="settings-form">
                 <div class="settings-field">
-                  <label class="settings-label" for="settingsFullNameInput">ФИО</label>
+                  <label class="settings-label" for="settingsFullNameInput">
+                    ФИО
+                  </label>
                   <input
                     id="settingsFullNameInput"
                     class="settings-input"
@@ -69,7 +84,9 @@
                 </div>
 
                 <div class="settings-field">
-                  <label class="settings-label" for="settingsEmailInput">Почта</label>
+                  <label class="settings-label" for="settingsEmailInput">
+                    Почта
+                  </label>
                   <input
                     id="settingsEmailInput"
                     class="settings-input"
@@ -79,8 +96,11 @@
                   />
                 </div>
 
-                <p class="settings-helper-text" id="settingsProfileHelperText">
-                  ФИО и почта будут использоваться в карточке профиля и внутренних сценариях miniapp.
+                <p
+                  class="settings-helper-text"
+                  id="settingsProfileHelperText"
+                >
+                  Эти данные используются в карточке профиля и во внутренних сценариях приложения.
                 </p>
 
                 <button
@@ -88,10 +108,14 @@
                   class="btn btn-block"
                   id="settingsSaveProfileButton"
                 >
-                  Сохранить
+                  Сохранить данные
                 </button>
 
-                <p class="settings-success-text" id="settingsSaveProfileSuccess" hidden>
+                <p
+                  class="settings-success-text"
+                  id="settingsSaveProfileSuccess"
+                  hidden
+                >
                   Данные профиля сохранены.
                 </p>
               </div>
@@ -99,34 +123,57 @@
           </div>
         </section>
 
-        <!-- Карточка: о приложении -->
+        <!-- =========================================================
+             SETTINGS / ABOUT APP
+        ========================================================== -->
         <section class="card-section">
           <div class="card-section-header">
-            <h2 class="card-section-title">📱 О приложении</h2>
-            <p class="card-section-subtitle">
-              Информация о версии и разработчике
+            <h2 class="card-section-title">О приложении</h2>
+            <p class="card-section-subtitle" id="settingsAboutSubtitle">
+              Служебная информация о текущей сборке и бренде
             </p>
           </div>
           <div class="card-section-body">
             <div class="settings-info-list">
               <div class="settings-info-row">
-                <span class="settings-info-label">Версия:</span>
-                <span class="settings-info-value"><strong>1.0.0</strong></span>
+                <span class="settings-info-label">Приложение:</span>
+                <span class="settings-info-value" id="settingsAboutAppName">
+                  —
+                </span>
               </div>
+
               <div class="settings-info-row">
-                <span class="settings-info-label">Разработчик:</span>
-                <span class="settings-info-value"><strong>KadtsinDigital</strong></span>
+                <span class="settings-info-label">Tenant:</span>
+                <span class="settings-info-value" id="settingsAboutTenantId">
+                  —
+                </span>
+              </div>
+
+              <div class="settings-info-row">
+                <span class="settings-info-label">Версия:</span>
+                <span class="settings-info-value" id="settingsAboutVersion">
+                  1.0.0
+                </span>
+              </div>
+
+              <div class="settings-info-row">
+                <span class="settings-info-label">Среда:</span>
+                <span class="settings-info-value" id="settingsAboutRuntime">
+                  Telegram Mini App
+                </span>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Карточка: действия -->
+        <!-- =========================================================
+             SETTINGS / ACTIONS
+        ========================================================== -->
         <section class="card-section">
           <div class="card-section-header">
             <h2 class="card-section-title">Действия</h2>
             <p class="card-section-subtitle">
-              Управление сессией miniapp
+              Управление текущей сессией
             </p>
           </div>
           <div class="card-section-body">
@@ -162,6 +209,82 @@
           .filter(Boolean)
           .join(" ")
           .trim();
+      }
+
+      function getTenantConfig() {
+        try {
+          return window.parent?.AICAppShell?.getTenantConfig?.() || null;
+        } catch (error) {
+          console.error("Settings tenant config read failed", error);
+          return null;
+        }
+      }
+
+      function isTelegramRuntime() {
+        return !!(window.Telegram && window.Telegram.WebApp);
+      }
+
+      function isStandalonePWA() {
+        return (
+          window.matchMedia?.("(display-mode: standalone)")?.matches ||
+          window.navigator.standalone === true
+        );
+      }
+
+      function getRuntimeLabel() {
+        if (isTelegramRuntime()) return "Telegram Mini App";
+        if (isStandalonePWA()) return "PWA / Standalone";
+        return "Web App";
+      }
+
+      function applyTenantMeta() {
+        const tenantConfig = getTenantConfig();
+        const texts = tenantConfig?.texts || {};
+        const appName =
+          texts.appTitle ||
+          texts.headerTitle ||
+          tenantConfig?.appName ||
+          "AI CENTER";
+        const tenantId = tenantConfig?.tenantId || "default";
+
+        document.title = `Настройки — ${appName}`;
+
+        const pageTitle = document.getElementById("settingsPageTitle");
+        const pageSubtitle = document.getElementById("settingsPageSubtitle");
+        const introText = document.getElementById("settingsIntroText");
+        const profileSubtitle = document.getElementById("settingsProfileCardSubtitle");
+        const aboutAppName = document.getElementById("settingsAboutAppName");
+        const aboutTenantId = document.getElementById("settingsAboutTenantId");
+        const aboutRuntime = document.getElementById("settingsAboutRuntime");
+
+        if (pageTitle) {
+          pageTitle.textContent = "Настройки";
+        }
+
+        if (pageSubtitle) {
+          pageSubtitle.textContent = `Профиль и параметры ${appName}`;
+        }
+
+        if (introText) {
+          introText.textContent =
+            "Здесь можно проверить данные профиля, обновить контактную информацию и завершить текущую сессию.";
+        }
+
+        if (profileSubtitle) {
+          profileSubtitle.textContent = "Основная информация пользователя";
+        }
+
+        if (aboutAppName) {
+          aboutAppName.textContent = appName;
+        }
+
+        if (aboutTenantId) {
+          aboutTenantId.textContent = tenantId;
+        }
+
+        if (aboutRuntime) {
+          aboutRuntime.textContent = getRuntimeLabel();
+        }
       }
 
       function setSettingsAvatar(user, fullName) {
@@ -299,6 +422,7 @@
           saveButton.addEventListener("click", saveProfileSettings);
         }
 
+        applyTenantMeta();
         fillTelegramProfileBlock();
 
         window.parent?.postMessage?.(
