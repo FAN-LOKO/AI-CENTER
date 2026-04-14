@@ -369,4 +369,3 @@
   getTenantSections: () =>
     (window.AICTenant ? window.AICTenant.getSections() : {})
 };
-})();
