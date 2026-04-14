@@ -13,304 +13,113 @@
 
   <script src="./tenant-loader.js"></script>
 </head>
-<body class="app-shell-page">
-  <div class="background-glow" aria-hidden="true"></div>
+<body>
+  <div class="screen">
+    <div class="app-shell">
+      <div class="app-header">
+        <div class="app-header-left">
+          <span class="app-logo-text" id="appLogoText">AI CENTER</span>
+        </div>
 
-  <div class="app-shell" id="appShell">
-    <div class="pwa-top-banner" id="pwaBanner">
-      <p class="pwa-top-banner-text">
-        Для быстрого доступа открой приложение в режиме PWA или добавь его на главный экран.
-      </p>
-      <button type="button" class="pwa-top-banner-close" id="pwaBannerClose">
-        Понятно
-      </button>
-    </div>
+        <div class="app-header-right">
+          <button class="icon-button" id="notificationsButton" type="button" aria-label="Уведомления">
+            <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"></path>
+              <path d="M10 19a2 2 0 0 0 4 0"></path>
+            </svg>
+            <span class="notif-badge" id="notifBadge">3</span>
+          </button>
 
-    <header class="app-header">
-      <div class="app-brand">
-        <div class="app-brand-mark" id="appBrandMark" aria-hidden="true">FIT</div>
-
-        <div class="app-brand-copy">
-          <h1 class="app-brand-title" id="appLogoText">AI CENTER</h1>
-          <p class="app-brand-subtitle" id="appBrandSubtitle">AI-консультант и рабочий shell</p>
+          <button class="icon-button" id="settingsButton" type="button" aria-label="Настройки">
+            <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"></path>
+              <path d="M19.4 10.5h-1.1a6.5 6.5 0 0 0-.5-1.3l.8-.8a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0l-.8.8a6.5 6.5 0 0 0-1.3-.5V3.6a1 1 0 0 0-1-1h-2.2a1 1 0 0 0-1 1v1.1a6.5 6.5 0 0 0-1.3.5l-.8-.8a1 1 0 0 0-1.4 0L3.4 6a1 1 0 0 0 0 1.4l.8.8a6.5 6.5 0 0 0-.5 1.3H2.6a1 1 0 0 0-1 1v2.2a1 1 0 0 0 1 1h1.1a6.5 6.5 0 0 0 .5 1.3l-.8.8a1 1 0 0 0 0 1.4L5 20.6a1 1 0 0 0 1.4 0l.8-.8a6.5 6.5 0 0 0 1.3.5v1.1a1 1 0 0 0 1 1h2.2a1 1 0 0 0 1-1v-1.1a6.5 6.5 0 0 0 1.3-.5l.8.8a1 1 0 0 0 1.4 0l1.6-1.6a1 1 0 0 0 0-1.4l-.8-.8a6.5 6.5 0 0 0 .5-1.3h1.1a1 1 0 0 0 1-1v-2.2a1 1 0 0 0-1-1z"></path>
+            </svg>
+          </button>
         </div>
       </div>
 
-      <div class="header-actions">
-        <button
-          class="icon-button"
-          id="notificationsButton"
-          type="button"
-          aria-label="Уведомления"
-        >
-          <span class="badge-count" id="notificationsCount">3</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"></path>
-            <path d="M10 21a2 2 0 0 0 4 0"></path>
-          </svg>
-        </button>
-
-        <button
-          class="icon-button"
-          id="settingsButton"
-          type="button"
-          aria-label="Настройки"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82L4.21 7.2a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01A1.65 1.65 0 0 0 10 3.25V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-        </button>
-      </div>
-    </header>
-
-    <main class="shell-main">
-      <div class="frame-wrap">
+      <div class="app-content" id="appContent">
         <iframe
           id="pageFrame"
-          class="page-frame"
-          title="AI CENTER Content"
-          src="about:blank"
-          loading="eager"
+          class="pageFrame"
+          src="home.html"
+          title="Content"
         ></iframe>
-
-        <div class="shell-loading" id="shellLoading">
-          <div class="loader-mark" id="shellLoaderMark">FIT</div>
-          <div class="loader-text" id="shellLoadingText">
-            Загружаем рабочее пространство бренда...
-          </div>
-        </div>
       </div>
-    </main>
 
-    <nav class="bottom-nav" aria-label="Основная навигация">
-      <button class="nav-btn active" type="button" data-tab="home" aria-label="Главная">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 10.5 12 3l9 7.5"></path>
-          <path d="M5 9.5V21h14V9.5"></path>
-        </svg>
-        <span class="nav-label" id="navLabelHome">Главная</span>
-      </button>
+      <nav class="bottom-nav" id="bottomNav">
+        <button class="nav-btn active" data-page="home.html" data-tab="home" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span class="nav-btn-label" id="navLabelHome">Главная</span>
+        </button>
 
-      <button class="nav-btn" type="button" data-tab="my-agent" aria-label="Мой агент">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="7" y="8" width="10" height="8" rx="2"></rect>
-          <path d="M9 16v2"></path>
-          <path d="M15 16v2"></path>
-          <path d="M9 11h.01"></path>
-          <path d="M15 11h.01"></path>
-          <path d="M12 8V5"></path>
-          <path d="M10 5h4"></path>
-        </svg>
-        <span class="nav-label" id="navLabelMyAgent">Агент</span>
-      </button>
+        <button class="nav-btn" data-page="my-agent.html" data-tab="my-agent" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 5h18v10H7l-4 4V5z"></path>
+          </svg>
+          <span class="nav-btn-label" id="navLabelMyAgent">Мой агент</span>
+        </button>
 
-      <button class="nav-btn" type="button" data-tab="shared-chat" aria-label="Чат">
-        <span class="nav-badge" id="sharedChatBadge"></span>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.52 0-2.95-.4-4.18-1.1L3 20l1.28-4.64A8.47 8.47 0 0 1 4 11.5 8.5 8.5 0 1 1 21 11.5Z"></path>
-        </svg>
-        <span class="nav-label" id="navLabelSharedChat">Чат</span>
-      </button>
+        <button class="nav-btn" data-page="shared-chat.html" data-tab="shared-chat" type="button">
+          <div class="nav-btn-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7A2.5 2.5 0 0 1 17.5 16H10l-4.5 4V16.5A2.5 2.5 0 0 1 4 14z" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span class="nav-btn-badge nav-btn-badge--dot" id="sharedChatBadge"></span>
+          </div>
+          <span class="nav-btn-label" id="navLabelSharedChat">Чат</span>
+        </button>
 
-      <button class="nav-btn" type="button" data-tab="modules" aria-label="Модули">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="3" y="3" width="7" height="7" rx="2"></rect>
-          <rect x="14" y="3" width="7" height="7" rx="2"></rect>
-          <rect x="3" y="14" width="7" height="7" rx="2"></rect>
-          <rect x="14" y="14" width="7" height="7" rx="2"></rect>
-        </svg>
-        <span class="nav-label" id="navLabelModules">Модули</span>
-      </button>
+        <button class="nav-btn" data-page="modules.html" data-tab="modules" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+          </svg>
+          <span class="nav-btn-label" id="navLabelModules">Модули</span>
+        </button>
 
-      <button class="nav-btn" type="button" data-tab="affiliate" aria-label="Партнер">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 21s-6.5-4.35-8.5-7.5A5 5 0 0 1 12 6a5 5 0 0 1 8.5 7.5C18.5 16.65 12 21 12 21Z"></path>
-          <path d="M12 10.5v3"></path>
-          <path d="M10.5 12h3"></path>
-        </svg>
-        <span class="nav-label" id="navLabelAffiliate">Партнер</span>
-      </button>
+        <button class="nav-btn" data-page="partner.html" data-tab="affiliate" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span class="nav-btn-label" id="navLabelAffiliate">Партнер</span>
+        </button>
 
-      <button class="nav-btn" type="button" data-tab="payments" aria-label="Платежи">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="2.5" y="5" width="19" height="14" rx="3"></rect>
-          <path d="M2.5 10h19"></path>
-          <path d="M7 15h3"></path>
-        </svg>
-        <span class="nav-label" id="navLabelPayments">Платежи</span>
-      </button>
-    </nav>
+        <button class="nav-btn" data-page="payments.html" data-tab="payments" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="1" y="4" width="22" height="16" rx="2"></rect>
+            <line x1="1" y1="10" x2="23" y2="10"></line>
+            <line x1="7" y1="15" x2="13" y2="15"></line>
+          </svg>
+          <span class="nav-btn-label" id="navLabelPayments">Платежи</span>
+        </button>
+      </nav>
+    </div>
   </div>
 
+  <script src="js/runtime.js"></script>
+  <script src="js/tenant-loader.js"></script>
+  <script src="js/app-shell.js"></script>
+
   <script>
-  (function () {
-    function isTelegramWebApp() {
-      return !!(window.Telegram && window.Telegram.WebApp);
-    }
-
-    function isStandalonePWA() {
-      return (
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true
-      );
-    }
-
-    function getEl(id) {
-      return document.getElementById(id);
-    }
-
-    function setText(el, value) {
-      if (el) {
-        el.textContent = value;
-      }
-    }
-
-    function setShellBrandMark(config) {
-      const appBrandMark = getEl('appBrandMark');
-      const shellLoaderMark = getEl('shellLoaderMark');
-
-      const label =
-        (config && (config.brandLabel || config.brandKey)) ||
-        (config && config.appName
-          ? config.appName.replace(/AI\s*/i, '').trim().slice(0, 3)
-          : '') ||
-        'FIT';
-
-      const value = String(label).toUpperCase();
-
-      setText(appBrandMark, value);
-      setText(shellLoaderMark, value);
-    }
-
-    function applyShellMeta(config) {
-      const appBrandSubtitle = getEl('appBrandSubtitle');
-      const appLogoText = getEl('appLogoText');
-      const texts = (config && config.texts) || {};
-
-      document.title = texts.appTitle || (config && config.appName) || 'AI FIT CENTER';
-
-      if (appLogoText) {
-        appLogoText.textContent =
-          texts.headerTitle || (config && config.appName) || 'AI FIT CENTER';
-      }
-
-      if (appBrandSubtitle) {
-        appBrandSubtitle.textContent = isTelegramWebApp()
-          ? 'Telegram Mini App'
-          : (isStandalonePWA() ? 'PWA / Standalone' : 'Web App');
-      }
-
-      setShellBrandMark(config || {});
-    }
-
-    function setupEnvironmentFlags() {
-      if (!document.body) return;
-
-      document.body.dataset.runtime = isTelegramWebApp() ? 'telegram' : 'web';
-      document.body.dataset.standalone = isStandalonePWA() ? 'true' : 'false';
-    }
-
-    function setupPWABanner() {
-      const pwaBanner = getEl('pwaBanner');
-      if (!pwaBanner) return;
-
-      if (isTelegramWebApp() || isStandalonePWA()) {
-        pwaBanner.classList.remove('visible');
-        return;
-      }
-
-      pwaBanner.classList.add('visible');
-    }
-
-    function hideShellLoading() {
-      const shellLoading = getEl('shellLoading');
-      if (shellLoading) {
-        shellLoading.classList.add('hidden');
-      }
-    }
-
-    function showShellLoading(message) {
-      const shellLoading = getEl('shellLoading');
-      const shellLoadingText = getEl('shellLoadingText');
-
-      if (shellLoadingText && message) {
-        shellLoadingText.textContent = message;
-      }
-
-      if (shellLoading) {
-        shellLoading.classList.remove('hidden');
-      }
-    }
-
-    function initTelegramShell() {
-      if (!isTelegramWebApp()) return;
-
-      try {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-      } catch (error) {
-        console.warn('[AI CENTER][App] Telegram WebApp init warning', error);
-      }
-    }
-
-    function bindLocalUI() {
-      const pwaBanner = getEl('pwaBanner');
-      const pwaBannerClose = getEl('pwaBannerClose');
-      const notificationsCount = getEl('notificationsCount');
-
-      if (pwaBannerClose && pwaBanner) {
-        pwaBannerClose.addEventListener('click', function () {
-          pwaBanner.classList.remove('visible');
-        });
-      }
-
-      if (notificationsCount) {
-        notificationsCount.textContent = '3';
-      }
-    }
-
-    function applyFallbackBranding() {
-      applyShellMeta({
-        brandLabel: 'FIT',
-        brandKey: 'fitline',
-        appName: 'AI FIT CENTER',
-        texts: {
-          appTitle: 'AI FIT CENTER',
-          headerTitle: 'AI FIT CENTER'
-        }
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker
+          .register('./sw.js')
+          .catch(function (error) {
+            console.error('Service worker registration failed:', error);
+          });
       });
-
-      hideShellLoading();
     }
-
-    async function bootstrapShellMeta() {
-      showShellLoading('Загружаем рабочее пространство бренда...');
-
-      try {
-        if (!window.AICTenant || typeof window.AICTenant.load !== 'function') {
-          throw new Error('AICTenant is not available');
-        }
-
-        const config = await window.AICTenant.load();
-        applyShellMeta(config);
-        hideShellLoading();
-      } catch (error) {
-        console.error('[AI CENTER][App] tenant load failed', error);
-        applyFallbackBranding();
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-      setupEnvironmentFlags();
-      bindLocalUI();
-      initTelegramShell();
-      setupPWABanner();
-      bootstrapShellMeta();
-    });
-  })();
-</script>
-
-<script src="./app-shell.js"></script>
+  </script>
 </body>
 </html>
