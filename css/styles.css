@@ -1032,6 +1032,61 @@ img {
 }
 
 /* =========================================================
+   HOME / AFFILIATE CARD
+========================================================= */
+
+#homeAffiliateCard {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.94) 0%,
+      rgba(248, 252, 255, 0.92) 100%
+    );
+}
+
+#homeAffiliateCard .card-section-body {
+  padding: 16px;
+}
+
+#homeAffiliateCard .home-card-stack {
+  gap: 12px;
+}
+
+#homeAffiliateCard .home-card-text {
+  max-width: none;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #334155;
+}
+
+#openAffiliateButton {
+  min-height: 42px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  background:
+    linear-gradient(
+      135deg,
+      var(--tenant-primary-dark) 0%,
+      var(--tenant-primary) 100%
+    );
+  box-shadow:
+    0 10px 22px rgba(59, 130, 246, 0.24),
+    0 3px 8px rgba(15, 23, 42, 0.08);
+}
+
+#openAffiliateButton:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 28px rgba(59, 130, 246, 0.28),
+    0 5px 12px rgba(15, 23, 42, 0.10);
+}
+
+#openAffiliateButton:active {
+  transform: translateY(0);
+}
+
+/* =========================================================
    13. SETTINGS
 ========================================================= */
 
