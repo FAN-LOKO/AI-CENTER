@@ -143,25 +143,21 @@
     }
 
     function setStatus(message, type) {
-      const statusEl = document.getElementById("profileStatusMessage");
-      if (!statusEl) return;
+  const statusEl = document.getElementById("profileStatusMessage");
+  if (!statusEl) return;
 
-      if (!message) {
-        statusEl.hidden = true;
-        statusEl.textContent = "";
-        statusEl.className = "settings-success-text";
-        return;
-      }
+  if (!message) {
+    statusEl.hidden = true;
+    statusEl.textContent = "";
+    statusEl.className = "settings-success-text";
+    return;
+  }
 
-      statusEl.hidden = false;
-      statusEl.textContent = message;
-
-      if (type === "error") {
-        statusEl.className = "settings-helper-text";
-      } else {
-        statusEl.className = "settings-success-text";
-      }
-    }
+  statusEl.hidden = false;
+  statusEl.textContent = message;
+  statusEl.className =
+    type === "error" ? "settings-error-text" : "settings-success-text";
+}
 
     function fillVersionInfo() {
       const shell = getShell();
