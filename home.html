@@ -6,46 +6,58 @@
     <title>AI FIT Center</title>
     <link rel="stylesheet" href="css/styles.css" />
     <style>
-      /* ── skeleton loader ──────────────────────────────────────── */
-      @keyframes shimmer {
-        0%   { background-position: -200% 0; }
-        100% { background-position:  200% 0; }
-      }
-      .skeleton {
-        background: linear-gradient(
-          90deg,
-          var(--color-surface-offset, #eee) 25%,
-          var(--color-surface-dynamic, #ddd) 50%,
-          var(--color-surface-offset, #eee) 75%
-        );
-        background-size: 200% 100%;
-        animation: shimmer 1.4s ease-in-out infinite;
-        border-radius: 6px;
-      }
-      .skeleton-line {
-        height: 1em;
-        margin-bottom: 8px;
-        border-radius: 4px;
-      }
-      .skeleton-line:last-child { width: 60%; }
-      .skeleton-btn {
-        height: 38px;
-        width: 100%;
-        border-radius: 8px;
-        margin-top: 8px;
-      }
-      .home-modules-skeleton {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        padding: 4px 0;
-      }
-      .home-modules-skeleton-item {
-        padding: 12px;
-        border: 1px solid var(--color-border, #e0e0e0);
-        border-radius: 10px;
-      }
-    </style>
+  [hidden] {
+    display: none !important;
+  }
+
+  /* ── skeleton loader ──────────────────────────────────────── */
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-offset, #eee) 25%,
+      var(--color-surface-dynamic, #ddd) 50%,
+      var(--color-surface-offset, #eee) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: 6px;
+  }
+
+  .skeleton-line {
+    height: 1em;
+    margin-bottom: 8px;
+    border-radius: 4px;
+  }
+
+  .skeleton-line:last-child {
+    width: 60%;
+  }
+
+  .skeleton-btn {
+    height: 38px;
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+
+  .home-modules-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 0;
+  }
+
+  .home-modules-skeleton-item {
+    padding: 12px;
+    border: 1px solid var(--color-border, #e0e0e0);
+    border-radius: 10px;
+  }
+</style>
   </head>
   <body>
     <div class="page home-page">
