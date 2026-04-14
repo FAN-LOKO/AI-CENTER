@@ -144,124 +144,157 @@
   </div>
 
   <script>
-    (function () {
-      const body = document.body;
-      const pwaBanner = document.getElementById('pwaBanner');
-      const pwaBannerClose = document.getElementById('pwaBannerClose');
-      const appBrandMark = document.getElementById('appBrandMark');
-      const shellLoaderMark = document.getElementById('shellLoaderMark');
-      const shellLoading = document.getElementById('shellLoading');
-      const shellLoadingText = document.getElementById('shellLoadingText');
-      const appBrandSubtitle = document.getElementById('appBrandSubtitle');
-      const notificationsCount = document.getElementById('notificationsCount');
+  (function () {
+    function isTelegramWebApp() {
+      return !!(window.Telegram && window.Telegram.WebApp);
+    }
 
-      function isTelegramWebApp() {
-        return !!(window.Telegram && window.Telegram.WebApp);
-      }
+    function isStandalonePWA() {
+      return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true
+      );
+    }
 
-      function isStandalonePWA() {
-        return (
-          window.matchMedia('(display-mode: standalone)').matches ||
-          window.navigator.standalone === true
-        );
-      }
+    function getEl(id) {
+      return document.getElementById(id);
+    }
 
-      function setShellBrandMark(config) {
-        const label =
-          config.brandLabel ||
-          config.brandKey ||
-          (config.appName || 'AI').replace(/AI\s*/i, '').trim().slice(0, 3) ||
-          'AI';
+    function setText(el, value) {
+      if (el) el.textContent = value;
+    }
 
-        const value = label.toUpperCase();
-        appBrandMark.textContent = value;
-        shellLoaderMark.textContent = value;
-      }
+    function setShellBrandMark(config) {
+      const appBrandMark = getEl('appBrandMark');
+      const shellLoaderMark = getEl('shellLoaderMark');
 
-      function applyShellMeta(config) {
-        const texts = config.texts || {};
-        document.title = texts.appTitle || config.appName || 'AI CENTER';
+      const label =
+        config.brandLabel ||
+        config.brandKey ||
+        (config.appName || 'AI').replace(/AI\s*/i, '').trim().slice(0, 3) ||
+        'AI';
 
+      const value = String(label).toUpperCase();
+
+      setText(appBrandMark, value);
+      setText(shellLoaderMark, value);
+    }
+
+    function applyShellMeta(config) {
+      const appBrandSubtitle = getEl('appBrandSubtitle');
+      const texts = config.texts || {};
+
+      document.title = texts.appTitle || config.appName || 'AI CENTER';
+
+      if (appBrandSubtitle) {
         appBrandSubtitle.textContent = isTelegramWebApp()
           ? 'Telegram Mini App'
           : (isStandalonePWA() ? 'PWA / Standalone' : 'Web App');
-
-        setShellBrandMark(config);
       }
 
-      function setupEnvironmentFlags() {
-        body.dataset.runtime = isTelegramWebApp() ? 'telegram' : 'web';
-        body.dataset.standalone = isStandalonePWA() ? 'true' : 'false';
+      setShellBrandMark(config);
+    }
+
+    function setupEnvironmentFlags() {
+      if (!document.body) return;
+
+      document.body.dataset.runtime = isTelegramWebApp() ? 'telegram' : 'web';
+      document.body.dataset.standalone = isStandalonePWA() ? 'true' : 'false';
+    }
+
+    function setupPWABanner() {
+      const pwaBanner = getEl('pwaBanner');
+      if (!pwaBanner) return;
+
+      if (isTelegramWebApp() || isStandalonePWA()) {
+        pwaBanner.classList.remove('visible');
+        return;
       }
 
-      function setupPWABanner() {
-        if (isTelegramWebApp() || isStandalonePWA()) {
-          pwaBanner.classList.remove('visible');
-          return;
-        }
+      pwaBanner.classList.add('visible');
+    }
 
-        pwaBanner.classList.add('visible');
-      }
-
-      function hideShellLoading() {
+    function hideShellLoading() {
+      const shellLoading = getEl('shellLoading');
+      if (shellLoading) {
         shellLoading.classList.add('hidden');
       }
+    }
 
-      function showShellLoading(message) {
-        if (message) {
-          shellLoadingText.textContent = message;
-        }
+    function showShellLoading(message) {
+      const shellLoading = getEl('shellLoading');
+      const shellLoadingText = getEl('shellLoadingText');
+
+      if (shellLoadingText && message) {
+        shellLoadingText.textContent = message;
+      }
+
+      if (shellLoading) {
         shellLoading.classList.remove('hidden');
       }
+    }
 
-      function initTelegramShell() {
-        if (!isTelegramWebApp()) return;
+    function setShellLoadingError(message) {
+      const shellLoadingText = getEl('shellLoadingText');
+      if (shellLoadingText) {
+        shellLoadingText.textContent = message;
+      }
+    }
 
-        try {
-          window.Telegram.WebApp.ready();
-          window.Telegram.WebApp.expand();
-        } catch (error) {
-          console.warn('[AI CENTER][App] Telegram WebApp init warning', error);
-        }
+    function initTelegramShell() {
+      if (!isTelegramWebApp()) return;
+
+      try {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+      } catch (error) {
+        console.warn('[AI CENTER][App] Telegram WebApp init warning', error);
+      }
+    }
+
+    function bindLocalUI() {
+      const pwaBanner = getEl('pwaBanner');
+      const pwaBannerClose = getEl('pwaBannerClose');
+      const notificationsCount = getEl('notificationsCount');
+
+      if (pwaBannerClose && pwaBanner) {
+        pwaBannerClose.addEventListener('click', function () {
+          pwaBanner.classList.remove('visible');
+        });
       }
 
-      function bindLocalUI() {
-        if (pwaBannerClose) {
-          pwaBannerClose.addEventListener('click', function () {
-            pwaBanner.classList.remove('visible');
-          });
-        }
-
-        if (notificationsCount) {
-          notificationsCount.textContent = '3';
-        }
+      if (notificationsCount) {
+        notificationsCount.textContent = '3';
       }
+    }
 
-      async function bootstrapShellMeta() {
-        showShellLoading('Загружаем рабочее пространство бренда...');
+    async function bootstrapShellMeta() {
+      showShellLoading('Загружаем рабочее пространство бренда...');
 
-        try {
-          const config = await window.AICTenant.load();
-          applyShellMeta(config);
-        } catch (error) {
-          console.error('[AI CENTER][App] tenant load failed', error);
-          shellLoadingText.textContent = 'Не удалось загрузить конфигурацию бренда.';
-          return;
+      try {
+        if (!window.AICTenant || typeof window.AICTenant.load !== 'function') {
+          throw new Error('AICTenant is not available');
         }
 
+        const config = await window.AICTenant.load();
+        applyShellMeta(config);
         hideShellLoading();
+      } catch (error) {
+        console.error('[AI CENTER][App] tenant load failed', error);
+        setShellLoadingError('Не удалось загрузить конфигурацию бренда.');
       }
+    }
 
-      document.addEventListener('DOMContentLoaded', function () {
-        setupEnvironmentFlags();
-        bindLocalUI();
-        initTelegramShell();
-        setupPWABanner();
-        bootstrapShellMeta();
-      });
-    })();
-  </script>
+    document.addEventListener('DOMContentLoaded', function () {
+      setupEnvironmentFlags();
+      bindLocalUI();
+      initTelegramShell();
+      setupPWABanner();
+      bootstrapShellMeta();
+    });
+  })();
+</script>
 
-  <script src="./app-shell.js"></script>
+<script src="./app-shell.js"></script>
 </body>
 </html>
