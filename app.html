@@ -10,8 +10,6 @@
   <title>AI CENTER</title>
 
   <link rel="stylesheet" href="css/styles.css" />
-
-  <script src="./tenant-loader.js"></script>
 </head>
 <body>
   <div class="screen">
@@ -108,15 +106,16 @@
 
   <script src="js/runtime.js"></script>
   <script src="js/tenant-loader.js"></script>
+  <script src="js/app-version.js"></script>
   <script src="js/app-shell.js"></script>
 
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
         navigator.serviceWorker
-          .register('./sw.js')
+          .register("./sw.js")
           .catch(function (error) {
-            console.error('Service worker registration failed:', error);
+            console.error("Service worker registration failed:", error);
           });
       });
     }
