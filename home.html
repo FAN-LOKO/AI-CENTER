@@ -90,8 +90,9 @@
       <button type="button" class="home-text-link" id="paymentLink">Перейти к оплатам</button>
     </div>
 
-    <!-- skeleton показывается до загрузки модулей -->
-    <div id="homeModulesSkeleton" class="home-modules-skeleton">
+    <!-- Skeleton скрыт по умолчанию.
+         Показываем его только если загрузка реально затянулась. -->
+    <div id="homeModulesSkeleton" class="home-modules-skeleton" hidden>
       <div class="home-modules-skeleton-item">
         <div class="skeleton skeleton-line" style="width:55%"></div>
         <div class="skeleton skeleton-line" style="width:80%"></div>
@@ -131,14 +132,8 @@
     <script>
   // ═══════════════════════════════════════════════════════════════
   //  STATE / СОСТОЯНИЕ
-  //  Global state for Home page: feature flags, tenant config,
-  //  tenant modules registry and user modules view model.
-  //  Глобальное состояние для главной: флаги фич, конфиг тенанта,
-  //  реестр модулей тенанта и пользовательская проекция модулей.
   // ═══════════════════════════════════════════════════════════════
 
-  /** Feature flags — overridden from shell via postMessage */
-  /** Флаги фич — перезаписываются из shell через postMessage */
   let APPFEATURES = {
     home: true,
     myAgent: true,
@@ -149,41 +144,73 @@
     settings: true
   };
 
-  /** Current tenant config (fitline.json) */
-  /** Конфиг текущего тенанта (fitline.json) */
   let TENANTCONFIG = null;
-
-  /**
-   * Tenant modules from tenant config.
-   * Structure: { id, title, titleRu, page, requiresPayment, enabled, category }
-   *
-   * This is the single source of truth for module registry.
-   * Это единственный источник истины для реестра модулей тенанта.
-   */
   let TENANTMODULES = [];
-
-  /**
-   * User-facing modules list for Home page.
-   * Each item: { id, title, page, requiresPayment, category,
-   *              visible, paid, frozen, daysLeft, isAgent }
-   *
-   * Built from TENANTMODULES + user access info.
-   * Строится из TENANTMODULES + данных о доступе пользователя.
-   */
   let USERMODULES = [];
-
-  /** true — modules were loaded at least once from shell */
-  /** true — модули уже были загружены из shell хотя бы раз */
   let _modulesReady = false;
-
-  /** Last rendered modules signature to prevent duplicate repaint */
-  /** Сигнатура последнего рендера, чтобы не делать лишнюю перерисовку */
   let _lastHomeModulesSignature = '';
+
+  let _homeModulesLoading = true;
+  let _homeModulesSkeletonTimer = null;
+
+  const HOME_SKELETON_DELAY_MS = 280;
+
+  // ═══════════════════════════════════════════════════════════════
+  //  UI HELPERS / UI-ХЕЛПЕРЫ
+  // ═══════════════════════════════════════════════════════════════
+
+  function getHomeModulesSkeletonEl() {
+    return document.getElementById('homeModulesSkeleton');
+  }
+
+  function getHomeModulesListEl() {
+    return document.getElementById('homeModulesList');
+  }
+
+  function showHomeModulesSkeleton() {
+    const skeleton = getHomeModulesSkeletonEl();
+    const list = getHomeModulesListEl();
+    if (skeleton) skeleton.hidden = false;
+    if (list) list.hidden = true;
+  }
+
+  function hideHomeModulesSkeleton() {
+    const skeleton = getHomeModulesSkeletonEl();
+    if (skeleton) skeleton.hidden = true;
+  }
+
+  function showHomeModulesList() {
+    const list = getHomeModulesListEl();
+    if (list) list.hidden = false;
+  }
+
+  function scheduleHomeModulesSkeleton() {
+    clearHomeModulesSkeletonTimer();
+
+    _homeModulesSkeletonTimer = setTimeout(() => {
+      if (_homeModulesLoading) {
+        console.log('[HOME] skeleton shown after delay');
+        showHomeModulesSkeleton();
+      }
+    }, HOME_SKELETON_DELAY_MS);
+  }
+
+  function clearHomeModulesSkeletonTimer() {
+    if (_homeModulesSkeletonTimer) {
+      clearTimeout(_homeModulesSkeletonTimer);
+      _homeModulesSkeletonTimer = null;
+    }
+  }
+
+  function finishHomeModulesLoading() {
+    _homeModulesLoading = false;
+    clearHomeModulesSkeletonTimer();
+    hideHomeModulesSkeleton();
+    showHomeModulesList();
+  }
 
   // ═══════════════════════════════════════════════════════════════
   //  SHELL HELPERS / ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ SHELL
-  //  Helpers to read tenant config and modules from parent shell.
-  //  Хелперы для чтения tenant-конфига и модулей из shell.
   // ═══════════════════════════════════════════════════════════════
 
   function getTenantConfig() {
@@ -195,13 +222,6 @@
     }
   }
 
-  /**
-   * Reads raw modules from shell: filters enabled and maps structure.
-   * Similar to getTenantModules() in modules.html.
-   *
-   * Читает raw-модули из shell: фильтрует enabled и приводит к нужной структуре.
-   * Аналогично getTenantModules() из modules.html.
-   */
   function getTenantModulesRaw() {
     try {
       const raw = window.parent?.AICAppShell?.getTenantModules?.() || [];
@@ -221,17 +241,11 @@
     }
   }
 
-  /**
-   * Retry loop: waits until shell loads tenant config (up to 20×150ms = 3s).
-   * After success returns array of tenant modules.
-   *
-   * Retry-цикл: ждём, пока shell загрузит tenant-конфиг (до 20×150мс = 3с).
-   * После успеха возвращает массив модулей тенанта.
-   */
   function waitForTenantModules(attempt) {
     attempt = attempt || 0;
     return new Promise(resolve => {
       const mods = getTenantModulesRaw();
+
       if (mods.length > 0) {
         console.log('[HOME] waitForTenantModules resolved', {
           attempt,
@@ -248,30 +262,13 @@
   }
 
   // ═══════════════════════════════════════════════════════════════
-  //  HOME MODULES SELECTION / ОТБОР МОДУЛЕЙ ДЛЯ HOME
-  //  Business rules for which modules are visible on Home.
-  //  Бизнес-правила, какие модули видны на главной.
+  //  HOME RULES / ПРАВИЛА HOME
   // ═══════════════════════════════════════════════════════════════
 
-  /** IDs of modules that must always be shown on Home */
-  /** ID модулей, которые всегда показываем на главной */
   const HOME_ALWAYS_VISIBLE_IDS = ['ai-agent', 'knowledge-hub', 'support-desk'];
-
-  /** IDs of modules that are always free for user */
-  /** ID модулей, которые всегда бесплатны для пользователя */
   const HOME_FREE_VISIBLE_IDS = ['knowledge-hub', 'support-desk'];
-
-  /** ID of base Agent module */
-  /** ID базового модуля Агент */
   const HOME_AGENT_ID = 'ai-agent';
 
-  /**
-   * Temporary mock of user access map.
-   * Should be replaced by real CRM / subscription sync via shell.
-   *
-   * Временный mock-контейнер доступа пользователя.
-   * Позже заменяется реальными данными из CRM / подписок.
-   */
   function getDefaultUserModuleAccess() {
     return {
       'ai-agent': {
@@ -279,41 +276,22 @@
         frozen: true,
         daysLeft: 5
       }
-      // Examples of future paid modules:
-      // Примеры будущих платных модулей:
-      // 'media-lab': { paid: true, frozen: false, daysLeft: 27 },
-      // 'lead-flow': { paid: true, frozen: false, daysLeft: 12 }
     };
   }
 
-  /**
-   * Normalizes raw access map from shell.
-   * Нормализует raw-карту доступа из shell.
-   */
   function normalizeUserAccessMap(raw) {
     if (!raw || typeof raw !== 'object') return {};
     return raw;
   }
 
-  /**
-   * Builds user-facing Home modules from tenant registry + access map.
-   *
-   * Строит пользовательский список модулей для главной страницы
-   * на основе реестра модулей тенанта и карты доступа пользователя.
-   */
   function buildHomeModulesFromTenant(tenantModules, accessMap) {
     const normalizedAccess = normalizeUserAccessMap(accessMap);
 
     return tenantModules
       .filter(m => {
         if (!m || m.enabled === false) return false;
-
-        // Always show Agent + Knowledge Hub + Support on Home
-        // Всегда показываем Агент + База знаний + Поддержка
         if (HOME_ALWAYS_VISIBLE_IDS.includes(m.id)) return true;
 
-        // Other modules — only if user has paid access
-        // Остальные модули — только при оплаченной подписке
         const access = normalizedAccess[m.id];
         return !!access?.paid;
       })
@@ -322,8 +300,6 @@
         const isAlwaysFree = HOME_FREE_VISIBLE_IDS.includes(m.id);
         const isAgent = m.id === HOME_AGENT_ID;
 
-        // Always-free modules (Knowledge Hub, Support)
-        // Всегда бесплатные модули (База знаний, Поддержка)
         if (isAlwaysFree) {
           return {
             id: m.id,
@@ -339,8 +315,6 @@
           };
         }
 
-        // Base Agent module — always visible, may be frozen/unpaid
-        // Базовый модуль Агент — всегда виден, может быть заморожен/неоплачен
         if (isAgent) {
           const paid = !!access?.paid;
           const frozen = !paid;
@@ -358,8 +332,6 @@
           };
         }
 
-        // Other paid modules visible on Home
-        // Остальные платные модули, видимые на главной
         return {
           id: m.id,
           title: m.title,
@@ -374,8 +346,6 @@
         };
       })
       .sort((a, b) => {
-        // Ensure order: Agent → Knowledge Hub → Support → others
-        // Сортируем: Агент → База знаний → Поддержка → остальные
         const order = {
           'ai-agent': 0,
           'knowledge-hub': 1,
@@ -392,8 +362,6 @@
 
   // ═══════════════════════════════════════════════════════════════
   //  BADGES & STATUS / БЕЙДЖИ И СТАТУСЫ
-  //  Visual labels and status text for Home modules.
-  //  Визуальные бейджи и статусные тексты для модулей на главной.
   // ═══════════════════════════════════════════════════════════════
 
   function getModuleBadge(mod) {
@@ -438,8 +406,6 @@
 
   // ═══════════════════════════════════════════════════════════════
   //  NAVIGATION / НАВИГАЦИЯ
-  //  Navigation requests from Home to shell.
-  //  Навигационные запросы с главной в shell.
   // ═══════════════════════════════════════════════════════════════
 
   function navigateFromHome(page, tab) {
@@ -448,8 +414,6 @@
 
   // ═══════════════════════════════════════════════════════════════
   //  RENDER / ОТРИСОВКА
-  //  Render Home modules list according to visibility rules.
-  //  Отрисовываем список модулей на главной согласно правилам видимости.
   // ═══════════════════════════════════════════════════════════════
 
   function getVisibleHomeModules() {
@@ -461,8 +425,7 @@
   }
 
   function renderHomeModules() {
-    const skeleton  = document.getElementById('homeModulesSkeleton');
-    const container = document.getElementById('homeModulesList');
+    const container = getHomeModulesListEl();
     if (!container) return;
 
     const visible = getVisibleHomeModules();
@@ -483,21 +446,16 @@
 
     if (_lastHomeModulesSignature === nextSignature) {
       console.log('[HOME] renderHomeModules skipped: no changes');
-      if (skeleton) skeleton.hidden = true;
-      container.hidden = false;
+      finishHomeModulesLoading();
       return;
     }
 
     _lastHomeModulesSignature = nextSignature;
 
-    // Hide skeleton, show container
-    // Скрываем skeleton, показываем контейнер
-    if (skeleton) skeleton.hidden = true;
-    container.hidden = false;
-
     if (!visible.length) {
       container.innerHTML =
         '<p class="home-empty-note">Пока нет доступных модулей. Как только они появятся, вы увидите их здесь.</p>';
+      finishHomeModulesLoading();
       return;
     }
 
@@ -546,12 +504,12 @@
         if (page) navigateFromHome(page, 'modules');
       });
     });
+
+    finishHomeModulesLoading();
   }
 
   // ═══════════════════════════════════════════════════════════════
   //  TENANT / FEATURES / ТЕНАНТ И ФИЧИ
-  //  Apply tenant texts and feature flags for sections visibility.
-  //  Применяем tenant-тексты и флаги фич для видимости секций.
   // ═══════════════════════════════════════════════════════════════
 
   function applyTenantContent() {
@@ -574,15 +532,6 @@
     if (modulesCard) modulesCard.hidden = APPFEATURES.modules === false;
   }
 
-  /**
-   * Applies feature flags from shell.
-   * Called from postMessage. Does NOT overwrite USERMODULES —
-   * only updates APPFEATURES and re-renders UI.
-   *
-   * Применяет фичи из shell.
-   * Вызывается из postMessage. НЕ перезаписывает USERMODULES —
-   * только обновляет APPFEATURES и перерисовывает UI.
-   */
   function applyHomeFeatures(features) {
     APPFEATURES = { ...APPFEATURES, ...(features || {}) };
 
@@ -597,8 +546,6 @@
 
   // ═══════════════════════════════════════════════════════════════
   //  TELEGRAM PROFILE / ПРОФИЛЬ TELEGRAM
-  //  Read and display Telegram WebApp user profile on Home.
-  //  Чтение и отображение Telegram-профиля пользователя на главной.
   // ═══════════════════════════════════════════════════════════════
 
   function getTelegramUser() {
@@ -662,8 +609,6 @@
 
   // ═══════════════════════════════════════════════════════════════
   //  MESSAGE BUS / ОБРАБОТКА postMessage
-  //  Handle messages from shell: features, user modules, user profile.
-  //  Обрабатываем сообщения от shell: фичи, модули пользователя, профиль.
   // ═══════════════════════════════════════════════════════════════
 
   window.addEventListener('message', event => {
@@ -672,7 +617,6 @@
 
     if (data.type === 'app-features') {
       applyHomeFeatures(data.features || {});
-
     } else if (data.type === 'user-modules' && Array.isArray(data.modules)) {
       const accessMap = {};
 
@@ -688,7 +632,6 @@
       USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, accessMap);
       _modulesReady = true;
       renderHomeModules();
-
     } else if (data.type === 'user-profile') {
       applyUserProfileOnHome(data.profile || data);
     }
@@ -696,8 +639,6 @@
 
   // ═══════════════════════════════════════════════════════════════
   //  INIT / ИНИЦИАЛИЗАЦИЯ
-  //  Wire navigation, load tenant modules, apply tenant content and render.
-  //  Подключаем навигацию, загружаем модули, применяем tenant-конфиг и рисуем.
   // ═══════════════════════════════════════════════════════════════
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -709,6 +650,9 @@
       navigateFromHome('partner.html', 'affiliate'));
 
     fillTelegramProfile();
+
+    _homeModulesLoading = true;
+    scheduleHomeModulesSkeleton();
 
     TENANTMODULES = await waitForTenantModules();
     console.log('[AI CENTER][Home] tenant modules loaded:', TENANTMODULES.length);
