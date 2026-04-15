@@ -12,11 +12,6 @@
    - partner.html
    - payments.html
    - settings.html
-
-   Принцип:
-   - текущая HTML-разметка = источник правды
-   - ничего не переименовываем
-   - возвращаем рабочий визуал shell и базовых страниц
 ========================================================= */
 
 /* =========================================================
@@ -155,7 +150,6 @@ img {
 
 /* =========================================================
    4. APP SHELL
-   Совместимо с текущим app.html
 ========================================================= */
 
 .app-shell {
@@ -194,7 +188,7 @@ img {
     0 10px 24px rgba(11, 60, 120, 0.22),
     inset 0 -1px 0 rgba(255, 255, 255, 0.10);
   position: relative;
-  z-: 3;
+  z-index: 3;
 }
 
 .app-header-left {
@@ -346,7 +340,7 @@ img {
     0 3px 10px rgba(15, 23, 42, 0.08);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  z-: 4;
+  z-index: 4;
 }
 
 .nav-btn {
@@ -620,11 +614,7 @@ img {
    INDEX / AUTH START
 ========================================================= */
 
-.screen {
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-}
+/* ВАЖНО: не трогаем .screen, чтобы не ломать app.html */
 
 .auth-start-card {
   position: relative;
@@ -742,10 +732,6 @@ img {
 ========================================================= */
 
 @media (max-width: 520px) {
-  .screen {
-    max-width: 100%;
-  }
-
   .auth-start-card {
     border-radius: 20px;
   }
@@ -760,10 +746,6 @@ img {
 }
 
 @media (max-width: 380px) {
-  .screen {
-    padding: 12px;
-  }
-
   .auth-start-title {
     font-size: 40px;
   }
@@ -1583,8 +1565,10 @@ img {
   .nav-btn-label {
     font-size: 10px;
   }
-  
-   @media (min-width: 768px) {
+}
+
+/* Широкие экраны: центрируем shell, но не ломаем index */
+@media (min-width: 768px) {
   .screen {
     align-items: center;
   }
@@ -1596,7 +1580,6 @@ img {
 
 /* =========================================================
    GLOBAL / SCROLLBARS
-   Premium compact version
 ========================================================= */
 
 html {
