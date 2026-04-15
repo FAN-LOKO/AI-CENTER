@@ -256,5 +256,8 @@
     "paymentsOfferLinkText": "условиями оферты",
     "paymentsPayButton30": "Оплатить 30 дней",
     "paymentsPayButton90": "Оплатить 3 месяца"
+    "paymentsModuleIntroTitle": "Оплата доступа к модулю",
+    "paymentsModuleIntroText": "Выберите подходящий тариф, подтвердите согласие с условиями оферты и перейдите к оплате.",
+    "paymentsTariff90Badge": "Выгоднее"
   }
 }
