@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Модуль в разработке</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/modules.css" />
+</head>
+<body>
+  <div class="page page-my-agent">
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Модуль в разработке</h2>
+        <p class="card-section-subtitle">
+          Этот модуль появится в одной из ближайших версий AI CENTER
+        </p>
+      </div>
+
+      <div class="card-section-body">
+        <div class="profile-row">
+          <span class="profile-label">Статус</span>
+          <span class="profile-value">
+            <span class="status-badge status-offline">В разработке</span>
+          </span>
+        </div>
+
+        <div class="profile-row">
+          <span class="profile-label">Что это значит</span>
+          <span class="profile-value">
+            Страница модуля уже зарезервирована в платформе, но функциональность еще не подключена.
+          </span>
+        </div>
+
+        <div class="profile-row">
+          <span class="profile-label">Что делать сейчас</span>
+          <span class="profile-value">
+            Используйте уже доступные разделы или вернитесь к списку модулей позже.
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section">
+      <div class="card-section-body">
+        <button class="btn btn-block" type="button" onclick="goBackToModules()">
+          Вернуться к модулям
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function goBackToModules() {
+      try {
+        window.parent?.postMessage?.(
+          {
+            type: "navigate",
+            page: "modules.html",
+            tab: "modules"
+          },
+          "*"
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
