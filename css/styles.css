@@ -194,7 +194,7 @@ img {
     0 10px 24px rgba(11, 60, 120, 0.22),
     inset 0 -1px 0 rgba(255, 255, 255, 0.10);
   position: relative;
-  z-index: 3;
+  z-: 3;
 }
 
 .app-header-left {
@@ -346,7 +346,7 @@ img {
     0 3px 10px rgba(15, 23, 42, 0.08);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  z-index: 4;
+  z-: 4;
 }
 
 .nav-btn {
@@ -617,23 +617,38 @@ img {
 }
 
 /* =========================================================
-   10. AUTH / INDEX
+   INDEX / AUTH START
 ========================================================= */
 
+.screen {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
 .auth-start-card {
-  overflow: hidden;
+  position: relative;
+  width: 100%;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.10),
+    0 6px 16px rgba(15, 23, 42, 0.06);
 }
 
 .auth-start-header {
-  text-align: center;
+  gap: 8px;
 }
 
 .auth-start-title {
-  margin: 0 0 8px;
-  font-size: 60px;
-  line-height: 1.02;
-  font-weight: 800;
-  text-transform: uppercase;
+  margin: 0;
+  text-align: center;
+  font-size: clamp(38px, 7vw, 52px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  color: #0f172a;
+  text-wrap: balance;
 }
 
 .auth-start-line {
@@ -641,43 +656,41 @@ img {
 }
 
 .auth-start-line-light {
-  color: #f9fafb;
-  text-shadow:
-    0 3px 0 rgba(15, 23, 42, 0.9),
-    0 8px 18px rgba(15, 23, 42, 0.7);
+  color: #0f172a;
 }
 
 .auth-start-line-accent {
-  color: var(--tenant-primary);
-  text-shadow:
-    0 3px 0 rgba(15, 23, 42, 0.9),
-    0 8px 18px rgba(15, 23, 42, 0.7);
+  color: var(--brand-primary, #3b82f6);
 }
 
 .auth-start-subtitle {
   margin: 0;
+  text-align: center;
   font-size: 15px;
-  opacity: 0.96;
+  line-height: 1.55;
+  color: #475569;
+  text-wrap: pretty;
 }
 
 .auth-start-note {
-  margin-bottom: 14px;
-  font-size: 13px;
-  color: #6b7280;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.16);
+  color: #0f172a;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .auth-consent-item {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 10px 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.10);
-  cursor: pointer;
-  font-size: 13px;
-  color: #374151;
+  margin-bottom: 12px;
+  color: #0f172a;
+  font-size: 14px;
+  line-height: 1.48;
 }
 
 .auth-consent-item:last-of-type {
@@ -687,25 +700,82 @@ img {
 .auth-consent-checkbox {
   width: 18px;
   height: 18px;
+  min-width: 18px;
   margin-top: 2px;
+  flex: 0 0 auto;
+  accent-color: var(--brand-primary, #3b82f6);
   cursor: pointer;
 }
 
+.auth-consent-item span {
+  display: block;
+}
+
 .auth-consent-link {
-  color: var(--tenant-primary);
+  color: var(--brand-primary-dark, #0b3c78);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-consent-link:hover {
   text-decoration: underline;
 }
 
-.auth-start-button.is-disabled,
-.auth-start-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+.auth-start-button {
+  margin-top: 4px;
 }
 
 .auth-start-footnote {
-  margin-top: 10px;
-  font-size: 11px;
-  color: #9ca3af;
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* =========================================================
+   INDEX / AUTH START RESPONSIVE
+========================================================= */
+
+@media (max-width: 520px) {
+  .screen {
+    max-width: 100%;
+  }
+
+  .auth-start-card {
+    border-radius: 20px;
+  }
+
+  .auth-start-note {
+    padding: 11px 12px;
+  }
+
+  .auth-consent-item {
+    gap: 9px;
+  }
+}
+
+@media (max-width: 380px) {
+  .screen {
+    padding: 12px;
+  }
+
+  .auth-start-title {
+    font-size: 40px;
+  }
+
+  .auth-start-subtitle {
+    font-size: 14px;
+  }
+
+  .auth-start-note,
+  .auth-consent-item {
+    font-size: 13px;
+  }
 }
 
 /* =========================================================
@@ -1513,13 +1583,8 @@ img {
   .nav-btn-label {
     font-size: 10px;
   }
-
-  .auth-start-title {
-    font-size: 48px;
-  }
-}
-
-@media (min-width: 768px) {
+  
+   @media (min-width: 768px) {
   .screen {
     align-items: center;
   }
