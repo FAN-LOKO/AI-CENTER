@@ -2076,4 +2076,42 @@ body {
   .payments-tariff-price-wrap {
     text-align: left;
   }
+
+.payments-plan-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.payments-plan-meta-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.035);
+}
+
+.payments-plan-meta-label {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+.payments-plan-meta-value {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: right;
+}
+
+.payments-plan-meta-value-muted {
+  color: #475569;
+}
+
+.payments-plan-meta-value-success {
+  color: #16a34a;
 }
