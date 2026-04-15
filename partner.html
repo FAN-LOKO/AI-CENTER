@@ -3,20 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Партнерка — AI FIT CENTER</title>
+    <title>Партнёрка</title>
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
     <div class="page partner-page">
       <section class="card-section partner-hero-card">
         <div class="card-section-header">
-          <h1 class="card-section-title">Партнерка</h1>
-          <p class="card-section-subtitle">
-            Зарабатывайте вместе с AI FIT CENTER
+          <h1 class="card-section-title" id="partnerTitle">Партнёрка</h1>
+          <p class="card-section-subtitle" id="partnerSubtitle">
+            Зарабатывайте вместе с вашим AI-ассистентом
           </p>
         </div>
         <div class="card-section-body">
-          <p class="partner-lead">
+          <p class="partner-lead" id="partnerLead">
             Делитесь реферальной ссылкой и получайте процент с оплат ваших
             партнёров.
           </p>
@@ -29,11 +29,13 @@
           type="button"
           onclick="toggleAccordion(this)"
         >
-          <span class="accordion-header-title">Ваша реферальная ссылка</span>
+          <span class="accordion-header-title" id="partnerRefTitle">
+            Ваша реферальная ссылка
+          </span>
           <span class="accordion-header-icon">▴</span>
         </button>
         <div class="accordion-body">
-          <p class="partner-muted-text">
+          <p class="partner-muted-text" id="partnerRefText">
             Скопируйте ссылку и отправьте её своим клиентам или партнёрам.
           </p>
 
@@ -41,7 +43,7 @@
             https://t.me/your_bot?start=ref123
           </div>
 
-          <button class="btn btn-block" onclick="copyRefLink()">
+          <button class="btn btn-block" id="copyRefButton" onclick="copyRefLink()">
             Копировать
           </button>
         </div>
@@ -53,26 +55,36 @@
           type="button"
           onclick="toggleAccordion(this)"
         >
-          <span class="accordion-header-title">Статистика</span>
+          <span class="accordion-header-title" id="partnerStatsTitle">
+            Статистика
+          </span>
           <span class="accordion-header-icon">▾</span>
         </button>
         <div class="accordion-body">
           <div class="partner-stats-list">
             <div class="partner-stat-row">
-              <span class="partner-stat-label">Всего человек</span>
-              <strong class="partner-stat-value">0</strong>
+              <span class="partner-stat-label" id="partnerStatTotalLabel">
+                Всего человек
+              </span>
+              <strong class="partner-stat-value" id="partnerStatTotalValue">0</strong>
             </div>
             <div class="partner-stat-row">
-              <span class="partner-stat-label">1 линия</span>
-              <strong class="partner-stat-value">0</strong>
+              <span class="partner-stat-label" id="partnerStatLine1Label">
+                1 линия
+              </span>
+              <strong class="partner-stat-value" id="partnerStatLine1Value">0</strong>
             </div>
             <div class="partner-stat-row">
-              <span class="partner-stat-label">2 линия</span>
-              <strong class="partner-stat-value">0</strong>
+              <span class="partner-stat-label" id="partnerStatLine2Label">
+                2 линия
+              </span>
+              <strong class="partner-stat-value" id="partnerStatLine2Value">0</strong>
             </div>
             <div class="partner-stat-row">
-              <span class="partner-stat-label">3 линия</span>
-              <strong class="partner-stat-value">0</strong>
+              <span class="partner-stat-label" id="partnerStatLine3Label">
+                3 линия
+              </span>
+              <strong class="partner-stat-value" id="partnerStatLine3Value">0</strong>
             </div>
           </div>
         </div>
@@ -84,12 +96,14 @@
           type="button"
           onclick="toggleAccordion(this)"
         >
-          <span class="accordion-header-title">Древо партнёров</span>
+          <span class="accordion-header-title" id="partnerTreeSectionTitle">
+            Древо партнёров
+          </span>
           <span class="accordion-header-icon">▾</span>
         </button>
         <div class="accordion-body">
-          <p class="partner-tree-title">1 линия</p>
-          <p class="partner-muted-text">
+          <p class="partner-tree-title" id="partnerTreeLineTitle">1 линия</p>
+          <p class="partner-muted-text" id="partnerTreeEmptyText">
             Партнёры появятся после подключения.
           </p>
         </div>
@@ -101,11 +115,13 @@
           type="button"
           onclick="toggleAccordion(this)"
         >
-          <span class="accordion-header-title">Условия партнёрки</span>
+          <span class="accordion-header-title" id="partnerTermsTitle">
+            Условия партнёрки
+          </span>
           <span class="accordion-header-icon">▾</span>
         </button>
         <div class="accordion-body">
-          <ul class="partner-list">
+          <ul class="partner-list" id="partnerTermsList">
             <li>Реферальное вознаграждение — 10% с первой линии</li>
             <li>5% со второй линии</li>
             <li>3% с третьей линии</li>
@@ -121,11 +137,13 @@
           type="button"
           onclick="toggleAccordion(this)"
         >
-          <span class="accordion-header-title">Правила партнёрки</span>
+          <span class="accordion-header-title" id="partnerRulesTitle">
+            Правила партнёрки
+          </span>
           <span class="accordion-header-icon">▾</span>
         </button>
         <div class="accordion-body">
-          <ul class="partner-list">
+          <ul class="partner-list" id="partnerRulesList">
             <li>Запрещено использование спама и вводящей в заблуждение рекламы</li>
             <li>Выплаты начисляются только с реальных оплат</li>
             <li>Реферал должен зарегистрироваться через вашу реферальную ссылку</li>
@@ -137,41 +155,195 @@
     </div>
 
     <script>
-      function toggleAccordion(button) {
-        const card = button.closest(".accordion-card");
-        const isOpen = card.classList.contains("open");
-        card.classList.toggle("open", !isOpen);
-
-        const icon = button.querySelector(".accordion-header-icon");
-        if (icon) {
-          icon.textContent = isOpen ? "▾" : "▴";
-        }
-      }
-
-      function copyRefLink() {
-        const el = document.getElementById("refLink");
-        const text = el ? el.textContent.trim() : "";
-        if (!text) return;
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text);
-        } else {
-          const tmpInput = document.createElement("input");
-          tmpInput.value = text;
-          document.body.appendChild(tmpInput);
-          tmpInput.select();
-          document.execCommand("copy");
-          document.body.removeChild(tmpInput);
+      (function () {
+        function getTenantConfig() {
+          try {
+            return window.parent?.AICAppShell?.getTenantConfig?.() || null;
+          } catch (error) {
+            console.error('[AI CENTER][Partner] tenant config read failed', error);
+            return null;
+          }
         }
 
-        window.parent.postMessage(
-          {
-            type: "notify",
-            message: "Реферальная ссылка скопирована",
-          },
-          "*"
-        );
-      }
+        function setListItems(listEl, items) {
+          if (!listEl || !Array.isArray(items) || !items.length) return;
+
+          listEl.innerHTML = items
+            .map(function (item) {
+              return '<li>' + String(item) + '</li>';
+            })
+            .join('');
+        }
+
+        function applyTenantContent() {
+          const config = getTenantConfig();
+          if (!config) return;
+
+          const texts = config.texts || {};
+          const appName = config.appName || 'AI CENTER';
+
+          document.title =
+            texts.partnerPageTitle ||
+            texts.partnerTitle ||
+            ('Партнёрка — ' + appName);
+
+          const titleEl = document.getElementById('partnerTitle');
+          const subtitleEl = document.getElementById('partnerSubtitle');
+          const leadEl = document.getElementById('partnerLead');
+          const refTitleEl = document.getElementById('partnerRefTitle');
+          const refTextEl = document.getElementById('partnerRefText');
+          const copyButtonEl = document.getElementById('copyRefButton');
+          const statsTitleEl = document.getElementById('partnerStatsTitle');
+          const totalLabelEl = document.getElementById('partnerStatTotalLabel');
+          const line1LabelEl = document.getElementById('partnerStatLine1Label');
+          const line2LabelEl = document.getElementById('partnerStatLine2Label');
+          const line3LabelEl = document.getElementById('partnerStatLine3Label');
+          const treeSectionTitleEl = document.getElementById('partnerTreeSectionTitle');
+          const treeLineTitleEl = document.getElementById('partnerTreeLineTitle');
+          const treeEmptyTextEl = document.getElementById('partnerTreeEmptyText');
+          const termsTitleEl = document.getElementById('partnerTermsTitle');
+          const rulesTitleEl = document.getElementById('partnerRulesTitle');
+          const termsListEl = document.getElementById('partnerTermsList');
+          const rulesListEl = document.getElementById('partnerRulesList');
+          const refLinkEl = document.getElementById('refLink');
+
+          if (titleEl) {
+            titleEl.textContent = texts.partnerHeaderTitle || 'Партнёрка';
+          }
+
+          if (subtitleEl) {
+            subtitleEl.textContent =
+              texts.partnerHeaderSubtitle ||
+              ('Зарабатывайте вместе с ' + appName);
+          }
+
+          if (leadEl) {
+            leadEl.textContent =
+              texts.partnerLead ||
+              'Делитесь реферальной ссылкой и получайте процент с оплат ваших партнёров.';
+          }
+
+          if (refTitleEl) {
+            refTitleEl.textContent =
+              texts.partnerReferralTitle || 'Ваша реферальная ссылка';
+          }
+
+          if (refTextEl) {
+            refTextEl.textContent =
+              texts.partnerReferralText ||
+              'Скопируйте ссылку и отправьте её своим клиентам или партнёрам.';
+          }
+
+          if (copyButtonEl) {
+            copyButtonEl.textContent =
+              texts.partnerCopyButton || 'Копировать';
+          }
+
+          if (statsTitleEl) {
+            statsTitleEl.textContent =
+              texts.partnerStatsTitle || 'Статистика';
+          }
+
+          if (totalLabelEl) {
+            totalLabelEl.textContent =
+              texts.partnerStatTotalLabel || 'Всего человек';
+          }
+
+          if (line1LabelEl) {
+            line1LabelEl.textContent =
+              texts.partnerStatLine1Label || '1 линия';
+          }
+
+          if (line2LabelEl) {
+            line2LabelEl.textContent =
+              texts.partnerStatLine2Label || '2 линия';
+          }
+
+          if (line3LabelEl) {
+            line3LabelEl.textContent =
+              texts.partnerStatLine3Label || '3 линия';
+          }
+
+          if (treeSectionTitleEl) {
+            treeSectionTitleEl.textContent =
+              texts.partnerTreeTitle || 'Древо партнёров';
+          }
+
+          if (treeLineTitleEl) {
+            treeLineTitleEl.textContent =
+              texts.partnerTreeLineTitle || '1 линия';
+          }
+
+          if (treeEmptyTextEl) {
+            treeEmptyTextEl.textContent =
+              texts.partnerTreeEmptyText ||
+              'Партнёры появятся после подключения.';
+          }
+
+          if (termsTitleEl) {
+            termsTitleEl.textContent =
+              texts.partnerTermsTitle || 'Условия партнёрки';
+          }
+
+          if (rulesTitleEl) {
+            rulesTitleEl.textContent =
+              texts.partnerRulesTitle || 'Правила партнёрки';
+          }
+
+          if (Array.isArray(texts.partnerTermsList)) {
+            setListItems(termsListEl, texts.partnerTermsList);
+          }
+
+          if (Array.isArray(texts.partnerRulesList)) {
+            setListItems(rulesListEl, texts.partnerRulesList);
+          }
+
+          if (refLinkEl && texts.partnerReferralLink) {
+            refLinkEl.textContent = texts.partnerReferralLink;
+          }
+        }
+
+        window.toggleAccordion = function (button) {
+          const card = button.closest('.accordion-card');
+          const isOpen = card.classList.contains('open');
+
+          card.classList.toggle('open', !isOpen);
+
+          const icon = button.querySelector('.accordion-header-icon');
+          if (icon) {
+            icon.textContent = isOpen ? '▾' : '▴';
+          }
+        };
+
+        window.copyRefLink = function () {
+          const el = document.getElementById('refLink');
+          const text = el ? el.textContent.trim() : '';
+          if (!text) return;
+
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text);
+          } else {
+            const tmpInput = document.createElement('input');
+            tmpInput.value = text;
+            document.body.appendChild(tmpInput);
+            tmpInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tmpInput);
+          }
+
+          window.parent?.postMessage?.(
+            {
+              type: 'notify',
+              message: 'Реферальная ссылка скопирована'
+            },
+            '*'
+          );
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+          applyTenantContent();
+        });
+      })();
     </script>
   </body>
 </html>
