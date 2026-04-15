@@ -169,6 +169,7 @@
   "texts": {
     "appTitle": "AI FIT CENTER",
     "headerTitle": "AI FIT CENTER",
+
     "navHome": "Главная",
     "navMyAgent": "Агент",
     "navSharedChat": "Чат",
@@ -176,6 +177,7 @@
     "navAffiliate": "Партнер",
     "navPayments": "Платежи",
     "navSettings": "Настройки",
+
     "authWelcome": "Добро пожаловать!",
     "authConsentIntro": "Перед началом работы подтвердите согласие с политикой конфиденциальности и обработкой персональных данных.",
     "authPrivacyLabel": "Согласен с политикой конфиденциальности",
@@ -188,6 +190,71 @@
     "authEmailPlaceholder": "Введите email",
     "authOtpPlaceholder": "Введите код подтверждения",
     "authSendCode": "Получить код",
-    "authVerifyCode": "Подтвердить вход"
+    "authVerifyCode": "Подтвердить вход",
+
+    "partnerPageTitle": "Партнерка",
+    "partnerHeaderTitle": "Партнерка",
+    "partnerHeaderSubtitle": "Зарабатывайте вместе с вашим AI-ассистентом",
+    "partnerLead": "Делитесь реферальной ссылкой и получайте процент с оплат ваших партнеров.",
+
+    "partnerReferralTitle": "Ваша реферальная ссылка",
+    "partnerReferralText": "Скопируйте ссылку и отправьте ее своим клиентам или партнерам.",
+    "partnerReferralLink": "https://t.me/your_bot?start=ref123",
+    "partnerCopyButton": "Копировать",
+
+    "partnerStatsTitle": "Статистика",
+    "partnerStatTotalLabel": "Всего человек",
+    "partnerStatLine1Label": "1 линия",
+    "partnerStatLine2Label": "2 линия",
+    "partnerStatLine3Label": "3 линия",
+
+    "partnerTreeTitle": "Древо партнеров",
+    "partnerTreeLineTitle": "1 линия",
+    "partnerTreeEmptyText": "Партнеры появятся после подключения.",
+
+    "partnerTermsTitle": "Условия партнерки",
+    "partnerTermsList": [
+      "Реферальное вознаграждение — 10% с первой линии",
+      "5% со второй линии",
+      "3% с третьей линии",
+      "Выплаты начисляются автоматически при оплате партнера",
+      "Без ограничения по количеству партнеров"
+    ],
+
+    "partnerRulesTitle": "Правила партнерки",
+    "partnerRulesList": [
+      "Запрещено использование спама и вводящей в заблуждение рекламы",
+      "Выплаты начисляются только с реальных оплат",
+      "Реферал должен зарегистрироваться через вашу реферальную ссылку",
+      "Права на комиссию сохраняются при повторных оплатах партнера",
+      "Нарушение правил ведет к отключению от партнерской программы"
+    ],
+
+    "paymentsPageTitle": "Оплата",
+    "paymentsHeaderTitle": "Оплата",
+    "paymentsHeaderSubtitle": "Управление подпиской на модули",
+    "paymentsHeaderLead": "Выберите тариф для модуля «Агент» и подтвердите согласие с офертой перед оплатой.",
+
+    "paymentsBalanceTitle": "💰 Баланс",
+    "paymentsBalanceSubtitle": "Текущий баланс вашего аккаунта",
+    "paymentsBalanceAmount": "0",
+    "paymentsBalanceCurrency": "руб.",
+    "paymentsBalanceNote": "Пополнение баланса и автоматические списания появятся позже.",
+
+    "paymentsAgentHeaderTitle": "📋 Модуль «Агент»",
+
+    "paymentsTariff30Name": "Подписка на 30 дней",
+    "paymentsTariff30Price": "990 руб.",
+    "paymentsTariff30Desc": "Полный доступ к модулю «Агент» на 30 дней.",
+
+    "paymentsTariff90Name": "Подписка на 3 месяца",
+    "paymentsTariff90Price": "2490 руб.",
+    "paymentsTariff90Desc": "90 дней доступа с выгодой 16% по сравнению с помесячной оплатой.",
+    "paymentsTariff90Benefit": "Экономия по сравнению с 3 отдельными месяцами.",
+
+    "paymentsOfferTextBase": "Согласен с",
+    "paymentsOfferLinkText": "условиями оферты",
+    "paymentsPayButton30": "Оплатить 30 дней",
+    "paymentsPayButton90": "Оплатить 3 месяца"
   }
 }
