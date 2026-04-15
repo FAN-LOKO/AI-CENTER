@@ -1,9 +1,7 @@
 /* =========================================================
-   AI CENTER / COMPATIBLE MAIN STYLES
-   Финальная совместимая версия styles.css
-
-   Покрывает:
-   - index.html
+   AI CENTER / MAIN STYLES
+   Единый styles.css для:
+   - index.html (старый auth-start layout)
    - app.html
    - home.html
    - my-agent.html
@@ -12,6 +10,11 @@
    - partner.html
    - payments.html
    - settings.html
+
+   Подход:
+   - один shell, много брендов
+   - единые дизайн-токены
+   - стартовый экран визуально совпадает с shell
 ========================================================= */
 
 /* =========================================================
@@ -120,7 +123,15 @@ img {
   max-width: 100%;
 }
 
+a {
+  color: inherit;
+}
+
 [hidden] {
+  display: none !important;
+}
+
+.hidden {
   display: none !important;
 }
 
@@ -506,7 +517,12 @@ img {
   box-shadow:
     0 4px 12px rgba(59, 130, 246, 0.35),
     0 2px 4px rgba(0, 0, 0, 0.08);
-  transition: all 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease,
+    filter 0.18s ease,
+    background 0.18s ease;
 }
 
 .btn:hover {
@@ -611,33 +627,34 @@ img {
 }
 
 /* =========================================================
-   INDEX / AUTH START
+   10. INDEX / AUTH START
+   Старая разметка, новый общий стиль
 ========================================================= */
 
-/* ВАЖНО: не трогаем .screen, чтобы не ломать app.html */
-
 .auth-start-card {
-  position: relative;
   width: 100%;
+  max-width: 456px;
+  margin: auto;
   border-radius: 22px;
-  background: #ffffff;
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.92);
   box-shadow:
-    0 18px 40px rgba(15, 23, 42, 0.10),
-    0 6px 16px rgba(15, 23, 42, 0.06);
+    0 18px 44px rgba(15, 23, 42, 0.16),
+    0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
 .auth-start-header {
-  gap: 8px;
+  padding: 18px 18px 16px;
 }
 
 .auth-start-title {
   margin: 0;
   text-align: center;
-  font-size: clamp(38px, 7vw, 52px);
+  font-size: clamp(34px, 7vw, 52px);
   line-height: 0.96;
-  letter-spacing: -0.04em;
-  color: #0f172a;
+  letter-spacing: -0.045em;
+  font-weight: 900;
+  color: #ffffff;
   text-wrap: balance;
 }
 
@@ -646,31 +663,39 @@ img {
 }
 
 .auth-start-line-light {
-  color: #0f172a;
+  color: rgba(255, 255, 255, 0.98);
 }
 
 .auth-start-line-accent {
-  color: var(--brand-primary, #3b82f6);
+  color: #ffffff;
+  text-shadow:
+    0 0 0 rgba(255, 255, 255, 0),
+    0 2px 12px rgba(255, 255, 255, 0.10);
 }
 
 .auth-start-subtitle {
-  margin: 0;
+  margin: 10px 0 0;
   text-align: center;
-  font-size: 15px;
-  line-height: 1.55;
-  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
   text-wrap: pretty;
+}
+
+.auth-start-card .card-section-body {
+  padding: 18px 18px 18px;
 }
 
 .auth-start-note {
   margin: 0 0 14px;
-  padding: 12px 14px;
+  padding: 13px 14px;
   border-radius: 14px;
-  background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.16);
-  color: #0f172a;
+  background: rgba(248, 250, 252, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: #334155;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.52;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.40);
 }
 
 .auth-consent-item {
@@ -678,9 +703,15 @@ img {
   align-items: flex-start;
   gap: 10px;
   margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.84);
+  border: 1px solid rgba(148, 163, 184, 0.14);
   color: #0f172a;
   font-size: 14px;
   line-height: 1.48;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
 }
 
 .auth-consent-item:last-of-type {
@@ -693,7 +724,7 @@ img {
   min-width: 18px;
   margin-top: 2px;
   flex: 0 0 auto;
-  accent-color: var(--brand-primary, #3b82f6);
+  accent-color: var(--tenant-primary);
   cursor: pointer;
 }
 
@@ -702,8 +733,8 @@ img {
 }
 
 .auth-consent-link {
-  color: var(--brand-primary-dark, #0b3c78);
-  font-weight: 600;
+  color: var(--tenant-primary-dark);
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -712,7 +743,23 @@ img {
 }
 
 .auth-start-button {
-  margin-top: 4px;
+  min-height: 46px;
+  margin-top: 2px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow:
+    0 10px 22px rgba(16, 185, 129, 0.28),
+    0 3px 8px rgba(15, 23, 42, 0.08);
+}
+
+.auth-start-button:disabled,
+.auth-start-button.is-disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: grayscale(0.08);
 }
 
 .auth-start-footnote {
@@ -721,43 +768,6 @@ img {
   line-height: 1.45;
   text-align: center;
   color: #94a3b8;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* =========================================================
-   INDEX / AUTH START RESPONSIVE
-========================================================= */
-
-@media (max-width: 520px) {
-  .auth-start-card {
-    border-radius: 20px;
-  }
-
-  .auth-start-note {
-    padding: 11px 12px;
-  }
-
-  .auth-consent-item {
-    gap: 9px;
-  }
-}
-
-@media (max-width: 380px) {
-  .auth-start-title {
-    font-size: 40px;
-  }
-
-  .auth-start-subtitle {
-    font-size: 14px;
-  }
-
-  .auth-start-note,
-  .auth-consent-item {
-    font-size: 13px;
-  }
 }
 
 /* =========================================================
@@ -1084,7 +1094,7 @@ img {
 }
 
 /* =========================================================
-   HOME / AFFILIATE CARD
+   13. HOME / AFFILIATE CARD
 ========================================================= */
 
 #homeAffiliateCard {
@@ -1138,7 +1148,9 @@ img {
   transform: translateY(0);
 }
 
-/* ========== SETTINGS ========== */
+/* =========================================================
+   14. SETTINGS
+========================================================= */
 
 .settings-page {
   padding: 12px 16px 16px;
@@ -1164,7 +1176,7 @@ img {
   font-size: 13px;
   font-weight: 700;
   line-height: 1.3;
-  color: var(--text-main);
+  color: var(--text-primary);
 }
 
 .settings-input {
@@ -1174,7 +1186,7 @@ img {
   border: 1px solid var(--border-mid);
   border-radius: 12px;
   background: rgba(248, 250, 252, 0.92);
-  color: var(--text-main);
+  color: var(--text-primary);
   font: inherit;
   line-height: 1.4;
   outline: none;
@@ -1274,29 +1286,12 @@ img {
   font-size: 13px;
   line-height: 1.4;
   font-weight: 700;
-  color: var(--text-main);
+  color: var(--text-primary);
   word-break: break-word;
 }
 
-@media (max-width: 380px) {
-  .settings-page {
-    padding: 10px 14px 14px;
-  }
-
-  .settings-info-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-  }
-
-  .settings-info-value {
-    max-width: 100%;
-    text-align: left;
-  }
-}
-
 /* =========================================================
-   14. CHAT / MY AGENT / SHARED CHAT
+   15. CHAT / MY AGENT / SHARED CHAT
 ========================================================= */
 
 .chat-input {
@@ -1390,7 +1385,7 @@ img {
 }
 
 /* =========================================================
-   15. MODULES PAGE HELPERS
+   16. MODULES PAGE HELPERS
 ========================================================= */
 
 .modules-summary-body {
@@ -1412,7 +1407,7 @@ img {
 }
 
 /* =========================================================
-   16. SKELETONS
+   17. SKELETONS
 ========================================================= */
 
 @keyframes shimmer {
@@ -1462,8 +1457,7 @@ img {
 }
 
 /* =========================================================
-   17. SERVICE LAYERS / FALLBACK UI
-   Если эти блоки есть в app.html — не ломаем shell.
+   18. SERVICE LAYERS / FALLBACK UI
 ========================================================= */
 
 #pwaBanner {
@@ -1534,8 +1528,31 @@ img {
 }
 
 /* =========================================================
-   18. RESPONSIVE
+   19. RESPONSIVE
 ========================================================= */
+
+@media (max-width: 520px) {
+  .auth-start-card {
+    border-radius: 20px;
+  }
+
+  .auth-start-header {
+    padding: 17px 16px 15px;
+  }
+
+  .auth-start-card .card-section-body {
+    padding: 16px;
+  }
+
+  .auth-start-note {
+    padding: 12px 13px;
+  }
+
+  .auth-consent-item {
+    gap: 9px;
+    padding: 11px 12px;
+  }
+}
 
 @media (max-width: 380px) {
   .screen {
@@ -1545,6 +1562,19 @@ img {
   .app-shell {
     height: calc(100vh - 24px);
     height: calc(100dvh - 24px);
+  }
+
+  .auth-start-title {
+    font-size: 38px;
+  }
+
+  .auth-start-subtitle {
+    font-size: 13px;
+  }
+
+  .auth-start-note,
+  .auth-consent-item {
+    font-size: 13px;
   }
 
   .home-page {
@@ -1562,12 +1592,26 @@ img {
     gap: 10px;
   }
 
+  .settings-page {
+    padding: 10px 14px 14px;
+  }
+
+  .settings-info-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .settings-info-value {
+    max-width: 100%;
+    text-align: left;
+  }
+
   .nav-btn-label {
     font-size: 10px;
   }
 }
 
-/* Широкие экраны: центрируем shell, но не ломаем index */
 @media (min-width: 768px) {
   .screen {
     align-items: center;
@@ -1579,7 +1623,7 @@ img {
 }
 
 /* =========================================================
-   GLOBAL / SCROLLBARS
+   20. GLOBAL / SCROLLBARS
 ========================================================= */
 
 html {
