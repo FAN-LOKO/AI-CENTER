@@ -25,7 +25,7 @@
         <div class="profile-row">
           <span class="profile-label">Открытие модулей</span>
           <span class="profile-value">
-            Базовые модули открываются сразу. Платные модули требуют активного доступа и при его отсутствии переводят пользователя на страницу оплаты.
+            Готовые модули открываются сразу. Остальные временно ведут на страницу «Модуль в разработке».
           </span>
         </div>
       </div>
@@ -36,20 +36,18 @@
 
   <script>
     const MODULE_ROUTE_MAP = {
-      "ai-agent": "modules-agent/profile.html",
-      "knowledge-hub": "modules-knowledge-hub/index.html",
-      "support-desk": "modules-support-desk/index.html",
-      "media-lab": "modules-medialab/index.html",
-      "leader-stage": "modules-leader-stage/index.html"
+      "ai-agent": "modules-agent/profile.html"
     };
+
+    const MODULE_FALLBACK_PAGE = "module-coming-soon.html";
 
     const USER_ACCESS = {
       subscriptionActive: true
     };
 
     function getModuleRoute(module) {
-      if (!module || !module.id) return "";
-      return MODULE_ROUTE_MAP[module.id] || module.page || "";
+      if (!module || !module.id) return MODULE_FALLBACK_PAGE;
+      return MODULE_ROUTE_MAP[module.id] || MODULE_FALLBACK_PAGE;
     }
 
     function getTenantModules() {
@@ -96,13 +94,9 @@
 
     function openModule(module) {
       const moduleRoute = getModuleRoute(module);
-      const needsPayment = !!module.requiresPayment;
+      const isFallback = moduleRoute === MODULE_FALLBACK_PAGE;
+      const needsPayment = !isFallback && !!module.requiresPayment;
       const hasAccess = !needsPayment || USER_ACCESS.subscriptionActive;
-
-      if (!moduleRoute) {
-        console.warn("[AI CENTER][Modules] route not found for module:", module);
-        return;
-      }
 
       if (hasAccess) {
         window.parent?.postMessage?.(
