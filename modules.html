@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Модули</title>
   <link rel="stylesheet" href="css/styles.css" />
-  
+  <link rel="stylesheet" href="css/modules.css" />
 </head>
 <body>
   <div class="page page-my-agent">
@@ -131,25 +131,22 @@
       document.querySelectorAll(".module-card-toggle").forEach((btn) => {
         btn.setAttribute("aria-expanded", "false");
       });
-
-      document.querySelectorAll(".module-card-chevron").forEach((icon) => {
-        icon.textContent = "▾";
-      });
     }
 
     function createModuleCard(module) {
       const section = document.createElement("section");
       section.className = "card-section module-accordion-card";
+
       section.innerHTML = `
         <div class="card-section-header module-card-header">
           <button class="module-card-toggle" type="button" aria-expanded="false">
             <div class="module-card-header-text">
-              <h2 class="card-section-title module-card-title">
+              <div class="module-card-title">
                 ${module.title}
                 <span class="module-card-title-ru">/ ${module.titleRu}</span>
-              </h2>
+              </div>
             </div>
-            <span class="accordion-icon module-card-chevron">▾</span>
+            <span class="module-card-chevron">▾</span>
           </button>
         </div>
 
@@ -165,7 +162,7 @@
           </button>
         </div>
 
-        <div class="card-section-body accordion-body module-card-expanded">
+        <div class="card-section-body module-card-expanded">
           <div class="module-card-expanded-title">Подробнее о модуле</div>
           <ul class="module-card-description-list">
             ${module.fullDescription.map((item) => `<li>${item}</li>`).join("")}
@@ -175,18 +172,16 @@
 
       const toggleBtn = section.querySelector(".module-card-toggle");
       const expandedBody = section.querySelector(".module-card-expanded");
-      const chevron = section.querySelector(".module-card-chevron");
       const openBtn = section.querySelector(".btn");
 
       toggleBtn.addEventListener("click", () => {
-        const isOpen = expandedBody.classList.contains("open");
+        const isOpen = section.classList.contains("open");
         closeAllModuleCards();
 
         if (!isOpen) {
-          expandedBody.classList.add("open");
           section.classList.add("open");
+          expandedBody.classList.add("open");
           toggleBtn.setAttribute("aria-expanded", "true");
-          chevron.textContent = "▴";
         }
       });
 
