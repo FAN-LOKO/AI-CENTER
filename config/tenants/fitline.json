@@ -160,7 +160,50 @@
   "partnerProgram": {
     "enabled": true
   },
-  "plans": [],
+  "plans": [
+    {
+      "id": "agent_30",
+      "moduleId": "ai-agent",
+      "name": "1 месяц",
+      "durationDays": 30,
+      "priceUsd": 20,
+      "compareAtUsd": null,
+      "giftDays": 0,
+      "savingUsd": 0,
+      "badge": "",
+      "description": "30 календарных дней доступа к модулю «Агент».",
+      "buttonText": "Оплатить 1 месяц",
+      "highlight": false
+    },
+    {
+      "id": "agent_180",
+      "moduleId": "ai-agent",
+      "name": "6 месяцев",
+      "durationDays": 180,
+      "priceUsd": 100,
+      "compareAtUsd": 120,
+      "giftDays": 30,
+      "savingUsd": 20,
+      "badge": "Выгодно",
+      "description": "180 календарных дней доступа + 30 дней в подарок.",
+      "buttonText": "Оплатить 6 месяцев",
+      "highlight": true
+    },
+    {
+      "id": "agent_360",
+      "moduleId": "ai-agent",
+      "name": "12 месяцев",
+      "durationDays": 360,
+      "priceUsd": 200,
+      "compareAtUsd": 240,
+      "giftDays": 60,
+      "savingUsd": 40,
+      "badge": "Максимальная выгода",
+      "description": "360 календарных дней доступа + 60 дней в подарок.",
+      "buttonText": "Оплатить 12 месяцев",
+      "highlight": false
+    }
+  ],
   "policyLinks": {
     "privacy": "https://fit.ai-center.app/privacy",
     "personalData": "https://fit.ai-center.app/personal-data",
@@ -232,32 +275,28 @@
 
     "paymentsPageTitle": "Оплата",
     "paymentsHeaderTitle": "Оплата",
-    "paymentsHeaderSubtitle": "Управление подпиской на модули",
-    "paymentsHeaderLead": "Выберите тариф для модуля «Агент» и подтвердите согласие с офертой перед оплатой.",
+    "paymentsHeaderSubtitle": "Выберите тариф для подключения модуля",
+    "paymentsHeaderLead": "Стоимость на этой странице указана в долларах США. На странице оплаты сумма будет показана в валюте пользователя.",
 
-    "paymentsBalanceTitle": "💰 Баланс",
+    "paymentsBalanceTitle": "Баланс",
     "paymentsBalanceSubtitle": "Текущий баланс вашего аккаунта",
     "paymentsBalanceAmount": "0",
-    "paymentsBalanceCurrency": "руб.",
-    "paymentsBalanceNote": "Пополнение баланса и автоматические списания появятся позже.",
+    "paymentsBalanceCurrency": "USD",
+    "paymentsBalanceNote": "История оплат, пополнение баланса и автоматические списания появятся позже.",
 
-    "paymentsAgentHeaderTitle": "📋 Модуль «Агент»",
-
-    "paymentsTariff30Name": "Подписка на 30 дней",
-    "paymentsTariff30Price": "990 руб.",
-    "paymentsTariff30Desc": "Полный доступ к модулю «Агент» на 30 дней.",
-
-    "paymentsTariff90Name": "Подписка на 3 месяца",
-    "paymentsTariff90Price": "2490 руб.",
-    "paymentsTariff90Desc": "90 дней доступа с выгодой 16% по сравнению с помесячной оплатой.",
-    "paymentsTariff90Benefit": "Экономия по сравнению с 3 отдельными месяцами.",
+    "paymentsAgentHeaderTitle": "Модуль «Агент»",
+    "paymentsModuleIntroTitle": "Выберите период доступа",
+    "paymentsModuleIntroText": "Подберите удобный тариф, подтвердите согласие с условиями оферты и перейдите к оплате.",
 
     "paymentsOfferTextBase": "Согласен с",
     "paymentsOfferLinkText": "условиями оферты",
-    "paymentsPayButton30": "Оплатить 30 дней",
-    "paymentsPayButton90": "Оплатить 3 месяца"
-    "paymentsModuleIntroTitle": "Оплата доступа к модулю",
-    "paymentsModuleIntroText": "Выберите подходящий тариф, подтвердите согласие с условиями оферты и перейдите к оплате.",
-    "paymentsTariff90Badge": "Выгоднее"
+
+    "paymentsBadgeBestValue": "Выгодно",
+    "paymentsBadgeMaxValue": "Максимальная выгода",
+    "paymentsComparePrefix": "При ежемесячной оплате:",
+    "paymentsSavingPrefix": "Экономия",
+    "paymentsGiftPrefix": "В подарок",
+    "paymentsDurationSuffix": "календарных дней",
+    "paymentsPriceSuffix": "$"
   }
 }
