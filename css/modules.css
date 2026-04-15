@@ -506,12 +506,18 @@ textarea.form-input,
   justify-content: space-between;
   gap: 12px;
   padding: 14px 16px;
-  background: transparent;
+  background:
+    linear-gradient(
+      135deg,
+      var(--tenant-primary-dark) 0%,
+      var(--tenant-primary) 100%
+    );
   border: none;
-  color: inherit;
+  color: #ffffff;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .module-card-header-text {
@@ -521,26 +527,37 @@ textarea.form-input,
 
 .module-card-title {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.25;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.32;
+  letter-spacing: 0.01em;
   text-align: left;
-  color: var(--module-text);
+  color: #ffffff;
 }
 
 .module-card-title-ru {
-  font-size: 15px;
-  font-weight: 600;
-  opacity: 0.92;
-  color: var(--module-text-soft);
+  display: inline;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .module-card-chevron {
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  width: 20px;
+  min-width: 20px;
   font-size: 16px;
   line-height: 1;
-  color: var(--module-text-muted);
+  color: #ffffff;
   transition: transform 0.2s ease;
+}
+
+.module-accordion-card.open .module-card-chevron {
+  transform: rotate(180deg);
 }
 
 .module-card-main {
