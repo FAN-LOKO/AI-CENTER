@@ -35,6 +35,23 @@
   </div>
 
   <script>
+    const MODULE_ROUTE_MAP = {
+      "ai-agent": "modules-agent/profile.html",
+      "knowledge-hub": "modules-knowledge-hub/index.html",
+      "support-desk": "modules-support-desk/index.html",
+      "media-lab": "modules-medialab/index.html",
+      "leader-stage": "modules-leader-stage/index.html"
+    };
+
+    const USER_ACCESS = {
+      subscriptionActive: true
+    };
+
+    function getModuleRoute(module) {
+      if (!module || !module.id) return "";
+      return MODULE_ROUTE_MAP[module.id] || module.page || "";
+    }
+
     function getTenantModules() {
       try {
         const shellModules =
@@ -53,7 +70,7 @@
               module.fullDescription && module.fullDescription.length
                 ? module.fullDescription
                 : ["Описание модуля будет добавлено позже."],
-            page: module.page,
+            page: getModuleRoute(module),
             requiresPayment: !!module.requiresPayment,
             category: module.category || "core"
           }));
@@ -77,19 +94,21 @@
       });
     }
 
-    const USER_ACCESS = {
-      subscriptionActive: true
-    };
-
     function openModule(module) {
+      const moduleRoute = getModuleRoute(module);
       const needsPayment = !!module.requiresPayment;
       const hasAccess = !needsPayment || USER_ACCESS.subscriptionActive;
+
+      if (!moduleRoute) {
+        console.warn("[AI CENTER][Modules] route not found for module:", module);
+        return;
+      }
 
       if (hasAccess) {
         window.parent?.postMessage?.(
           {
             type: "navigate",
-            page: module.page,
+            page: moduleRoute,
             tab: "modules"
           },
           "*"
