@@ -119,36 +119,13 @@
    3. КАРТОЧКИ И СЕКЦИИ
    ========================================================= */
 
-.card-section {
-  border: 1px solid var(--module-border);
-  border-radius: var(--module-radius-lg);
-  background: #ffffff;
-  box-shadow: var(--module-shadow-soft);
-  overflow: hidden;
-}
-
-.card-section-header {
-  padding: 14px 16px;
-}
-
-.card-section-body {
-  padding: 14px 16px 16px;
-}
-
-.card-section-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--module-text);
-  line-height: 1.3;
-}
-
-.card-section-subtitle {
-  margin: 4px 0 0;
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--module-text-muted);
-}
+/*
+  ВАЖНО: базовые .card-section, .card-section-header, .card-section-title,
+  .card-section-subtitle и .card-section-body НЕ переопределяем здесь,
+  чтобы страницы modules.html визуально совпадали с главными страницами
+  проекта и брали стиль из css/styles.css.
+  В modules.css задаём только модульные расширения.
+*/
 
 
 /* =========================================================
@@ -384,7 +361,6 @@ textarea.form-input,
    Только уникальные стили модуля Агент
    ========================================================= */
 
-/* Можно оставить как контекстный хук на будущее */
 .agent-tabs .module-tab--active {
   background: linear-gradient(135deg, var(--module-primary), var(--module-primary-2));
   color: #ffffff;
@@ -625,8 +601,6 @@ textarea.form-input,
     padding: 8px 10px;
   }
 
-  .card-section-header,
-  .card-section-body,
   .card-section.accordion-card .card-section-body.accordion-body {
     padding-left: 14px;
     padding-right: 14px;
