@@ -916,3 +916,158 @@ textarea.form-input,
     text-align: left;
   }
 }
+
+/* =========================================================
+   MODULE CONNECT PAGE
+   connect.html:
+   - Telegram accordion
+   - token instructions
+   - token input block
+   - instruction links
+========================================================= */
+
+.module-connect-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.module-connect-page .accordion-card {
+  margin-bottom: 0;
+}
+
+.connect-instructions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.connect-instruction-step {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.035);
+}
+
+.connect-instruction-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.connect-instruction-points {
+  margin: 0;
+  padding-left: 18px;
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.connect-instruction-points li + li {
+  margin-top: 6px;
+}
+
+.connect-form-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.connect-field-label {
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.connect-token-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.96);
+  color: #111827;
+  font: inherit;
+  line-height: 1.4;
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.connect-token-input::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.connect-token-input:hover {
+  border-color: rgba(59, 130, 246, 0.28);
+  background: #ffffff;
+}
+
+.connect-token-input:focus {
+  border-color: var(--tenant-primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+}
+
+.connect-submit-btn {
+  min-height: 42px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.connect-form-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #475569;
+}
+
+.connect-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.connect-link-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.035);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  text-decoration: none;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.connect-link-card:hover {
+  transform: translateY(-1px);
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(59, 130, 246, 0.16);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.connect-link-title {
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 800;
+  color: #111827;
+}
+
+.connect-link-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #475569;
+}
