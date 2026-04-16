@@ -2121,3 +2121,12 @@ body {
     text-align: left;
   }
 }
+
+.stats-layout,
+.dashboard-shell,
+.module-card,
+.stats-chart-card,
+main,
+section {
+  background: transparent !important;
+}
