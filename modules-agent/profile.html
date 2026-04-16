@@ -7,75 +7,31 @@
   <link rel="stylesheet" href="../css/styles.css" />
   <link rel="stylesheet" href="../css/modules.css" />
 </head>
-<body>
+<body class="module-body">
   <div class="page page-my-agent">
     <div class="module-tabs agent-tabs">
-      <button
-        class="module-tab module-tab--third module-tab--active"
-        type="button"
-        onclick="navigateAgent('modules-agent/profile.html')"
-      >
-        Профиль
-      </button>
-      <button
-        class="module-tab module-tab--third"
-        type="button"
-        onclick="navigateAgent('modules-agent/connect.html')"
-      >
-        Подключение
-      </button>
-      <button
-        class="module-tab module-tab--third"
-        type="button"
-        onclick="navigateAgent('modules-agent/links.html')"
-      >
-        Ссылки
-      </button>
-      <button
-        class="module-tab module-tab--half"
-        type="button"
-        onclick="navigateAgent('modules-agent/stats.html')"
-      >
-        Статистика
-      </button>
-      <button
-        class="module-tab module-tab--half"
-        type="button"
-        onclick="navigateAgent('modules-agent/dialogs.html')"
-      >
-        Диалоги
-      </button>
+      <button class="module-tab module-tab--third module-tab--active" type="button" onclick="navigateAgent('modules-agent/profile.html')">Профиль</button>
+      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/connect.html')">Подключение</button>
+      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/links.html')">Ссылки</button>
+      <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/stats.html')">Статистика</button>
+      <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/dialogs.html')">Диалоги</button>
     </div>
 
     <div class="app-content">
-      <section class="card-section module-card-compact">
+      <section class="card-section">
         <div class="card-section-header">
           <h2 class="card-section-title">Профиль агента</h2>
           <p class="card-section-subtitle">Основные данные вашего бота-агента</p>
         </div>
         <div class="card-section-body">
-          <div class="profile-row">
-            <span class="profile-label">Название агента</span>
-            <span class="profile-value" id="agentDisplayName">AI Agent</span>
-          </div>
-          <div class="profile-row">
-            <span class="profile-label">Username бота</span>
-            <span class="profile-value" id="agentBotUsername">@your_bot_username</span>
-          </div>
-          <div class="profile-row">
-            <span class="profile-label">Статус агента</span>
-            <span class="profile-value">
-              <span class="status-badge status-offline" id="agentStatusBadge">Не подключен</span>
-            </span>
-          </div>
-          <div class="profile-row">
-            <span class="profile-label">ID бота</span>
-            <span class="profile-value" id="agentBotId">—</span>
-          </div>
+          <div class="profile-row"><span class="profile-label">Название агента</span><span class="profile-value" id="agentName">AI FIT CENTER Agent</span></div>
+          <div class="profile-row"><span class="profile-label">Username бота</span><span class="profile-value" id="agentUsername">@your_bot_username</span></div>
+          <div class="profile-row"><span class="profile-label">Статус агента</span><span class="profile-value status-offline" id="agentStatus">Не подключен</span></div>
+          <div class="profile-row"><span class="profile-label">ID бота</span><span class="profile-value" id="agentBotId">—</span></div>
         </div>
       </section>
 
-      <section class="card-section module-card-compact">
+      <section class="card-section">
         <div class="card-section-header">
           <h2 class="card-section-title">Настройки модуля</h2>
           <p class="card-section-subtitle">Базовые параметры работы агента</p>
@@ -85,32 +41,20 @@
             <span class="profile-label">Режим работы</span>
             <span class="profile-value">
               <select id="agentMode" class="profile-select">
-                <option value="light">Легкий</option>
-                <option value="medium">Средний</option>
-                <option value="active">Активный</option>
+                <option value="light">Лёгкий</option>
+                <option value="medium" selected>Средний</option>
+                <option value="pro">Продвинутый</option>
               </select>
             </span>
           </div>
           <div class="profile-row">
             <span class="profile-label">Язык</span>
             <span class="profile-value">
-              <select id="agentLocale" class="profile-select">
-                <option value="ru">Русский</option>
-                <option value="en">Английский</option>
+              <select id="agentLanguage" class="profile-select">
+                <option value="ru" selected>Русский</option>
+                <option value="en">English</option>
               </select>
             </span>
-          </div>
-        </div>
-      </section>
-
-      <section class="card-section module-card-compact">
-        <div class="card-section-header">
-          <h2 class="card-section-title">Состояние интеграции</h2>
-          <p class="card-section-subtitle">Данные читаются через shell и runtime</p>
-        </div>
-        <div class="card-section-body">
-          <div class="module-notice" id="agentProfileNotice">
-            Настройки и статус модуля загружаются из общей конфигурации приложения.
           </div>
         </div>
       </section>
@@ -120,167 +64,51 @@
   <script>
     function navigateAgent(page) {
       try {
-        window.parent?.postMessage?.(
-          {
-            type: "navigate",
-            page,
-            tab: "modules"
-          },
-          "*"
-        );
-      } catch (error) {
-        console.error(error);
+        window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*');
+      } catch (e) {
+        console.error(e);
       }
     }
 
-    function getTenantConfig() {
+    function getAgentProfileState() {
       try {
-        return window.parent?.AICAppShell?.getTenantConfig?.() || null;
+        return window.parent?.AICAppShell?.getAgentProfile?.() || null;
       } catch (error) {
-        console.error("[AI CENTER][Agent Profile] tenant config read failed", error);
+        console.error('[AI CENTER][Agent Profile] profile state read failed', error);
         return null;
       }
     }
 
-    function getAgentModuleConfig() {
-      try {
-        return window.parent?.AICAppShell?.getTenantModuleById?.("ai-agent") || null;
-      } catch (error) {
-        console.error("[AI CENTER][Agent Profile] agent module read failed", error);
-        return null;
+    function applyProfile() {
+      const state = getAgentProfileState() || {};
+      const setText = (id, value, fallback = '—') => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = value !== undefined && value !== null && value !== '' ? value : fallback;
+      };
+
+      setText('agentName', state.name, 'AI FIT CENTER Agent');
+      setText('agentUsername', state.username, '@your_bot_username');
+      setText('agentBotId', state.botId, '—');
+
+      const statusEl = document.getElementById('agentStatus');
+      if (statusEl) {
+        const connected = Boolean(state.connected);
+        statusEl.textContent = connected ? 'Подключен' : 'Не подключен';
+        statusEl.classList.remove('status-online', 'status-offline', 'status-waiting', 'status-neutral');
+        statusEl.classList.add(connected ? 'status-online' : 'status-offline');
       }
+
+      const modeEl = document.getElementById('agentMode');
+      if (modeEl && state.mode) modeEl.value = state.mode;
+
+      const langEl = document.getElementById('agentLanguage');
+      if (langEl && state.language) langEl.value = state.language;
     }
 
-    function getAgentRuntimeState() {
-      try {
-        return window.parent?.AICAppShell?.getAgentState?.() || null;
-      } catch (error) {
-        console.error("[AI CENTER][Agent Profile] agent state read failed", error);
-        return null;
-      }
-    }
-
-    function applyAgentStatus(statusBadgeEl, isConnected) {
-      if (!statusBadgeEl) return;
-
-      statusBadgeEl.classList.remove("status-online", "status-offline", "status-waiting");
-
-      if (isConnected) {
-        statusBadgeEl.textContent = "Подключен";
-        statusBadgeEl.classList.add("status-online");
-      } else {
-        statusBadgeEl.textContent = "Не подключен";
-        statusBadgeEl.classList.add("status-offline");
-      }
-    }
-
-    function applyTenantContent() {
-      const config = getTenantConfig();
-      const agentModule = getAgentModuleConfig();
-      const agentState = getAgentRuntimeState() || {};
-
-      const texts = config?.texts || {};
-      const moduleTexts = agentModule?.texts || {};
-      const appName = config?.appName || "AI CENTER";
-
-      const displayNameEl = document.getElementById("agentDisplayName");
-      const usernameEl = document.getElementById("agentBotUsername");
-      const statusBadgeEl = document.getElementById("agentStatusBadge");
-      const botIdEl = document.getElementById("agentBotId");
-      const modeSelect = document.getElementById("agentMode");
-      const localeSelect = document.getElementById("agentLocale");
-      const noticeEl = document.getElementById("agentProfileNotice");
-
-      const agentDisplayName =
-        agentState.agentName ||
-        moduleTexts.agentName ||
-        texts.agentName ||
-        (appName + " Agent");
-
-      const botUsername =
-        agentState.botUsername ||
-        moduleTexts.botUsername ||
-        texts.agentBotUsername ||
-        "@your_bot_username";
-
-      const botId =
-        agentState.botId ||
-        moduleTexts.botId ||
-        texts.agentBotId ||
-        "—";
-
-      const agentMode =
-        agentState.mode ||
-        moduleTexts.defaultMode ||
-        "medium";
-
-      const agentLocale =
-        agentState.locale ||
-        moduleTexts.defaultLocale ||
-        "ru";
-
-      const isConnected = Boolean(agentState.connected);
-
-      if (displayNameEl) {
-        displayNameEl.textContent = agentDisplayName;
-      }
-
-      if (usernameEl) {
-        usernameEl.textContent = botUsername;
-      }
-
-      if (botIdEl) {
-        botIdEl.textContent = botId;
-      }
-
-      applyAgentStatus(statusBadgeEl, isConnected);
-
-      if (modeSelect) {
-        modeSelect.value = agentMode;
-      }
-
-      if (localeSelect) {
-        localeSelect.value = agentLocale;
-      }
-
-      if (noticeEl) {
-        noticeEl.textContent = isConnected
-          ? "Модуль агента подключен. Изменения параметров передаются в shell приложения."
-          : "Модуль пока не подключен. Завершите подключение на вкладке «Подключение».";
-        noticeEl.className = isConnected
-          ? "module-notice module-notice--success"
-          : "module-notice module-notice--warning";
-      }
-    }
-
-    function bindEvents() {
-      const modeSelect = document.getElementById("agentMode");
-      const localeSelect = document.getElementById("agentLocale");
-
-      modeSelect?.addEventListener("change", () => {
-        window.parent?.postMessage?.(
-          {
-            type: "agent-mode-changed",
-            mode: modeSelect.value
-          },
-          "*"
-        );
-      });
-
-      localeSelect?.addEventListener("change", () => {
-        window.parent?.postMessage?.(
-          {
-            type: "agent-locale-changed",
-            locale: localeSelect.value
-          },
-          "*"
-        );
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      applyTenantContent();
-      bindEvents();
+    document.addEventListener('DOMContentLoaded', () => {
+      try { window.Telegram?.WebApp?.ready?.(); } catch (e) {}
+      applyProfile();
     });
   </script>
 </body>
