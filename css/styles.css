@@ -482,9 +482,8 @@ a {
   color: var(--text-muted);
 }
 
-html,
-body.module-body {
-  background: #ff00aa !important;
+html {
+  background: transparent;
 }
 
 body.module-body {
@@ -493,6 +492,7 @@ body.module-body {
   min-height: 100dvh;
   font-size: 14px;
   color: var(--text-body);
+  background: #eef2f7;
 }
 
 /* =========================================================
