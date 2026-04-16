@@ -2130,40 +2130,6 @@ body.module-body {
   background: #eef2f7;
 }
 
-.page.page-my-agent {
-  padding: 12px;
-}
-
-.module-page-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* ===== TABS ===== */
-
-.module-tabs.agent-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.module-tab {
-  border: 0;
-  border-radius: 12px;
-  padding: 10px 14px;
-  background: #ffffff;
-  color: var(--text-body);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.module-tab--active {
-  background: #111827;
-  color: #ffffff;
-}
-
 /* ===== MAIN CARDS ===== */
 
 .card-section {
