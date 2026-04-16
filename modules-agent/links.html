@@ -8,185 +8,201 @@
   <link rel="stylesheet" href="../css/modules.css" />
 </head>
 <body>
-
-  <!-- Внутренняя навигация модуля Агента -->
-  <div class="module-tabs agent-tabs">
-  <button
-    class="module-tab module-tab--third"
-    onclick="navigateAgent('modules-agent/profile.html')"
-  >
-    Профиль
-  </button>
-  <button
-    class="module-tab module-tab--third"
-    onclick="navigateAgent('modules-agent/connect.html')"
-  >
-    Подключение
-  </button>
-  <button
-    class="module-tab module-tab--third module-tab--active"
-    onclick="navigateAgent('modules-agent/links.html')"
-  >
-    Ссылки
-  </button>
-  <button
-    class="module-tab module-tab--half"
-    onclick="navigateAgent('modules-agent/stats.html')"
-  >
-    Статистика
-  </button>
-  <button
-    class="module-tab module-tab--half"
-    onclick="navigateAgent('modules-agent/dialogs.html')"
-  >
-    Диалоги
-  </button>
-</div>
-
-
-  <div class="app-content">
-
-    <!-- Карточка 1: Партнёрские ссылки -->
-    <section class="card-section accordion-card">
-  <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
-    <span class="card-section-title">Партнёрские ссылки</span>
-    <span class="accordion-icon">▼</span>
-  </div>
-
-  <!-- важно: добавили card-section-body -->
-  <div class="card-section-body accordion-body open">
-    <p class="card-section-subtitle">
-      Введите реферальные ссылки в компании PM International.
-    </p>
-
-    <div class="form-group">
-      <label class="form-label" for="pmPartnerLink">
-        Ваша партнёрская ссылка<br />
-        <span class="profile-label">
-          вида https://www.pmebusiness.com/registrationv2?TP=XXXXXXXX
-        </span>
-      </label>
-      <input
-        type="url"
-        id="pmPartnerLink"
-        class="form-input"
-        placeholder="https://www.pmebusiness.com/registrationv2?TP=XXXXXXXX"
-      />
+  <div class="page page-my-agent">
+    <!-- Внутренняя навигация модуля Агента -->
+    <div class="module-tabs agent-tabs">
+      <button
+        class="module-tab module-tab--third"
+        type="button"
+        onclick="navigateAgent('modules-agent/profile.html')"
+      >
+        Профиль
+      </button>
+      <button
+        class="module-tab module-tab--third"
+        type="button"
+        onclick="navigateAgent('modules-agent/connect.html')"
+      >
+        Подключение
+      </button>
+      <button
+        class="module-tab module-tab--third module-tab--active"
+        type="button"
+        onclick="navigateAgent('modules-agent/links.html')"
+      >
+        Ссылки
+      </button>
+      <button
+        class="module-tab module-tab--half"
+        type="button"
+        onclick="navigateAgent('modules-agent/stats.html')"
+      >
+        Статистика
+      </button>
+      <button
+        class="module-tab module-tab--half"
+        type="button"
+        onclick="navigateAgent('modules-agent/dialogs.html')"
+      >
+        Диалоги
+      </button>
     </div>
 
-    <div class="form-group">
-      <label class="form-label" for="pmClientLink">
-        Ваша клиентская ссылка<br />
-        <span class="profile-label">
-          вида https://www.fitline.com/?sponsor=XXXXXXXX
-        </span>
-      </label>
-      <input
-        type="url"
-        id="pmClientLink"
-        class="form-input"
-        placeholder="https://www.fitline.com/?sponsor=XXXXXXXX"
-      />
+    <div class="app-content">
+      <!-- Карточка 1: Партнёрские ссылки -->
+      <section class="card-section accordion-card">
+        <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+          <span class="card-section-title">Партнёрские ссылки</span>
+          <span class="accordion-icon">▼</span>
+        </div>
+
+        <div class="card-section-body accordion-body open">
+          <p class="card-section-subtitle">
+            Введите реферальные ссылки в компании PM International.
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="pmPartnerLink">
+              Ваша партнёрская ссылка<br />
+              <span class="profile-label">
+                вида https://www.pmebusiness.com/registrationv2?TP=XXXXXXXX
+              </span>
+            </label>
+            <input
+              type="url"
+              id="pmPartnerLink"
+              class="form-input"
+              placeholder="https://www.pmebusiness.com/registrationv2?TP=XXXXXXXX"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pmClientLink">
+              Ваша клиентская ссылка<br />
+              <span class="profile-label">
+                вида https://www.fitline.com/?sponsor=XXXXXXXX
+              </span>
+            </label>
+            <input
+              type="url"
+              id="pmClientLink"
+              class="form-input"
+              placeholder="https://www.fitline.com/?sponsor=XXXXXXXX"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="module-notice module-notice--warning">
+            Сохранение и использование партнёрских ссылок должно выполняться через общую конфигурацию приложения и backend, а не через локальное хранилище страницы.
+          </div>
+
+          <button class="btn btn-block" id="savePmLinksButton" type="button">
+            Сохранить партнёрские ссылки
+          </button>
+        </div>
+      </section>
+
+      <!-- Карточка 2: Ваши соцсети -->
+      <section class="card-section accordion-card">
+        <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+          <span class="card-section-title">Ваши соцсети</span>
+          <span class="accordion-icon">▼</span>
+        </div>
+
+        <div class="card-section-body accordion-body open">
+          <p class="card-section-subtitle">
+            Введите ссылки на соцсети и мессенджеры. Все поля опциональные.
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="telegramLink">Telegram</label>
+            <input
+              type="url"
+              id="telegramLink"
+              class="form-input"
+              placeholder="https://t.me/username"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="whatsappLink">WhatsApp</label>
+            <input
+              type="url"
+              id="whatsappLink"
+              class="form-input"
+              placeholder="https://wa.me/..."
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="instagramLink">Instagram</label>
+            <input
+              type="url"
+              id="instagramLink"
+              class="form-input"
+              placeholder="https://instagram.com/..."
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="vkLink">VKontakte</label>
+            <input
+              type="url"
+              id="vkLink"
+              class="form-input"
+              placeholder="https://vk.com/..."
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="youtubeLink">YouTube</label>
+            <input
+              type="url"
+              id="youtubeLink"
+              class="form-input"
+              placeholder="https://youtube.com/@..."
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="tiktokLink">TikTok</label>
+            <input
+              type="url"
+              id="tiktokLink"
+              class="form-input"
+              placeholder="https://tiktok.com/@..."
+              autocomplete="off"
+            />
+          </div>
+
+          <button class="btn btn-block" id="saveSocialLinksButton" type="button">
+            Сохранить соцсети
+          </button>
+        </div>
+      </section>
+
+      <!-- Общий блок статуса сохранения -->
+      <p id="saveLinksMessage" class="connect-status-msg"></p>
     </div>
-
-    <button class="btn btn-block" id="savePmLinksButton">
-      Сохранить партнёрские ссылки
-    </button>
-  </div>
-</section>
-
-
-    <!-- Карточка 2: Ваши соцсети -->
-<section class="card-section accordion-card">
-  <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
-    <span class="card-section-title">Ваши соцсети</span>
-    <span class="accordion-icon">▼</span>
-  </div>
-  <div class="card-section-body accordion-body open">
-    <p class="card-section-subtitle">
-      Введите ссылки на соцсети и мессенджеры. Все поля опциональные.
-    </p>
-
-    <div class="form-group">
-      <label class="form-label" for="telegramLink">Telegram</label>
-      <input
-        type="url"
-        id="telegramLink"
-        class="form-input"
-        placeholder="https://t.me/username"
-      />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="whatsappLink">WhatsApp</label>
-      <input
-        type="url"
-        id="whatsappLink"
-        class="form-input"
-        placeholder="https://wa.me/..."
-      />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="instagramLink">Instagram</label>
-      <input
-        type="url"
-        id="instagramLink"
-        class="form-input"
-        placeholder="https://instagram.com/..."
-      />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="vkLink">VKontakte</label>
-      <input
-        type="url"
-        id="vkLink"
-        class="form-input"
-        placeholder="https://vk.com/..."
-      />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="youtubeLink">YouTube</label>
-      <input
-        type="url"
-        id="youtubeLink"
-        class="form-input"
-        placeholder="https://youtube.com/@..."
-      />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="tiktokLink">TikTok</label>
-      <input
-        type="url"
-        id="tiktokLink"
-        class="form-input"
-        placeholder="https://tiktok.com/@..."
-      />
-    </div>
-
-    <button class="btn btn-block" id="saveSocialLinksButton">
-      Сохранить соцсети
-    </button>
-  </div>
-</section>
-
-
-    <!-- Общий блок статуса сохранения -->
-    <p id="saveLinksMessage" class="connect-status-msg"></p>
-
   </div>
 
   <script>
     function navigateAgent(page) {
       try {
-        window.parent?.postMessage?.({
-          type: 'navigate',
-          page: page,
-          tab: 'modules'
-        }, '*');
+        window.parent?.postMessage?.(
+          {
+            type: 'navigate',
+            page,
+            tab: 'modules'
+          },
+          '*'
+        );
       } catch (e) {
         console.error(e);
       }
@@ -194,14 +210,75 @@
 
     function toggleAccordion(headerEl) {
       const body = headerEl.nextElementSibling;
+      if (!body) return;
+
       const isOpen = body.classList.contains('open');
       body.classList.toggle('open', !isOpen);
       headerEl.classList.toggle('open', !isOpen);
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    function getAgentLinksState() {
+      try {
+        return window.parent?.AICAppShell?.getAgentLinks?.() || null;
+      } catch (error) {
+        console.error('[AI CENTER][Agent Links] links state read failed', error);
+        return null;
+      }
+    }
+
+    function applyInitialLinks() {
+      const state = getAgentLinksState() || {};
+
+      const pmPartnerInput = document.getElementById('pmPartnerLink');
+      const pmClientInput = document.getElementById('pmClientLink');
+
+      const socialFields = {
+        telegramLink: document.getElementById('telegramLink'),
+        whatsappLink: document.getElementById('whatsappLink'),
+        instagramLink: document.getElementById('instagramLink'),
+        vkLink: document.getElementById('vkLink'),
+        youtubeLink: document.getElementById('youtubeLink'),
+        tiktokLink: document.getElementById('tiktokLink')
+      };
+
+      const pmLinks = state.pmLinks || {};
+      const socialLinks = state.socialLinks || {};
+
+      if (pmPartnerInput && pmLinks.pmPartnerLink) {
+        pmPartnerInput.value = pmLinks.pmPartnerLink;
+      }
+      if (pmClientInput && pmLinks.pmClientLink) {
+        pmClientInput.value = pmLinks.pmClientLink;
+      }
+
+      Object.keys(socialFields).forEach((key) => {
+        const el = socialFields[key];
+        if (el && socialLinks[key]) {
+          el.value = socialLinks[key];
+        }
+      });
+    }
+
+    function showMessage(text, type) {
+      const msgEl = document.getElementById('saveLinksMessage');
+      if (!msgEl) return;
+
+      msgEl.textContent = text;
+      msgEl.className = 'connect-status-msg';
+
+      if (type === 'success') {
+        msgEl.classList.add('success');
+      }
+      if (type === 'error') {
+        msgEl.classList.add('error');
+      }
+    }
+
+    function bindEvents() {
       const tg = window.Telegram?.WebApp;
-      tg?.ready?.();
+      try {
+        tg?.ready?.();
+      } catch (e) {}
 
       const pmPartnerInput = document.getElementById('pmPartnerLink');
       const pmClientInput = document.getElementById('pmClientLink');
@@ -217,38 +294,12 @@
       };
       const saveSocialBtn = document.getElementById('saveSocialLinksButton');
 
-      const msgEl = document.getElementById('saveLinksMessage');
-
-      // Загружаем сохранённые данные
-      try {
-        const savedPmRaw = localStorage.getItem('agentPmLinks');
-        if (savedPmRaw) {
-          const savedPm = JSON.parse(savedPmRaw);
-          if (savedPm.pmPartnerLink && pmPartnerInput) pmPartnerInput.value = savedPm.pmPartnerLink;
-          if (savedPm.pmClientLink && pmClientInput) pmClientInput.value = savedPm.pmClientLink;
-        }
-
-        const savedSocialRaw = localStorage.getItem('agentSocialLinks');
-        if (savedSocialRaw) {
-          const savedSocial = JSON.parse(savedSocialRaw);
-          Object.keys(socialFields).forEach(key => {
-            if (socialFields[key] && savedSocial[key]) {
-              socialFields[key].value = savedSocial[key];
-            }
-          });
-        }
-      } catch (e) {
-        console.error(e);
-      }
-
-      // Сохранение партнёрских ссылок (обе обязательны)
-      savePmBtn.addEventListener('click', () => {
-        const partner = (pmPartnerInput.value || '').trim();
-        const client = (pmClientInput.value || '').trim();
+      savePmBtn?.addEventListener('click', () => {
+        const partner = (pmPartnerInput?.value || '').trim();
+        const client = (pmClientInput?.value || '').trim();
 
         if (!partner || !client) {
-          msgEl.textContent = 'Введите обе ссылки: партнёрскую и клиентскую.';
-          msgEl.className = 'connect-status-msg error';
+          showMessage('Введите обе ссылки: партнёрскую и клиентскую.', 'error');
           return;
         }
 
@@ -257,44 +308,45 @@
           pmClientLink: client
         };
 
-        try {
-          localStorage.setItem('agentPmLinks', JSON.stringify(data));
-          msgEl.textContent = 'Партнёрские ссылки сохранены.';
-          msgEl.className = 'connect-status-msg success';
-          tg?.HapticFeedback?.notificationOccurred?.('success');
-          window.parent?.postMessage?.({
+        window.parent?.postMessage?.(
+          {
             type: 'agent-pm-links-updated',
             links: data
-          }, '*');
-        } catch (e) {
-          console.error(e);
-          msgEl.textContent = 'Не удалось сохранить партнёрские ссылки.';
-          msgEl.className = 'connect-status-msg error';
-        }
+          },
+          '*'
+        );
+
+        showMessage('Партнёрские ссылки отправлены в shell.', 'success');
+        try {
+          tg?.HapticFeedback?.notificationOccurred?.('success');
+        } catch (e) {}
       });
 
-      // Сохранение соцсетей (любое количество полей)
-      saveSocialBtn.addEventListener('click', () => {
+      saveSocialBtn?.addEventListener('click', () => {
         const data = {};
-        Object.keys(socialFields).forEach(key => {
+
+        Object.keys(socialFields).forEach((key) => {
           data[key] = (socialFields[key]?.value || '').trim();
         });
 
-        try {
-          localStorage.setItem('agentSocialLinks', JSON.stringify(data));
-          msgEl.textContent = 'Ссылки на соцсети сохранены.';
-          msgEl.className = 'connect-status-msg success';
-          tg?.HapticFeedback?.notificationOccurred?.('success');
-          window.parent?.postMessage?.({
+        window.parent?.postMessage?.(
+          {
             type: 'agent-social-links-updated',
             links: data
-          }, '*');
-        } catch (e) {
-          console.error(e);
-          msgEl.textContent = 'Не удалось сохранить ссылки на соцсети.';
-          msgEl.className = 'connect-status-msg error';
-        }
+          },
+          '*'
+        );
+
+        showMessage('Ссылки на соцсети отправлены в shell.', 'success');
+        try {
+          tg?.HapticFeedback?.notificationOccurred?.('success');
+        } catch (e) {}
       });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      applyInitialLinks();
+      bindEvents();
     });
   </script>
 </body>
