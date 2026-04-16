@@ -63,72 +63,88 @@
         </div>
       </section>
 
-      <section class="card-section">
-        <div class="card-section-header">
-          <h2 class="card-section-title">Telegram</h2>
-          <p class="card-section-subtitle">Подключите Telegram-бота через API Token</p>
-        </div>
-        <div class="card-section-body">
-          <div class="connect-instructions-list">
-            <div class="connect-instruction-step">
-              <div class="connect-instruction-title">Как получить токен</div>
-              <ul class="connect-instruction-points">
-                <li>Откройте @BotFather в Telegram.</li>
-                <li>Отправьте команду <strong>/mybots</strong> или <strong>/newbot</strong>, если создаёте нового.</li>
-                <li>Выберите вашего бота из списка.</li>
-                <li>Нажмите «API Token».</li>
-                <li>Скопируйте токен и вставьте его в поле ниже.</li>
-              </ul>
-            </div>
-          </div>
+      <div class="accordion-card open">
+  <button class="accordion-header" type="button" onclick="toggleAccordion(this)">
+    <span class="accordion-header-title">Telegram</span>
+    <span class="accordion-header-icon">▲</span>
+  </button>
 
-          <div class="connect-form-block">
-            <label for="telegramBotToken" class="connect-field-label">Введите токен</label>
-            <input
-              id="telegramBotToken"
-              class="connect-token-input"
-              type="text"
-              inputmode="text"
-              autocomplete="off"
-              placeholder="API Token вашего бота"
-            />
-            <button type="button" class="btn connect-submit-btn" id="telegramConnectBtn">
-              Подключить
-            </button>
-            <p class="connect-form-note" id="telegramConnectNote" hidden></p>
+  <div class="accordion-body" style="display: block;">
+    <div class="accordion-card open">
+      <button class="accordion-header" type="button" onclick="toggleAccordion(this)">
+        <span class="accordion-header-title">Как получить токен</span>
+        <span class="accordion-header-icon">▲</span>
+      </button>
+      <div class="accordion-body" style="display: block;">
+        <div class="connect-instructions-list">
+          <div class="connect-instruction-step">
+            <ul class="connect-instruction-points">
+              <li>Откройте @BotFather в Telegram.</li>
+              <li>Отправьте команду <strong>/mybots</strong> или <strong>/newbot</strong>, если создаёте нового.</li>
+              <li>Выберите вашего бота из списка.</li>
+              <li>Нажмите «API Token».</li>
+              <li>Скопируйте токен и вставьте его в поле ниже.</li>
+            </ul>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
 
-      <section class="card-section">
-        <div class="card-section-header">
-          <h2 class="card-section-title">Инструкции</h2>
-          <p class="card-section-subtitle">Откройте материалы по подключению Telegram-бота</p>
+    <div class="accordion-card open">
+      <button class="accordion-header" type="button" onclick="toggleAccordion(this)">
+        <span class="accordion-header-title">Введите токен</span>
+        <span class="accordion-header-icon">▲</span>
+      </button>
+      <div class="accordion-body" style="display: block;">
+        <div class="connect-form-block">
+          <label for="telegramBotToken" class="connect-field-label">Введите токен</label>
+          <input
+            id="telegramBotToken"
+            class="connect-token-input"
+            type="text"
+            inputmode="text"
+            autocomplete="off"
+            placeholder="API Token вашего бота"
+          />
+          <button type="button" class="btn connect-submit-btn" id="telegramConnectBtn">
+            Подключить
+          </button>
+          <p class="connect-form-note" id="telegramConnectNote" hidden></p>
         </div>
-        <div class="card-section-body">
-          <div class="connect-links-list">
-            <a
-              class="connect-link-card"
-              href="https://www.youtube.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span class="connect-link-title">Видео-инструкция</span>
-              <span class="connect-link-text">Открыть видео по подключению Telegram-бота</span>
-            </a>
+      </div>
+    </div>
 
-            <a
-              class="connect-link-card"
-              href="https://docs.google.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span class="connect-link-title">Текстовая инструкция</span>
-              <span class="connect-link-text">Открыть подробную текстовую инструкцию</span>
-            </a>
-          </div>
+    <div class="accordion-card open">
+      <button class="accordion-header" type="button" onclick="toggleAccordion(this)">
+        <span class="accordion-header-title">Инструкции</span>
+        <span class="accordion-header-icon">▲</span>
+      </button>
+      <div class="accordion-body" style="display: block;">
+        <div class="connect-links-list">
+          <a
+            class="connect-link-card"
+            href="https://www.youtube.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="connect-link-title">Видео-инструкция</span>
+            <span class="connect-link-text">Открыть видео по подключению Telegram-бота</span>
+          </a>
+
+          <a
+            class="connect-link-card"
+            href="https://docs.google.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="connect-link-title">Текстовая инструкция</span>
+            <span class="connect-link-text">Открыть подробную текстовую инструкцию</span>
+          </a>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+</div>
     </div>
   </div>
 
@@ -217,6 +233,16 @@
       applyConnectState();
       bindConnectActions();
     });
+
+    function toggleAccordion(button) {
+  const card = button.closest('.accordion-card');
+  const body = card?.querySelector(':scope > .accordion-body');
+  if (!card || !body) return;
+
+  const isOpen = card.classList.contains('open');
+  card.classList.toggle('open', !isOpen);
+  body.style.display = isOpen ? 'none' : 'block';
+}
   </script>
 </body>
 </html>
