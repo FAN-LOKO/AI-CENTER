@@ -16,7 +16,6 @@
    9. Адаптив
    ========================================================= */
 
-
 /* =========================================================
    1. БАЗА МОДУЛЕЙ
    ========================================================= */
@@ -57,17 +56,17 @@
   --module-shadow-primary: 0 4px 10px rgba(37, 99, 235, 0.18);
 }
 
-
 /* =========================================================
    2. КОНТЕЙНЕР И ТАБЫ МОДУЛЕЙ
    ========================================================= */
 
 .app-content {
   width: 100%;
-  max-width: 456px;
-  margin: 0 auto;
-  padding: 20px 18px 28px;
+  margin: 0;
+  padding: 16px 0 24px;
   box-sizing: border-box;
+  background: transparent;
+  max-width: none;
 }
 
 .card-section + .card-section {
@@ -79,15 +78,24 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-  padding: 12px 18px 0;
-  margin: 0 auto;
-  max-width: 456px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
+  background: transparent;
+  max-width: none;
+}
+
+.page.page-my-agent .app-content,
+.page.page-my-agent .module-tabs {
+  background: transparent !important;
+  box-shadow: none;
+  border: 0;
 }
 
 .agent-tabs + .app-content,
 .module-tabs + .app-content {
-  padding-top: 18px;
+  padding-top: 14px;
 }
 
 .module-tab {
@@ -137,16 +145,9 @@
   box-shadow: var(--module-shadow-primary);
 }
 
-
 /* =========================================================
    3. УНИВЕРСАЛЬНЫЕ КАРТОЧКИ И АККОРДЕОНЫ МОДУЛЕЙ
    ========================================================= */
-
-/*
-  ВАЖНО: базовые .card-section, .card-section-header, .card-section-title,
-  .card-section-subtitle и .card-section-body живут в css/styles.css.
-  Здесь только модульные расширения.
-*/
 
 .card-section.accordion-card {
   border-radius: var(--module-radius-lg);
@@ -213,7 +214,6 @@
   padding: 12px 14px 14px;
   background: #ffffff;
 }
-
 
 /* =========================================================
    4. ФОРМЫ И ДЕЙСТВИЯ
@@ -284,7 +284,6 @@ textarea.form-input,
   resize: vertical;
   min-height: 96px;
 }
-
 
 /* =========================================================
    5. СТАТУСЫ, СТРОКИ И СЛУЖЕБНЫЕ ЭЛЕМЕНТЫ
@@ -374,7 +373,6 @@ textarea.form-input,
 .connect-status-msg.error {
   color: var(--module-danger);
 }
-
 
 /* =========================================================
    6. ОБЩИЕ WORKSPACE-ПАТТЕРНЫ ДЛЯ ВСЕХ МОДУЛЕЙ
@@ -490,7 +488,6 @@ textarea.form-input,
   border-color: rgba(146, 64, 14, 0.12);
   color: var(--module-warning);
 }
-
 
 /* =========================================================
    7. УНИВЕРСАЛЬНЫЕ СПИСКИ И КАРТОЧКИ МОДУЛЕЙ
@@ -658,7 +655,6 @@ textarea.form-input,
   margin-bottom: 0;
 }
 
-
 /* =========================================================
    8. ВРЕМЕННАЯ СПЕЦИФИКА AGENT
    До вынесения в общие паттерны или отдельный слой
@@ -754,26 +750,25 @@ textarea.form-input,
   white-space: nowrap;
 }
 
-
 /* =========================================================
    9. АДАПТИВ
    ========================================================= */
 
 @media (max-width: 640px) {
   .app-content {
-    max-width: 100%;
-    padding: 18px 12px 24px;
+    max-width: none;
+    padding: 14px 0 20px;
   }
 
   .module-tabs {
-    max-width: 100%;
-    padding: 12px 12px 0;
+    max-width: none;
+    padding: 0;
     gap: 8px;
   }
 
   .agent-tabs + .app-content,
   .module-tabs + .app-content {
-    padding-top: 16px;
+    padding-top: 14px;
   }
 
   .module-tab {
