@@ -2123,10 +2123,9 @@ body {
 }
 
 .stats-layout,
-.dashboard-shell,
-.module-card,
 .stats-chart-card,
-main,
-section {
+.stats-chart-card svg,
+.stats-chart-card canvas,
+.stats-chart-card > div {
   background: transparent !important;
 }
