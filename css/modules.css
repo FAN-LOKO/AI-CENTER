@@ -1,14 +1,18 @@
 /* =========================================================
    MODULES.CSS — ЕДИНЫЙ СЛОЙ СТИЛЕЙ ДЛЯ ВСЕХ МОДУЛЕЙ
+   Назначение:
+   - дополняет общий слой css/styles.css
+   - НЕ переопределяет базовые карточки miniapp без необходимости
+   - задаёт единые паттерны для всех модулей
    Структура:
    1. База модулей
-   2. Верхние табы модулей
-   3. Карточки и секции
-   4. Аккордеоны
-   5. Формы и действия
-   6. Статусы и профили
-   7. Ссылки и служебные сообщения
-   8. Модуль: Agent
+   2. Контейнер и табы модулей
+   3. Универсальные карточки и аккордеоны модулей
+   4. Формы и действия
+   5. Статусы, строки и служебные элементы
+   6. Общие workspace-паттерны для всех модулей
+   7. Универсальные списки и карточки модулей
+   8. Временная специфика Agent
    9. Адаптив
    ========================================================= */
 
@@ -38,6 +42,12 @@
   --module-danger: #b91c1c;
   --module-danger-soft: #fef2f2;
 
+  --module-warning: #92400e;
+  --module-warning-soft: #fef3c7;
+
+  --module-neutral: #334155;
+  --module-neutral-soft: #e2e8f0;
+
   --module-radius-sm: 8px;
   --module-radius-md: 12px;
   --module-radius-lg: 16px;
@@ -46,6 +56,11 @@
   --module-shadow-soft: 0 4px 12px rgba(17, 24, 39, 0.06);
   --module-shadow-primary: 0 4px 10px rgba(37, 99, 235, 0.18);
 }
+
+
+/* =========================================================
+   2. КОНТЕЙНЕР И ТАБЫ МОДУЛЕЙ
+   ========================================================= */
 
 .app-content {
   width: 100%;
@@ -73,19 +88,6 @@
 .agent-tabs + .app-content,
 .module-tabs + .app-content {
   padding-top: 18px;
-}
-
-
-/* =========================================================
-   2. ВЕРХНИЕ ТАБЫ МОДУЛЕЙ
-   ========================================================= */
-
-.module-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 16px 0;
 }
 
 .module-tab {
@@ -127,7 +129,8 @@
   flex: 0 1 calc(50% - 8px);
 }
 
-.module-tab--active {
+.module-tab--active,
+.agent-tabs .module-tab--active {
   background: linear-gradient(135deg, var(--module-primary), var(--module-primary-2));
   color: #ffffff;
   border-color: transparent;
@@ -136,21 +139,14 @@
 
 
 /* =========================================================
-   3. КАРТОЧКИ И СЕКЦИИ
+   3. УНИВЕРСАЛЬНЫЕ КАРТОЧКИ И АККОРДЕОНЫ МОДУЛЕЙ
    ========================================================= */
 
 /*
   ВАЖНО: базовые .card-section, .card-section-header, .card-section-title,
-  .card-section-subtitle и .card-section-body НЕ переопределяем здесь,
-  чтобы страницы modules.html визуально совпадали с главными страницами
-  проекта и брали стиль из css/styles.css.
-  В modules.css задаём только модульные расширения.
+  .card-section-subtitle и .card-section-body живут в css/styles.css.
+  Здесь только модульные расширения.
 */
-
-
-/* =========================================================
-   4. АККОРДЕОНЫ
-   ========================================================= */
 
 .card-section.accordion-card {
   border-radius: var(--module-radius-lg);
@@ -199,7 +195,6 @@
   box-sizing: border-box;
 }
 
-/* Вложенные аккордеоны */
 .card-section-body .card-section.accordion-card {
   margin: 8px 0;
   width: 100%;
@@ -221,7 +216,7 @@
 
 
 /* =========================================================
-   5. ФОРМЫ И ДЕЙСТВИЯ
+   4. ФОРМЫ И ДЕЙСТВИЯ
    ========================================================= */
 
 .form-group {
@@ -292,7 +287,7 @@ textarea.form-input,
 
 
 /* =========================================================
-   6. СТАТУСЫ И ПРОФИЛИ
+   5. СТАТУСЫ, СТРОКИ И СЛУЖЕБНЫЕ ЭЛЕМЕНТЫ
    ========================================================= */
 
 .profile-row,
@@ -343,10 +338,15 @@ textarea.form-input,
   background: var(--module-danger-soft);
 }
 
+.status-waiting {
+  color: var(--module-warning);
+  background: var(--module-warning-soft);
+}
 
-/* =========================================================
-   7. ССЫЛКИ И СЛУЖЕБНЫЕ СООБЩЕНИЯ
-   ========================================================= */
+.status-neutral {
+  color: var(--module-neutral);
+  background: var(--module-neutral-soft);
+}
 
 .link-primary {
   color: var(--module-primary-2);
@@ -377,115 +377,168 @@ textarea.form-input,
 
 
 /* =========================================================
-   8. МОДУЛЬ: AGENT
-   Только уникальные стили модуля Агент
+   6. ОБЩИЕ WORKSPACE-ПАТТЕРНЫ ДЛЯ ВСЕХ МОДУЛЕЙ
    ========================================================= */
 
-.agent-tabs .module-tab--active {
-  background: linear-gradient(135deg, var(--module-primary), var(--module-primary-2));
-  color: #ffffff;
-  border-color: transparent;
-  box-shadow: var(--module-shadow-primary);
-}
-
-
-/* ===== ЧАТ МОДУЛЯ AGENT ===== */
-
-.chat-messages {
-  max-height: 340px;
-  overflow-y: auto;
+.module-page-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
+}
+
+.module-card-compact .card-section-body {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.module-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.module-inline-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(224, 236, 255, 0.55);
+  border: 1px solid rgba(59, 130, 246, 0.10);
+  color: var(--module-text-soft);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.module-subsection-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--module-text);
+}
+
+.module-workspace-card .card-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.module-history {
+  min-height: 220px;
+  max-height: 420px;
+  overflow-y: auto;
   padding-right: 2px;
 }
 
-.chat-message {
+.module-input-wrap {
   display: flex;
   flex-direction: column;
-  font-size: 13px;
-}
-
-.chat-message-meta {
-  display: flex;
-  justify-content: space-between;
   gap: 12px;
-  margin-bottom: 2px;
-  color: var(--module-text-muted);
+  padding-top: 2px;
 }
 
-.chat-bubble {
-  display: inline-block;
-  max-width: 100%;
-  padding: 8px 10px;
-  border-radius: var(--module-radius-md);
-  word-wrap: break-word;
-  line-height: 1.4;
+.module-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-.chat-message-client .chat-bubble {
-  background: var(--module-primary-soft);
-  color: var(--module-primary);
+.module-toolbar-left,
+.module-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.chat-message-agent .chat-bubble {
-  background: var(--module-success-soft);
+.module-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--module-text-soft);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.module-notice {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: var(--module-text-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.module-notice--success {
+  background: rgba(220, 252, 231, 0.72);
+  border-color: rgba(22, 101, 52, 0.12);
   color: var(--module-success);
 }
 
-
-/* ===== КАРТОЧКИ ДИАЛОГОВ AGENT ===== */
-
-.dialog-item {
-  margin-bottom: 8px;
-  padding: 10px 12px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: var(--module-primary-soft);
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+.module-notice--danger {
+  background: rgba(254, 242, 242, 0.84);
+  border-color: rgba(185, 28, 28, 0.12);
+  color: var(--module-danger);
 }
 
-.dialog-item:hover {
-  background: #d1e3ff;
-  border-color: rgba(11, 60, 120, 0.12);
+.module-notice--warning {
+  background: rgba(254, 243, 199, 0.84);
+  border-color: rgba(146, 64, 14, 0.12);
+  color: var(--module-warning);
 }
 
-.dialog-item:active {
-  transform: translateY(1px);
+
+/* =========================================================
+   7. УНИВЕРСАЛЬНЫЕ СПИСКИ И КАРТОЧКИ МОДУЛЕЙ
+   ========================================================= */
+
+.module-list-item {
+  position: relative;
 }
 
-.dialog-item-row {
+.module-list-item.is-active {
+  background: #dbeafe;
+  border-color: rgba(59, 130, 246, 0.24);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.10);
+}
+
+.module-list-item.is-unread::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #2563eb;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.92);
+}
+
+.module-item-meta {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 2px;
-  font-size: 13px;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
 }
 
-.dialog-user {
-  font-weight: 600;
-  color: var(--module-primary);
+.module-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
 }
-
-.dialog-time {
-  color: var(--module-text-muted);
-  font-size: 12px;
-}
-
-.dialog-last-msg {
-  overflow: hidden;
-  font-size: 13px;
-  color: var(--module-text-soft);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-
-/* ===== КАРТОЧКИ СПИСКА МОДУЛЕЙ ===== */
 
 .module-accordion-card {
   margin-top: 16px;
@@ -607,13 +660,120 @@ textarea.form-input,
 
 
 /* =========================================================
+   8. ВРЕМЕННАЯ СПЕЦИФИКА AGENT
+   До вынесения в общие паттерны или отдельный слой
+   ========================================================= */
+
+.chat-messages {
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 2px;
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.chat-message-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 2px;
+  color: var(--module-text-muted);
+}
+
+.chat-bubble {
+  display: inline-block;
+  max-width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--module-radius-md);
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+.chat-message-client .chat-bubble {
+  background: var(--module-primary-soft);
+  color: var(--module-primary);
+}
+
+.chat-message-agent .chat-bubble {
+  background: var(--module-success-soft);
+  color: var(--module-success);
+}
+
+.dialog-item {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--module-primary-soft);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.dialog-item:hover {
+  background: #d1e3ff;
+  border-color: rgba(11, 60, 120, 0.12);
+}
+
+.dialog-item:active {
+  transform: translateY(1px);
+}
+
+.dialog-item-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 2px;
+  font-size: 13px;
+}
+
+.dialog-user {
+  font-weight: 600;
+  color: var(--module-primary);
+}
+
+.dialog-time {
+  color: var(--module-text-muted);
+  font-size: 12px;
+}
+
+.dialog-last-msg {
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--module-text-soft);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
    9. АДАПТИВ
    ========================================================= */
 
 @media (max-width: 640px) {
+  .app-content {
+    max-width: 100%;
+    padding: 18px 12px 24px;
+  }
+
   .module-tabs {
+    max-width: 100%;
     padding: 12px 12px 0;
     gap: 8px;
+  }
+
+  .agent-tabs + .app-content,
+  .module-tabs + .app-content {
+    padding-top: 16px;
   }
 
   .module-tab {
@@ -636,6 +796,16 @@ textarea.form-input,
     flex-basis: 48%;
   }
 
+  .module-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .module-toolbar-left,
+  .module-toolbar-right {
+    flex-wrap: wrap;
+  }
+
   .module-card-title {
     font-size: 17px;
   }
@@ -644,19 +814,3 @@ textarea.form-input,
     font-size: 14px;
   }
 }
-
-  .app-content {
-    max-width: 100%;
-    padding: 18px 12px 24px;
-  }
-
-  .module-tabs {
-    max-width: 100%;
-    padding: 12px 12px 0;
-    gap: 8px;
-  }
-
-  .agent-tabs + .app-content,
-  .module-tabs + .app-content {
-    padding-top: 16px;
-  }
