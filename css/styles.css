@@ -235,15 +235,7 @@ a {
   padding: 0 0 calc(var(--bottom-nav-height) + 8px);
   display: flex;
   flex-direction: column;
-  background:
-    linear-gradient(
-      135deg,
-      var(--tenant-bg-start),
-      var(--tenant-bg-mid),
-      var(--tenant-bg-accent),
-      var(--tenant-bg-end)
-    );
-  background-size: 200% 200%;
+  background: transparent;
 }
 
 #pageFrame,
