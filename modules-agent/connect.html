@@ -7,167 +7,35 @@
   <link rel="stylesheet" href="../css/styles.css" />
   <link rel="stylesheet" href="../css/modules.css" />
 </head>
-<body>
+<body class="module-body">
   <div class="page page-my-agent">
-    <!-- Внутренняя навигация модуля Агента -->
     <div class="module-tabs agent-tabs">
-      <button
-        class="module-tab module-tab--third"
-        type="button"
-        onclick="navigateAgent('modules-agent/profile.html')"
-      >
-        Профиль
-      </button>
-      <button
-        class="module-tab module-tab--third module-tab--active"
-        type="button"
-        onclick="navigateAgent('modules-agent/connect.html')"
-      >
-        Подключение
-      </button>
-      <button
-        class="module-tab module-tab--third"
-        type="button"
-        onclick="navigateAgent('modules-agent/links.html')"
-      >
-        Ссылки
-      </button>
-      <button
-        class="module-tab module-tab--half"
-        type="button"
-        onclick="navigateAgent('modules-agent/stats.html')"
-      >
-        Статистика
-      </button>
-      <button
-        class="module-tab module-tab--half"
-        type="button"
-        onclick="navigateAgent('modules-agent/dialogs.html')"
-      >
-        Диалоги
-      </button>
+      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/profile.html')">Профиль</button>
+      <button class="module-tab module-tab--third module-tab--active" type="button" onclick="navigateAgent('modules-agent/connect.html')">Подключение</button>
+      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/links.html')">Ссылки</button>
+      <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/stats.html')">Статистика</button>
+      <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/dialogs.html')">Диалоги</button>
     </div>
 
     <div class="app-content">
-      <!-- Карточка статуса агента -->
-      <section class="card-section accordion-card">
-        <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
-          <div>
-            <h2 class="card-section-title">Подключение агента</h2>
-            <p class="card-section-subtitle">Управляйте подключением агента к каналам</p>
-          </div>
-          <span class="accordion-icon">▼</span>
+      <section class="card-section">
+        <div class="card-section-header">
+          <h2 class="card-section-title">Подключение агента</h2>
+          <p class="card-section-subtitle">Настройка Telegram-бота и статуса подключения</p>
         </div>
-        <div class="accordion-body open">
-          <div class="status-row">
-            <span class="status-label">Статус в Telegram</span>
-            <span class="status-badge status-offline" id="agentTelegramStatus">Не подключен</span>
+        <div class="card-section-body module-stack">
+          <div class="form-group">
+            <label class="form-label" for="botToken">Токен бота</label>
+            <input id="botToken" class="form-input" type="text" placeholder="Введите токен Telegram-бота" />
           </div>
-          <div class="status-row">
-            <span class="status-label">Статус TikTok</span>
-            <span class="status-badge status-offline" id="agentTiktokStatus">Не подключен</span>
+
+          <div class="form-group">
+            <label class="form-label" for="botWebhook">Webhook URL</label>
+            <input id="botWebhook" class="form-input" type="text" placeholder="https://..." />
           </div>
-          <div class="status-row">
-            <span class="status-label">Статус Instagram</span>
-            <span class="status-badge status-offline" id="agentInstagramStatus">Не подключен</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label">Статус ВКонтакте</span>
-            <span class="status-badge status-offline" id="agentVkStatus">Не подключен</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label">Статус WhatsApp</span>
-            <span class="status-badge status-offline" id="agentWhatsappStatus">Не подключен</span>
-          </div>
-        </div>
-      </section>
 
-      <!-- Telegram: общая карточка с вложенными аккордеонами -->
-      <section class="card-section accordion-card">
-        <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
-          <span class="card-section-title">Telegram</span>
-          <span class="accordion-icon">▼</span>
-        </div>
-
-        <div class="card-section-body accordion-body open">
-          <!-- Вложенный аккордеон 1: Как получить токен -->
-          <section class="card-section accordion-card">
-            <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
-              <span class="card-section-title">Как получить токен</span>
-              <span class="accordion-icon">▼</span>
-            </div>
-            <div class="card-section-body accordion-body open">
-              <ol>
-                <li>Откройте @BotFather в Telegram.</li>
-                <li>Отправьте команду <code>/mybots</code> или <code>/newbot</code>, если создаёте нового.</li>
-                <li>Выберите вашего бота из списка.</li>
-                <li>Нажмите «API Token».</li>
-                <li>Скопируйте токен и вставьте его в поле ниже.</li>
-              </ol>
-            </div>
-          </section>
-
-          <!-- Вложенный аккордеон 2: Введите токен -->
-          <section class="card-section accordion-card">
-            <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
-              <span class="card-section-title">Введите токен</span>
-              <span class="accordion-icon">▼</span>
-            </div>
-            <div class="card-section-body accordion-body open">
-              <div class="form-group">
-                <label class="form-label" for="botToken">API Token вашего бота</label>
-                <input
-                  type="text"
-                  id="botToken"
-                  class="form-input"
-                  placeholder="123456789:AAAbbbCCCdddEEEfffGGG"
-                  autocomplete="off"
-                />
-              </div>
-
-              <div class="module-notice module-notice--warning">
-                Токен не сохраняется в локальном хранилище страницы. Подключение должно обрабатываться через shell и backend-интеграции.
-              </div>
-
-              <button class="btn btn-block" id="connectButton" type="button" disabled>
-                Подключить
-              </button>
-
-              <p id="connectMessage" class="connect-status-msg"></p>
-            </div>
-          </section>
-
-          <!-- Вложенный аккордеон 3: Инструкции -->
-          <section class="card-section accordion-card">
-            <div class="card-section-header accordion-header" onclick="toggleAccordion(this)">
-              <span class="card-section-title">Инструкции</span>
-              <span class="accordion-icon">▼</span>
-            </div>
-            <div class="card-section-body accordion-body">
-              <div class="form-group">
-                <p class="form-label">Видео-инструкция</p>
-                <a
-                  href="https://t.me/your_video_link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="link-primary"
-                >
-                  Открыть видео по подключению Telegram-бота
-                </a>
-              </div>
-              <div class="form-group">
-                <p class="form-label">Текстовая инструкция</p>
-                <a
-                  href="https://t.me/your_text_guide"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="link-primary"
-                >
-                  Открыть подробную текстовую инструкцию
-                </a>
-              </div>
-            </div>
-          </section>
+          <button class="btn" type="button" id="saveConnectButton">Сохранить</button>
+          <p id="connectStatusMessage" class="connect-status-msg"></p>
         </div>
       </section>
     </div>
@@ -176,141 +44,48 @@
   <script>
     function navigateAgent(page) {
       try {
-        window.parent?.postMessage?.(
-          {
-            type: 'navigate',
-            page,
-            tab: 'modules'
-          },
-          '*'
-        );
+        window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*');
       } catch (e) {
         console.error(e);
       }
     }
 
-    function toggleAccordion(headerEl) {
-      const body = headerEl.nextElementSibling;
-      if (!body) return;
-
-      const isOpen = body.classList.contains('open');
-      body.classList.toggle('open', !isOpen);
-      headerEl.classList.toggle('open', !isOpen);
-    }
-
-    function getAgentRuntimeState() {
+    function getAgentConnectState() {
       try {
-        return window.parent?.AICAppShell?.getAgentState?.() || null;
+        return window.parent?.AICAppShell?.getAgentConnect?.() || null;
       } catch (error) {
-        console.error('[AI CENTER][Agent Connect] agent state read failed', error);
+        console.error('[AI CENTER][Agent Connect] connect state read failed', error);
         return null;
       }
     }
 
-    function applyStatusBadge(el, connected) {
+    function showStatus(message, isError = false) {
+      const el = document.getElementById('connectStatusMessage');
       if (!el) return;
-
-      el.classList.remove('status-online', 'status-offline', 'status-waiting');
-
-      if (connected) {
-        el.textContent = 'Подключен';
-        el.classList.add('status-online');
-      } else {
-        el.textContent = 'Не подключен';
-        el.classList.add('status-offline');
-      }
+      el.textContent = message || '';
+      el.classList.remove('success', 'error');
+      if (message) el.classList.add(isError ? 'error' : 'success');
     }
 
-    function applyRuntimeState() {
-      const state = getAgentRuntimeState() || {};
-
-      const tokenInput = document.getElementById('botToken');
-      const telegramBadge = document.getElementById('agentTelegramStatus');
-      const tiktokBadge = document.getElementById('agentTiktokStatus');
-      const instagramBadge = document.getElementById('agentInstagramStatus');
-      const vkBadge = document.getElementById('agentVkStatus');
-      const whatsappBadge = document.getElementById('agentWhatsappStatus');
-
-      const telegramConnected = Boolean(state.connected);
-      const tiktokConnected = Boolean(state.tiktokConnected);
-      const instagramConnected = Boolean(state.instagramConnected);
-      const vkConnected = Boolean(state.vkConnected);
-      const whatsappConnected = Boolean(state.whatsappConnected);
-
-      if (tokenInput && state.botTokenMasked) {
-        tokenInput.value = state.botTokenMasked;
-      }
-
-      applyStatusBadge(telegramBadge, telegramConnected);
-      applyStatusBadge(tiktokBadge, tiktokConnected);
-      applyStatusBadge(instagramBadge, instagramConnected);
-      applyStatusBadge(vkBadge, vkConnected);
-      applyStatusBadge(whatsappBadge, whatsappConnected);
+    function applyConnectState() {
+      const state = getAgentConnectState() || {};
+      const tokenEl = document.getElementById('botToken');
+      const webhookEl = document.getElementById('botWebhook');
+      if (tokenEl && state.token) tokenEl.value = state.token;
+      if (webhookEl && state.webhook) webhookEl.value = state.webhook;
     }
 
-    function updateButtonState() {
-      const tokenInput = document.getElementById('botToken');
-      const connectBtn = document.getElementById('connectButton');
-      if (!tokenInput || !connectBtn) return;
-
-      const hasValue = tokenInput.value.trim().length > 10;
-      connectBtn.disabled = !hasValue;
-    }
-
-    function showConnectMessage(text, type) {
-      const msgEl = document.getElementById('connectMessage');
-      if (!msgEl) return;
-
-      msgEl.textContent = text;
-      msgEl.className = 'connect-status-msg';
-
-      if (type === 'success') {
-        msgEl.classList.add('success');
-      }
-
-      if (type === 'error') {
-        msgEl.classList.add('error');
-      }
-    }
-
-    function bindEvents() {
-      const tg = window.Telegram?.WebApp;
-      const tokenInput = document.getElementById('botToken');
-      const connectBtn = document.getElementById('connectButton');
-
-      try {
-        tg?.ready?.();
-      } catch (e) {}
-
-      tokenInput?.addEventListener('input', updateButtonState);
-      updateButtonState();
-
-      connectBtn?.addEventListener('click', () => {
-        const token = tokenInput?.value?.trim() || '';
-        if (!token) return;
-
-        showConnectMessage('Проверяем токен...', 'success');
-
-        try {
-          tg?.HapticFeedback?.impactOccurred?.('medium');
-        } catch (e) {}
-
-        window.parent?.postMessage?.(
-          {
-            type: 'agent-connect-request',
-            payload: {
-              channel: 'telegram',
-              botToken: token
-            }
-          },
-          '*'
-        );
-      });
+    function saveConnectSettings() {
+      const token = document.getElementById('botToken')?.value?.trim() || '';
+      const webhook = document.getElementById('botWebhook')?.value?.trim() || '';
+      window.parent?.postMessage?.({ type: 'agent-connect-save', token, webhook }, '*');
+      showStatus('Настройки подключения отправлены на сохранение...');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      applyRuntimeState();
-      bindEvents();
+      try { window.Telegram?.WebApp?.ready?.(); } catch (e) {}
+      applyConnectState();
+      document.getElementById('saveConnectButton')?.addEventListener('click', saveConnectSettings);
     });
   </script>
 </body>
