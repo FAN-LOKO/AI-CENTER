@@ -809,3 +809,14 @@ textarea.form-input,
     font-size: 14px;
   }
 }
+
+@media (max-width: 640px) {
+  .module-page-content {
+    padding: 14px 0 20px;
+  }
+
+  .agent-tabs + .module-page-content,
+  .module-tabs + .module-page-content {
+    padding-top: 14px;
+  }
+}
