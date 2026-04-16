@@ -7,214 +7,49 @@
   <link rel="stylesheet" href="../css/styles.css" />
   <link rel="stylesheet" href="../css/modules.css" />
 </head>
-<body>
+<body class="module-body">
   <div class="page page-my-agent">
-    <!-- Внутренняя навигация модуля Агента -->
     <div class="module-tabs agent-tabs">
-      <button
-        class="module-tab module-tab--third"
-        type="button"
-        onclick="navigateAgent('modules-agent/profile.html')"
-      >
-        Профиль
-      </button>
-      <button
-        class="module-tab module-tab--third"
-        type="button"
-        onclick="navigateAgent('modules-agent/connect.html')"
-      >
-        Подключение
-      </button>
-      <button
-        class="module-tab module-tab--third module-tab--active"
-        type="button"
-        onclick="navigateAgent('modules-agent/links.html')"
-      >
-        Ссылки
-      </button>
-      <button
-        class="module-tab module-tab--half"
-        type="button"
-        onclick="navigateAgent('modules-agent/stats.html')"
-      >
-        Статистика
-      </button>
-      <button
-        class="module-tab module-tab--half"
-        type="button"
-        onclick="navigateAgent('modules-agent/dialogs.html')"
-      >
-        Диалоги
-      </button>
+      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/profile.html')">Профиль</button>
+      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/connect.html')">Подключение</button>
+      <button class="module-tab module-tab--third module-tab--active" type="button" onclick="navigateAgent('modules-agent/links.html')">Ссылки</button>
+      <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/stats.html')">Статистика</button>
+      <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/dialogs.html')">Диалоги</button>
     </div>
 
     <div class="app-content">
-      <!-- Карточка 1: Партнёрские ссылки -->
-      <section class="card-section accordion-card">
-        <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
-          <span class="card-section-title">Партнёрские ссылки</span>
-          <span class="accordion-icon">▼</span>
+      <section class="card-section">
+        <div class="card-section-header">
+          <h2 class="card-section-title">Ссылки агента</h2>
+          <p class="card-section-subtitle">Генерация и просмотр реферальных ссылок</p>
         </div>
-
-        <div class="card-section-body accordion-body open">
-          <p class="card-section-subtitle">
-            Введите реферальные ссылки в компании PM International.
-          </p>
-
+        <div class="card-section-body module-stack">
           <div class="form-group">
-            <label class="form-label" for="pmPartnerLink">
-              Ваша партнёрская ссылка<br />
-              <span class="profile-label">
-                вида https://www.pmebusiness.com/registrationv2?TP=XXXXXXXX
-              </span>
-            </label>
-            <input
-              type="url"
-              id="pmPartnerLink"
-              class="form-input"
-              placeholder="https://www.pmebusiness.com/registrationv2?TP=XXXXXXXX"
-              autocomplete="off"
-            />
+            <label class="form-label" for="linkType">Тип ссылки</label>
+            <select id="linkType" class="form-input">
+              <option value="client">Клиентская ссылка</option>
+              <option value="partner">Партнерская ссылка</option>
+            </select>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="pmClientLink">
-              Ваша клиентская ссылка<br />
-              <span class="profile-label">
-                вида https://www.fitline.com/?sponsor=XXXXXXXX
-              </span>
-            </label>
-            <input
-              type="url"
-              id="pmClientLink"
-              class="form-input"
-              placeholder="https://www.fitline.com/?sponsor=XXXXXXXX"
-              autocomplete="off"
-            />
-          </div>
+          <button class="btn" type="button" id="generateLinkButton">Сгенерировать ссылку</button>
+          <p id="linksStatusMessage" class="connect-status-msg"></p>
 
-          <div class="module-notice module-notice--warning">
-            Сохранение и использование партнёрских ссылок должно выполняться через общую конфигурацию приложения и backend, а не через локальное хранилище страницы.
+          <div id="generatedLinksList" class="module-stack">
+            <div class="module-notice">Ссылки пока не сгенерированы.</div>
           </div>
-
-          <button class="btn btn-block" id="savePmLinksButton" type="button">
-            Сохранить партнёрские ссылки
-          </button>
         </div>
       </section>
-
-      <!-- Карточка 2: Ваши соцсети -->
-      <section class="card-section accordion-card">
-        <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
-          <span class="card-section-title">Ваши соцсети</span>
-          <span class="accordion-icon">▼</span>
-        </div>
-
-        <div class="card-section-body accordion-body open">
-          <p class="card-section-subtitle">
-            Введите ссылки на соцсети и мессенджеры. Все поля опциональные.
-          </p>
-
-          <div class="form-group">
-            <label class="form-label" for="telegramLink">Telegram</label>
-            <input
-              type="url"
-              id="telegramLink"
-              class="form-input"
-              placeholder="https://t.me/username"
-              autocomplete="off"
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="whatsappLink">WhatsApp</label>
-            <input
-              type="url"
-              id="whatsappLink"
-              class="form-input"
-              placeholder="https://wa.me/..."
-              autocomplete="off"
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="instagramLink">Instagram</label>
-            <input
-              type="url"
-              id="instagramLink"
-              class="form-input"
-              placeholder="https://instagram.com/..."
-              autocomplete="off"
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="vkLink">VKontakte</label>
-            <input
-              type="url"
-              id="vkLink"
-              class="form-input"
-              placeholder="https://vk.com/..."
-              autocomplete="off"
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="youtubeLink">YouTube</label>
-            <input
-              type="url"
-              id="youtubeLink"
-              class="form-input"
-              placeholder="https://youtube.com/@..."
-              autocomplete="off"
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="tiktokLink">TikTok</label>
-            <input
-              type="url"
-              id="tiktokLink"
-              class="form-input"
-              placeholder="https://tiktok.com/@..."
-              autocomplete="off"
-            />
-          </div>
-
-          <button class="btn btn-block" id="saveSocialLinksButton" type="button">
-            Сохранить соцсети
-          </button>
-        </div>
-      </section>
-
-      <!-- Общий блок статуса сохранения -->
-      <p id="saveLinksMessage" class="connect-status-msg"></p>
     </div>
   </div>
 
   <script>
     function navigateAgent(page) {
       try {
-        window.parent?.postMessage?.(
-          {
-            type: 'navigate',
-            page,
-            tab: 'modules'
-          },
-          '*'
-        );
+        window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*');
       } catch (e) {
         console.error(e);
       }
-    }
-
-    function toggleAccordion(headerEl) {
-      const body = headerEl.nextElementSibling;
-      if (!body) return;
-
-      const isOpen = body.classList.contains('open');
-      body.classList.toggle('open', !isOpen);
-      headerEl.classList.toggle('open', !isOpen);
     }
 
     function getAgentLinksState() {
@@ -226,127 +61,66 @@
       }
     }
 
-    function applyInitialLinks() {
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function showStatus(message, isError = false) {
+      const el = document.getElementById('linksStatusMessage');
+      if (!el) return;
+      el.textContent = message || '';
+      el.classList.remove('success', 'error');
+      if (message) el.classList.add(isError ? 'error' : 'success');
+    }
+
+    function renderLinks(items) {
+      const listEl = document.getElementById('generatedLinksList');
+      if (!listEl) return;
+
+      if (!Array.isArray(items) || items.length === 0) {
+        listEl.innerHTML = '<div class="module-notice">Ссылки пока не сгенерированы.</div>';
+        return;
+      }
+
+      listEl.innerHTML = items.map((item) => `
+        <div class="form-group">
+          <div class="profile-row"><span class="profile-label">Тип</span><span class="profile-value">${escapeHtml(item.type || '—')}</span></div>
+          <div class="profile-row"><span class="profile-label">Ссылка</span><span class="profile-value"><a class="link-primary" href="${escapeHtml(item.url || '#')}" target="_blank" rel="noopener noreferrer">Открыть</a></span></div>
+          <div class="profile-row"><span class="profile-label">Дата</span><span class="profile-value">${escapeHtml(item.createdAt || '—')}</span></div>
+        </div>
+      `).join('');
+    }
+
+    function applyLinksState() {
       const state = getAgentLinksState() || {};
-
-      const pmPartnerInput = document.getElementById('pmPartnerLink');
-      const pmClientInput = document.getElementById('pmClientLink');
-
-      const socialFields = {
-        telegramLink: document.getElementById('telegramLink'),
-        whatsappLink: document.getElementById('whatsappLink'),
-        instagramLink: document.getElementById('instagramLink'),
-        vkLink: document.getElementById('vkLink'),
-        youtubeLink: document.getElementById('youtubeLink'),
-        tiktokLink: document.getElementById('tiktokLink')
-      };
-
-      const pmLinks = state.pmLinks || {};
-      const socialLinks = state.socialLinks || {};
-
-      if (pmPartnerInput && pmLinks.pmPartnerLink) {
-        pmPartnerInput.value = pmLinks.pmPartnerLink;
-      }
-      if (pmClientInput && pmLinks.pmClientLink) {
-        pmClientInput.value = pmLinks.pmClientLink;
-      }
-
-      Object.keys(socialFields).forEach((key) => {
-        const el = socialFields[key];
-        if (el && socialLinks[key]) {
-          el.value = socialLinks[key];
-        }
-      });
+      const typeEl = document.getElementById('linkType');
+      if (typeEl && state.defaultType) typeEl.value = state.defaultType;
+      renderLinks(state.items || []);
     }
 
-    function showMessage(text, type) {
-      const msgEl = document.getElementById('saveLinksMessage');
-      if (!msgEl) return;
-
-      msgEl.textContent = text;
-      msgEl.className = 'connect-status-msg';
-
-      if (type === 'success') {
-        msgEl.classList.add('success');
-      }
-      if (type === 'error') {
-        msgEl.classList.add('error');
-      }
+    function generateLink() {
+      const type = document.getElementById('linkType')?.value || 'client';
+      window.parent?.postMessage?.({ type: 'agent-generate-link', linkType: type }, '*');
+      showStatus('Запрос на генерацию ссылки отправлен...');
     }
 
-    function bindEvents() {
-      const tg = window.Telegram?.WebApp;
-      try {
-        tg?.ready?.();
-      } catch (e) {}
-
-      const pmPartnerInput = document.getElementById('pmPartnerLink');
-      const pmClientInput = document.getElementById('pmClientLink');
-      const savePmBtn = document.getElementById('savePmLinksButton');
-
-      const socialFields = {
-        telegramLink: document.getElementById('telegramLink'),
-        whatsappLink: document.getElementById('whatsappLink'),
-        instagramLink: document.getElementById('instagramLink'),
-        vkLink: document.getElementById('vkLink'),
-        youtubeLink: document.getElementById('youtubeLink'),
-        tiktokLink: document.getElementById('tiktokLink')
-      };
-      const saveSocialBtn = document.getElementById('saveSocialLinksButton');
-
-      savePmBtn?.addEventListener('click', () => {
-        const partner = (pmPartnerInput?.value || '').trim();
-        const client = (pmClientInput?.value || '').trim();
-
-        if (!partner || !client) {
-          showMessage('Введите обе ссылки: партнёрскую и клиентскую.', 'error');
-          return;
-        }
-
-        const data = {
-          pmPartnerLink: partner,
-          pmClientLink: client
-        };
-
-        window.parent?.postMessage?.(
-          {
-            type: 'agent-pm-links-updated',
-            links: data
-          },
-          '*'
-        );
-
-        showMessage('Партнёрские ссылки отправлены в shell.', 'success');
-        try {
-          tg?.HapticFeedback?.notificationOccurred?.('success');
-        } catch (e) {}
-      });
-
-      saveSocialBtn?.addEventListener('click', () => {
-        const data = {};
-
-        Object.keys(socialFields).forEach((key) => {
-          data[key] = (socialFields[key]?.value || '').trim();
-        });
-
-        window.parent?.postMessage?.(
-          {
-            type: 'agent-social-links-updated',
-            links: data
-          },
-          '*'
-        );
-
-        showMessage('Ссылки на соцсети отправлены в shell.', 'success');
-        try {
-          tg?.HapticFeedback?.notificationOccurred?.('success');
-        } catch (e) {}
-      });
-    }
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+      if (data.type === 'agent-links-update') {
+        renderLinks(data.items || []);
+      }
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
-      applyInitialLinks();
-      bindEvents();
+      try { window.Telegram?.WebApp?.ready?.(); } catch (e) {}
+      applyLinksState();
+      document.getElementById('generateLinkButton')?.addEventListener('click', generateLink);
     });
   </script>
 </body>
