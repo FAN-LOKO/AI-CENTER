@@ -7,68 +7,28 @@
   <link rel="stylesheet" href="../css/styles.css" />
   <link rel="stylesheet" href="../css/modules.css" />
 </head>
-<body>
+<body class="module-body">
   <div class="page page-my-agent">
-    <!-- Внутренняя навигация модуля Агента -->
     <div class="module-tabs agent-tabs">
-      <button
-        class="module-tab module-tab--third"
-        type="button"
-        onclick="navigateAgent('modules-agent/profile.html')"
-      >
-        Профиль
-      </button>
-      <button
-        class="module-tab module-tab--third"
-        type="button"
-        onclick="navigateAgent('modules-agent/connect.html')"
-      >
-        Подключение
-      </button>
-      <button
-        class="module-tab module-tab--third"
-        type="button"
-        onclick="navigateAgent('modules-agent/links.html')"
-      >
-        Ссылки
-      </button>
-      <button
-        class="module-tab module-tab--half"
-        type="button"
-        onclick="navigateAgent('modules-agent/stats.html')"
-      >
-        Статистика
-      </button>
-      <button
-        class="module-tab module-tab--half module-tab--active"
-        type="button"
-      >
-        Диалоги
-      </button>
+      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/profile.html')">Профиль</button>
+      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/connect.html')">Подключение</button>
+      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/links.html')">Ссылки</button>
+      <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/stats.html')">Статистика</button>
+      <button class="module-tab module-tab--half module-tab--active" type="button">Диалоги</button>
     </div>
 
     <div class="app-content">
-      <!-- Шапка выбранного диалога -->
       <section class="card-section">
         <div class="card-section-header">
           <h2 class="card-section-title" id="dialogTitle">Диалог с клиентом</h2>
-          <p class="card-section-subtitle" id="dialogSubtitle">
-            Клиент: @username • Канал: Telegram
-          </p>
+          <p class="card-section-subtitle" id="dialogSubtitle">Клиент: @username • Канал: Telegram</p>
         </div>
         <div class="card-section-body">
-          <div class="profile-row">
-            <span class="profile-label">ID диалога</span>
-            <span class="profile-value" id="dialogIdLabel">—</span>
-          </div>
-          <div class="profile-row">
-            <span class="profile-label">Статус</span>
-            <span class="profile-value" id="dialogStatusLabel">Активен</span>
-          </div>
+          <div class="profile-row"><span class="profile-label">ID диалога</span><span class="profile-value" id="dialogIdLabel">—</span></div>
+          <div class="profile-row"><span class="profile-label">Статус</span><span class="profile-value" id="dialogStatusLabel">Активен</span></div>
         </div>
       </section>
 
-      <!-- История сообщений -->
       <section class="card-section module-workspace-card">
         <div class="card-section-header">
           <h2 class="card-section-title">История сообщений</h2>
@@ -77,81 +37,36 @@
         <div class="card-section-body">
           <div id="messagesContainer" class="chat-messages">
             <div class="chat-message chat-message-client">
-              <div class="chat-message-meta">
-                <span class="chat-author">@user1</span>
-                <span class="chat-time">10:40</span>
-              </div>
-              <div class="chat-bubble">
-                Здравствуйте! Расскажите подробнее про продукт.
-              </div>
+              <div class="chat-message-meta"><span class="chat-author">@user1</span><span class="chat-time">10:40</span></div>
+              <div class="chat-bubble">Здравствуйте! Расскажите подробнее про продукт.</div>
             </div>
-
             <div class="chat-message chat-message-agent">
-              <div class="chat-message-meta">
-                <span class="chat-author">Агент</span>
-                <span class="chat-time">10:41</span>
-              </div>
-              <div class="chat-bubble">
-                Добрый день! Сейчас всё расскажу и подберу для вас программу.
-              </div>
+              <div class="chat-message-meta"><span class="chat-author">Агент</span><span class="chat-time">10:41</span></div>
+              <div class="chat-bubble">Добрый день! Сейчас всё расскажу и подберу для вас программу.</div>
             </div>
-
             <div class="chat-message chat-message-client">
-              <div class="chat-message-meta">
-                <span class="chat-author">@user1</span>
-                <span class="chat-time">10:42</span>
-              </div>
-              <div class="chat-bubble">
-                Спасибо за инфо!
-              </div>
+              <div class="chat-message-meta"><span class="chat-author">@user1</span><span class="chat-time">10:42</span></div>
+              <div class="chat-bubble">Спасибо за инфо!</div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Ответ клиенту -->
       <section class="card-section module-workspace-card">
         <div class="card-section-header">
           <h2 class="card-section-title">Ответ клиенту</h2>
           <p class="card-section-subtitle">Текстовые и голосовые ответы в активный диалог</p>
         </div>
         <div class="card-section-body">
-          <textarea
-            id="clientMessageInput"
-            class="chat-input"
-            rows="2"
-            placeholder="Напишите сообщение клиенту..."
-          ></textarea>
-
+          <textarea id="clientMessageInput" class="chat-input" rows="2" placeholder="Напишите сообщение клиенту..."></textarea>
           <div class="chat-input-actions-row">
-            <button
-              class="btn btn-send"
-              type="button"
-              id="clientSendMessageButton"
-            >
-              Отправить
-            </button>
-
-            <button
-              id="clientVoiceButton"
-              class="btn btn-icon"
-              type="button"
-              aria-label="Записать голосовое сообщение"
-            >
-              <svg
-                class="icon-mic"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 1 1 2 0 7 7 0 0 1-6 6.92V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.08A7 7 0 0 1 5 11a1 1 0 1 1 2 0 5 5 0 0 0 10 0z"
-                />
+            <button class="btn btn-send" type="button" id="clientSendMessageButton">Отправить</button>
+            <button id="clientVoiceButton" class="btn btn-icon" type="button" aria-label="Записать голосовое сообщение">
+              <svg class="icon-mic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 1 1 2 0 7 7 0 0 1-6 6.92V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.08A7 7 0 0 1 5 11a1 1 0 1 1 2 0 5 5 0 0 0 10 0z" />
               </svg>
             </button>
           </div>
-
           <p id="clientSendMessageStatus" class="connect-status-msg"></p>
         </div>
       </section>
@@ -160,105 +75,70 @@
 
   <script>
     function navigateAgent(page) {
-      try {
-        window.parent?.postMessage?.(
-          {
-            type: "navigate",
-            page,
-            tab: "modules"
-          },
-          "*"
-        );
-      } catch (e) {
-        console.error(e);
-      }
+      try { window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*'); } catch (e) { console.error(e); }
     }
 
     function getAgentDialogState() {
-      try {
-        return window.parent?.AICAppShell?.getCurrentAgentDialog?.() || null;
-      } catch (error) {
-        console.error("[AI CENTER][Agent Dialogs] current dialog read failed", error);
+      try { return window.parent?.AICAppShell?.getCurrentAgentDialog?.() || null; }
+      catch (error) {
+        console.error('[AI CENTER][Agent Dialogs] current dialog read failed', error);
         return null;
       }
     }
 
     function applyDialogMeta(meta = {}) {
-      const dialogIdLabel = document.getElementById("dialogIdLabel");
-      const dialogStatusLabel = document.getElementById("dialogStatusLabel");
-      const dialogTitle = document.getElementById("dialogTitle");
-      const dialogSubtitle = document.getElementById("dialogSubtitle");
-
-      if (dialogTitle) {
-        dialogTitle.textContent = meta.title || "Диалог с клиентом";
-      }
-
-      if (dialogSubtitle) {
-        dialogSubtitle.textContent =
-          meta.subtitle || "Клиент: @username • Канал: Telegram";
-      }
-
-      if (dialogIdLabel) {
-        dialogIdLabel.textContent = meta.dialogId || "—";
-      }
-
-      if (dialogStatusLabel) {
-        dialogStatusLabel.textContent = meta.status || "Активен";
-      }
+      const dialogIdLabel = document.getElementById('dialogIdLabel');
+      const dialogStatusLabel = document.getElementById('dialogStatusLabel');
+      const dialogTitle = document.getElementById('dialogTitle');
+      const dialogSubtitle = document.getElementById('dialogSubtitle');
+      if (dialogTitle) dialogTitle.textContent = meta.title || 'Диалог с клиентом';
+      if (dialogSubtitle) dialogSubtitle.textContent = meta.subtitle || 'Клиент: @username • Канал: Telegram';
+      if (dialogIdLabel) dialogIdLabel.textContent = meta.dialogId || '—';
+      if (dialogStatusLabel) dialogStatusLabel.textContent = meta.status || 'Активен';
     }
 
     function clearMessages() {
-      const container = document.getElementById("messagesContainer");
+      const container = document.getElementById('messagesContainer');
       if (!container) return;
-      container.innerHTML = "";
+      container.innerHTML = '';
     }
 
     function appendMessage(msg) {
       try {
-        const container = document.getElementById("messagesContainer");
+        const container = document.getElementById('messagesContainer');
         if (!container || !msg) return;
+        const wrapper = document.createElement('div');
+        const from = msg.from === 'agent' ? 'agent' : 'client';
+        wrapper.className = 'chat-message chat-message-' + from;
 
-        const wrapper = document.createElement("div");
-        const from = msg.from === "agent" ? "agent" : "client";
-        wrapper.className = "chat-message chat-message-" + from;
+        const meta = document.createElement('div');
+        meta.className = 'chat-message-meta';
 
-        const meta = document.createElement("div");
-        meta.className = "chat-message-meta";
+        const authorSpan = document.createElement('span');
+        authorSpan.className = 'chat-author';
+        authorSpan.textContent = typeof msg.author === 'string' && msg.author.trim() ? msg.author : (from === 'agent' ? 'Агент' : 'Клиент');
 
-        const authorSpan = document.createElement("span");
-        authorSpan.className = "chat-author";
-        authorSpan.textContent =
-          typeof msg.author === "string" && msg.author.trim()
-            ? msg.author
-            : from === "agent"
-              ? "Агент"
-              : "Клиент";
-
-        const timeSpan = document.createElement("span");
-        timeSpan.className = "chat-time";
-        timeSpan.textContent = msg.time || "";
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'chat-time';
+        timeSpan.textContent = msg.time || '';
 
         meta.appendChild(authorSpan);
         meta.appendChild(timeSpan);
 
-        const bubble = document.createElement("div");
-        bubble.className = "chat-bubble";
-        bubble.textContent = msg.text || "";
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble';
+        bubble.textContent = msg.text || '';
 
         wrapper.appendChild(meta);
         wrapper.appendChild(bubble);
-
         container.appendChild(wrapper);
         container.scrollTop = container.scrollHeight;
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) { console.error(e); }
     }
 
     function applyInitialDialogState() {
       const state = getAgentDialogState() || {};
       applyDialogMeta(state.meta || state);
-
       const messages = Array.isArray(state.messages) ? state.messages : null;
       if (messages && messages.length) {
         clearMessages();
@@ -267,61 +147,39 @@
     }
 
     function showClientStatus(message) {
-      const statusEl = document.getElementById("clientSendMessageStatus");
+      const statusEl = document.getElementById('clientSendMessageStatus');
       if (!statusEl) return;
       statusEl.textContent = message;
-      statusEl.classList.remove("error");
-      statusEl.classList.add("success");
+      statusEl.classList.remove('error');
+      statusEl.classList.add('success');
     }
 
     function showClientError(message) {
-      const statusEl = document.getElementById("clientSendMessageStatus");
-      if (!statusEl) {
-        alert(message);
-        return;
-      }
+      const statusEl = document.getElementById('clientSendMessageStatus');
+      if (!statusEl) { alert(message); return; }
       statusEl.textContent = message;
-      statusEl.classList.remove("success");
-      statusEl.classList.add("error");
+      statusEl.classList.remove('success');
+      statusEl.classList.add('error');
     }
 
     function sendClientTextMessage() {
-      const input = document.getElementById("clientMessageInput");
+      const input = document.getElementById('clientMessageInput');
       if (!input) return;
-
-      const text = (input.value || "").trim();
+      const text = (input.value || '').trim();
       if (!text) return;
 
       appendMessage({
-        from: "agent",
-        author: "Вы",
-        time: new Date().toLocaleTimeString("ru-RU", {
-          hour: "2-digit",
-          minute: "2-digit"
-        }),
+        from: 'agent',
+        author: 'Вы',
+        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
         text
       });
 
-      input.value = "";
-      showClientStatus("Сообщение отправлено клиенту...");
+      input.value = '';
+      showClientStatus('Сообщение отправлено клиенту...');
 
-      try {
-        window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.("medium");
-      } catch (e) {
-        console.error(e);
-      }
-
-      try {
-        window.parent?.postMessage?.(
-          {
-            type: "client-send-message",
-            text
-          },
-          "*"
-        );
-      } catch (e) {
-        console.error(e);
-      }
+      try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium'); } catch (e) { console.error(e); }
+      try { window.parent?.postMessage?.({ type: 'client-send-message', text }, '*'); } catch (e) { console.error(e); }
     }
 
     let mediaRecorder = null;
@@ -330,85 +188,49 @@
     let isRecording = false;
 
     function getSupportedMimeType() {
-      const candidates = [
-        "audio/webm;codecs=opus",
-        "audio/webm",
-        "audio/mp4",
-        "audio/m4a",
-        "audio/aac",
-        "audio/ogg",
-        "audio/wav"
-      ];
-
-      if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) {
-        return "";
-      }
-
+      const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/m4a', 'audio/aac', 'audio/ogg', 'audio/wav'];
+      if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return '';
       for (const type of candidates) {
-        try {
-          if (MediaRecorder.isTypeSupported(type)) {
-            return type;
-          }
-        } catch (e) {}
+        try { if (MediaRecorder.isTypeSupported(type)) return type; } catch (e) {}
       }
-
-      return "";
+      return '';
     }
 
     async function startVoiceRecording() {
       if (!navigator.mediaDevices?.getUserMedia) {
-        showClientError("Запись голоса не поддерживается на этом устройстве/в этом браузере.");
+        showClientError('Запись голоса не поддерживается на этом устройстве/в этом браузере.');
         return;
       }
-
       try {
         mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         recordedChunks = [];
-
         const mimeType = getSupportedMimeType();
         const options = mimeType ? { mimeType } : undefined;
         mediaRecorder = new MediaRecorder(mediaStream, options);
 
-        mediaRecorder.addEventListener("dataavailable", (event) => {
-          if (event.data.size > 0) {
-            recordedChunks.push(event.data);
-          }
+        mediaRecorder.addEventListener('dataavailable', (event) => {
+          if (event.data.size > 0) recordedChunks.push(event.data);
         });
 
-        mediaRecorder.addEventListener("stop", () => {
-          const blobType = mimeType || "audio/webm";
+        mediaRecorder.addEventListener('stop', () => {
+          const blobType = mimeType || 'audio/webm';
           const blob = new Blob(recordedChunks, { type: blobType });
 
           appendMessage({
-            from: "agent",
-            author: "Вы (голосовое)",
-            time: new Date().toLocaleTimeString("ru-RU", {
-              hour: "2-digit",
-              minute: "2-digit"
-            }),
-            text: "Голосовое сообщение"
+            from: 'agent',
+            author: 'Вы (голосовое)',
+            time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+            text: 'Голосовое сообщение'
           });
 
           const reader = new FileReader();
           reader.onloadend = () => {
             const base64Audio = reader.result;
-
             try {
-              window.parent?.postMessage?.(
-                {
-                  type: "client-send-voice",
-                  audio: base64Audio,
-                  mimeType: blob.type || blobType
-                },
-                "*"
-              );
-            } catch (e) {
-              console.error(e);
-            }
-
-            showClientStatus("Голосовое отправлено клиенту...");
+              window.parent?.postMessage?.({ type: 'client-send-voice', audio: base64Audio, mimeType: blob.type || blobType }, '*');
+            } catch (e) { console.error(e); }
+            showClientStatus('Голосовое отправлено клиенту...');
           };
-
           reader.readAsDataURL(blob);
 
           if (mediaStream) {
@@ -419,79 +241,48 @@
 
         mediaRecorder.start();
         isRecording = true;
-
-        const voiceBtn = document.getElementById("clientVoiceButton");
-        if (voiceBtn) {
-          voiceBtn.classList.add("recording");
-        }
-
-        try {
-          window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.("medium");
-        } catch (e) {
-          console.error(e);
-        }
-
-        showClientStatus("Идёт запись голосового...");
+        document.getElementById('clientVoiceButton')?.classList.add('recording');
+        try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium'); } catch (e) { console.error(e); }
+        showClientStatus('Идёт запись голосового...');
       } catch (err) {
         console.error(err);
-        showClientError("Не удалось получить доступ к микрофону. Проверьте разрешения в Telegram/браузере.");
+        showClientError('Не удалось получить доступ к микрофону. Проверьте разрешения в Telegram/браузере.');
       }
     }
 
     function stopVoiceRecording() {
       if (!mediaRecorder || !isRecording) return;
-
       mediaRecorder.stop();
       isRecording = false;
-
-      const voiceBtn = document.getElementById("clientVoiceButton");
-      if (voiceBtn) {
-        voiceBtn.classList.remove("recording");
-      }
-
-      showClientStatus("Обработка голосового сообщения...");
+      document.getElementById('clientVoiceButton')?.classList.remove('recording');
+      showClientStatus('Обработка голосового сообщения...');
     }
 
-    window.addEventListener("message", (event) => {
+    window.addEventListener('message', (event) => {
       try {
         const data = event.data;
-        if (!data || typeof data !== "object") return;
-
-        if (data.type === "agent-dialog-meta") {
-          applyDialogMeta(data);
-        }
-
-        if (data.type === "agent-dialog-new-message" && data.message) {
-          appendMessage(data.message);
-        }
-
-        if (data.type === "agent-dialog-history" && Array.isArray(data.messages)) {
+        if (!data || typeof data !== 'object') return;
+        if (data.type === 'agent-dialog-meta') applyDialogMeta(data);
+        if (data.type === 'agent-dialog-new-message' && data.message) appendMessage(data.message);
+        if (data.type === 'agent-dialog-history' && Array.isArray(data.messages)) {
           clearMessages();
           data.messages.forEach(appendMessage);
         }
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) { console.error(e); }
     });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      try {
-        window.Telegram?.WebApp?.ready?.();
-      } catch (e) {}
-
+    document.addEventListener('DOMContentLoaded', () => {
+      try { window.Telegram?.WebApp?.ready?.(); } catch (e) {}
       applyInitialDialogState();
 
-      const input = document.getElementById("clientMessageInput");
-      const sendBtn = document.getElementById("clientSendMessageButton");
-      const voiceBtn = document.getElementById("clientVoiceButton");
+      const input = document.getElementById('clientMessageInput');
+      const sendBtn = document.getElementById('clientSendMessageButton');
+      const voiceBtn = document.getElementById('clientVoiceButton');
 
-      if (sendBtn) {
-        sendBtn.addEventListener("click", sendClientTextMessage);
-      }
-
+      if (sendBtn) sendBtn.addEventListener('click', sendClientTextMessage);
       if (input) {
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendClientTextMessage();
           }
@@ -499,24 +290,16 @@
       }
 
       if (voiceBtn) {
-        const startEvents = ["mousedown", "touchstart"];
-        const stopEvents = ["mouseup", "mouseleave", "touchend", "touchcancel"];
-
-        startEvents.forEach((ev) => {
+        ['mousedown', 'touchstart'].forEach((ev) => {
           voiceBtn.addEventListener(ev, (e) => {
             e.stopPropagation();
-            if (!isRecording) {
-              startVoiceRecording();
-            }
+            if (!isRecording) startVoiceRecording();
           });
         });
-
-        stopEvents.forEach((ev) => {
+        ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach((ev) => {
           voiceBtn.addEventListener(ev, (e) => {
             e.stopPropagation();
-            if (isRecording) {
-              stopVoiceRecording();
-            }
+            if (isRecording) stopVoiceRecording();
           });
         });
       }
