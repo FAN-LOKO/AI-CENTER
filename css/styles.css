@@ -2108,3 +2108,14 @@ body {
     text-align: left;
   }
 }
+
+/* ===== MODULE PAGE BACKGROUND FIX ===== */
+
+body.module-body {
+  background: #eef2f7;
+}
+
+body.module-body .page,
+body.module-body .module-page-content {
+  background: transparent;
+}
