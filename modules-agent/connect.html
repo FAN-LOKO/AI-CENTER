@@ -17,25 +17,116 @@
       <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/dialogs.html')">Диалоги</button>
     </div>
 
-    <div class="module-page-content">
+    <div class="module-page-content module-connect-page">
       <section class="card-section">
         <div class="card-section-header">
           <h2 class="card-section-title">Подключение агента</h2>
-          <p class="card-section-subtitle">Настройка Telegram-бота и статуса подключения</p>
+          <p class="card-section-subtitle">Управляйте подключением агента к каналам</p>
         </div>
-        <div class="card-section-body module-stack">
-          <div class="form-group">
-            <label class="form-label" for="botToken">Токен бота</label>
-            <input id="botToken" class="form-input" type="text" placeholder="Введите токен Telegram-бота" />
+        <div class="card-section-body">
+          <div class="module-summary">
+            <div class="module-summary-row">
+              <div class="module-summary-label">Статус в Telegram</div>
+              <div class="module-summary-value">
+                <span class="status-badge status-badge--danger" id="telegramStatus">Не подключен</span>
+              </div>
+            </div>
+
+            <div class="module-summary-row">
+              <div class="module-summary-label">Статус TikTok</div>
+              <div class="module-summary-value">
+                <span class="status-badge status-badge--neutral" id="tiktokStatus">Не подключен</span>
+              </div>
+            </div>
+
+            <div class="module-summary-row">
+              <div class="module-summary-label">Статус Instagram</div>
+              <div class="module-summary-value">
+                <span class="status-badge status-badge--neutral" id="instagramStatus">Не подключен</span>
+              </div>
+            </div>
+
+            <div class="module-summary-row">
+              <div class="module-summary-label">Статус ВКонтакте</div>
+              <div class="module-summary-value">
+                <span class="status-badge status-badge--neutral" id="vkStatus">Не подключен</span>
+              </div>
+            </div>
+
+            <div class="module-summary-row">
+              <div class="module-summary-label">Статус WhatsApp</div>
+              <div class="module-summary-value">
+                <span class="status-badge status-badge--neutral" id="whatsappStatus">Не подключен</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card-section">
+        <div class="card-section-header">
+          <h2 class="card-section-title">Telegram</h2>
+          <p class="card-section-subtitle">Подключите Telegram-бота через API Token</p>
+        </div>
+        <div class="card-section-body">
+          <div class="connect-instructions-list">
+            <div class="connect-instruction-step">
+              <div class="connect-instruction-title">Как получить токен</div>
+              <ul class="connect-instruction-points">
+                <li>Откройте @BotFather в Telegram.</li>
+                <li>Отправьте команду <strong>/mybots</strong> или <strong>/newbot</strong>, если создаёте нового.</li>
+                <li>Выберите вашего бота из списка.</li>
+                <li>Нажмите «API Token».</li>
+                <li>Скопируйте токен и вставьте его в поле ниже.</li>
+              </ul>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="botWebhook">Webhook URL</label>
-            <input id="botWebhook" class="form-input" type="text" placeholder="https://..." />
+          <div class="connect-form-block">
+            <label for="telegramBotToken" class="connect-field-label">Введите токен</label>
+            <input
+              id="telegramBotToken"
+              class="connect-token-input"
+              type="text"
+              inputmode="text"
+              autocomplete="off"
+              placeholder="API Token вашего бота"
+            />
+            <button type="button" class="btn connect-submit-btn" id="telegramConnectBtn">
+              Подключить
+            </button>
+            <p class="connect-form-note" id="telegramConnectNote" hidden></p>
           </div>
+        </div>
+      </section>
 
-          <button class="btn" type="button" id="saveConnectButton">Сохранить</button>
-          <p id="connectStatusMessage" class="connect-status-msg"></p>
+      <section class="card-section">
+        <div class="card-section-header">
+          <h2 class="card-section-title">Инструкции</h2>
+          <p class="card-section-subtitle">Откройте материалы по подключению Telegram-бота</p>
+        </div>
+        <div class="card-section-body">
+          <div class="connect-links-list">
+            <a
+              class="connect-link-card"
+              href="https://www.youtube.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="connect-link-title">Видео-инструкция</span>
+              <span class="connect-link-text">Открыть видео по подключению Telegram-бота</span>
+            </a>
+
+            <a
+              class="connect-link-card"
+              href="https://docs.google.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="connect-link-title">Текстовая инструкция</span>
+              <span class="connect-link-text">Открыть подробную текстовую инструкцию</span>
+            </a>
+          </div>
         </div>
       </section>
     </div>
@@ -50,42 +141,81 @@
       }
     }
 
-    function getAgentConnectState() {
+    function getAgentProfileState() {
       try {
-        return window.parent?.AICAppShell?.getAgentConnect?.() || null;
+        return window.parent?.AICAppShell?.getAgentProfile?.() || null;
       } catch (error) {
-        console.error('[AI CENTER][Agent Connect] connect state read failed', error);
+        console.error('[AI CENTER][Agent Connect] profile state read failed', error);
         return null;
       }
     }
 
-    function showStatus(message, isError = false) {
-      const el = document.getElementById('connectStatusMessage');
-      if (!el) return;
-      el.textContent = message || '';
-      el.classList.remove('success', 'error');
-      if (message) el.classList.add(isError ? 'error' : 'success');
+    function setBadgeState(element, connected, connectedText = 'Подключен', disconnectedText = 'Не подключен') {
+      if (!element) return;
+      element.textContent = connected ? connectedText : disconnectedText;
+      element.classList.remove(
+        'status-badge--success',
+        'status-badge--danger',
+        'status-badge--warning',
+        'status-badge--info',
+        'status-badge--neutral'
+      );
+      element.classList.add(connected ? 'status-badge--success' : 'status-badge--danger');
     }
 
     function applyConnectState() {
-      const state = getAgentConnectState() || {};
-      const tokenEl = document.getElementById('botToken');
-      const webhookEl = document.getElementById('botWebhook');
-      if (tokenEl && state.token) tokenEl.value = state.token;
-      if (webhookEl && state.webhook) webhookEl.value = state.webhook;
+      const state = getAgentProfileState() || {};
+
+      const telegramStatusEl = document.getElementById('telegramStatus');
+      setBadgeState(telegramStatusEl, Boolean(state.connected));
+
+      const tokenInput = document.getElementById('telegramBotToken');
+      if (tokenInput && state.token) {
+        tokenInput.value = state.token;
+      }
     }
 
-    function saveConnectSettings() {
-      const token = document.getElementById('botToken')?.value?.trim() || '';
-      const webhook = document.getElementById('botWebhook')?.value?.trim() || '';
-      window.parent?.postMessage?.({ type: 'agent-connect-save', token, webhook }, '*');
-      showStatus('Настройки подключения отправлены на сохранение...');
+    function bindConnectActions() {
+      const connectBtn = document.getElementById('telegramConnectBtn');
+      const tokenInput = document.getElementById('telegramBotToken');
+      const noteEl = document.getElementById('telegramConnectNote');
+      const telegramStatusEl = document.getElementById('telegramStatus');
+
+      if (!connectBtn || !tokenInput) return;
+
+      connectBtn.addEventListener('click', () => {
+        const token = tokenInput.value.trim();
+
+        if (!token) {
+          if (noteEl) {
+            noteEl.hidden = false;
+            noteEl.textContent = 'Введите API Token перед подключением.';
+          }
+          return;
+        }
+
+        try {
+          window.parent?.AICAppShell?.setAgentProfile?.({
+            token,
+            connected: true
+          });
+        } catch (error) {
+          console.error('[AI CENTER][Agent Connect] profile state write failed', error);
+        }
+
+        setBadgeState(telegramStatusEl, true);
+
+        if (noteEl) {
+          noteEl.hidden = false;
+          noteEl.textContent = 'Telegram-бот отмечен как подключенный.';
+        }
+      });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       try { window.Telegram?.WebApp?.ready?.(); } catch (e) {}
       applyConnectState();
-      document.getElementById('saveConnectButton')?.addEventListener('click', saveConnectSettings);
+      bindConnectActions();
     });
   </script>
 </body>
