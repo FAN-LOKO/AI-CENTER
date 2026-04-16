@@ -937,10 +937,11 @@ textarea.form-input,
 }
 
 .module-connect-page > .accordion-card > .accordion-body {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
   padding: 15px 16px 16px;
+}
+
+.module-connect-page > .accordion-card > .accordion-body > .accordion-card + .accordion-card {
+  margin-top: 15px;
 }
 
 .module-connect-page > .accordion-card > .accordion-body > .accordion-card {
