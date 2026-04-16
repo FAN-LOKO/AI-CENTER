@@ -2119,3 +2119,20 @@ body.module-body .page,
 body.module-body .module-page-content {
   background: transparent;
 }
+
+body.module-body {
+  background: #eef2f7;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body.module-body .page.page-my-agent {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #eef2f7;
+}
+
+body.module-body .module-page-content {
+  min-height: calc(100vh - 80px);
+  min-height: calc(100dvh - 80px);
+}
