@@ -482,19 +482,6 @@ a {
   color: var(--text-muted);
 }
 
-html {
-  background: transparent;
-}
-
-body.module-body {
-  margin: 0;
-  min-height: 100vh;
-  min-height: 100dvh;
-  font-size: 14px;
-  color: var(--text-body);
-  background: #eef2f7;
-}
-
 /* =========================================================
    8. BUTTONS
 ========================================================= */
@@ -2122,10 +2109,248 @@ body {
   }
 }
 
-.stats-layout,
-.stats-chart-card,
-.stats-chart-card svg,
-.stats-chart-card canvas,
-.stats-chart-card > div {
-  background: transparent !important;
+/* ===== STATS / MODULE PAGE LAYOUT ===== */
+
+html {
+  background: #eef2f7;
+}
+
+body.module-body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-size: 14px;
+  color: var(--text-body);
+  background: #eef2f7;
+}
+
+.page,
+.page.page-my-agent,
+.module-page-content {
+  background: #eef2f7;
+}
+
+.page.page-my-agent {
+  padding: 12px;
+}
+
+.module-page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ===== TABS ===== */
+
+.module-tabs.agent-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.module-tab {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #ffffff;
+  color: var(--text-body);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.module-tab--active {
+  background: #111827;
+  color: #ffffff;
+}
+
+/* ===== MAIN CARDS ===== */
+
+.card-section {
+  margin: 0;
+  border-radius: 16px;
+  padding: 16px 18px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.card-section-header {
+  margin-bottom: 8px;
+}
+
+.card-section-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.card-section-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.card-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ===== PROFILE / STATS ROWS ===== */
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.profile-row:last-child {
+  border-bottom: 0;
+}
+
+.profile-label {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.profile-value {
+  color: var(--text-heading);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* ===== ACCORDION ===== */
+
+.accordion-card {
+  padding: 0;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.accordion-icon {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.accordion-header.open .accordion-icon {
+  transform: rotate(180deg);
+}
+
+.accordion-body {
+  display: none;
+  padding: 0 18px 18px;
+  background: #ffffff;
+}
+
+.accordion-body.open {
+  display: block;
+}
+
+/* Вложенные карточки внутри аккордеона */
+.accordion-body > .card-section {
+  margin-top: 12px;
+  padding: 0;
+  border-radius: 14px;
+  background: #f8fafc;
+  box-shadow: none;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.accordion-body > .card-section:first-child {
+  margin-top: 0;
+}
+
+.accordion-body > .card-section .accordion-header {
+  padding: 14px 16px;
+}
+
+.accordion-body > .card-section .accordion-body {
+  padding: 0 16px 16px;
+  background: #f8fafc;
+}
+
+.accordion-body > .card-section .card-section-subtitle {
+  margin-bottom: 12px;
+}
+
+/* ===== DIALOG ITEMS ===== */
+
+.dialog-item {
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.dialog-item:last-child {
+  margin-bottom: 0;
+}
+
+.dialog-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.dialog-user {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.dialog-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.dialog-last-msg {
+  font-size: 13px;
+  color: var(--text-body);
+}
+
+/* ===== FORM GROUP / ISSUED LINKS ===== */
+
+.form-group {
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  margin-bottom: 10px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* ===== EMPTY STATE ===== */
+
+.module-notice {
+  border-radius: 14px;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px dashed rgba(15, 23, 42, 0.12);
+  color: var(--text-muted);
+  font-size: 13px;
 }
