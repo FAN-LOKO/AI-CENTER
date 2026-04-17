@@ -282,6 +282,24 @@
     "agentLinksPmSaved": "Партнёрские ссылки сохранены.",
     "agentLinksPmSaveError": "Не удалось сохранить партнёрские ссылки.",
     "agentLinksSocialSaved": "Ссылки на соцсети сохранены.",
-    "agentLinksSocialSaveError": "Не удалось сохранить ссылки на соцсети."
+    "agentLinksSocialSaveError": "Не удалось сохранить ссылки на соцсети.",
+
+    "agentProfileBrowserTitle": "Профиль агента",
+    "agentProfilePageTitle": "Профиль агента",
+    "agentProfilePageSubtitle": "Основные данные и статус подключения Telegram-бота.",
+    "agentProfileNameLabel": "Имя агента",
+    "agentProfileUsernameLabel": "Username",
+    "agentProfileBotIdLabel": "Bot ID",
+    "agentProfileStatusLabel": "Статус",
+    "agentProfileModeLabel": "Режим",
+    "agentProfileLanguageLabel": "Язык",
+    "agentProfileNameFallback": "AI FIT CENTER Agent",
+    "agentProfileUsernameFallback": "@your_bot_username",
+    "agentProfileEmptyValue": "—",
+    "agentProfileStatusConnected": "Подключен",
+    "agentProfileStatusDisconnected": "Не подключен",
+    "agentProfileModeFallback": "assistant",
+    "agentProfileLanguageFallback": "ru",
+    "agentProfileDisabledText": "Модуль агента сейчас недоступен."
   }
 }
