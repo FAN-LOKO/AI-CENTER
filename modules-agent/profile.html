@@ -81,61 +81,252 @@
   </div>
 
   <script>
-    function navigateAgent(page) {
+  (function () {
+    let TENANTCONFIG = null;
+    let APPFEATURES = {
+      home: true,
+      myAgent: true,
+      modules: true,
+      sharedChat: true,
+      affiliate: true,
+      payments: true,
+      settings: true
+    };
+
+    function getShell() {
       try {
-        window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*');
-      } catch (e) {
-        console.error(e);
+        return window.parent?.AICAppShell || null;
+      } catch (error) {
+        console.error('[AI CENTER][Agent Profile] shell access failed', error);
+        return null;
+      }
+    }
+
+    function getTenantConfig() {
+      try {
+        return getShell()?.getTenantConfig?.() || null;
+      } catch (error) {
+        console.error('[AI CENTER][Agent Profile] tenant config read failed', error);
+        return null;
+      }
+    }
+
+    function getAppFeatures() {
+      try {
+        return getShell()?.getAppFeatures?.() || {};
+      } catch (error) {
+        console.error('[AI CENTER][Agent Profile] app features read failed', error);
+        return {};
+      }
+    }
+
+    function getText(key, fallback = '') {
+      return TENANTCONFIG?.texts?.[key] ?? fallback;
+    }
+
+    function navigateAgent(page) {
+      if (APPFEATURES.myAgent === false) {
+        console.warn('[AI CENTER][Agent Profile] agent module is disabled');
+        return;
+      }
+
+      try {
+        window.parent?.postMessage?.(
+          { type: 'navigate', page, tab: 'modules' },
+          '*'
+        );
+      } catch (error) {
+        console.error('[AI CENTER][Agent Profile] navigate failed', error);
       }
     }
 
     function getAgentProfileState() {
       try {
-        return window.parent?.AICAppShell?.getAgentProfile?.() || null;
+        return getShell()?.getAgentProfile?.() || null;
       } catch (error) {
         console.error('[AI CENTER][Agent Profile] profile state read failed', error);
         return null;
       }
     }
 
+    function setText(id, value, fallback = '—') {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent =
+        value !== undefined && value !== null && value !== ''
+          ? value
+          : fallback;
+    }
+
+    function setBadgeState(element, connected) {
+      if (!element) return;
+
+      element.textContent = connected
+        ? getText('agentProfileStatusConnected', 'Подключен')
+        : getText('agentProfileStatusDisconnected', 'Не подключен');
+
+      element.classList.remove(
+        'status-badge--success',
+        'status-badge--danger',
+        'status-badge--warning',
+        'status-badge--info',
+        'status-badge--neutral'
+      );
+
+      element.classList.add(
+        connected ? 'status-badge--success' : 'status-badge--danger'
+      );
+    }
+
+    function applyTenantTexts() {
+      const titleEl = document.getElementById('agentProfileTitle');
+      const subtitleEl = document.getElementById('agentProfileSubtitle');
+      const nameLabelEl = document.getElementById('agentNameLabel');
+      const usernameLabelEl = document.getElementById('agentUsernameLabel');
+      const botIdLabelEl = document.getElementById('agentBotIdLabel');
+      const statusLabelEl = document.getElementById('agentStatusLabel');
+      const modeLabelEl = document.getElementById('agentModeLabel');
+      const languageLabelEl = document.getElementById('agentLanguageLabel');
+
+      if (titleEl) {
+        titleEl.textContent = getText('agentProfilePageTitle', 'Профиль агента');
+      }
+
+      if (subtitleEl) {
+        subtitleEl.textContent = getText(
+          'agentProfilePageSubtitle',
+          'Основные данные и статус подключения Telegram-бота.'
+        );
+      }
+
+      if (nameLabelEl) {
+        nameLabelEl.textContent = getText('agentProfileNameLabel', 'Имя агента');
+      }
+
+      if (usernameLabelEl) {
+        usernameLabelEl.textContent = getText('agentProfileUsernameLabel', 'Username');
+      }
+
+      if (botIdLabelEl) {
+        botIdLabelEl.textContent = getText('agentProfileBotIdLabel', 'Bot ID');
+      }
+
+      if (statusLabelEl) {
+        statusLabelEl.textContent = getText('agentProfileStatusLabel', 'Статус');
+      }
+
+      if (modeLabelEl) {
+        modeLabelEl.textContent = getText('agentProfileModeLabel', 'Режим');
+      }
+
+      if (languageLabelEl) {
+        languageLabelEl.textContent = getText('agentProfileLanguageLabel', 'Язык');
+      }
+
+      document.title =
+        getText('agentProfileBrowserTitle', '') ||
+        getText('agentProfilePageTitle', '') ||
+        'Профиль агента';
+    }
+
     function applyProfile() {
       const state = getAgentProfileState() || {};
 
-      const setText = (id, value, fallback = '—') => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.textContent = value !== undefined && value !== null && value !== '' ? value : fallback;
-      };
-
-      setText('agentName', state.name, 'AI FIT CENTER Agent');
-      setText('agentUsername', state.username, '@your_bot_username');
-      setText('agentBotId', state.botId, '—');
+      setText(
+        'agentName',
+        state.name,
+        getText('agentProfileNameFallback', 'AI FIT CENTER Agent')
+      );
+      setText(
+        'agentUsername',
+        state.username,
+        getText('agentProfileUsernameFallback', '@your_bot_username')
+      );
+      setText(
+        'agentBotId',
+        state.botId,
+        getText('agentProfileEmptyValue', '—')
+      );
 
       const statusEl = document.getElementById('agentStatus');
-      if (statusEl) {
-        const connected = Boolean(state.connected);
-        statusEl.textContent = connected ? 'Подключен' : 'Не подключен';
-        statusEl.classList.remove(
-          'status-badge--success',
-          'status-badge--danger',
-          'status-badge--warning',
-          'status-badge--info',
-          'status-badge--neutral'
-        );
-        statusEl.classList.add(connected ? 'status-badge--success' : 'status-badge--danger');
-      }
+      setBadgeState(statusEl, Boolean(state.connected));
 
       const modeEl = document.getElementById('agentMode');
-      if (modeEl && state.mode) modeEl.value = state.mode;
+      if (modeEl) {
+        if (state.mode) {
+          modeEl.value = state.mode;
+        } else if (!modeEl.value) {
+          modeEl.value = getText('agentProfileModeFallback', 'assistant');
+        }
+        modeEl.disabled = APPFEATURES.myAgent === false;
+      }
 
       const langEl = document.getElementById('agentLanguage');
-      if (langEl && state.language) langEl.value = state.language;
+      if (langEl) {
+        if (state.language) {
+          langEl.value = state.language;
+        } else if (!langEl.value) {
+          langEl.value = getText('agentProfileLanguageFallback', 'ru');
+        }
+        langEl.disabled = APPFEATURES.myAgent === false;
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      try { window.Telegram?.WebApp?.ready?.(); } catch (e) {}
+    function syncAvailability() {
+      const disabled = APPFEATURES.myAgent === false;
+      const modeEl = document.getElementById('agentMode');
+      const langEl = document.getElementById('agentLanguage');
+      const disabledNoteEl = document.getElementById('agentProfileDisabledText');
+
+      if (modeEl) modeEl.disabled = disabled;
+      if (langEl) langEl.disabled = disabled;
+
+      if (disabledNoteEl) {
+        disabledNoteEl.hidden = !disabled;
+        disabledNoteEl.textContent = disabled
+          ? getText('agentProfileDisabledText', 'Модуль агента сейчас недоступен.')
+          : '';
+      }
+    }
+
+    function applyAppFeatures(features) {
+      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+      syncAvailability();
       applyProfile();
+    }
+
+    window.navigateAgent = navigateAgent;
+
+    window.addEventListener('message', (event) => {
+      const data = event?.data;
+      if (!data || typeof data !== 'object') return;
+
+      if (data.type === 'app-features') {
+        applyAppFeatures(data.features || {});
+      }
+
+      if (data.type === 'agent-profile-update') {
+        applyProfile();
+      }
     });
-  </script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        window.Telegram?.WebApp?.ready?.();
+      } catch (error) {
+        console.warn('[AI CENTER][Agent Profile] Telegram ready failed', error);
+      }
+
+      TENANTCONFIG = getTenantConfig();
+      APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
+
+      applyTenantTexts();
+      applyProfile();
+      syncAvailability();
+
+      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+    });
+  })();
+</script>
 </body>
 </html>
