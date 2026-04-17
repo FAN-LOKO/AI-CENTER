@@ -233,15 +233,6 @@
       });
     }
 
-    function getDialogDisplayNumberById(dialogId, dialogs) {
-      const list = Array.isArray(dialogs) ? dialogs : [];
-      const index = list.findIndex(
-        (item) => String(item?.id || item?.dialogId || '') === String(dialogId || '')
-      );
-      if (index < 0) return '—';
-      return formatSequenceNumber(index + 1);
-    }
-
     function renderIssuedLinksList(issuedLinks, dialogs) {
       const container = document.getElementById('issuedLinksList');
       if (!container) return;
@@ -260,26 +251,16 @@
           const directIndex = dialogList.findIndex(
             (dialog) => String(dialog?.id || dialog?.dialogId || '') === String(linkItem.dialogId)
           );
-          if (directIndex >= 0) {
-            return formatSequenceNumber(directIndex + 1);
-          }
+          if (directIndex >= 0) return formatSequenceNumber(directIndex + 1);
         }
 
-        const linkClient = String(linkItem.clientName || linkItem.username || '')
-          .trim()
-          .toLowerCase();
-
+        const linkClient = String(linkItem.clientName || linkItem.username || '').trim().toLowerCase();
         if (linkClient) {
           const byClientIndex = dialogList.findIndex((dialog) => {
-            const dialogClient = String(dialog?.username || dialog?.clientName || '')
-              .trim()
-              .toLowerCase();
+            const dialogClient = String(dialog?.username || dialog?.clientName || '').trim().toLowerCase();
             return dialogClient && dialogClient === linkClient;
           });
-
-          if (byClientIndex >= 0) {
-            return formatSequenceNumber(byClientIndex + 1);
-          }
+          if (byClientIndex >= 0) return formatSequenceNumber(byClientIndex + 1);
         }
 
         return '—';
@@ -352,7 +333,5 @@
       renderAgentStatsPage();
     });
   </script>
-
-  <script src="../js/stats.js"></script>
 </body>
 </html>
