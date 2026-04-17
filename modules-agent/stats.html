@@ -95,11 +95,59 @@
   </div>
 
   <script>
+  (function () {
+    let TENANTCONFIG = null;
+    let APPFEATURES = {
+      home: true,
+      myAgent: true,
+      modules: true,
+      sharedChat: true,
+      affiliate: true,
+      payments: true,
+      settings: true
+    };
+
+    function getShell() {
+      try {
+        return window.parent?.AICAppShell || null;
+      } catch (error) {
+        console.error('[AI CENTER][Agent Stats] shell access failed', error);
+        return null;
+      }
+    }
+
+    function getTenantConfig() {
+      try {
+        return getShell()?.getTenantConfig?.() || null;
+      } catch (error) {
+        console.error('[AI CENTER][Agent Stats] tenant config read failed', error);
+        return null;
+      }
+    }
+
+    function getAppFeatures() {
+      try {
+        return getShell()?.getAppFeatures?.() || {};
+      } catch (error) {
+        console.error('[AI CENTER][Agent Stats] app features read failed', error);
+        return {};
+      }
+    }
+
+    function getText(key, fallback = '') {
+      return TENANTCONFIG?.texts?.[key] ?? fallback;
+    }
+
     function navigateAgent(page) {
+      if (APPFEATURES.myAgent === false) {
+        console.warn('[AI CENTER][Agent Stats] agent module is disabled');
+        return;
+      }
+
       try {
         window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*');
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error('[AI CENTER][Agent Stats] navigate failed', error);
       }
     }
 
@@ -115,17 +163,19 @@
       if (isOpen) {
         card.classList.remove('open');
         body.style.display = 'none';
-        icon.textContent = '▼';
+        icon.textContent = getText('agentStatsAccordionClosedIcon', '▼');
       } else {
         card.classList.add('open');
         body.style.display = 'block';
-        icon.textContent = '▲';
+        icon.textContent = getText('agentStatsAccordionOpenIcon', '▲');
       }
     }
 
     function formatSequenceNumber(value) {
       const n = Number(value);
-      if (!Number.isFinite(n) || n <= 0) return '000';
+      if (!Number.isFinite(n) || n <= 0) {
+        return getText('agentStatsSequenceFallback', '000');
+      }
       return String(n).padStart(3, '0');
     }
 
@@ -140,7 +190,7 @@
 
     function getAgentStats() {
       try {
-        const stats = window.parent?.AICAppShell?.getAgentStats?.();
+        const stats = getShell()?.getAgentStats?.();
         if (stats && typeof stats === 'object') return stats;
       } catch (error) {
         console.error('[AI CENTER][Agent Stats] read failed', error);
@@ -151,6 +201,54 @@
         issuedLinks: [],
         stats: {}
       };
+    }
+
+    function setTextContent(id, value, fallback = '') {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value ?? fallback;
+    }
+
+    function applyTenantTexts() {
+      setTextContent(
+        'agentStatsPageTitle',
+        getText('agentStatsPageTitle', 'Статистика агента')
+      );
+      setTextContent(
+        'agentStatsPageSubtitle',
+        getText('agentStatsPageSubtitle', 'Сводка по диалогам и выданным ссылкам.')
+      );
+
+      setTextContent(
+        'statDialogsTotalLabel',
+        getText('agentStatsDialogsTotalLabel', 'Всего диалогов')
+      );
+      setTextContent(
+        'statRefLinksTotalLabel',
+        getText('agentStatsRefLinksTotalLabel', 'Всего ссылок')
+      );
+      setTextContent(
+        'statDialogsTodayLabel',
+        getText('agentStatsDialogsTodayLabel', 'Диалогов сегодня')
+      );
+      setTextContent(
+        'statRefLinksTodayLabel',
+        getText('agentStatsRefLinksTodayLabel', 'Ссылок сегодня')
+      );
+
+      setTextContent(
+        'dialogsAccordionTitle',
+        getText('agentStatsDialogsSectionTitle', 'Диалоги')
+      );
+      setTextContent(
+        'issuedLinksAccordionTitle',
+        getText('agentStatsIssuedLinksSectionTitle', 'Выданные ссылки')
+      );
+
+      document.title =
+        getText('agentStatsBrowserTitle', '') ||
+        getText('agentStatsPageTitle', '') ||
+        'Статистика агента';
     }
 
     function renderStatsSummary(statsData) {
@@ -179,6 +277,11 @@
     }
 
     function openDialog(dialogId, username, channel, timeLabel, lastMessage) {
+      if (APPFEATURES.myAgent === false) {
+        console.warn('[AI CENTER][Agent Stats] agent module is disabled');
+        return;
+      }
+
       try {
         window.parent?.postMessage?.(
           {
@@ -200,8 +303,17 @@
       const container = document.getElementById('dialogsList');
       if (!container) return;
 
+      if (APPFEATURES.myAgent === false) {
+        container.innerHTML = `<div class="module-notice">${escapeHtml(
+          getText('agentStatsDisabledText', 'Модуль агента сейчас недоступен.')
+        )}</div>`;
+        return;
+      }
+
       if (!Array.isArray(dialogs) || dialogs.length === 0) {
-        container.innerHTML = '<div class="module-notice">Диалогов пока нет.</div>';
+        container.innerHTML = `<div class="module-notice">${escapeHtml(
+          getText('agentStatsDialogsEmptyText', 'Диалогов пока нет.')
+        )}</div>`;
         return;
       }
 
@@ -211,10 +323,21 @@
         const item = document.createElement('div');
         item.className = 'dialog-item';
 
-        const username = dialog?.username || dialog?.clientName || '@username';
-        const channel = dialog?.channel || 'Telegram';
+        const username =
+          dialog?.username ||
+          dialog?.clientName ||
+          getText('agentStatsUsernameFallback', '@username');
+
+        const channel =
+          dialog?.channel ||
+          getText('agentStatsChannelFallback', 'Telegram');
+
         const timeLabel = dialog?.timeLabel || dialog?.time || '';
-        const lastMessage = dialog?.lastMessage || dialog?.message || 'Сообщений пока нет';
+        const lastMessage =
+          dialog?.lastMessage ||
+          dialog?.message ||
+          getText('agentStatsMessageFallback', 'Сообщений пока нет');
+
         const displayNumber = formatSequenceNumber(index + 1);
 
         item.innerHTML = `
@@ -237,15 +360,26 @@
       const container = document.getElementById('issuedLinksList');
       if (!container) return;
 
+      if (APPFEATURES.myAgent === false) {
+        container.innerHTML = `<div class="module-notice">${escapeHtml(
+          getText('agentStatsDisabledText', 'Модуль агента сейчас недоступен.')
+        )}</div>`;
+        return;
+      }
+
       if (!Array.isArray(issuedLinks) || issuedLinks.length === 0) {
-        container.innerHTML = '<div class="module-notice">Выданных ссылок пока нет.</div>';
+        container.innerHTML = `<div class="module-notice">${escapeHtml(
+          getText('agentStatsIssuedLinksEmptyText', 'Выданных ссылок пока нет.')
+        )}</div>`;
         return;
       }
 
       const dialogList = Array.isArray(dialogs) ? dialogs : [];
 
       function resolveDialogNumber(linkItem) {
-        if (!linkItem || typeof linkItem !== 'object') return '—';
+        if (!linkItem || typeof linkItem !== 'object') {
+          return getText('agentStatsEmptyValue', '—');
+        }
 
         if (linkItem.dialogId) {
           const directIndex = dialogList.findIndex(
@@ -263,35 +397,57 @@
           if (byClientIndex >= 0) return formatSequenceNumber(byClientIndex + 1);
         }
 
-        return '—';
+        return getText('agentStatsEmptyValue', '—');
       }
 
       container.innerHTML = issuedLinks.map((item) => {
-        const clientName = item?.clientName || item?.username || '@username';
-        const linkType = item?.type || item?.linkType || item?.title || 'Клиентская';
-        const issuedAt = item?.issuedAt || item?.timeLabel || item?.time || '—';
+        const clientName =
+          item?.clientName ||
+          item?.username ||
+          getText('agentStatsUsernameFallback', '@username');
+
+        const linkType =
+          item?.type ||
+          item?.linkType ||
+          item?.title ||
+          getText('agentStatsLinkTypeFallback', 'Клиентская');
+
+        const issuedAt =
+          item?.issuedAt ||
+          item?.timeLabel ||
+          item?.time ||
+          getText('agentStatsEmptyValue', '—');
+
         const dialogNumber = resolveDialogNumber(item);
 
         return `
           <div class="stats-issued-card">
             <div class="module-summary">
               <div class="stats-issued-head">
-                <div class="stats-issued-client-label">Кому</div>
+                <div class="stats-issued-client-label">${escapeHtml(
+                  getText('agentStatsIssuedToLabel', 'Кому')
+                )}</div>
                 <div class="stats-issued-client-name">${escapeHtml(clientName)}</div>
               </div>
 
               <div class="stats-issued-links">
                 <div class="stats-issued-link">
                   <div class="profile-row">
-                    <div class="profile-label">Диалог</div>
+                    <div class="profile-label">${escapeHtml(
+                      getText('agentStatsDialogLabel', 'Диалог')
+                    )}</div>
                     <div class="profile-value">${escapeHtml(dialogNumber)}</div>
                   </div>
                   <div class="profile-row">
-                    <div class="profile-label">Тип ссылки</div>
+                    <div class="profile-label">${escapeHtml(
+                      getText('agentStatsLinkTypeLabel', 'Тип ссылки')
+                    )}</div>
                     <div class="profile-value">${escapeHtml(linkType)}</div>
                   </div>
                   <div class="profile-row">
-                    <div class="profile-label">Время</div>
+                    <div class="profile-label">${escapeHtml(
+                      getText('agentStatsTimeLabel', 'Время')
+                    )}</div>
                     <div class="profile-value">${escapeHtml(issuedAt)}</div>
                   </div>
                 </div>
@@ -312,10 +468,22 @@
       renderIssuedLinksList(issuedLinks, dialogs);
     }
 
+    function applyAppFeatures(features) {
+      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+      renderAgentStatsPage();
+    }
+
+    window.navigateAgent = navigateAgent;
+    window.toggleAccordion = toggleAccordion;
+
     window.addEventListener('message', (event) => {
       try {
         const data = event?.data;
         if (!data || typeof data !== 'object') return;
+
+        if (data.type === 'app-features') {
+          applyAppFeatures(data.features || {});
+        }
 
         if (
           data.type === 'agent-stats-update' ||
@@ -325,13 +493,20 @@
           renderAgentStatsPage();
         }
       } catch (error) {
-        console.error(error);
+        console.error('[AI CENTER][Agent Stats] message handling failed', error);
       }
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+      TENANTCONFIG = getTenantConfig();
+      APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
+
+      applyTenantTexts();
       renderAgentStatsPage();
+
+      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
     });
-  </script>
+  })();
+</script>
 </body>
 </html>
