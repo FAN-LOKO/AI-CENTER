@@ -233,6 +233,19 @@
     "settingsEmailRequiredError": "Укажите email для входа в PWA",
     "settingsEmailInvalidError": "Введите корректный email",
     "settingsProfileSaved": "Данные профиля сохранены",
-    "settingsProfileSaveError": "Не удалось сохранить профиль"
+    "settingsProfileSaveError": "Не удалось сохранить профиль",
+
+    "agentConnectPageTitle": "Подключение Telegram-бота",
+    "agentConnectTitle": "Подключение Telegram-бота",
+    "agentConnectSubtitle": "Укажите API Token и подключите Telegram-бота к модулю.",
+    "agentConnectStatusLabel": "Статус",
+    "agentConnectTokenLabel": "API Token",
+    "agentConnectButton": "Подключить",
+    "agentConnectStatusConnected": "Подключен",
+    "agentConnectStatusDisconnected": "Не подключен",
+    "agentConnectDisabledText": "Модуль агента сейчас недоступен.",
+    "agentConnectTokenRequired": "Введите API Token перед подключением.",
+    "agentConnectSaveError": "Не удалось сохранить состояние подключения.",
+    "agentConnectSuccess": "Telegram-бот отмечен как подключенный."
   }
 }
