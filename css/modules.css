@@ -1109,3 +1109,34 @@ textarea.form-input,
   line-height: 1.5;
   color: #475569;
 }
+
+/* =========================================================
+   MODULE LINKS PAGE
+   Тонкая стрелка для аккордеонов на links.html
+========================================================= */
+
+.module-links-page .accordion-header-icon {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  font-size: 0;
+  color: transparent;
+}
+
+.module-links-page .accordion-header-icon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.8px solid #ffffff;
+  border-bottom: 1.8px solid #ffffff;
+  transform: translate(-50%, -62%) rotate(45deg);
+  transition: transform 0.18s ease;
+}
+
+.module-links-page .accordion-card.open > .accordion-header .accordion-header-icon::before {
+  transform: translate(-50%, -38%) rotate(225deg);
+}
