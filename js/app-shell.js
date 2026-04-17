@@ -380,7 +380,7 @@
   Открывает минимальное API shell для отладки и будущих интеграций
   ========================================================= */
 
-  window.AICAppShell = {
+    window.AICAppShell = {
     navigate,
     getCurrentTab: () => currentTab,
     getFeatures: () => APPFEATURES,
@@ -422,13 +422,10 @@
       (window.AICTenant ? window.AICTenant.getPlans() : []),
 
     getTenantSections: () =>
-      (window.AICTenant ? window.AICTenant.getSections() : {})
-  };
-})();
-
-    getTenantSections: () =>
       (window.AICTenant ? window.AICTenant.getSections() : {}),
 
     // === Agent stats API / API статистики агента ===
     getAgentStats: () => getAgentStats(),
     setAgentStats: (stats) => setAgentStats(stats)
+  };
+})();
