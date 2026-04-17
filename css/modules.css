@@ -1577,7 +1577,7 @@ textarea.form-input,
 
 .module-stats-page > .card-section,
 .module-dialogs-page > .card-section {
-  margin-bottom: 8px !important;
+  margin-bottom: 6px !important;
 }
 
 .module-stats-page > .card-section:last-child,
