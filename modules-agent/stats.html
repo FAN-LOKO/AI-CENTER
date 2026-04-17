@@ -246,42 +246,42 @@
     partner: 'Партнерская'
   };
 
+  listEl.className = 'stats-issued-list';
+
   listEl.innerHTML = items.map((item) => {
     const username = item.username || '—';
     const links = Array.isArray(item.links) ? item.links : [];
 
     const linksHtml = links.length
       ? links.map((link) => `
-          <div class="issued-link-inner">
-            <div class="module-summary-row">
-              <div class="module-summary-label">Тип ссылки</div>
-              <div class="module-summary-value">${escapeHtml(typeMap[link.type] || '—')}</div>
+          <div class="stats-issued-link">
+            <div class="profile-row">
+              <div class="profile-label">Тип ссылки</div>
+              <div class="profile-value">${escapeHtml(typeMap[link.type] || '—')}</div>
             </div>
-            <div class="module-summary-row">
-              <div class="module-summary-label">Время</div>
-              <div class="module-summary-value">${escapeHtml(link.timeLabel || '—')}</div>
+            <div class="profile-row">
+              <div class="profile-label">Время</div>
+              <div class="profile-value">${escapeHtml(link.timeLabel || '—')}</div>
             </div>
           </div>
         `).join('')
       : `
-          <div class="issued-link-inner">
-            <div class="module-summary-row">
-              <div class="module-summary-label">Тип ссылки</div>
-              <div class="module-summary-value">—</div>
+          <div class="stats-issued-link">
+            <div class="profile-row">
+              <div class="profile-label">Тип ссылки</div>
+              <div class="profile-value">—</div>
             </div>
           </div>
         `;
 
     return `
       <div class="stats-issued-card">
-        <div class="module-summary">
-          <div class="module-summary-row">
-            <div class="module-summary-label">Кому</div>
-            <div class="module-summary-value">${escapeHtml(username)}</div>
-          </div>
-          <div class="issued-link-list">
-            ${linksHtml}
-          </div>
+        <div class="stats-issued-head">
+          <div class="stats-issued-client-label">Кому</div>
+          <div class="stats-issued-client-name">${escapeHtml(username)}</div>
+        </div>
+        <div class="stats-issued-links">
+          ${linksHtml}
         </div>
       </div>
     `;
