@@ -35,6 +35,42 @@
   let currentTab = "home";
   let USERPROFILE = null;
 
+    // Agent stats state / Состояние статистики агента
+  let AGENT_STATS = {
+    dialogsTotal: 0,
+    refLinksTotal: 0,
+    dialogsToday: 0,
+    refLinksToday: 0,
+    dialogs: [],
+    issuedLinks: []
+  };
+
+  function setAgentStats(nextStats) {
+    AGENT_STATS = {
+      dialogsTotal: Number(nextStats?.dialogsTotal || 0),
+      refLinksTotal: Number(nextStats?.refLinksTotal || 0),
+      dialogsToday: Number(nextStats?.dialogsToday || 0),
+      refLinksToday: Number(nextStats?.refLinksToday || 0),
+      dialogs: Array.isArray(nextStats?.dialogs) ? nextStats.dialogs : [],
+      issuedLinks: Array.isArray(nextStats?.issuedLinks) ? nextStats.issuedLinks : []
+    };
+
+    // По желанию: можно пушнуть обновление в текущий frame
+    if (frame && frame.contentWindow) {
+      frame.contentWindow.postMessage(
+        {
+          type: "agent-stats-update",
+          stats: AGENT_STATS
+        },
+        "*"
+      );
+    }
+  }
+
+  function getAgentStats() {
+    return AGENT_STATS;
+  }
+
   /* =========================================================
   PAGE CONFIGURATION / КОНФИГУРАЦИЯ СТРАНИЦ
   Maps shell tabs to internal page files and feature access
@@ -277,6 +313,35 @@
         sendFeaturesToFrame();
         return;
       }
+
+      // Страница статистики просит актуальные данные
+      if (data.type === "agent-stats-request") {
+        if (frame && frame.contentWindow) {
+          frame.contentWindow.postMessage(
+            {
+              type: "agent-stats-response",
+              stats: getAgentStats()
+            },
+            "*"
+          );
+        }
+        return;
+      }
+
+      // Где-то внутри модулей обновили агрегированную статистику
+      if (data.type === "agent-stats-save" && data.stats) {
+        setAgentStats(data.stats);
+        return;
+      }
+
+      // Обновление только по диалогам (если хочешь отдельно пушить)
+      if (data.type === "agent-dialogs-update" && Array.isArray(data.dialogs)) {
+        setAgentStats({
+          ...getAgentStats(),
+          dialogs: data.dialogs
+        });
+        return;
+      }
     });
   }
 
@@ -360,3 +425,10 @@
       (window.AICTenant ? window.AICTenant.getSections() : {})
   };
 })();
+
+    getTenantSections: () =>
+      (window.AICTenant ? window.AICTenant.getSections() : {}),
+
+    // === Agent stats API / API статистики агента ===
+    getAgentStats: () => getAgentStats(),
+    setAgentStats: (stats) => setAgentStats(stats)
