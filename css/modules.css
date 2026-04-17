@@ -929,7 +929,7 @@ textarea.form-input,
 .module-connect-page {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  /* отступ между card-section даёт правило card-section + .card-section */
 }
 
 .module-connect-page > .accordion-card {
@@ -1153,7 +1153,7 @@ textarea.form-input,
 .module-stats-page {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  /* отступ между card-section даёт правило card-section + .card-section */
 }
 
 .module-stats-page > .accordion-card {
@@ -1403,7 +1403,7 @@ textarea.form-input,
 .module-dialogs-page {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  /* отступ между card-section даёт правило card-section + .card-section */
 }
 
 .module-dialogs-page .module-workspace-card .card-section-body {
