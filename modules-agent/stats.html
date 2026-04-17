@@ -233,33 +233,54 @@
   }
 
   function renderIssuedLinks(items) {
-    const listEl = document.getElementById('issuedLinksList');
-    if (!listEl) return;
+  const listEl = document.getElementById('issuedLinksList');
+  if (!listEl) return;
 
-    if (!Array.isArray(items) || items.length === 0) {
-      listEl.innerHTML = '<div class="module-notice">Пока нет данных по выданным ссылкам.</div>';
-      return;
-    }
+  if (!Array.isArray(items) || items.length === 0) {
+    listEl.innerHTML = '<div class="module-notice">Пока нет данных по выданным ссылкам.</div>';
+    return;
+  }
 
-    listEl.innerHTML = items.map((item) => `
+  const typeMap = {
+    client: 'Клиентская',
+    partner: 'Партнерская'
+  };
+
+  listEl.innerHTML = items.map((item) => {
+    const username = item.username || '—';
+    const links = Array.isArray(item.links) ? item.links : [];
+
+    const linksHtml = links.length
+      ? links.map((link) => `
+          <div class="module-summary-row">
+            <div class="module-summary-label">Тип ссылки</div>
+            <div class="module-summary-value">${escapeHtml(typeMap[link.type] || link.type || '—')}</div>
+          </div>
+          <div class="module-summary-row">
+            <div class="module-summary-label">Время</div>
+            <div class="module-summary-value">${escapeHtml(link.timeLabel || '—')}</div>
+          </div>
+        `).join('')
+      : `
+          <div class="module-summary-row">
+            <div class="module-summary-label">Тип ссылки</div>
+            <div class="module-summary-value">—</div>
+          </div>
+        `;
+
+    return `
       <div class="stats-issued-card">
         <div class="module-summary">
           <div class="module-summary-row">
             <div class="module-summary-label">Кому</div>
-            <div class="module-summary-value">${escapeHtml(item.username || '—')}</div>
+            <div class="module-summary-value">${escapeHtml(username)}</div>
           </div>
-          <div class="module-summary-row">
-            <div class="module-summary-label">Тип ссылки</div>
-            <div class="module-summary-value">${escapeHtml(item.linkType || '—')}</div>
-          </div>
-          <div class="module-summary-row">
-            <div class="module-summary-label">Время</div>
-            <div class="module-summary-value">${escapeHtml(item.timeLabel || '—')}</div>
-          </div>
+          ${linksHtml}
         </div>
       </div>
-    `).join('');
-  }
+    `;
+  }).join('');
+}
 
   function applyStats() {
     const stats = getAgentStatsState();
