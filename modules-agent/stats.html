@@ -142,7 +142,7 @@
     try {
       window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*');
     } catch (e) {
-      console.error(e);
+      console.error('[stats] navigateAgent error', e);
     }
   }
 
@@ -176,7 +176,7 @@
         return normalizeStats(directState);
       }
     } catch (error) {
-      console.error('[AI CENTER][Agent Stats] stats state read failed', error);
+      console.error('[stats] getAgentStatsState error', error);
     }
 
     return normalizeStats(agentStatsState);
@@ -190,12 +190,13 @@
   function requestAgentStats() {
     try {
       window.parent?.postMessage?.({ type: 'agent-stats-request' }, '*');
+      console.log('[stats] agent-stats-request sent');
     } catch (error) {
-      console.error('[AI CENTER][Agent Stats] request failed', error);
+      console.error('[stats] requestAgentStats error', error);
     }
   }
 
-  function setText(id, value, fallback = '0') {
+  function setText(id, value, fallback) {
     const el = document.getElementById(id);
     if (!el) return;
     el.textContent = value !== undefined && value !== null && value !== '' ? value : fallback;
@@ -203,11 +204,29 @@
 
   function escapeHtml(value) {
     return String(value)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function openDialog(dialogId, username, channel) {
+    try {
+      console.log('[stats] openDialog fired', { dialogId, username, channel });
+
+      window.parent?.postMessage?.(
+        {
+          type: 'agent-open-dialog',
+          dialogId: dialogId,
+          username: username,
+          channel: channel
+        },
+        '*'
+      );
+    } catch (e) {
+      console.error('[stats] openDialog error', e);
+    }
   }
 
   function renderDialogs(dialogs) {
@@ -219,87 +238,63 @@
       return;
     }
 
-    listEl.innerHTML = dialogs.map((dialog) => {
+    const html = dialogs.map(function (dialog) {
       const dialogId = dialog.id || '';
       const username = dialog.username || 'Без имени';
       const channel = dialog.channel || 'Telegram';
       const time = dialog.timeLabel || '—';
       const lastMessage = dialog.lastMessage || 'Сообщений пока нет';
 
-      return `
-        <div class="dialog-item" onclick="openDialog(${JSON.stringify(dialogId)}, ${JSON.stringify(username)}, ${JSON.stringify(channel)})">
-          <div class="dialog-item-row">
-            <span class="dialog-user">${escapeHtml(username)}</span>
-            <span class="dialog-time">${escapeHtml(time)}</span>
-          </div>
-          <div class="dialog-last-msg">${escapeHtml(lastMessage)}</div>
-        </div>
-      `;
+      return (
+        '<div class="dialog-item" onclick="openDialog(' +
+        JSON.stringify(dialogId) + ', ' +
+        JSON.stringify(username) + ', ' +
+        JSON.stringify(channel) +
+        ')">' +
+          '<div class="dialog-item-row">' +
+            '<span class="dialog-user">' + escapeHtml(username) + '</span>' +
+            '<span class="dialog-time">' + escapeHtml(time) + '</span>' +
+          '</div>' +
+          '<div class="dialog-last-msg">' + escapeHtml(lastMessage) + '</div>' +
+        '</div>'
+      );
     }).join('');
+
+    listEl.innerHTML = html;
   }
 
   function renderIssuedLinks(items) {
-  const listEl = document.getElementById('issuedLinksList');
-  if (!listEl) return;
+    const listEl = document.getElementById('issuedLinksList');
+    if (!listEl) return;
 
-  if (!Array.isArray(items) || items.length === 0) {
-    listEl.className = '';
-    listEl.innerHTML = '<div class="module-notice">Пока нет данных по выданным ссылкам.</div>';
-    return;
+    if (!Array.isArray(items) || items.length === 0) {
+      listEl.innerHTML = '<div class="module-notice">Пока нет данных по выданным ссылкам.</div>';
+      return;
+    }
+
+    const html = items.map(function (item) {
+      return (
+        '<div class="stats-issued-card">' +
+          '<div class="module-summary">' +
+            '<div class="module-summary-row">' +
+              '<div class="module-summary-label">Кому</div>' +
+              '<div class="module-summary-value">' + escapeHtml(item.username || '—') + '</div>' +
+            '</div>' +
+            '<div class="module-summary-row">' +
+              '<div class="module-summary-label">Тип ссылки</div>' +
+              '<div class="module-summary-value">' + escapeHtml(item.linkType || '—') + '</div>' +
+            '</div>' +
+            '<div class="module-summary-row">' +
+              '<div class="module-summary-label">Время</div>' +
+              '<div class="module-summary-value">' + escapeHtml(item.timeLabel || '—') + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    listEl.innerHTML = html;
   }
-
-  const typeMap = {
-    client: 'Клиентская',
-    partner: 'Партнерская'
-  };
-
-  listEl.className = 'stats-issued-links-list';
-
-  listEl.innerHTML = items.map((item) => {
-    const username = item.username || '—';
-    const links = Array.isArray(item.links) ? item.links : [];
-
-    const linksHtml = links.length
-      ? links.map((link) => `
-          <div class="stats-issued-link">
-            <div class="profile-row">
-              <div class="profile-label">Тип ссылки</div>
-              <div class="profile-value">${escapeHtml(typeMap[link.type] || '—')}</div>
-            </div>
-            <div class="profile-row">
-              <div class="profile-label">Время выдачи</div>
-              <div class="profile-value">${escapeHtml(link.timeLabel || '—')}</div>
-            </div>
-          </div>
-        `).join('')
-      : `
-          <div class="stats-issued-link">
-            <div class="profile-row">
-              <div class="profile-label">Тип ссылки</div>
-              <div class="profile-value">—</div>
-            </div>
-            <div class="profile-row">
-              <div class="profile-label">Время выдачи</div>
-              <div class="profile-value">—</div>
-            </div>
-          </div>
-        `;
-
-    return `
-      <div class="stats-issued-card">
-        <div class="module-summary">
-          <div class="stats-issued-head">
-            <div class="stats-issued-client-label">Кому</div>
-            <div class="stats-issued-client-name">${escapeHtml(username)}</div>
-          </div>
-          <div class="stats-issued-links">
-            ${linksHtml}
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
 
   function applyStats() {
     const stats = getAgentStatsState();
@@ -313,37 +308,15 @@
     renderIssuedLinks(stats.issuedLinks);
   }
 
-  function openDialog(dialogId, username, channel) {
-    try {
-      window.parent?.postMessage?.(
-        {
-          type: 'agent-open-dialog',
-          dialogId,
-          username,
-          channel
-        },
-        '*'
-      );
-
-      window.parent?.postMessage?.(
-        {
-          type: 'navigate',
-          page: 'modules-agent/dialogs.html',
-          tab: 'modules'
-        },
-        '*'
-      );
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  window.addEventListener('message', (event) => {
-    const data = event?.data;
+  window.addEventListener('message', function (event) {
+    const data = event && event.data;
     if (!data || typeof data !== 'object') return;
+
+    console.log('[stats] message received', data);
 
     if (data.type === 'agent-stats-response' && data.stats) {
       setAgentStatsState(data.stats);
+      return;
     }
 
     if (data.type === 'agent-stats-update' && data.stats) {
@@ -351,9 +324,14 @@
     }
   });
 
-  document.addEventListener('DOMContentLoaded', () => {
-    try { window.Telegram?.WebApp?.ready?.(); } catch (e) {}
+  document.addEventListener('DOMContentLoaded', function () {
+    try {
+      window.Telegram?.WebApp?.ready?.();
+    } catch (e) {
+      console.error('[stats] Telegram ready error', e);
+    }
 
+    console.log('[stats] DOMContentLoaded');
     applyStats();
     requestAgentStats();
   });
