@@ -35,193 +35,336 @@
   </div>
 
   <script>
-    const MODULE_ROUTE_MAP = {
-      "ai-agent": "modules-agent/profile.html"
-    };
+  let TENANTCONFIG = null;
+  let APPFEATURES = {
+    home: true,
+    myAgent: true,
+    modules: true,
+    sharedChat: true,
+    affiliate: true,
+    payments: true,
+    settings: true
+  };
 
-    const MODULE_FALLBACK_PAGE = "module-coming-soon.html";
+  const MODULE_FALLBACK_PAGE = 'module-coming-soon.html';
 
-    const USER_ACCESS = {
-      subscriptionActive: true
-    };
+  let TENANTMODULES = [];
+  let USERMODULEACCESS = {};
+  let _modulesReady = false;
 
-    function getModuleRoute(module) {
-      if (!module || !module.id) return MODULE_FALLBACK_PAGE;
-      return MODULE_ROUTE_MAP[module.id] || MODULE_FALLBACK_PAGE;
+  function getTenantConfig() {
+    try {
+      return window.parent?.AICAppShell?.getTenantConfig?.() || null;
+    } catch (error) {
+      console.error('[AI CENTER][Modules] tenant config read failed', error);
+      return null;
+    }
+  }
+
+  function getText(key, fallback = '') {
+    return TENANTCONFIG?.texts?.[key] ?? fallback;
+  }
+
+  function getTenantModulesRaw() {
+    try {
+      return window.parent?.AICAppShell?.getTenantModules?.() || [];
+    } catch (error) {
+      console.error('[AI CENTER][Modules] tenant modules read failed', error);
+      return [];
+    }
+  }
+
+  function getModuleRoute(module) {
+    if (!module) return MODULE_FALLBACK_PAGE;
+    return module.page || MODULE_FALLBACK_PAGE;
+  }
+
+  function normalizeAccessMap(raw) {
+    if (!raw || typeof raw !== 'object') return {};
+    return raw;
+  }
+
+  function getTenantModules() {
+    try {
+      const shellModules = getTenantModulesRaw();
+
+      return shellModules
+        .filter(module => module && module.enabled !== false)
+        .map(module => ({
+          id: module.id,
+          title: module.titleRu || module.title || module.id,
+          titleRu: module.titleRu || module.title || module.id,
+          shortDescription:
+            module.shortDescription ||
+            getText('modulesDefaultShortDescription', 'Описание модуля будет заполнено в tenant-конфиге.'),
+          fullDescription:
+            Array.isArray(module.fullDescription) && module.fullDescription.length
+              ? module.fullDescription
+              : [getText('modulesDefaultFullDescription', 'Описание модуля будет добавлено позже.')],
+          page: getModuleRoute(module),
+          requiresPayment: !!module.requiresPayment,
+          category: module.category || 'core'
+        }));
+    } catch (error) {
+      console.error('[AI CENTER][Modules] tenant modules normalize failed', error);
+      return [];
+    }
+  }
+
+  function waitForTenantModules(attempt = 0) {
+    const modules = getTenantModules();
+
+    if (modules.length || attempt >= 20) {
+      return Promise.resolve(modules);
     }
 
-    function getTenantModules() {
-      try {
-        const shellModules =
-          window.parent?.AICAppShell?.getTenantModules?.() || [];
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(waitForTenantModules(attempt + 1));
+      }, 150);
+    });
+  }
 
-        return shellModules
-          .filter((module) => module.enabled)
-          .map((module) => ({
-            id: module.id,
-            title: module.title,
-            titleRu: module.titleRu || module.title,
-            shortDescription:
-              module.shortDescription ||
-              "Описание модуля будет заполнено в tenant-конфиге.",
-            fullDescription:
-              module.fullDescription && module.fullDescription.length
-                ? module.fullDescription
-                : ["Описание модуля будет добавлено позже."],
-            page: getModuleRoute(module),
-            requiresPayment: !!module.requiresPayment,
-            category: module.category || "core"
-          }));
-      } catch (error) {
-        console.error("[AI CENTER][Modules] tenant modules read failed", error);
-        return [];
-      }
+  function getModuleAccess(moduleId) {
+    const accessMap = normalizeAccessMap(USERMODULEACCESS);
+    return accessMap[moduleId] || null;
+  }
+
+  function isModuleAccessible(module) {
+    if (!module) return false;
+
+    const isFallback = getModuleRoute(module) === MODULE_FALLBACK_PAGE;
+    if (isFallback) return true;
+
+    if (!module.requiresPayment) return true;
+
+    const access = getModuleAccess(module.id);
+    return !!access?.paid && !access?.frozen;
+  }
+
+  function getSubscriptionStatusText() {
+    const paidModules = TENANTMODULES.filter(m => m.requiresPayment);
+    const hasAnyPaidAccess = paidModules.some(m => {
+      const access = getModuleAccess(m.id);
+      return !!access?.paid && !access?.frozen;
+    });
+
+    return hasAnyPaidAccess
+      ? getText('modulesSubscriptionStatusPaid', 'Платные модули доступны')
+      : getText('modulesSubscriptionStatusBase', 'Доступ только к базовым модулям');
+  }
+
+  function openModule(module) {
+    if (!module) return;
+    if (APPFEATURES.modules === false) return;
+
+    const moduleRoute = getModuleRoute(module);
+    const isFallback = moduleRoute === MODULE_FALLBACK_PAGE;
+    const hasAccess = isFallback || isModuleAccessible(module);
+
+    if (hasAccess) {
+      window.parent?.postMessage?.(
+        {
+          type: 'navigate',
+          page: moduleRoute,
+          tab: 'modules'
+        },
+        '*'
+      );
+      return;
     }
 
-    function waitForTenantModules(attempt = 0) {
-      const modules = getTenantModules();
+    if (APPFEATURES.payments === false) return;
 
-      if (modules.length || attempt >= 20) {
-        return Promise.resolve(modules);
-      }
+    window.parent?.postMessage?.(
+      {
+        type: 'navigate',
+        page: 'payments.html',
+        tab: 'payments'
+      },
+      '*'
+    );
+  }
 
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(waitForTenantModules(attempt + 1));
-        }, 150);
-      });
+  function closeAllModuleCards() {
+    document.querySelectorAll('.module-card-expanded.open').forEach(el => {
+      el.classList.remove('open');
+    });
+
+    document.querySelectorAll('.module-accordion-card.open').forEach(el => {
+      el.classList.remove('open');
+    });
+
+    document.querySelectorAll('.module-card-toggle').forEach(btn => {
+      btn.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  function getModuleOpenButtonText(module) {
+    if (!module) return getText('modulesActionOpen', 'Открыть модуль');
+
+    if (getModuleRoute(module) === MODULE_FALLBACK_PAGE) {
+      return getText('modulesActionOpen', 'Открыть модуль');
     }
 
-    function openModule(module) {
-      const moduleRoute = getModuleRoute(module);
-      const isFallback = moduleRoute === MODULE_FALLBACK_PAGE;
-      const needsPayment = !isFallback && !!module.requiresPayment;
-      const hasAccess = !needsPayment || USER_ACCESS.subscriptionActive;
-
-      if (hasAccess) {
-        window.parent?.postMessage?.(
-          {
-            type: "navigate",
-            page: moduleRoute,
-            tab: "modules"
-          },
-          "*"
-        );
-      } else {
-        window.parent?.postMessage?.(
-          {
-            type: "navigate",
-            page: "payments.html",
-            tab: "payments"
-          },
-          "*"
-        );
-      }
+    if (!module.requiresPayment) {
+      return getText('modulesActionOpen', 'Открыть модуль');
     }
 
-    function closeAllModuleCards() {
-      document.querySelectorAll(".module-card-expanded.open").forEach((el) => {
-        el.classList.remove("open");
-      });
+    return isModuleAccessible(module)
+      ? getText('modulesActionOpen', 'Открыть модуль')
+      : getText('modulesActionPay', 'Перейти к оплате');
+  }
 
-      document.querySelectorAll(".module-accordion-card.open").forEach((el) => {
-        el.classList.remove("open");
-      });
+  function createModuleCard(module) {
+    const section = document.createElement('section');
+    section.className = 'card-section module-accordion-card';
 
-      document.querySelectorAll(".module-card-toggle").forEach((btn) => {
-        btn.setAttribute("aria-expanded", "false");
-      });
-    }
-
-    function createModuleCard(module) {
-      const section = document.createElement("section");
-      section.className = "card-section module-accordion-card";
-
-      section.innerHTML = `
-        <div class="card-section-header module-card-header">
-          <button class="module-card-toggle" type="button" aria-expanded="false">
-            <div class="module-card-header-text">
-              <div class="module-card-title">
-                ${module.title}
-                <span class="module-card-title-ru">/ ${module.titleRu}</span>
-              </div>
+    section.innerHTML = `
+      <div class="card-section-header module-card-header">
+        <button class="module-card-toggle" type="button" aria-expanded="false">
+          <div class="module-card-header-text">
+            <div class="module-card-title">
+              ${module.title}
+              <span class="module-card-title-ru">/ ${module.titleRu}</span>
             </div>
-            <span class="module-card-chevron">▾</span>
-          </button>
+          </div>
+          <span class="module-card-chevron">▾</span>
+        </button>
+      </div>
+
+      <div class="card-section-body module-card-main">
+        <p class="module-card-short-description">${module.shortDescription}</p>
+        <button
+          class="btn btn-block"
+          type="button"
+          data-module-id="${module.id}"
+          data-module-page="${module.page}"
+        >
+          ${getModuleOpenButtonText(module)}
+        </button>
+      </div>
+
+      <div class="card-section-body module-card-expanded">
+        <div class="module-card-expanded-title">
+          ${getText('modulesDetailsTitle', 'Подробнее о модуле')}
         </div>
+        <ul class="module-card-description-list">
+          ${module.fullDescription.map(item => `<li>${item}</li>`).join('')}
+        </ul>
+      </div>
+    `;
 
-        <div class="card-section-body module-card-main">
-          <p class="module-card-short-description">${module.shortDescription}</p>
-          <button
-            class="btn btn-block"
-            type="button"
-            data-module-id="${module.id}"
-            data-module-page="${module.page}"
-          >
-            Открыть модуль
-          </button>
-        </div>
+    const toggleBtn = section.querySelector('.module-card-toggle');
+    const expandedBody = section.querySelector('.module-card-expanded');
+    const openBtn = section.querySelector('.btn');
 
-        <div class="card-section-body module-card-expanded">
-          <div class="module-card-expanded-title">Подробнее о модуле</div>
-          <ul class="module-card-description-list">
-            ${module.fullDescription.map((item) => `<li>${item}</li>`).join("")}
-          </ul>
-        </div>
-      `;
+    toggleBtn.addEventListener('click', () => {
+      const isOpen = section.classList.contains('open');
+      closeAllModuleCards();
 
-      const toggleBtn = section.querySelector(".module-card-toggle");
-      const expandedBody = section.querySelector(".module-card-expanded");
-      const openBtn = section.querySelector(".btn");
-
-      toggleBtn.addEventListener("click", () => {
-        const isOpen = section.classList.contains("open");
-        closeAllModuleCards();
-
-        if (!isOpen) {
-          section.classList.add("open");
-          expandedBody.classList.add("open");
-          toggleBtn.setAttribute("aria-expanded", "true");
-        }
-      });
-
-      openBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        openModule(module);
-      });
-
-      return section;
-    }
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      const modulesList = document.getElementById("modulesList");
-      const subscriptionStatusLabel = document.getElementById("subscriptionStatusLabel");
-      const modules = await waitForTenantModules();
-
-      if (subscriptionStatusLabel) {
-        subscriptionStatusLabel.textContent = USER_ACCESS.subscriptionActive
-          ? "Платные модули доступны"
-          : "Доступ только к базовым модулям";
-      }
-
-      if (modulesList) {
-        if (!modules.length) {
-          modulesList.innerHTML = `
-            <section class="card-section">
-              <div class="card-section-body modules-empty-state">
-                <p class="module-card-short-description">
-                  Для этого tenant пока не настроен список модулей.
-                </p>
-              </div>
-            </section>
-          `;
-        } else {
-          modules.forEach((module) => {
-            modulesList.appendChild(createModuleCard(module));
-          });
-        }
+      if (!isOpen) {
+        section.classList.add('open');
+        expandedBody.classList.add('open');
+        toggleBtn.setAttribute('aria-expanded', 'true');
       }
     });
-  </script>
+
+    openBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      openModule(module);
+    });
+
+    return section;
+  }
+
+  function renderModulesList() {
+    const modulesList = document.getElementById('modulesList');
+    const subscriptionStatusLabel = document.getElementById('subscriptionStatusLabel');
+
+    if (subscriptionStatusLabel) {
+      subscriptionStatusLabel.textContent = getSubscriptionStatusText();
+    }
+
+    if (!modulesList) return;
+
+    modulesList.innerHTML = '';
+
+    if (APPFEATURES.modules === false) {
+      modulesList.innerHTML = `
+        <section class="card-section">
+          <div class="card-section-body modules-empty-state">
+            <p class="module-card-short-description">
+              ${getText('modulesDisabledText', 'Раздел модулей сейчас недоступен.')}
+            </p>
+          </div>
+        </section>
+      `;
+      return;
+    }
+
+    if (!TENANTMODULES.length) {
+      modulesList.innerHTML = `
+        <section class="card-section">
+          <div class="card-section-body modules-empty-state">
+            <p class="module-card-short-description">
+              ${getText('modulesEmptyText', 'Для этого tenant пока не настроен список модулей.')}
+            </p>
+          </div>
+        </section>
+      `;
+      return;
+    }
+
+    TENANTMODULES.forEach(module => {
+      modulesList.appendChild(createModuleCard(module));
+    });
+  }
+
+  function applyAppFeatures(features) {
+    APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+
+    if (_modulesReady) {
+      renderModulesList();
+    }
+  }
+
+  window.addEventListener('message', event => {
+    const data = event.data;
+    if (!data || typeof data !== 'object') return;
+
+    if (data.type === 'app-features') {
+      applyAppFeatures(data.features || {});
+    } else if (data.type === 'user-modules' && Array.isArray(data.modules)) {
+      const accessMap = {};
+
+      data.modules.forEach(module => {
+        if (!module || !module.id) return;
+        accessMap[module.id] = {
+          paid: !!module.paid,
+          frozen: !!module.frozen,
+          daysLeft: typeof module.daysLeft === 'number' ? module.daysLeft : null
+        };
+      });
+
+      USERMODULEACCESS = accessMap;
+
+      if (_modulesReady) {
+        renderModulesList();
+      }
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    TENANTCONFIG = getTenantConfig();
+    TENANTMODULES = await waitForTenantModules();
+    _modulesReady = true;
+
+    renderModulesList();
+
+    window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+    window.parent?.postMessage?.({ type: 'request-user-modules' }, '*');
+  });
+</script>
 </body>
 </html>
