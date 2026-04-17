@@ -1140,3 +1140,137 @@ textarea.form-input,
 .module-links-page .accordion-card.open > .accordion-header .accordion-header-icon::before {
   transform: translate(-50%, -38%) rotate(225deg);
 }
+
+/* =========================================================
+   MODULE STATS PAGE
+   stats.html:
+   - summary block
+   - nested accordions
+   - dialogs list
+   - issued links cards
+========================================================= */
+
+.module-stats-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.module-stats-page > .accordion-card {
+  margin-bottom: 0;
+}
+
+.module-stats-page > .accordion-card > .accordion-body {
+  padding: 15px 16px 16px;
+}
+
+.module-stats-page > .accordion-card > .accordion-body > .accordion-card + .accordion-card {
+  margin-top: 15px;
+}
+
+.module-stats-page .accordion-header-icon {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  font-size: 0;
+  color: transparent;
+}
+
+.module-stats-page .accordion-header-icon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.8px solid #ffffff;
+  border-bottom: 1.8px solid #ffffff;
+  transform: translate(-50%, -62%) rotate(45deg);
+  transition: transform 0.18s ease;
+}
+
+.module-stats-page .accordion-card.open > .accordion-header .accordion-header-icon::before {
+  transform: translate(-50%, -38%) rotate(225deg);
+}
+
+.stats-dialogs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.module-stats-page .dialog-item {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.035);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.module-stats-page .dialog-item:hover {
+  transform: translateY(-1px);
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(59, 130, 246, 0.16);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.module-stats-page .dialog-item-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.module-stats-page .dialog-user {
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 800;
+  color: #111827;
+}
+
+.module-stats-page .dialog-time {
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #64748b;
+  text-align: right;
+}
+
+.module-stats-page .dialog-last-msg {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.stats-issued-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stats-issued-card {
+  padding: 0;
+  border-radius: 14px;
+}
+
+.stats-issued-card .module-summary {
+  gap: 8px;
+}
+
+@media (max-width: 380px) {
+  .module-stats-page .dialog-item-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .module-stats-page .dialog-time {
+    text-align: left;
+  }
+}
