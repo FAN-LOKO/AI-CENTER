@@ -347,6 +347,10 @@
   }
 
   function navigateFromHome(page, tab) {
+    if (page === 'partner.html' && APPFEATURES.affiliate === false) return;
+    if (page === 'modules.html' && APPFEATURES.modules === false) return;
+    if (page === 'payments.html' && APPFEATURES.payments === false) return;
+
     window.parent?.postMessage?.({ type: 'navigate', page, tab }, '*');
   }
 
@@ -435,6 +439,18 @@
     });
   }
 
+  function syncHomeCardsVisibility() {
+    const affiliateCard = document.getElementById('homeAffiliateCard');
+    if (affiliateCard) {
+      affiliateCard.hidden = APPFEATURES.affiliate === false;
+    }
+
+    const modulesCard = document.getElementById('homeModulesCard');
+    if (modulesCard) {
+      modulesCard.hidden = APPFEATURES.modules === false;
+    }
+  }
+
   function applyTenantContent() {
     TENANTCONFIG = getTenantConfig();
     const texts = TENANTCONFIG?.texts || {};
@@ -447,25 +463,12 @@
         getText('homeProfileSubtitle', TENANTCONFIG?.appName || 'Telegram WebApp');
     }
 
-    const sections = TENANTCONFIG?.sections || {};
-    const affiliateCard = document.getElementById('homeAffiliateCard');
-    if (affiliateCard) {
-      affiliateCard.hidden =
-        APPFEATURES.affiliate === false || sections.partnerProgram === false;
-    }
-
-    const modulesCard = document.getElementById('homeModulesCard');
-    if (modulesCard) modulesCard.hidden = APPFEATURES.modules === false;
+    syncHomeCardsVisibility();
   }
 
   function applyHomeFeatures(features) {
     APPFEATURES = { ...APPFEATURES, ...(features || {}) };
-
-    const affiliateCard = document.getElementById('homeAffiliateCard');
-    if (affiliateCard) affiliateCard.hidden = APPFEATURES.affiliate === false;
-
-    const modulesCard = document.getElementById('homeModulesCard');
-    if (modulesCard) modulesCard.hidden = APPFEATURES.modules === false;
+    syncHomeCardsVisibility();
 
     if (_modulesReady) renderHomeModules();
   }
