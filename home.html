@@ -81,438 +81,517 @@
     </div><!-- /.page -->
 
     <script>
-      let APPFEATURES = {
-        home: true,
-        myAgent: true,
-        modules: true,
-        sharedChat: true,
-        affiliate: true,
-        payments: true,
-        settings: true
-      };
+  let APPFEATURES = {
+    home: true,
+    myAgent: true,
+    modules: true,
+    sharedChat: true,
+    affiliate: true,
+    payments: true,
+    settings: true
+  };
 
-      let TENANTCONFIG = null;
-      let TENANTMODULES = [];
-      let USERMODULES = [];
-      let _modulesReady = false;
-      let _lastHomeModulesSignature = '';
+  let TENANTCONFIG = null;
+  let TENANTMODULES = [];
+  let USERMODULES = [];
+  let _modulesReady = false;
+  let _lastHomeModulesSignature = '';
 
-      const HOME_ALWAYS_VISIBLE_IDS = ['ai-agent', 'knowledge-hub', 'support-desk'];
-      const HOME_FREE_VISIBLE_IDS = ['knowledge-hub', 'support-desk'];
-      const HOME_AGENT_ID = 'ai-agent';
+  function getHomeModulesListEl() {
+    return document.getElementById('homeModulesList');
+  }
 
-      function getHomeModulesListEl() {
-        return document.getElementById('homeModulesList');
+  function getTenantConfig() {
+    try {
+      return window.parent?.AICAppShell?.getTenantConfig?.() || null;
+    } catch (e) {
+      console.error('[Home] tenant config read failed', e);
+      return null;
+    }
+  }
+
+  function getText(key, fallback = '') {
+    return TENANTCONFIG?.texts?.[key] ?? fallback;
+  }
+
+  function getHomeConfig() {
+    return TENANTCONFIG?.home || {};
+  }
+
+  function getHomeAlwaysVisibleIds() {
+    return getHomeConfig().alwaysVisibleModuleIds || ['ai-agent', 'knowledge-hub', 'support-desk'];
+  }
+
+  function getHomeFreeVisibleIds() {
+    return getHomeConfig().freeVisibleModuleIds || ['knowledge-hub', 'support-desk'];
+  }
+
+  function getHomeAgentId() {
+    return getHomeConfig().agentModuleId || 'ai-agent';
+  }
+
+  function getHomeModuleOrder() {
+    return getHomeConfig().moduleOrder || ['ai-agent', 'knowledge-hub', 'support-desk'];
+  }
+
+  function getTenantModulesRaw() {
+    try {
+      const raw = window.parent?.AICAppShell?.getTenantModules?.() || [];
+      return raw
+        .filter(m => m.enabled !== false)
+        .map(m => ({
+          id: m.id,
+          title: m.titleRu || m.title || m.id,
+          page: m.page,
+          requiresPayment: !!m.requiresPayment,
+          enabled: m.enabled !== false,
+          category: m.category || 'core'
+        }));
+    } catch (e) {
+      console.error('[Home] tenant modules read failed', e);
+      return [];
+    }
+  }
+
+  function waitForTenantModules(attempt) {
+    attempt = attempt || 0;
+    return new Promise(resolve => {
+      const mods = getTenantModulesRaw();
+
+      if (mods.length > 0) {
+        resolve(mods);
+      } else if (attempt < 20) {
+        setTimeout(() => waitForTenantModules(attempt + 1).then(resolve), 150);
+      } else {
+        console.warn('[Home] tenant modules not available after 20 attempts');
+        resolve([]);
       }
+    });
+  }
 
-      function getTenantConfig() {
-        try {
-          return window.parent?.AICAppShell?.getTenantConfig?.() || null;
-        } catch (e) {
-          console.error('[Home] tenant config read failed', e);
-          return null;
+  function getDefaultUserModuleAccess() {
+    return {
+      'ai-agent': {
+        paid: false,
+        frozen: true,
+        daysLeft: 5
+      }
+    };
+  }
+
+  function normalizeUserAccessMap(raw) {
+    if (!raw || typeof raw !== 'object') return {};
+    return raw;
+  }
+
+  function buildHomeModulesFromTenant(tenantModules, accessMap) {
+    const normalizedAccess = normalizeUserAccessMap(accessMap);
+    const alwaysVisibleIds = getHomeAlwaysVisibleIds();
+    const freeVisibleIds = getHomeFreeVisibleIds();
+    const agentId = getHomeAgentId();
+    const moduleOrder = getHomeModuleOrder();
+
+    return tenantModules
+      .filter(m => {
+        if (!m || m.enabled === false) return false;
+        if (alwaysVisibleIds.includes(m.id)) return true;
+
+        const access = normalizedAccess[m.id];
+        return !!access?.paid;
+      })
+      .map(m => {
+        const access = normalizedAccess[m.id] || null;
+        const isAlwaysFree = freeVisibleIds.includes(m.id);
+        const isAgent = m.id === agentId;
+
+        if (isAlwaysFree) {
+          return {
+            id: m.id,
+            title: m.title,
+            page: m.page,
+            requiresPayment: false,
+            category: m.category,
+            visible: true,
+            paid: true,
+            frozen: false,
+            daysLeft: null,
+            isAgent: false
+          };
         }
-      }
 
-      function getTenantModulesRaw() {
-        try {
-          const raw = window.parent?.AICAppShell?.getTenantModules?.() || [];
-          return raw
-            .filter(m => m.enabled !== false)
-            .map(m => ({
-              id: m.id,
-              title: m.titleRu || m.title || m.id,
-              page: m.page,
-              requiresPayment: !!m.requiresPayment,
-              enabled: m.enabled !== false,
-              category: m.category || 'core'
-            }));
-        } catch (e) {
-          console.error('[Home] tenant modules read failed', e);
-          return [];
+        if (isAgent) {
+          const paid = !!access?.paid;
+          const frozen = !paid;
+          return {
+            id: m.id,
+            title: m.title,
+            page: m.page,
+            requiresPayment: true,
+            category: m.category,
+            visible: true,
+            paid,
+            frozen,
+            daysLeft: typeof access?.daysLeft === 'number' ? access.daysLeft : null,
+            isAgent: true
+          };
         }
-      }
 
-      function waitForTenantModules(attempt) {
-        attempt = attempt || 0;
-        return new Promise(resolve => {
-          const mods = getTenantModulesRaw();
-
-          if (mods.length > 0) {
-            resolve(mods);
-          } else if (attempt < 20) {
-            setTimeout(() => waitForTenantModules(attempt + 1).then(resolve), 150);
-          } else {
-            console.warn('[Home] tenant modules not available after 20 attempts');
-            resolve([]);
-          }
-        });
-      }
-
-      function getDefaultUserModuleAccess() {
         return {
-          'ai-agent': {
-            paid: false,
-            frozen: true,
-            daysLeft: 5
-          }
+          id: m.id,
+          title: m.title,
+          page: m.page,
+          requiresPayment: true,
+          category: m.category,
+          visible: true,
+          paid: true,
+          frozen: !!access?.frozen,
+          daysLeft: typeof access?.daysLeft === 'number' ? access.daysLeft : null,
+          isAgent: false
+        };
+      })
+      .sort((a, b) => {
+        const aOrder = moduleOrder.indexOf(a.id);
+        const bOrder = moduleOrder.indexOf(b.id);
+
+        const normalizedA = aOrder === -1 ? 100 : aOrder;
+        const normalizedB = bOrder === -1 ? 100 : bOrder;
+
+        if (normalizedA !== normalizedB) return normalizedA - normalizedB;
+        return a.title.localeCompare(b.title, 'ru');
+      });
+  }
+
+  function getModuleBadge(mod) {
+    const agentId = getHomeAgentId();
+    const freeVisibleIds = getHomeFreeVisibleIds();
+
+    if (mod.id === agentId) {
+      return {
+        text: getText('homeBadgeBaseModule', 'Базовый модуль'),
+        cls: 'required'
+      };
+    }
+
+    if (freeVisibleIds.includes(mod.id)) {
+      return {
+        text: getText('homeBadgeFree', 'Бесплатный'),
+        cls: 'free'
+      };
+    }
+
+    return {
+      text: getText('homeBadgePaid', 'Оплачен'),
+      cls: 'paid'
+    };
+  }
+
+  function getModuleStatusText(mod) {
+    const freeVisibleIds = getHomeFreeVisibleIds();
+    const agentId = getHomeAgentId();
+
+    if (freeVisibleIds.includes(mod.id)) {
+      return {
+        text: getText('homeStatusFree', 'Доступен бесплатно'),
+        cls: 'is-free'
+      };
+    }
+
+    if (mod.id === agentId) {
+      const d = typeof mod.daysLeft === 'number' ? mod.daysLeft : null;
+
+      if (mod.frozen) {
+        if (d === 0) {
+          return {
+            text: getText('homeStatusInactive', 'Подписка не активна'),
+            cls: 'is-warning'
+          };
+        }
+
+        if (d !== null && d > 0) {
+          return {
+            text: getText('homeStatusDaysLeftShort', 'Осталось {days} дн.').replace('{days}', d),
+            cls: 'is-warning'
+          };
+        }
+
+        return {
+          text: getText('homeStatusActivationRequired', 'Требуется активация'),
+          cls: 'is-warning'
         };
       }
 
-      function normalizeUserAccessMap(raw) {
-        if (!raw || typeof raw !== 'object') return {};
-        return raw;
+      if (d !== null && d > 0) {
+        return {
+          text: getText('homeStatusPaidDaysLeft', 'Оплачен, осталось {days} дн.').replace('{days}', d),
+          cls: ''
+        };
       }
 
-      function buildHomeModulesFromTenant(tenantModules, accessMap) {
-        const normalizedAccess = normalizeUserAccessMap(accessMap);
+      return {
+        text: getText('homeStatusActive', 'Активен'),
+        cls: ''
+      };
+    }
 
-        return tenantModules
-          .filter(m => {
-            if (!m || m.enabled === false) return false;
-            if (HOME_ALWAYS_VISIBLE_IDS.includes(m.id)) return true;
+    if (typeof mod.daysLeft === 'number' && mod.daysLeft > 0) {
+      return {
+        text: getText('homeStatusPaidDaysLeft', 'Оплачен, осталось {days} дн.').replace('{days}', mod.daysLeft),
+        cls: ''
+      };
+    }
 
-            const access = normalizedAccess[m.id];
-            return !!access?.paid;
-          })
-          .map(m => {
-            const access = normalizedAccess[m.id] || null;
-            const isAlwaysFree = HOME_FREE_VISIBLE_IDS.includes(m.id);
-            const isAgent = m.id === HOME_AGENT_ID;
+    return {
+      text: getText('homeStatusPaid', 'Оплачен'),
+      cls: ''
+    };
+  }
 
-            if (isAlwaysFree) {
-              return {
-                id: m.id,
-                title: m.title,
-                page: m.page,
-                requiresPayment: false,
-                category: m.category,
-                visible: true,
-                paid: true,
-                frozen: false,
-                daysLeft: null,
-                isAgent: false
-              };
-            }
+  function navigateFromHome(page, tab) {
+    window.parent?.postMessage?.({ type: 'navigate', page, tab }, '*');
+  }
 
-            if (isAgent) {
-              const paid = !!access?.paid;
-              const frozen = !paid;
-              return {
-                id: m.id,
-                title: m.title,
-                page: m.page,
-                requiresPayment: true,
-                category: m.category,
-                visible: true,
-                paid,
-                frozen,
-                daysLeft: typeof access?.daysLeft === 'number' ? access.daysLeft : null,
-                isAgent: true
-              };
-            }
+  function getVisibleHomeModules() {
+    return USERMODULES.filter(m => {
+      if (!m.visible) return false;
+      if (APPFEATURES.modules === false) return false;
+      return true;
+    });
+  }
 
-            return {
-              id: m.id,
-              title: m.title,
-              page: m.page,
-              requiresPayment: true,
-              category: m.category,
-              visible: true,
-              paid: true,
-              frozen: !!access?.frozen,
-              daysLeft: typeof access?.daysLeft === 'number' ? access.daysLeft : null,
-              isAgent: false
-            };
-          })
-          .sort((a, b) => {
-            const order = {
-              'ai-agent': 0,
-              'knowledge-hub': 1,
-              'support-desk': 2
-            };
+  function renderHomeModules() {
+    const container = getHomeModulesListEl();
+    if (!container) return;
 
-            const aOrder = order[a.id] ?? 100;
-            const bOrder = order[b.id] ?? 100;
+    const visible = getVisibleHomeModules();
+    const nextSignature = JSON.stringify(
+      visible.map(mod => ({
+        id: mod.id,
+        frozen: !!mod.frozen,
+        paid: !!mod.paid,
+        daysLeft: typeof mod.daysLeft === 'number' ? mod.daysLeft : null
+      }))
+    );
 
-            if (aOrder !== bOrder) return aOrder - bOrder;
-            return a.title.localeCompare(b.title, 'ru');
-          });
-      }
+    if (_lastHomeModulesSignature === nextSignature) {
+      return;
+    }
 
-      function getModuleBadge(mod) {
-        if (mod.id === 'ai-agent') {
-          return { text: 'Базовый модуль', cls: 'required' };
-        }
+    _lastHomeModulesSignature = nextSignature;
 
-        if (HOME_FREE_VISIBLE_IDS.includes(mod.id)) {
-          return { text: 'Бесплатный', cls: 'free' };
-        }
+    if (!visible.length) {
+      container.innerHTML =
+        `<p class="home-empty-note">${getText('homeEmptyModulesText', 'Пока нет доступных модулей. Как только они появятся, вы увидите их здесь.')}</p>`;
+      return;
+    }
 
-        return { text: 'Оплачен', cls: 'paid' };
-      }
+    const agentId = getHomeAgentId();
 
-      function getModuleStatusText(mod) {
-        if (HOME_FREE_VISIBLE_IDS.includes(mod.id)) {
-          return { text: 'Доступен бесплатно', cls: 'is-free' };
-        }
+    container.innerHTML = visible.map(mod => {
+      const badge = getModuleBadge(mod);
+      const status = getModuleStatusText(mod);
+      const frozen = !!mod.frozen;
+      const actionText = frozen
+        ? (mod.id === agentId
+            ? getText('homeActionPayModule', 'Оплатить модуль')
+            : getText('homeActionUnavailable', 'Недоступен'))
+        : getText('homeActionOpenModule', 'Открыть модуль');
 
-        if (mod.id === 'ai-agent') {
-          const d = typeof mod.daysLeft === 'number' ? mod.daysLeft : null;
+      return `
+        <div class="home-module-item${frozen ? ' is-frozen' : ''}">
+          <div class="home-module-top">
+            <div class="home-module-title">${mod.title}</div>
+            <span class="home-module-badge ${badge.cls}">${badge.text}</span>
+          </div>
+          <p class="home-module-status ${status.cls}">${status.text}</p>
+          <div class="home-module-actions">
+            <button
+              type="button"
+              class="btn btn-block home-module-open-btn${frozen ? ' disabled' : ''}"
+              data-module-page="${mod.page}"
+              data-module-id="${mod.id}"
+              data-frozen="${frozen ? '1' : '0'}"
+            >
+              ${actionText}
+            </button>
+          </div>
+        </div>`;
+    }).join('');
 
-          if (mod.frozen) {
-            if (d === 0) return { text: 'Подписка не активна', cls: 'is-warning' };
-            if (d !== null && d > 0) return { text: `Осталось ${d} дн.`, cls: 'is-warning' };
-            return { text: 'Требуется активация', cls: 'is-warning' };
-          }
+    container.querySelectorAll('[data-module-page]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const page = btn.getAttribute('data-module-page');
+        const moduleId = btn.getAttribute('data-module-id');
+        const frozen = btn.getAttribute('data-frozen') === '1';
 
-          if (d !== null && d > 0) {
-            return { text: `Оплачен, осталось ${d} дн.`, cls: '' };
-          }
-
-          return { text: 'Активен', cls: '' };
-        }
-
-        if (typeof mod.daysLeft === 'number' && mod.daysLeft > 0) {
-          return { text: `Оплачен, осталось ${mod.daysLeft} дн.`, cls: '' };
-        }
-
-        return { text: 'Оплачен', cls: '' };
-      }
-
-      function navigateFromHome(page, tab) {
-        window.parent?.postMessage?.({ type: 'navigate', page, tab }, '*');
-      }
-
-      function getVisibleHomeModules() {
-        return USERMODULES.filter(m => {
-          if (!m.visible) return false;
-          if (APPFEATURES.modules === false) return false;
-          return true;
-        });
-      }
-
-      function renderHomeModules() {
-        const container = getHomeModulesListEl();
-        if (!container) return;
-
-        const visible = getVisibleHomeModules();
-        const nextSignature = JSON.stringify(
-          visible.map(mod => ({
-            id: mod.id,
-            frozen: !!mod.frozen,
-            paid: !!mod.paid,
-            daysLeft: typeof mod.daysLeft === 'number' ? mod.daysLeft : null
-          }))
-        );
-
-        if (_lastHomeModulesSignature === nextSignature) {
+        if (frozen && moduleId === getHomeAgentId()) {
+          navigateFromHome('payments.html', 'payments');
           return;
         }
 
-        _lastHomeModulesSignature = nextSignature;
+        if (frozen) return;
 
-        if (!visible.length) {
-          container.innerHTML =
-            '<p class="home-empty-note">Пока нет доступных модулей. Как только они появятся, вы увидите их здесь.</p>';
-          return;
-        }
+        if (page) navigateFromHome(page, 'modules');
+      });
+    });
+  }
 
-        container.innerHTML = visible.map(mod => {
-          const badge = getModuleBadge(mod);
-          const status = getModuleStatusText(mod);
-          const frozen = !!mod.frozen;
-          const actionText = frozen
-            ? (mod.id === 'ai-agent' ? 'Оплатить модуль' : 'Недоступен')
-            : 'Открыть модуль';
+  function applyTenantContent() {
+    TENANTCONFIG = getTenantConfig();
+    const texts = TENANTCONFIG?.texts || {};
 
-          return `
-            <div class="home-module-item${frozen ? ' is-frozen' : ''}">
-              <div class="home-module-top">
-                <div class="home-module-title">${mod.title}</div>
-                <span class="home-module-badge ${badge.cls}">${badge.text}</span>
-              </div>
-              <p class="home-module-status ${status.cls}">${status.text}</p>
-              <div class="home-module-actions">
-                <button
-                  type="button"
-                  class="btn btn-block home-module-open-btn${frozen ? ' disabled' : ''}"
-                  data-module-page="${mod.page}"
-                  data-module-id="${mod.id}"
-                  data-frozen="${frozen ? '1' : '0'}"
-                >
-                  ${actionText}
-                </button>
-              </div>
-            </div>`;
-        }).join('');
+    if (texts.appTitle) document.title = texts.appTitle;
 
-        container.querySelectorAll('[data-module-page]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const page = btn.getAttribute('data-module-page');
-            const moduleId = btn.getAttribute('data-module-id');
-            const frozen = btn.getAttribute('data-frozen') === '1';
+    const subtitleEl = document.getElementById('homeProfileSubtitle');
+    if (subtitleEl) {
+      subtitleEl.textContent =
+        getText('homeProfileSubtitle', TENANTCONFIG?.appName || 'Telegram WebApp');
+    }
 
-            if (frozen && moduleId === 'ai-agent') {
-              navigateFromHome('payments.html', 'payments');
-              return;
-            }
+    const sections = TENANTCONFIG?.sections || {};
+    const affiliateCard = document.getElementById('homeAffiliateCard');
+    if (affiliateCard) {
+      affiliateCard.hidden =
+        APPFEATURES.affiliate === false || sections.partnerProgram === false;
+    }
 
-            if (frozen) return;
+    const modulesCard = document.getElementById('homeModulesCard');
+    if (modulesCard) modulesCard.hidden = APPFEATURES.modules === false;
+  }
 
-            if (page) navigateFromHome(page, 'modules');
-          });
-        });
-      }
+  function applyHomeFeatures(features) {
+    APPFEATURES = { ...APPFEATURES, ...(features || {}) };
 
-      function applyTenantContent() {
-        TENANTCONFIG = getTenantConfig();
-        const texts = TENANTCONFIG?.texts || {};
+    const affiliateCard = document.getElementById('homeAffiliateCard');
+    if (affiliateCard) affiliateCard.hidden = APPFEATURES.affiliate === false;
 
-        if (texts.appTitle) document.title = texts.appTitle;
+    const modulesCard = document.getElementById('homeModulesCard');
+    if (modulesCard) modulesCard.hidden = APPFEATURES.modules === false;
 
-        const subtitleEl = document.getElementById('homeProfileSubtitle');
-        if (subtitleEl) subtitleEl.textContent = TENANTCONFIG?.appName || 'Telegram WebApp';
+    if (_modulesReady) renderHomeModules();
+  }
 
-        const sections = TENANTCONFIG?.sections || {};
-        const affiliateCard = document.getElementById('homeAffiliateCard');
-        if (affiliateCard) {
-          affiliateCard.hidden =
-            APPFEATURES.affiliate === false || sections.partnerProgram === false;
-        }
+  function getTelegramUser() {
+    return window.Telegram?.WebApp?.initDataUnsafe?.user || null;
+  }
 
-        const modulesCard = document.getElementById('homeModulesCard');
-        if (modulesCard) modulesCard.hidden = APPFEATURES.modules === false;
-      }
+  function getTelegramFullName(user) {
+    if (!user) return '';
+    return [user.first_name || '', user.last_name || ''].filter(Boolean).join(' ').trim();
+  }
 
-      function applyHomeFeatures(features) {
-        APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+  function setHomeAvatar(user, fullName) {
+    const fallbackEl = document.getElementById('homeProfileAvatarFallback');
+    const imgEl = document.getElementById('homeProfileAvatarImage');
+    const letter = (fullName || 'U').charAt(0).toUpperCase();
 
-        const affiliateCard = document.getElementById('homeAffiliateCard');
-        if (affiliateCard) affiliateCard.hidden = APPFEATURES.affiliate === false;
+    if (fallbackEl) {
+      fallbackEl.textContent = letter;
+      fallbackEl.hidden = false;
+    }
 
-        const modulesCard = document.getElementById('homeModulesCard');
-        if (modulesCard) modulesCard.hidden = APPFEATURES.modules === false;
+    if (imgEl) {
+      imgEl.hidden = true;
+      imgEl.removeAttribute('src');
+    }
 
-        if (_modulesReady) renderHomeModules();
-      }
+    if (user?.photo_url && imgEl) {
+      imgEl.src = user.photo_url;
+      imgEl.hidden = false;
+      if (fallbackEl) fallbackEl.hidden = true;
+    }
+  }
 
-      function getTelegramUser() {
-        return window.Telegram?.WebApp?.initDataUnsafe?.user || null;
-      }
+  function fillTelegramProfile() {
+    const user = getTelegramUser();
+    const nameEl = document.getElementById('homeProfileName');
+    const usernameEl = document.getElementById('homeProfileUsername');
+    const idEl = document.getElementById('homeProfileId');
+    const statusEl = document.getElementById('homeProfileStatus');
+    const noteEl = document.getElementById('homeProfileNote');
 
-      function getTelegramFullName(user) {
-        if (!user) return '';
-        return [user.first_name || '', user.last_name || ''].filter(Boolean).join(' ').trim();
-      }
+    if (!user) {
+      if (nameEl) nameEl.textContent = '';
+      if (usernameEl) usernameEl.textContent = getText('homeGuestUsername', 'username');
+      if (idEl) idEl.textContent = getText('homeGuestId', 'ID');
+      if (statusEl) statusEl.textContent = getText('homeGuestStatus', 'GUEST');
+      if (noteEl) noteEl.textContent = getText('homeDefaultNote', 'Telegram Mini App.');
+      setHomeAvatar(null, 'U');
+      return;
+    }
 
-      function setHomeAvatar(user, fullName) {
-        const fallbackEl = document.getElementById('homeProfileAvatarFallback');
-        const imgEl = document.getElementById('homeProfileAvatarImage');
-        const letter = (fullName || 'U').charAt(0).toUpperCase();
+    const fullName = getTelegramFullName(user);
+    if (nameEl) nameEl.textContent = fullName;
+    if (usernameEl) {
+      usernameEl.textContent = user.username
+        ? `@${user.username}`
+        : getText('homeUnknownUsername', 'username не указан');
+    }
+    if (idEl) idEl.textContent = user.id ? `ID: ${user.id}` : getText('homeGuestId', 'ID');
+    if (statusEl) statusEl.textContent = getText('homeOnlineStatus', 'ONLINE');
+    if (noteEl) noteEl.textContent = getText('homeDefaultNote', 'Telegram Mini App.');
+    setHomeAvatar(user, fullName || 'U');
+  }
 
-        if (fallbackEl) {
-          fallbackEl.textContent = letter;
-          fallbackEl.hidden = false;
-        }
+  function applyUserProfileOnHome(profile) {
+    if (!profile || typeof profile !== 'object') return;
+    const nameEl = document.getElementById('homeProfileName');
+    const noteEl = document.getElementById('homeProfileNote');
+    if (profile.fullName && nameEl) nameEl.textContent = profile.fullName;
+    if (profile.email && noteEl) noteEl.textContent = profile.email;
+  }
 
-        if (imgEl) {
-          imgEl.hidden = true;
-          imgEl.removeAttribute('src');
-        }
+  window.addEventListener('message', event => {
+    const data = event.data;
+    if (!data || typeof data !== 'object') return;
 
-        if (user?.photo_url && imgEl) {
-          imgEl.src = user.photo_url;
-          imgEl.hidden = false;
-          if (fallbackEl) fallbackEl.hidden = true;
-        }
-      }
+    if (data.type === 'app-features') {
+      applyHomeFeatures(data.features || {});
+    } else if (data.type === 'user-modules' && Array.isArray(data.modules)) {
+      const accessMap = {};
 
-      function fillTelegramProfile() {
-        const user = getTelegramUser();
-        const nameEl = document.getElementById('homeProfileName');
-        const usernameEl = document.getElementById('homeProfileUsername');
-        const idEl = document.getElementById('homeProfileId');
-        const statusEl = document.getElementById('homeProfileStatus');
-        const noteEl = document.getElementById('homeProfileNote');
-
-        if (!user) {
-          if (nameEl) nameEl.textContent = '';
-          if (usernameEl) usernameEl.textContent = 'username';
-          if (idEl) idEl.textContent = 'ID';
-          if (statusEl) statusEl.textContent = 'GUEST';
-          if (noteEl) noteEl.textContent = 'Telegram Mini App.';
-          setHomeAvatar(null, 'U');
-          return;
-        }
-
-        const fullName = getTelegramFullName(user);
-        if (nameEl) nameEl.textContent = fullName;
-        if (usernameEl) usernameEl.textContent = user.username ? `@${user.username}` : 'username не указан';
-        if (idEl) idEl.textContent = user.id ? `ID: ${user.id}` : 'ID';
-        if (statusEl) statusEl.textContent = 'ONLINE';
-        if (noteEl) noteEl.textContent = 'Telegram Mini App.';
-        setHomeAvatar(user, fullName || 'U');
-      }
-
-      function applyUserProfileOnHome(profile) {
-        if (!profile || typeof profile !== 'object') return;
-        const nameEl = document.getElementById('homeProfileName');
-        const noteEl = document.getElementById('homeProfileNote');
-        if (profile.fullName && nameEl) nameEl.textContent = profile.fullName;
-        if (profile.email && noteEl) noteEl.textContent = profile.email;
-      }
-
-      window.addEventListener('message', event => {
-        const data = event.data;
-        if (!data || typeof data !== 'object') return;
-
-        if (data.type === 'app-features') {
-          applyHomeFeatures(data.features || {});
-        } else if (data.type === 'user-modules' && Array.isArray(data.modules)) {
-          const accessMap = {};
-
-          data.modules.forEach(mod => {
-            if (!mod || !mod.id) return;
-            accessMap[mod.id] = {
-              paid: !!mod.paid,
-              frozen: !!mod.frozen,
-              daysLeft: typeof mod.daysLeft === 'number' ? mod.daysLeft : null
-            };
-          });
-
-          USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, accessMap);
-          _modulesReady = true;
-          renderHomeModules();
-        } else if (data.type === 'user-profile') {
-          applyUserProfileOnHome(data.profile || data);
-        }
+      data.modules.forEach(mod => {
+        if (!mod || !mod.id) return;
+        accessMap[mod.id] = {
+          paid: !!mod.paid,
+          frozen: !!mod.frozen,
+          daysLeft: typeof mod.daysLeft === 'number' ? mod.daysLeft : null
+        };
       });
 
-      document.addEventListener('DOMContentLoaded', async () => {
-        document.getElementById('allModulesLink')?.addEventListener('click', () =>
-          navigateFromHome('modules.html', 'modules'));
+      USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, accessMap);
+      _modulesReady = true;
+      renderHomeModules();
+    } else if (data.type === 'user-profile') {
+      applyUserProfileOnHome(data.profile || data);
+    }
+  });
 
-        document.getElementById('paymentLink')?.addEventListener('click', () =>
-          navigateFromHome('payments.html', 'payments'));
+  document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('allModulesLink')?.addEventListener('click', () =>
+      navigateFromHome('modules.html', 'modules'));
 
-        document.getElementById('openAffiliateButton')?.addEventListener('click', () =>
-          navigateFromHome('partner.html', 'affiliate'));
+    document.getElementById('paymentLink')?.addEventListener('click', () =>
+      navigateFromHome('payments.html', 'payments'));
 
-        fillTelegramProfile();
+    document.getElementById('openAffiliateButton')?.addEventListener('click', () =>
+      navigateFromHome('partner.html', 'affiliate'));
 
-        TENANTMODULES = await waitForTenantModules();
+    TENANTCONFIG = getTenantConfig();
 
-        const defaultAccessMap = getDefaultUserModuleAccess();
-        USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, defaultAccessMap);
-        _modulesReady = true;
+    fillTelegramProfile();
 
-        applyTenantContent();
-        renderHomeModules();
+    TENANTMODULES = await waitForTenantModules();
 
-        window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
-        window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
-      });
-    </script>
+    const defaultAccessMap = getDefaultUserModuleAccess();
+    USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, defaultAccessMap);
+    _modulesReady = true;
+
+    applyTenantContent();
+    renderHomeModules();
+
+    window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+    window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
+  });
+</script>
   </body>
 </html>
