@@ -237,6 +237,7 @@
   if (!listEl) return;
 
   if (!Array.isArray(items) || items.length === 0) {
+    listEl.className = '';
     listEl.innerHTML = '<div class="module-notice">Пока нет данных по выданным ссылкам.</div>';
     return;
   }
@@ -246,7 +247,7 @@
     partner: 'Партнерская'
   };
 
-  listEl.className = 'stats-issued-list';
+  listEl.className = 'stats-issued-links-list';
 
   listEl.innerHTML = items.map((item) => {
     const username = item.username || '—';
@@ -260,7 +261,7 @@
               <div class="profile-value">${escapeHtml(typeMap[link.type] || '—')}</div>
             </div>
             <div class="profile-row">
-              <div class="profile-label">Время</div>
+              <div class="profile-label">Время выдачи</div>
               <div class="profile-value">${escapeHtml(link.timeLabel || '—')}</div>
             </div>
           </div>
@@ -271,17 +272,23 @@
               <div class="profile-label">Тип ссылки</div>
               <div class="profile-value">—</div>
             </div>
+            <div class="profile-row">
+              <div class="profile-label">Время выдачи</div>
+              <div class="profile-value">—</div>
+            </div>
           </div>
         `;
 
     return `
       <div class="stats-issued-card">
-        <div class="stats-issued-head">
-          <div class="stats-issued-client-label">Кому</div>
-          <div class="stats-issued-client-name">${escapeHtml(username)}</div>
-        </div>
-        <div class="stats-issued-links">
-          ${linksHtml}
+        <div class="module-summary">
+          <div class="stats-issued-head">
+            <div class="stats-issued-client-label">Кому</div>
+            <div class="stats-issued-client-name">${escapeHtml(username)}</div>
+          </div>
+          <div class="stats-issued-links">
+            ${linksHtml}
+          </div>
         </div>
       </div>
     `;
