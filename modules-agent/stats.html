@@ -85,27 +85,7 @@
 
             <div class="card-section-body accordion-body" style="display: block;">
               <div id="issuedLinksList" class="stats-issued-links-list">
-                <div class="stats-issued-card">
-                  <div class="module-summary">
-                    <div class="stats-issued-head">
-                      <div class="stats-issued-client-label">Кому</div>
-                      <div class="stats-issued-client-name">@user1</div>
-                    </div>
-
-                    <div class="stats-issued-links">
-                      <div class="stats-issued-link">
-                        <div class="profile-row">
-                          <div class="profile-label">Тип ссылки</div>
-                          <div class="profile-value">Клиентская</div>
-                        </div>
-                        <div class="profile-row">
-                          <div class="profile-label">Время выдачи</div>
-                          <div class="profile-value">17.04.2026 • 10:45</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <div class="module-notice">Загрузка ссылок...</div>
               </div>
             </div>
           </section>
@@ -253,58 +233,70 @@
       });
     }
 
-   function renderIssuedLinksList(issuedLinks, dialogs) {
-  const container = document.getElementById('issuedLinksList');
-  if (!container) return;
+    function getDialogDisplayNumberById(dialogId, dialogs) {
+      const list = Array.isArray(dialogs) ? dialogs : [];
+      const index = list.findIndex(
+        (item) => String(item?.id || item?.dialogId || '') === String(dialogId || '')
+      );
+      if (index < 0) return '—';
+      return formatSequenceNumber(index + 1);
+    }
 
-  if (!Array.isArray(issuedLinks) || issuedLinks.length === 0) {
-    container.innerHTML = '<div class="module-notice">Выданных ссылок пока нет.</div>';
-    return;
-  }
+    function renderIssuedLinksList(issuedLinks, dialogs) {
+      const container = document.getElementById('issuedLinksList');
+      if (!container) return;
 
-  container.innerHTML = issuedLinks.map((item) => {
-    const clientName = item?.clientName || item?.username || '@username';
-    const linkType = item?.type || item?.linkType || item?.title || 'Клиентская';
-    const issuedAt = item?.issuedAt || item?.timeLabel || item?.time || '—';
-    const dialogNumber = item?.dialogId
-      ? getDialogDisplayNumberById(item.dialogId, dialogs)
-      : '—';
+      if (!Array.isArray(issuedLinks) || issuedLinks.length === 0) {
+        container.innerHTML = '<div class="module-notice">Выданных ссылок пока нет.</div>';
+        return;
+      }
 
-    return `
-      <div class="stats-issued-card">
-        <div class="module-summary">
-          <div class="stats-issued-head">
-            <div class="stats-issued-client-label">Кому</div>
-            <div class="stats-issued-client-name">${escapeHtml(clientName)}</div>
-          </div>
+      container.innerHTML = issuedLinks.map((item) => {
+        const clientName = item?.clientName || item?.username || '@username';
+        const linkType = item?.type || item?.linkType || item?.title || 'Клиентская';
+        const issuedAt = item?.issuedAt || item?.timeLabel || item?.time || '—';
+        const dialogNumber = item?.dialogId
+          ? getDialogDisplayNumberById(item.dialogId, dialogs)
+          : '—';
 
-          <div class="stats-issued-links">
-            <div class="stats-issued-link">
-              <div class="profile-row">
-                <div class="profile-label">Диалог</div>
-                <div class="profile-value">${escapeHtml(dialogNumber)}</div>
+        return `
+          <div class="stats-issued-card">
+            <div class="module-summary">
+              <div class="stats-issued-head">
+                <div class="stats-issued-client-label">Кому</div>
+                <div class="stats-issued-client-name">${escapeHtml(clientName)}</div>
               </div>
-              <div class="profile-row">
-                <div class="profile-label">Тип ссылки</div>
-                <div class="profile-value">${escapeHtml(linkType)}</div>
-              </div>
-              <div class="profile-row">
-                <div class="profile-label">Время</div>
-                <div class="profile-value">${escapeHtml(issuedAt)}</div>
+
+              <div class="stats-issued-links">
+                <div class="stats-issued-link">
+                  <div class="profile-row">
+                    <div class="profile-label">Диалог</div>
+                    <div class="profile-value">${escapeHtml(dialogNumber)}</div>
+                  </div>
+                  <div class="profile-row">
+                    <div class="profile-label">Тип ссылки</div>
+                    <div class="profile-value">${escapeHtml(linkType)}</div>
+                  </div>
+                  <div class="profile-row">
+                    <div class="profile-label">Время</div>
+                    <div class="profile-value">${escapeHtml(issuedAt)}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
+        `;
+      }).join('');
+    }
 
     function renderAgentStatsPage() {
       const statsData = getAgentStats();
+      const dialogs = Array.isArray(statsData?.dialogs) ? statsData.dialogs : [];
+      const issuedLinks = Array.isArray(statsData?.issuedLinks) ? statsData.issuedLinks : [];
+
       renderStatsSummary(statsData);
-      renderDialogsList(Array.isArray(statsData?.dialogs) ? statsData.dialogs : []);
-      renderIssuedLinksList(Array.isArray(statsData?.issuedLinks) ? statsData.issuedLinks : []);
+      renderDialogsList(dialogs);
+      renderIssuedLinksList(issuedLinks, dialogs);
     }
 
     window.addEventListener('message', (event) => {
