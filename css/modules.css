@@ -1574,3 +1574,13 @@ textarea.form-input,
     min-height: 44px;
   }
 }
+
+.module-stats-page > .card-section,
+.module-dialogs-page > .card-section {
+  margin-bottom: 8px !important;
+}
+
+.module-stats-page > .card-section:last-child,
+.module-dialogs-page > .card-section:last-child {
+  margin-bottom: 0 !important;
+}
