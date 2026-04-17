@@ -67,63 +67,261 @@
               </p>
 
               <div id="dialogsList" class="stats-dialogs-list">
-                <div class="dialog-item" onclick="openDialog('dlg-1', '@user1', 'Telegram')">
-                  <div class="dialog-item-row">
-                    <span class="dialog-user">@user1</span>
-                    <span class="dialog-time">18.03.2026 • 10:45</span>
-                  </div>
-                  <div class="dialog-last-msg">Спасибо за инфо!</div>
-                </div>
-
-                <div class="dialog-item" onclick="openDialog('dlg-2', '@user2', 'Telegram')">
-                  <div class="dialog-item-row">
-                    <span class="dialog-user">@user2</span>
-                    <span class="dialog-time">18.03.2026 • 09:12</span>
-                  </div>
-                  <div class="dialog-last-msg">Можно подробнее про условия?</div>
-                </div>
+                <div class="module-notice">Загрузка диалогов...</div>
               </div>
             </div>
           </section>
 
           <section class="card-section accordion-card open">
-  <button class="card-section-header accordion-header" type="button" onclick="toggleAccordion(this)">
-    <span class="stats-accordion-head">
-      <span class="card-section-title">Выданные ссылки</span>
-      <span class="stats-accordion-subtitle">
-        Здесь будут отображаться последние выданные клиентам ссылки.
-      </span>
-    </span>
-    <span class="accordion-header-icon">▲</span>
-  </button>
+            <button class="card-section-header accordion-header" type="button" onclick="toggleAccordion(this)">
+              <span class="stats-accordion-head">
+                <span class="card-section-title">Выданные ссылки</span>
+                <span class="stats-accordion-subtitle">
+                  Здесь будут отображаться последние выданные клиентам ссылки.
+                </span>
+              </span>
+              <span class="accordion-header-icon">▲</span>
+            </button>
 
-  <div class="card-section-body accordion-body" style="display: block;">
-    <div id="issuedLinksList" class="stats-issued-links-list">
-      <div class="stats-issued-card">
-        <div class="module-summary">
-          <div class="stats-issued-head">
-            <div class="stats-issued-client-label">Кому</div>
-            <div class="stats-issued-client-name">@user1</div>
-          </div>
+            <div class="card-section-body accordion-body" style="display: block;">
+              <div id="issuedLinksList" class="stats-issued-links-list">
+                <div class="stats-issued-card">
+                  <div class="module-summary">
+                    <div class="stats-issued-head">
+                      <div class="stats-issued-client-label">Кому</div>
+                      <div class="stats-issued-client-name">@user1</div>
+                    </div>
 
-          <div class="stats-issued-links">
-            <div class="stats-issued-link">
-              <div class="profile-row">
-                <div class="profile-label">Тип ссылки</div>
-                <div class="profile-value">Клиентская</div>
+                    <div class="stats-issued-links">
+                      <div class="stats-issued-link">
+                        <div class="profile-row">
+                          <div class="profile-label">Тип ссылки</div>
+                          <div class="profile-value">Клиентская</div>
+                        </div>
+                        <div class="profile-row">
+                          <div class="profile-label">Время выдачи</div>
+                          <div class="profile-value">17.04.2026 • 10:45</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="profile-row">
-                <div class="profile-label">Время выдачи</div>
-                <div class="profile-value">17.04.2026 • 10:45</div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    function navigateAgent(page) {
+      try {
+        window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function toggleAccordion(button) {
+      const card = button.closest('.accordion-card');
+      const body = card?.querySelector('.accordion-body');
+      const icon = button.querySelector('.accordion-header-icon');
+
+      if (!card || !body || !icon) return;
+
+      const isOpen = card.classList.contains('open');
+
+      if (isOpen) {
+        card.classList.remove('open');
+        body.style.display = 'none';
+        icon.textContent = '▼';
+      } else {
+        card.classList.add('open');
+        body.style.display = 'block';
+        icon.textContent = '▲';
+      }
+    }
+
+    function formatSequenceNumber(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n) || n <= 0) return '000';
+      return String(n).padStart(3, '0');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getAgentStats() {
+      try {
+        const stats = window.parent?.AICAppShell?.getAgentStats?.();
+        if (stats && typeof stats === 'object') return stats;
+      } catch (error) {
+        console.error('[AI CENTER][Agent Stats] read failed', error);
+      }
+
+      return {
+        dialogs: [],
+        issuedLinks: [],
+        stats: {}
+      };
+    }
+
+    function renderStatsSummary(statsData) {
+      const dialogs = Array.isArray(statsData?.dialogs) ? statsData.dialogs : [];
+      const issuedLinks = Array.isArray(statsData?.issuedLinks) ? statsData.issuedLinks : [];
+
+      const statDialogsTotal = document.getElementById('statDialogsTotal');
+      const statRefLinksTotal = document.getElementById('statRefLinksTotal');
+      const statDialogsToday = document.getElementById('statDialogsToday');
+      const statRefLinksToday = document.getElementById('statRefLinksToday');
+
+      if (statDialogsTotal) statDialogsTotal.textContent = String(dialogs.length);
+      if (statRefLinksTotal) statRefLinksTotal.textContent = String(issuedLinks.length);
+
+      if (statDialogsToday) {
+        statDialogsToday.textContent = String(
+          Number(statsData?.stats?.dialogsToday ?? statsData?.dialogsToday ?? 0)
+        );
+      }
+
+      if (statRefLinksToday) {
+        statRefLinksToday.textContent = String(
+          Number(statsData?.stats?.issuedLinksToday ?? statsData?.refLinksToday ?? statsData?.issuedLinksToday ?? 0)
+        );
+      }
+    }
+
+    function openDialog(dialogId, username, channel, timeLabel, lastMessage) {
+      try {
+        window.parent?.postMessage?.(
+          {
+            type: 'agent-open-dialog',
+            dialogId,
+            username,
+            channel,
+            timeLabel,
+            lastMessage
+          },
+          '*'
+        );
+      } catch (error) {
+        console.error('[AI CENTER][Agent Stats] open dialog failed', error);
+      }
+    }
+
+    function renderDialogsList(dialogs) {
+      const container = document.getElementById('dialogsList');
+      if (!container) return;
+
+      if (!Array.isArray(dialogs) || dialogs.length === 0) {
+        container.innerHTML = '<div class="module-notice">Диалогов пока нет.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+
+      dialogs.forEach((dialog, index) => {
+        const item = document.createElement('div');
+        item.className = 'dialog-item';
+
+        const username = dialog?.username || dialog?.clientName || '@username';
+        const channel = dialog?.channel || 'Telegram';
+        const timeLabel = dialog?.timeLabel || dialog?.time || '';
+        const lastMessage = dialog?.lastMessage || dialog?.message || 'Сообщений пока нет';
+        const displayNumber = formatSequenceNumber(index + 1);
+
+        item.innerHTML = `
+          <div class="dialog-item-row">
+            <span class="dialog-user">${displayNumber} • ${escapeHtml(username)}</span>
+            <span class="dialog-time">${escapeHtml(timeLabel)}</span>
+          </div>
+          <div class="dialog-last-msg">${escapeHtml(lastMessage)}</div>
+        `;
+
+        item.addEventListener('click', () => {
+          openDialog(dialog?.id || dialog?.dialogId || '', username, channel, timeLabel, lastMessage);
+        });
+
+        container.appendChild(item);
+      });
+    }
+
+    function renderIssuedLinksList(issuedLinks) {
+      const container = document.getElementById('issuedLinksList');
+      if (!container) return;
+
+      if (!Array.isArray(issuedLinks) || issuedLinks.length === 0) {
+        container.innerHTML = '<div class="module-notice">Выданных ссылок пока нет.</div>';
+        return;
+      }
+
+      container.innerHTML = issuedLinks.map((item) => {
+        const clientName = item?.clientName || item?.username || '@username';
+        const linkType = item?.type || item?.linkType || 'Клиентская';
+        const issuedAt = item?.issuedAt || item?.timeLabel || item?.time || '—';
+
+        return `
+          <div class="stats-issued-card">
+            <div class="module-summary">
+              <div class="stats-issued-head">
+                <div class="stats-issued-client-label">Кому</div>
+                <div class="stats-issued-client-name">${escapeHtml(clientName)}</div>
+              </div>
+
+              <div class="stats-issued-links">
+                <div class="stats-issued-link">
+                  <div class="profile-row">
+                    <div class="profile-label">Тип ссылки</div>
+                    <div class="profile-value">${escapeHtml(linkType)}</div>
+                  </div>
+                  <div class="profile-row">
+                    <div class="profile-label">Время выдачи</div>
+                    <div class="profile-value">${escapeHtml(issuedAt)}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-       
+        `;
+      }).join('');
+    }
+
+    function renderAgentStatsPage() {
+      const statsData = getAgentStats();
+      renderStatsSummary(statsData);
+      renderDialogsList(Array.isArray(statsData?.dialogs) ? statsData.dialogs : []);
+      renderIssuedLinksList(Array.isArray(statsData?.issuedLinks) ? statsData.issuedLinks : []);
+    }
+
+    window.addEventListener('message', (event) => {
+      try {
+        const data = event?.data;
+        if (!data || typeof data !== 'object') return;
+
+        if (
+          data.type === 'agent-stats-update' ||
+          data.type === 'agent-dialog-update' ||
+          data.type === 'agent-links-update'
+        ) {
+          renderAgentStatsPage();
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAgentStatsPage();
+    });
+  </script>
+
   <script src="../js/stats.js"></script>
 </body>
 </html>
