@@ -252,19 +252,23 @@
 
     const linksHtml = links.length
       ? links.map((link) => `
-          <div class="module-summary-row">
-            <div class="module-summary-label">Тип ссылки</div>
-            <div class="module-summary-value">${escapeHtml(typeMap[link.type] || link.type || '—')}</div>
-          </div>
-          <div class="module-summary-row">
-            <div class="module-summary-label">Время</div>
-            <div class="module-summary-value">${escapeHtml(link.timeLabel || '—')}</div>
+          <div class="issued-link-inner">
+            <div class="module-summary-row">
+              <div class="module-summary-label">Тип ссылки</div>
+              <div class="module-summary-value">${escapeHtml(typeMap[link.type] || '—')}</div>
+            </div>
+            <div class="module-summary-row">
+              <div class="module-summary-label">Время</div>
+              <div class="module-summary-value">${escapeHtml(link.timeLabel || '—')}</div>
+            </div>
           </div>
         `).join('')
       : `
-          <div class="module-summary-row">
-            <div class="module-summary-label">Тип ссылки</div>
-            <div class="module-summary-value">—</div>
+          <div class="issued-link-inner">
+            <div class="module-summary-row">
+              <div class="module-summary-label">Тип ссылки</div>
+              <div class="module-summary-value">—</div>
+            </div>
           </div>
         `;
 
@@ -275,7 +279,9 @@
             <div class="module-summary-label">Кому</div>
             <div class="module-summary-value">${escapeHtml(username)}</div>
           </div>
-          ${linksHtml}
+          <div class="issued-link-list">
+            ${linksHtml}
+          </div>
         </div>
       </div>
     `;
