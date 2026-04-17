@@ -21,8 +21,14 @@
     "bgAccent": "#3b82f6",
     "bgEnd": "#0b3c78"
   },
-  "partnerProgram": {
-    "enabled": true
+  "features": {
+    "home": true,
+    "myAgent": true,
+    "modules": true,
+    "sharedChat": true,
+    "affiliate": false,
+    "payments": true,
+    "settings": true
   },
   "plans": [
     {
