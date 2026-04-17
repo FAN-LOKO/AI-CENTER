@@ -298,6 +298,8 @@
 
   function bindMessageBus() {
     window.addEventListener("message", (e) => {
+      console.log("[shell] message received", e.data);
+      
       const data = e.data;
       if (!data || typeof data !== "object") return;
 
