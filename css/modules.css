@@ -1194,6 +1194,8 @@ textarea.form-input,
   transform: translate(-50%, -38%) rotate(225deg);
 }
 
+/* dialogs */
+
 .stats-dialogs-list {
   display: flex;
   flex-direction: column;
@@ -1249,28 +1251,88 @@ textarea.form-input,
   color: #475569;
 }
 
+/* issued links */
+
 .stats-issued-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stats-issued-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.035);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.stats-issued-card .module-summary {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.stats-issued-card {
-  padding: 0;
-  border-radius: 14px;
+.stats-issued-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
 }
 
-.stats-issued-card .module-summary {
-  gap: 8px;
+.stats-issued-client-label {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #64748b;
 }
 
-@media (max-width: 380px) {
-  .module-stats-page .dialog-item-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .module-stats-page .dialog-time {
-    text-align: left;
-  }
+.stats-issued-client-name {
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 800;
+  color: #111827;
+  text-align: right;
+  word-break: break-word;
 }
+
+.stats-issued-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stats-issued-link {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.stats-issued-link .profile-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.stats-issued-link .profile-row:first-child {
+  padding-top: 0;
+}
+
+.stats-issued-link .profile-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.stats-issued-link .profile-label {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.stats-issued-link .profile-value {
