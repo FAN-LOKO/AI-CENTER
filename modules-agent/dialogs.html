@@ -95,16 +95,31 @@
     }
   }
 
-  function formatDialogDisplayId(dialogId) {
-    const raw = String(dialogId || '').trim();
-    const numericPart = raw.replace(/^dlg-/, '');
-    const n = Number(numericPart);
-
-    if (!Number.isFinite(n) || n < 0) {
+  function formatSequenceNumber(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n <= 0) {
       return '000';
     }
-
     return String(n).padStart(3, '0');
+  }
+
+  function getDialogDisplayNumber(dialogId) {
+    const currentId = String(dialogId || '').trim();
+    if (!currentId) return '000';
+
+    try {
+      const stats = window.parent?.AICAppShell?.getAgentStats?.();
+      const dialogs = Array.isArray(stats?.dialogs) ? stats.dialogs : [];
+      const index = dialogs.findIndex((item) => String(item?.id || '') === currentId);
+
+      if (index >= 0) {
+        return formatSequenceNumber(index + 1);
+      }
+    } catch (error) {
+      console.error('[AI CENTER][Agent Dialogs] display number resolve failed', error);
+    }
+
+    return '000';
   }
 
   function normalizeDialogState(raw) {
@@ -154,7 +169,7 @@
 
     if (dialogTitle) dialogTitle.textContent = meta.title || 'Диалог с клиентом';
     if (dialogSubtitle) dialogSubtitle.textContent = meta.subtitle || 'Клиент: @username • Канал: Telegram';
-    if (dialogIdLabel) dialogIdLabel.textContent = formatDialogDisplayId(meta.dialogId);
+    if (dialogIdLabel) dialogIdLabel.textContent = getDialogDisplayNumber(meta.dialogId);
     if (dialogStatusLabel) dialogStatusLabel.textContent = meta.status || 'Активен';
   }
 
