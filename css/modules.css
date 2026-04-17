@@ -1168,6 +1168,10 @@ textarea.form-input,
   margin-top: 15px;
 }
 
+.module-stats-page .accordion-header {
+  align-items: flex-start;
+}
+
 .module-stats-page .accordion-header-icon {
   position: relative;
   width: 14px;
@@ -1175,6 +1179,7 @@ textarea.form-input,
   flex: 0 0 14px;
   font-size: 0;
   color: transparent;
+  margin-top: 2px;
 }
 
 .module-stats-page .accordion-header-icon::before {
@@ -1192,6 +1197,24 @@ textarea.form-input,
 
 .module-stats-page .accordion-card.open > .accordion-header .accordion-header-icon::before {
   transform: translate(-50%, -38%) rotate(225deg);
+}
+
+.stats-accordion-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.stats-accordion-subtitle {
+  display: block;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: left;
 }
 
 /* dialogs */
