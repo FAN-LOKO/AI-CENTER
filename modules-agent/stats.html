@@ -99,12 +99,14 @@
     let TENANTCONFIG = null;
     let APPFEATURES = {
       home: true,
-      myAgent: true,
       modules: true,
       sharedChat: true,
       affiliate: true,
       payments: true,
-      settings: true
+      settings: true,
+      stats: true,
+      dialogs: true,
+      agentDialogs: true
     };
 
     function getShell() {
@@ -138,17 +140,11 @@
       return TENANTCONFIG?.texts?.[key] ?? fallback;
     }
 
-    function navigateAgent(page) {
-      if (APPFEATURES.myAgent === false) {
-        console.warn('[AI CENTER][Agent Stats] agent module is disabled');
-        return;
-      }
-
-      try {
-        window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*');
-      } catch (error) {
-        console.error('[AI CENTER][Agent Stats] navigate failed', error);
-      }
+    function isAgentStatsAvailable() {
+      if (APPFEATURES.modules === false) return false;
+      if (APPFEATURES.stats === false) return false;
+      if (APPFEATURES.agentDialogs === false) return false;
+      return true;
     }
 
     function toggleAccordion(button) {
@@ -190,7 +186,12 @@
 
     function getAgentStats() {
       try {
-        const stats = getShell()?.getAgentStats?.();
+        const shell = getShell();
+
+        const stats =
+          shell?.getAgentModuleStats?.() ||
+          shell?.getAgentStats?.();
+
         if (stats && typeof stats === 'object') return stats;
       } catch (error) {
         console.error('[AI CENTER][Agent Stats] read failed', error);
@@ -277,8 +278,8 @@
     }
 
     function openDialog(dialogId, username, channel, timeLabel, lastMessage) {
-      if (APPFEATURES.myAgent === false) {
-        console.warn('[AI CENTER][Agent Stats] agent module is disabled');
+      if (!isAgentStatsAvailable()) {
+        console.warn('[AI CENTER][Agent Stats] module dialogs are disabled');
         return;
       }
 
@@ -290,7 +291,8 @@
             username,
             channel,
             timeLabel,
-            lastMessage
+            lastMessage,
+            source: 'stats'
           },
           '*'
         );
@@ -303,9 +305,9 @@
       const container = document.getElementById('dialogsList');
       if (!container) return;
 
-      if (APPFEATURES.myAgent === false) {
+      if (!isAgentStatsAvailable()) {
         container.innerHTML = `<div class="module-notice">${escapeHtml(
-          getText('agentStatsDisabledText', 'Модуль агента сейчас недоступен.')
+          getText('agentModuleDisabledText', 'Модуль диалогов сейчас недоступен.')
         )}</div>`;
         return;
       }
@@ -360,9 +362,9 @@
       const container = document.getElementById('issuedLinksList');
       if (!container) return;
 
-      if (APPFEATURES.myAgent === false) {
+      if (!isAgentStatsAvailable()) {
         container.innerHTML = `<div class="module-notice">${escapeHtml(
-          getText('agentStatsDisabledText', 'Модуль агента сейчас недоступен.')
+          getText('agentModuleDisabledText', 'Модуль диалогов сейчас недоступен.')
         )}</div>`;
         return;
       }
@@ -473,7 +475,6 @@
       renderAgentStatsPage();
     }
 
-    window.navigateAgent = navigateAgent;
     window.toggleAccordion = toggleAccordion;
 
     window.addEventListener('message', (event) => {
@@ -488,7 +489,8 @@
         if (
           data.type === 'agent-stats-update' ||
           data.type === 'agent-dialog-update' ||
-          data.type === 'agent-links-update'
+          data.type === 'agent-links-update' ||
+          data.type === 'agent-module-stats-update'
         ) {
           renderAgentStatsPage();
         }
@@ -505,6 +507,7 @@
       renderAgentStatsPage();
 
       window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+      window.parent?.postMessage?.({ type: 'request-agent-module-stats' }, '*');
     });
   })();
 </script>
