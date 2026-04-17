@@ -32,6 +32,10 @@
             <span class="profile-label">Статус</span>
             <span class="profile-value" id="dialogStatusLabel">Активен</span>
           </div>
+          <div class="profile-row">
+            <span class="profile-label">Последнее сообщение</span>
+            <span class="profile-value" id="dialogLastClientTimeLabel">—</span>
+          </div>
         </div>
       </section>
 
@@ -84,6 +88,7 @@
       status: 'Активен',
       clientName: '@username',
       channel: 'Telegram',
+      timeLabel: '',
       messages: []
     };
 
@@ -125,11 +130,9 @@
     function normalizeDialogState(raw) {
       const data = raw && typeof raw === 'object' ? raw : {};
       const dialogId = data.dialogId || data.id || '';
-
       const clientName = data.clientName || data.username || '@username';
       const channel = data.channel || 'Telegram';
       const displayNumber = dialogId ? getDialogDisplayNumber(dialogId) : '000';
-
       const titleFromNumber = displayNumber && displayNumber !== '000'
         ? `Диалог ${displayNumber}`
         : 'Диалог с клиентом';
@@ -141,6 +144,7 @@
         status: data.status || 'Активен',
         clientName,
         channel,
+        timeLabel: data.timeLabel || '',
         messages: Array.isArray(data.messages) ? data.messages : []
       };
     }
@@ -176,6 +180,7 @@
       const dialogStatusLabel = document.getElementById('dialogStatusLabel');
       const dialogTitle = document.getElementById('dialogTitle');
       const dialogSubtitle = document.getElementById('dialogSubtitle');
+      const dialogLastClientTimeLabel = document.getElementById('dialogLastClientTimeLabel');
 
       const dialogId = meta.dialogId || '';
       const displayNumber = dialogId ? getDialogDisplayNumber(dialogId) : '000';
@@ -200,6 +205,10 @@
 
       if (dialogStatusLabel) {
         dialogStatusLabel.textContent = meta.status || 'Активен';
+      }
+
+      if (dialogLastClientTimeLabel) {
+        dialogLastClientTimeLabel.textContent = meta.timeLabel || '—';
       }
     }
 
