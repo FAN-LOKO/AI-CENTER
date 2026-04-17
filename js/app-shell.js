@@ -35,15 +35,58 @@
   let currentTab = "home";
   let USERPROFILE = null;
 
-    // Agent stats state / Состояние статистики агента
+  // Agent stats state / Состояние статистики агента
   let AGENT_STATS = {
-    dialogsTotal: 0,
-    refLinksTotal: 0,
-    dialogsToday: 0,
-    refLinksToday: 0,
-    dialogs: [],
-    issuedLinks: []
-  };
+  dialogsTotal: 3,
+  refLinksTotal: 4,
+  dialogsToday: 2,
+  refLinksToday: 1,
+  dialogs: [
+    {
+      id: "dlg-101",
+      username: "@anna_fit",
+      channel: "Telegram",
+      timeLabel: "17.04.2026 • 12:15",
+      lastMessage: "Здравствуйте, хочу узнать про тариф с ботом-консультантом"
+    },
+    {
+      id: "dlg-102",
+      username: "@sergey_run",
+      channel: "Telegram",
+      timeLabel: "17.04.2026 • 11:42",
+      lastMessage: "Спасибо, пришлите, пожалуйста, ссылку на оплату"
+    },
+    {
+      id: "dlg-103",
+      username: "@olga_wellness",
+      channel: "Telegram",
+      timeLabel: "16.04.2026 • 19:08",
+      lastMessage: "Подскажите, можно ли подключить минимальную CRM на n8n"
+    }
+  ],
+  issuedLinks: [
+    {
+      username: "@anna_fit",
+      linkType: "Оплата тарифа Start",
+      timeLabel: "17.04.2026 • 12:20"
+    },
+    {
+      username: "@sergey_run",
+      linkType: "Пробный доступ",
+      timeLabel: "17.04.2026 • 11:50"
+    },
+    {
+      username: "@olga_wellness",
+      linkType: "Консультация / бриф",
+      timeLabel: "16.04.2026 • 19:15"
+    },
+    {
+      username: "@ivan_gym",
+      linkType: "Коммерческое предложение",
+      timeLabel: "15.04.2026 • 14:03"
+    }
+  ]
+};
 
   function setAgentStats(nextStats) {
     AGENT_STATS = {
