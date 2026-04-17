@@ -130,6 +130,16 @@
     "homeActionUnavailable": "Недоступен",
     "homeActionOpenModule": "Открыть модуль",
 
+    "modulesDefaultShortDescription": "Описание модуля будет заполнено в tenant-конфиге.",
+    "modulesDefaultFullDescription": "Описание модуля будет добавлено позже.",
+    "modulesSubscriptionStatusPaid": "Платные модули доступны",
+    "modulesSubscriptionStatusBase": "Доступ только к базовым модулям",
+    "modulesActionOpen": "Открыть модуль",
+    "modulesActionPay": "Перейти к оплате",
+    "modulesDetailsTitle": "Подробнее о модуле",
+    "modulesDisabledText": "Раздел модулей сейчас недоступен.",
+    "modulesEmptyText": "Для этого tenant пока не настроен список модулей.",
+
     "partnerPageTitle": "Партнерка",
     "partnerHeaderTitle": "Партнерка",
     "partnerHeaderSubtitle": "Зарабатывайте вместе с вашим AI-ассистентом",
