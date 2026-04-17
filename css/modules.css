@@ -1165,7 +1165,7 @@ textarea.form-input,
 }
 
 .module-stats-page > .accordion-card > .accordion-body > .accordion-card + .accordion-card {
-  margin-top: 15px;
+  margin-top: 8px;
 }
 
 .module-stats-page .accordion-header {
@@ -1409,7 +1409,7 @@ textarea.form-input,
 .module-dialogs-page .module-workspace-card .card-section-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .chat-messages {
