@@ -8,11 +8,6 @@
     "payments": true,
     "settings": true
   },
-  "sections": {
-    "partnerProgram": true,
-    "payments": true,
-    "moduleCatalog": true
-  },
   "home": {
     "alwaysVisibleModuleIds": [
       "ai-agent",
