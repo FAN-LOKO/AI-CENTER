@@ -246,6 +246,28 @@
     "agentConnectDisabledText": "Модуль агента сейчас недоступен.",
     "agentConnectTokenRequired": "Введите API Token перед подключением.",
     "agentConnectSaveError": "Не удалось сохранить состояние подключения.",
-    "agentConnectSuccess": "Telegram-бот отмечен как подключенный."
+    "agentConnectSuccess": "Telegram-бот отмечен как подключенный.",
+
+    "agentDialogTitleWithNumberPrefix": "Диалог",
+    "agentDialogDefaultTitle": "Диалог с клиентом",
+    "agentDialogClientPrefix": "Клиент:",
+    "agentDialogChannelPrefix": "Канал:",
+    "agentDialogStatusActive": "Активен",
+    "agentDialogEmptyTime": "—",
+    "agentDialogEmptyMessages": "История сообщений пока пуста.",
+    "agentDialogAuthorAgent": "Агент",
+    "agentDialogAuthorClient": "Клиент",
+    "agentDialogAuthorYou": "Вы",
+    "agentDialogAuthorVoice": "Вы (голосовое)",
+    "agentDialogDisabledText": "Модуль агента сейчас недоступен.",
+    "agentDialogTextSentStatus": "Сообщение отправлено клиенту...",
+    "agentDialogVoiceLabel": "Голосовое сообщение",
+    "agentDialogVoiceSentStatus": "Голосовое отправлено клиенту...",
+    "agentDialogVoiceRecordingStatus": "Идёт запись голосового...",
+    "agentDialogVoiceProcessingStatus": "Обработка голосового сообщения...",
+    "agentDialogVoiceUnsupported": "Запись голоса не поддерживается на этом устройстве/в этом браузере.",
+    "agentDialogVoiceAccessError": "Не удалось получить доступ к микрофону. Проверьте разрешения в Telegram/браузере.",
+    "agentDialogVoiceReadError": "Не удалось обработать голосовое сообщение.",
+    "agentDialogVoiceStopError": "Не удалось завершить запись голосового сообщения."
   }
 }
