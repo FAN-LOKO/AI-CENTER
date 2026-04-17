@@ -60,326 +60,415 @@
     </div>
 
     <script>
-      (function () {
-        function getTenantConfig() {
-          try {
-            return window.parent?.AICAppShell?.getTenantConfig?.() || null;
-          } catch (error) {
-            console.error('[AI CENTER][Payments] tenant config read failed', error);
-            return null;
-          }
-        }
+  (function () {
+    let TENANTCONFIG = null;
+    let APPFEATURES = {
+      home: true,
+      myAgent: true,
+      modules: true,
+      sharedChat: true,
+      affiliate: true,
+      payments: true,
+      settings: true
+    };
 
-        function getTenantPlans() {
-          try {
-            return window.parent?.AICAppShell?.getTenantPlans?.() || [];
-          } catch (error) {
-            console.error('[AI CENTER][Payments] tenant plans read failed', error);
-            return [];
-          }
-        }
+    function getTenantConfig() {
+      try {
+        return window.parent?.AICAppShell?.getTenantConfig?.() || null;
+      } catch (error) {
+        console.error('[AI CENTER][Payments] tenant config read failed', error);
+        return null;
+      }
+    }
 
-        function escapeHtml(value) {
-          return String(value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
+    function getTenantPlans() {
+      try {
+        return window.parent?.AICAppShell?.getTenantPlans?.() || [];
+      } catch (error) {
+        console.error('[AI CENTER][Payments] tenant plans read failed', error);
+        return [];
+      }
+    }
 
-        function formatUsd(value) {
-          const number = Number(value || 0);
-          if (Number.isNaN(number)) return '$0';
-          return '$' + number.toLocaleString('en-US');
-        }
+    function getAppFeatures() {
+      try {
+        return window.parent?.AICAppShell?.getAppFeatures?.() || {};
+      } catch (error) {
+        console.error('[AI CENTER][Payments] app features read failed', error);
+        return {};
+      }
+    }
 
-        function getOfferLabelHtml(prefix, linkText, linkHref, checkboxId) {
-          return (
-            '<label class="payments-offer-checkbox" for="' + checkboxId + '">' +
-              '<input type="checkbox" id="' + checkboxId + '" />' +
-              '<span class="payments-offer-text">' +
-                '<span>' + escapeHtml(prefix) + ' </span>' +
-                '<a href="' + escapeHtml(linkHref) + '" target="_blank" rel="noopener noreferrer" class="payments-offer-link">' +
-                  escapeHtml(linkText) +
-                '</a>' +
-              '</span>' +
-            '</label>'
-          );
-        }
+    function getText(key, fallback = '') {
+      return TENANTCONFIG?.texts?.[key] ?? fallback;
+    }
 
-        function createMetaRows(plan, texts) {
-          const rows = [];
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
-          if (plan.durationDays) {
-            rows.push(
-              '<div class="payments-plan-meta-item">' +
-                '<span class="payments-plan-meta-label">Период</span>' +
-                '<strong class="payments-plan-meta-value">' +
-                  escapeHtml(plan.durationDays + ' ' + (texts.paymentsDurationSuffix || 'календарных дней')) +
-                '</strong>' +
-              '</div>'
-            );
-          }
+    function formatUsd(value) {
+      const number = Number(value || 0);
+      if (Number.isNaN(number)) return '$0';
+      return '$' + number.toLocaleString('en-US');
+    }
 
-          if (plan.giftDays) {
-            rows.push(
-              '<div class="payments-plan-meta-item">' +
-                '<span class="payments-plan-meta-label">' + escapeHtml(texts.paymentsGiftPrefix || 'В подарок') + '</span>' +
-                '<strong class="payments-plan-meta-value">' +
-                  escapeHtml(plan.giftDays + ' дней') +
-                '</strong>' +
-              '</div>'
-            );
-          }
+    function getOfferLabelHtml(prefix, linkText, linkHref, checkboxId) {
+      return (
+        '<label class="payments-offer-checkbox" for="' + checkboxId + '">' +
+          '<input type="checkbox" id="' + checkboxId + '" />' +
+          '<span class="payments-offer-text">' +
+            '<span>' + escapeHtml(prefix) + ' </span>' +
+            '<a href="' + escapeHtml(linkHref) + '" target="_blank" rel="noopener noreferrer" class="payments-offer-link">' +
+              escapeHtml(linkText) +
+            '</a>' +
+          '</span>' +
+        '</label>'
+      );
+    }
 
-          if (plan.compareAtUsd) {
-            rows.push(
-              '<div class="payments-plan-meta-item">' +
-                '<span class="payments-plan-meta-label">' + escapeHtml(texts.paymentsComparePrefix || 'При ежемесячной оплате:') + '</span>' +
-                '<strong class="payments-plan-meta-value payments-plan-meta-value-muted">' +
-                  escapeHtml(formatUsd(plan.compareAtUsd)) +
-                '</strong>' +
-              '</div>'
-            );
-          }
+    function createMetaRows(plan) {
+      const rows = [];
 
-          if (plan.savingUsd) {
-            rows.push(
-              '<div class="payments-plan-meta-item">' +
-                '<span class="payments-plan-meta-label">' + escapeHtml(texts.paymentsSavingPrefix || 'Экономия') + '</span>' +
-                '<strong class="payments-plan-meta-value payments-plan-meta-value-success">' +
-                  escapeHtml(formatUsd(plan.savingUsd)) +
-                '</strong>' +
-              '</div>'
-            );
-          }
+      if (plan.durationDays) {
+        rows.push(
+          '<div class="payments-plan-meta-item">' +
+            '<span class="payments-plan-meta-label">' +
+              escapeHtml(getText('paymentsMetaPeriodLabel', 'Период')) +
+            '</span>' +
+            '<strong class="payments-plan-meta-value">' +
+              escapeHtml(plan.durationDays + ' ' + getText('paymentsDurationSuffix', 'календарных дней')) +
+            '</strong>' +
+          '</div>'
+        );
+      }
 
-          return rows.join('');
-        }
+      if (plan.giftDays) {
+        rows.push(
+          '<div class="payments-plan-meta-item">' +
+            '<span class="payments-plan-meta-label">' +
+              escapeHtml(getText('paymentsGiftPrefix', 'В подарок')) +
+            '</span>' +
+            '<strong class="payments-plan-meta-value">' +
+              escapeHtml(plan.giftDays + ' ' + getText('paymentsGiftDaysSuffix', 'дней')) +
+            '</strong>' +
+          '</div>'
+        );
+      }
 
-        function createPlanCard(plan, index, texts, policyLinks) {
-          const checkboxId = 'offerCheckbox_' + plan.id;
-          const buttonId = 'payButton_' + plan.id;
-          const featuredClass = plan.highlight ? ' payments-tariff-card-featured' : '';
-          const badgeHtml = plan.badge
-            ? '<div class="payments-tariff-badge">' + escapeHtml(plan.badge) + '</div>'
-            : '';
+      if (plan.compareAtUsd) {
+        rows.push(
+          '<div class="payments-plan-meta-item">' +
+            '<span class="payments-plan-meta-label">' +
+              escapeHtml(getText('paymentsComparePrefix', 'При ежемесячной оплате:')) +
+            '</span>' +
+            '<strong class="payments-plan-meta-value payments-plan-meta-value-muted">' +
+              escapeHtml(formatUsd(plan.compareAtUsd)) +
+            '</strong>' +
+          '</div>'
+        );
+      }
 
-          const description =
-            plan.description ||
-            (plan.durationDays
-              ? plan.durationDays + ' ' + (texts.paymentsDurationSuffix || 'календарных дней')
-              : 'Доступ к модулю');
+      if (plan.savingUsd) {
+        rows.push(
+          '<div class="payments-plan-meta-item">' +
+            '<span class="payments-plan-meta-label">' +
+              escapeHtml(getText('paymentsSavingPrefix', 'Экономия')) +
+            '</span>' +
+            '<strong class="payments-plan-meta-value payments-plan-meta-value-success">' +
+              escapeHtml(formatUsd(plan.savingUsd)) +
+            '</strong>' +
+          '</div>'
+        );
+      }
 
-          const buttonText =
-            plan.buttonText || ('Оплатить ' + (plan.name || 'тариф'));
+      return rows.join('');
+    }
 
-          return (
-            '<article class="payments-tariff-card' + featuredClass + '" data-plan-id="' + escapeHtml(plan.id) + '">' +
-              badgeHtml +
-              '<div class="payments-tariff-top">' +
-                '<div class="payments-tariff-heading-group">' +
-                  '<h3 class="payments-tariff-name">' + escapeHtml(plan.name || 'Тариф') + '</h3>' +
-                  '<p class="payments-tariff-desc">' + escapeHtml(description) + '</p>' +
-                '</div>' +
-                '<div class="payments-tariff-price-wrap">' +
-                  '<span class="payments-tariff-price">' + escapeHtml(formatUsd(plan.priceUsd)) + '</span>' +
-                '</div>' +
-              '</div>' +
-              '<div class="payments-plan-meta-grid">' +
-                createMetaRows(plan, texts) +
-              '</div>' +
-              '<div class="payments-tariff-divider"></div>' +
-              getOfferLabelHtml(
-                texts.paymentsOfferTextBase || 'Согласен с',
-                texts.paymentsOfferLinkText || 'условиями оферты',
-                policyLinks.terms || '#',
-                checkboxId
-              ) +
-              '<button id="' + buttonId + '" class="btn btn-primary btn-block payments-pay-button" data-plan-id="' + escapeHtml(plan.id) + '" disabled>' +
-                escapeHtml(buttonText) +
-              '</button>' +
-            '</article>'
-          );
-        }
+    function createPlanCard(plan) {
+      const checkboxId = 'offerCheckbox_' + plan.id;
+      const buttonId = 'payButton_' + plan.id;
+      const featuredClass = plan.highlight ? ' payments-tariff-card-featured' : '';
+      const badgeHtml = plan.badge
+        ? '<div class="payments-tariff-badge">' + escapeHtml(plan.badge) + '</div>'
+        : '';
 
-        function bindOfferCheckbox(checkboxId, buttonId) {
-          const checkbox = document.getElementById(checkboxId);
-          const button = document.getElementById(buttonId);
-          if (!checkbox || !button) return;
+      const description =
+        plan.description ||
+        (plan.durationDays
+          ? plan.durationDays + ' ' + getText('paymentsDurationSuffix', 'календарных дней')
+          : getText('paymentsDefaultPlanDescription', 'Доступ к модулю'));
 
-          function update() {
-            const enabled = checkbox.checked;
-            button.disabled = !enabled;
-            button.style.opacity = enabled ? '1' : '0.5';
-            button.style.cursor = enabled ? 'pointer' : 'not-allowed';
-          }
+      const buttonText =
+        plan.buttonText || (getText('paymentsActionPayPrefix', 'Оплатить') + ' ' + (plan.name || getText('paymentsPlanFallbackName', 'тариф')));
 
-          checkbox.addEventListener('change', update);
-          update();
-        }
+      return (
+        '<article class="payments-tariff-card' + featuredClass + '" data-plan-id="' + escapeHtml(plan.id) + '">' +
+          badgeHtml +
+          '<div class="payments-tariff-top">' +
+            '<div class="payments-tariff-heading-group">' +
+              '<h3 class="payments-tariff-name">' + escapeHtml(plan.name || getText('paymentsPlanFallbackName', 'Тариф')) + '</h3>' +
+              '<p class="payments-tariff-desc">' + escapeHtml(description) + '</p>' +
+            '</div>' +
+            '<div class="payments-tariff-price-wrap">' +
+              '<span class="payments-tariff-price">' + escapeHtml(formatUsd(plan.priceUsd)) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="payments-plan-meta-grid">' +
+            createMetaRows(plan) +
+          '</div>' +
+          '<div class="payments-tariff-divider"></div>' +
+          getOfferLabelHtml(
+            getText('paymentsOfferTextBase', 'Согласен с'),
+            getText('paymentsOfferLinkText', 'условиями оферты'),
+            TENANTCONFIG?.policyLinks?.terms || '#',
+            checkboxId
+          ) +
+          '<button id="' + buttonId + '" class="btn btn-primary btn-block payments-pay-button" data-plan-id="' + escapeHtml(plan.id) + '" disabled>' +
+            escapeHtml(buttonText) +
+          '</button>' +
+        '</article>'
+      );
+    }
 
-        function bindPlanInteractions(plans) {
-          plans.forEach(function (plan) {
-            const checkboxId = 'offerCheckbox_' + plan.id;
-            const buttonId = 'payButton_' + plan.id;
-            bindOfferCheckbox(checkboxId, buttonId);
+    function bindOfferCheckbox(checkboxId, buttonId) {
+      const checkbox = document.getElementById(checkboxId);
+      const button = document.getElementById(buttonId);
+      if (!checkbox || !button) return;
 
-            const button = document.getElementById(buttonId);
-            if (!button) return;
+      function update() {
+        const enabled = checkbox.checked && APPFEATURES.payments !== false;
+        button.disabled = !enabled;
+        button.style.opacity = enabled ? '1' : '0.5';
+        button.style.cursor = enabled ? 'pointer' : 'not-allowed';
+      }
 
-            button.addEventListener('click', function () {
-              startPayment(plan.id);
-            });
-          });
-        }
+      checkbox.addEventListener('change', update);
+      update();
+    }
 
-        function renderPlans(config) {
-          const listEl = document.getElementById('paymentsPlansList');
-          if (!listEl) return;
+    function bindPlanInteractions(plans) {
+      plans.forEach(function (plan) {
+        const checkboxId = 'offerCheckbox_' + plan.id;
+        const buttonId = 'payButton_' + plan.id;
+        bindOfferCheckbox(checkboxId, buttonId);
 
-          const texts = config?.texts || {};
-          const policyLinks = config?.policyLinks || {};
-          const plans = getTenantPlans().filter(function (plan) {
-            return plan && plan.moduleId === 'ai-agent';
-          });
+        const button = document.getElementById(buttonId);
+        if (!button) return;
 
-          if (!plans.length) {
-            listEl.innerHTML =
-              '<section class="card-section">' +
-                '<div class="card-section-body">' +
-                  '<p class="payments-muted-text">Тарифы пока не настроены для этого бренда.</p>' +
-                '</div>' +
-              '</section>';
-            return;
-          }
-
-          listEl.innerHTML = plans
-            .map(function (plan, index) {
-              return createPlanCard(plan, index, texts, policyLinks);
-            })
-            .join('');
-
-          bindPlanInteractions(plans);
-        }
-
-        function applyTenantContent() {
-          const config = getTenantConfig();
-          if (!config) return;
-
-          const texts = config.texts || {};
-          const appName = config.appName || 'AI CENTER';
-
-          document.title =
-            texts.paymentsPageTitle ||
-            texts.navPayments ||
-            ('Оплата — ' + appName);
-
-          const pageTitleEl = document.getElementById('paymentsTitle');
-          const pageSubtitleEl = document.getElementById('paymentsSubtitle');
-          const pageLeadEl = document.getElementById('paymentsLead');
-
-          const balanceTitleEl = document.getElementById('paymentsBalanceTitle');
-          const balanceSubtitleEl = document.getElementById('paymentsBalanceSubtitle');
-          const balanceAmountEl = document.getElementById('paymentsBalanceAmount');
-          const balanceCurrencyEl = document.getElementById('paymentsBalanceCurrency');
-          const balanceNoteEl = document.getElementById('paymentsBalanceNote');
-
-          const agentHeaderTitleEl = document.getElementById('paymentsAgentHeaderTitle');
-          const moduleIntroTitleEl = document.getElementById('paymentsModuleIntroTitle');
-          const moduleIntroTextEl = document.getElementById('paymentsModuleIntroText');
-
-          if (pageTitleEl) {
-            pageTitleEl.textContent = texts.paymentsHeaderTitle || 'Оплата';
-          }
-
-          if (pageSubtitleEl) {
-            pageSubtitleEl.textContent =
-              texts.paymentsHeaderSubtitle || 'Выберите тариф для подключения модуля';
-          }
-
-          if (pageLeadEl) {
-            pageLeadEl.textContent =
-              texts.paymentsHeaderLead ||
-              'Стоимость на этой странице указана в долларах США. На странице оплаты сумма будет показана в валюте пользователя.';
-          }
-
-          if (balanceTitleEl) {
-            balanceTitleEl.textContent = texts.paymentsBalanceTitle || 'Баланс';
-          }
-
-          if (balanceSubtitleEl) {
-            balanceSubtitleEl.textContent =
-              texts.paymentsBalanceSubtitle || 'Текущий баланс вашего аккаунта';
-          }
-
-          if (balanceAmountEl && typeof texts.paymentsBalanceAmount === 'string') {
-            balanceAmountEl.textContent = texts.paymentsBalanceAmount;
-          }
-
-          if (balanceCurrencyEl && typeof texts.paymentsBalanceCurrency === 'string') {
-            balanceCurrencyEl.textContent = texts.paymentsBalanceCurrency;
-          }
-
-          if (balanceNoteEl) {
-            balanceNoteEl.textContent =
-              texts.paymentsBalanceNote ||
-              'История оплат, пополнение баланса и автоматические списания появятся позже.';
-          }
-
-          if (agentHeaderTitleEl) {
-            agentHeaderTitleEl.textContent =
-              texts.paymentsAgentHeaderTitle || 'Модуль «Агент»';
-          }
-
-          if (moduleIntroTitleEl) {
-            moduleIntroTitleEl.textContent =
-              texts.paymentsModuleIntroTitle || 'Выберите период доступа';
-          }
-
-          if (moduleIntroTextEl) {
-            moduleIntroTextEl.textContent =
-              texts.paymentsModuleIntroText ||
-              'Подберите удобный тариф, подтвердите согласие с условиями оферты и перейдите к оплате.';
-          }
-
-          renderPlans(config);
-        }
-
-        function startPayment(tariffId) {
-          const tg = window.Telegram && window.Telegram.WebApp;
-
-          if (tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
-            tg.HapticFeedback.impactOccurred('medium');
-          }
-
-          window.parent?.postMessage?.(
-            {
-              type: 'payment',
-              tariff: tariffId
-            },
-            '*'
-          );
-        }
-
-        window.startPayment = startPayment;
-
-        window.toggleAccordion = function (button) {
-          const card = button.closest('.accordion-card');
-          const isOpen = card.classList.contains('open');
-          card.classList.toggle('open', !isOpen);
-
-          const icon = button.querySelector('.accordion-header-icon');
-          if (icon) {
-            icon.textContent = isOpen ? '▾' : '▴';
-          }
-        };
-
-        document.addEventListener('DOMContentLoaded', function () {
-          applyTenantContent();
+        button.addEventListener('click', function () {
+          startPayment(plan.id);
         });
-      })();
-    </script>
+      });
+    }
+
+    function renderPaymentsDisabledState() {
+      const listEl = document.getElementById('paymentsPlansList');
+      if (!listEl) return;
+
+      listEl.innerHTML =
+        '<section class="card-section">' +
+          '<div class="card-section-body">' +
+            '<p class="payments-muted-text">' +
+              escapeHtml(getText('paymentsDisabledText', 'Раздел оплат сейчас недоступен.')) +
+            '</p>' +
+          '</div>' +
+        '</section>';
+    }
+
+    function renderPlans() {
+      const listEl = document.getElementById('paymentsPlansList');
+      if (!listEl) return;
+
+      if (APPFEATURES.payments === false) {
+        renderPaymentsDisabledState();
+        return;
+      }
+
+      const plans = getTenantPlans().filter(function (plan) {
+        return plan && plan.moduleId === 'ai-agent';
+      });
+
+      if (!plans.length) {
+        listEl.innerHTML =
+          '<section class="card-section">' +
+            '<div class="card-section-body">' +
+              '<p class="payments-muted-text">' +
+                escapeHtml(getText('paymentsEmptyText', 'Тарифы пока не настроены для этого бренда.')) +
+              '</p>' +
+            '</div>' +
+          '</section>';
+        return;
+      }
+
+      listEl.innerHTML = plans
+        .map(function (plan) {
+          return createPlanCard(plan);
+        })
+        .join('');
+
+      bindPlanInteractions(plans);
+    }
+
+    function applyTenantContent() {
+      TENANTCONFIG = getTenantConfig();
+      if (!TENANTCONFIG) return;
+
+      const texts = TENANTCONFIG.texts || {};
+      const appName = TENANTCONFIG.appName || 'AI CENTER';
+
+      document.title =
+        texts.paymentsPageTitle ||
+        texts.navPayments ||
+        ('Оплата — ' + appName);
+
+      const pageTitleEl = document.getElementById('paymentsTitle');
+      const pageSubtitleEl = document.getElementById('paymentsSubtitle');
+      const pageLeadEl = document.getElementById('paymentsLead');
+
+      const balanceTitleEl = document.getElementById('paymentsBalanceTitle');
+      const balanceSubtitleEl = document.getElementById('paymentsBalanceSubtitle');
+      const balanceAmountEl = document.getElementById('paymentsBalanceAmount');
+      const balanceCurrencyEl = document.getElementById('paymentsBalanceCurrency');
+      const balanceNoteEl = document.getElementById('paymentsBalanceNote');
+
+      const agentHeaderTitleEl = document.getElementById('paymentsAgentHeaderTitle');
+      const moduleIntroTitleEl = document.getElementById('paymentsModuleIntroTitle');
+      const moduleIntroTextEl = document.getElementById('paymentsModuleIntroText');
+
+      if (pageTitleEl) {
+        pageTitleEl.textContent = texts.paymentsHeaderTitle || 'Оплата';
+      }
+
+      if (pageSubtitleEl) {
+        pageSubtitleEl.textContent =
+          texts.paymentsHeaderSubtitle || 'Выберите тариф для подключения модуля';
+      }
+
+      if (pageLeadEl) {
+        pageLeadEl.textContent =
+          texts.paymentsHeaderLead ||
+          'Стоимость на этой странице указана в долларах США. На странице оплаты сумма будет показана в валюте пользователя.';
+      }
+
+      if (balanceTitleEl) {
+        balanceTitleEl.textContent = texts.paymentsBalanceTitle || 'Баланс';
+      }
+
+      if (balanceSubtitleEl) {
+        balanceSubtitleEl.textContent =
+          texts.paymentsBalanceSubtitle || 'Текущий баланс вашего аккаунта';
+      }
+
+      if (balanceAmountEl && typeof texts.paymentsBalanceAmount === 'string') {
+        balanceAmountEl.textContent = texts.paymentsBalanceAmount;
+      }
+
+      if (balanceCurrencyEl && typeof texts.paymentsBalanceCurrency === 'string') {
+        balanceCurrencyEl.textContent = texts.paymentsBalanceCurrency;
+      }
+
+      if (balanceNoteEl) {
+        balanceNoteEl.textContent =
+          texts.paymentsBalanceNote ||
+          'История оплат, пополнение баланса и автоматические списания появятся позже.';
+      }
+
+      if (agentHeaderTitleEl) {
+        agentHeaderTitleEl.textContent =
+          texts.paymentsAgentHeaderTitle || 'Модуль «Агент»';
+      }
+
+      if (moduleIntroTitleEl) {
+        moduleIntroTitleEl.textContent =
+          texts.paymentsModuleIntroTitle || 'Выберите период доступа';
+      }
+
+      if (moduleIntroTextEl) {
+        moduleIntroTextEl.textContent =
+          texts.paymentsModuleIntroText ||
+          'Подберите удобный тариф, подтвердите согласие с условиями оферты и перейдите к оплате.';
+      }
+
+      renderPlans();
+    }
+
+    function syncPaymentsAvailability() {
+      if (APPFEATURES.payments === false) {
+        renderPaymentsDisabledState();
+      } else {
+        renderPlans();
+      }
+    }
+
+    function startPayment(tariffId) {
+      if (APPFEATURES.payments === false) {
+        return;
+      }
+
+      const tg = window.Telegram && window.Telegram.WebApp;
+
+      if (tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
+        try {
+          tg.HapticFeedback.impactOccurred('medium');
+        } catch (error) {
+          console.warn('[AI CENTER][Payments] haptic feedback failed', error);
+        }
+      }
+
+      window.parent?.postMessage?.(
+        {
+          type: 'payment',
+          tariff: tariffId
+        },
+        '*'
+      );
+    }
+
+    function applyAppFeatures(features) {
+      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+      syncPaymentsAvailability();
+    }
+
+    window.startPayment = startPayment;
+
+    window.toggleAccordion = function (button) {
+      const card = button.closest('.accordion-card');
+      if (!card) return;
+
+      const isOpen = card.classList.contains('open');
+      card.classList.toggle('open', !isOpen);
+
+      const icon = button.querySelector('.accordion-header-icon');
+      if (icon) {
+        icon.textContent = isOpen ? '▾' : '▴';
+      }
+    };
+
+    window.addEventListener('message', function (event) {
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+
+      if (data.type === 'app-features') {
+        applyAppFeatures(data.features || {});
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      TENANTCONFIG = getTenantConfig();
+      APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
+
+      applyTenantContent();
+      syncPaymentsAvailability();
+
+      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+    });
+  })();
+</script>
   </body>
 </html>
