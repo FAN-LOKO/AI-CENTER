@@ -300,6 +300,31 @@
     "agentProfileStatusDisconnected": "Не подключен",
     "agentProfileModeFallback": "assistant",
     "agentProfileLanguageFallback": "ru",
-    "agentProfileDisabledText": "Модуль агента сейчас недоступен."
+    "agentProfileDisabledText": "Модуль агента сейчас недоступен.",
+
+    "agentStatsBrowserTitle": "Статистика агента",
+    "agentStatsPageTitle": "Статистика агента",
+    "agentStatsPageSubtitle": "Сводка по диалогам и выданным ссылкам.",
+    "agentStatsDialogsTotalLabel": "Всего диалогов",
+    "agentStatsRefLinksTotalLabel": "Всего ссылок",
+    "agentStatsDialogsTodayLabel": "Диалогов сегодня",
+    "agentStatsRefLinksTodayLabel": "Ссылок сегодня",
+    "agentStatsDialogsSectionTitle": "Диалоги",
+    "agentStatsIssuedLinksSectionTitle": "Выданные ссылки",
+    "agentStatsDialogsEmptyText": "Диалогов пока нет.",
+    "agentStatsIssuedLinksEmptyText": "Выданных ссылок пока нет.",
+    "agentStatsDisabledText": "Модуль агента сейчас недоступен.",
+    "agentStatsUsernameFallback": "@username",
+    "agentStatsChannelFallback": "Telegram",
+    "agentStatsMessageFallback": "Сообщений пока нет",
+    "agentStatsLinkTypeFallback": "Клиентская",
+    "agentStatsIssuedToLabel": "Кому",
+    "agentStatsDialogLabel": "Диалог",
+    "agentStatsLinkTypeLabel": "Тип ссылки",
+    "agentStatsTimeLabel": "Время",
+    "agentStatsEmptyValue": "—",
+    "agentStatsSequenceFallback": "000",
+    "agentStatsAccordionClosedIcon": "▼",
+    "agentStatsAccordionOpenIcon": "▲"
   }
 }
