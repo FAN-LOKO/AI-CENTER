@@ -208,13 +208,20 @@
 
     "paymentsOfferTextBase": "Согласен с",
     "paymentsOfferLinkText": "условиями оферты",
-
     "paymentsBadgeBestValue": "Выгодно",
     "paymentsBadgeMaxValue": "Максимальная выгода",
     "paymentsComparePrefix": "При ежемесячной оплате:",
     "paymentsSavingPrefix": "Экономия",
     "paymentsGiftPrefix": "В подарок",
     "paymentsDurationSuffix": "календарных дней",
-    "paymentsPriceSuffix": "$"
+    "paymentsPriceSuffix": "$",
+
+    "paymentsDisabledText": "Раздел оплат сейчас недоступен.",
+    "paymentsEmptyText": "Тарифы пока не настроены для этого бренда.",
+    "paymentsMetaPeriodLabel": "Период",
+    "paymentsGiftDaysSuffix": "дней",
+    "paymentsDefaultPlanDescription": "Доступ к модулю",
+    "paymentsActionPayPrefix": "Оплатить",
+    "paymentsPlanFallbackName": "Тариф"
   }
 }
