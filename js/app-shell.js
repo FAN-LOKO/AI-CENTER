@@ -17,8 +17,6 @@
 
   /* =========================================================
   SHELL STATE / СОСТОЯНИЕ SHELL
-  Global shell state: features, page config, active tab, user profile
-  Глобальное состояние shell: фичи, конфиг страниц, активная вкладка, профиль
   ========================================================= */
 
   let APPFEATURES = {
@@ -37,46 +35,49 @@
 
   // Agent stats state / Состояние статистики агента
   let AGENT_STATS = {
-  dialogsTotal: 3,
-  refLinksTotal: 4,
-  dialogsToday: 2,
-  refLinksToday: 1,
-  dialogs: [
-    {
-      id: "dlg-101",
-      username: "@anna_fit",
-      channel: "Telegram",
-      timeLabel: "17.04.2026 • 12:15",
-      lastMessage: "Здравствуйте, хочу узнать про тариф с ботом-консультантом"
-    },
-    {
-      id: "dlg-102",
-      username: "@sergey_run",
-      channel: "Telegram",
-      timeLabel: "17.04.2026 • 11:42",
-      lastMessage: "Спасибо, пришлите, пожалуйста, ссылку на оплату"
-    },
-    {
-      id: "dlg-103",
-      username: "@olga_wellness",
-      channel: "Telegram",
-      timeLabel: "16.04.2026 • 19:08",
-      lastMessage: "Подскажите, можно ли подключить минимальную CRM на n8n"
-    }
-  ],
-  issuedLinks: [
-  {
-    username: "@anna_fit",
-    linkType: "Оплата тарифа Start",
-    timeLabel: "17.04.2026 • 12:20"
-  },
-  {
-    username: "@sergey_run",
-    linkType: "Пробный доступ",
-    timeLabel: "17.04.2026 • 11:50"
-  }
-]
-};
+    dialogsTotal: 3,
+    refLinksTotal: 4,
+    dialogsToday: 2,
+    refLinksToday: 1,
+    dialogs: [
+      {
+        id: "dlg-101",
+        username: "@anna_fit",
+        channel: "Telegram",
+        timeLabel: "17.04.2026 • 12:15",
+        lastMessage: "Здравствуйте, хочу узнать про тариф с ботом-консультантом"
+      },
+      {
+        id: "dlg-102",
+        username: "@sergey_run",
+        channel: "Telegram",
+        timeLabel: "17.04.2026 • 11:42",
+        lastMessage: "Спасибо, пришлите, пожалуйста, ссылку на оплату"
+      },
+      {
+        id: "dlg-103",
+        username: "@olga_wellness",
+        channel: "Telegram",
+        timeLabel: "16.04.2026 • 19:08",
+        lastMessage: "Подскажите, можно ли подключить минимальную CRM на n8n"
+      }
+    ],
+    issuedLinks: [
+      {
+        username: "@anna_fit",
+        linkType: "Оплата тарифа Start",
+        timeLabel: "17.04.2026 • 12:20"
+      },
+      {
+        username: "@sergey_run",
+        linkType: "Пробный доступ",
+        timeLabel: "17.04.2026 • 11:50"
+      }
+    ]
+  };
+
+  // Текущий выбранный диалог (по клику из stats)
+  let CURRENT_AGENT_DIALOG = null;
 
   function setAgentStats(nextStats) {
     AGENT_STATS = {
@@ -88,7 +89,7 @@
       issuedLinks: Array.isArray(nextStats?.issuedLinks) ? nextStats.issuedLinks : []
     };
 
-    // По желанию: можно пушнуть обновление в текущий frame
+    // Пушим обновление в текущий frame (если открыт stats или dialogs)
     if (frame && frame.contentWindow) {
       frame.contentWindow.postMessage(
         {
@@ -104,10 +105,27 @@
     return AGENT_STATS;
   }
 
+  function setCurrentAgentDialog(dialog) {
+    CURRENT_AGENT_DIALOG = dialog || null;
+
+    // При желании можно пушнуть выбранный диалог в открытую страницу диалогов
+    if (frame && frame.contentWindow && CURRENT_AGENT_DIALOG) {
+      frame.contentWindow.postMessage(
+        {
+          type: "agent-current-dialog",
+          dialog: CURRENT_AGENT_DIALOG
+        },
+        "*"
+      );
+    }
+  }
+
+  function getCurrentAgentDialog() {
+    return CURRENT_AGENT_DIALOG;
+  }
+
   /* =========================================================
   PAGE CONFIGURATION / КОНФИГУРАЦИЯ СТРАНИЦ
-  Maps shell tabs to internal page files and feature access
-  Связывает tab shell с файлами страниц и доступностью по feature flags
   ========================================================= */
 
   function buildPageConfig() {
@@ -127,8 +145,6 @@
 
   /* =========================================================
   NAVIGATION HELPERS / ВСПОМОГАТЕЛЬНАЯ ЛОГИКА НАВИГАЦИИ
-  Checks tab availability, resolves fallback tab, maps tab <-> page
-  Проводит проверки доступности, fallback и соответствия tab <-> page
   ========================================================= */
 
   function isTabEnabled(tab) {
@@ -154,8 +170,6 @@
 
   /* =========================================================
   SHELL -> PAGE MESSAGING / СООБЩЕНИЯ ОТ SHELL К СТРАНИЦАМ
-  Sends profile and feature flags into iframe pages
-  Отправляет профиль и feature flags во внутренние iframe-страницы
   ========================================================= */
 
   function sendUserProfileToFrame() {
@@ -188,8 +202,6 @@
 
   /* =========================================================
   SHELL UI STATE / UI-СОСТОЯНИЕ SHELL
-  Controls nav visibility, active nav state, unread badge state
-  Управляет видимостью навигации, активной вкладкой и badge
   ========================================================= */
 
   function updateNavVisibility() {
@@ -215,8 +227,6 @@
 
   /* =========================================================
   NAVIGATION ACTIONS / ДЕЙСТВИЯ НАВИГАЦИИ
-  Main navigate action used by shell buttons and page messages
-  Основная функция навигации для shell-кнопок и сообщений со страниц
   ========================================================= */
 
   function navigate(page, tab) {
@@ -246,8 +256,6 @@
 
   /* =========================================================
   NAV BUTTON BINDINGS / ПРИВЯЗКА КНОПОК НАВИГАЦИИ
-  Handles clicks on bottom navigation buttons
-  Обрабатывает клики по кнопкам нижней навигации
   ========================================================= */
 
   function bindNavButtons() {
@@ -264,8 +272,6 @@
 
   /* =========================================================
   SHELL HEADER ACTIONS / ДЕЙСТВИЯ HEADER В SHELL
-  Handles header buttons such as settings and notifications
-  Обрабатывает кнопки header, например settings и notifications
   ========================================================= */
 
   function bindShellButtons() {
@@ -288,8 +294,6 @@
 
   /* =========================================================
   MESSAGE BUS / ШИНА СООБЩЕНИЙ
-  Receives messages from inner pages and routes shell actions
-  Принимает сообщения от внутренних страниц и запускает действия shell
   ========================================================= */
 
   function bindMessageBus() {
@@ -367,7 +371,7 @@
         return;
       }
 
-      // Обновление только по диалогам (если хочешь отдельно пушить)
+      // Обновление только по диалогам
       if (data.type === "agent-dialogs-update" && Array.isArray(data.dialogs)) {
         setAgentStats({
           ...getAgentStats(),
@@ -375,13 +379,46 @@
         });
         return;
       }
+
+      // === КЛИК ПО ДИАЛОГУ ИЗ СТАТИСТИКИ ===
+      // stats.html шлёт: { type: 'agent-open-dialog', dialogId, username, channel }
+      if (data.type === "agent-open-dialog") {
+        const dialogs = getAgentStats().dialogs || [];
+        const dialog =
+          dialogs.find((d) => String(d.id) === String(data.dialogId)) || {
+            id: data.dialogId || null,
+            username: data.username || "",
+            channel: data.channel || "",
+            timeLabel: data.timeLabel || "",
+            lastMessage: data.lastMessage || ""
+          };
+
+        // сохраняем текущий диалог
+        setCurrentAgentDialog(dialog);
+
+        // открываем страницу диалогов агента
+        navigate("modules-agent/dialogs.html", "modules");
+        return;
+      }
+
+      // Страница диалогов может запросить текущий выбранный диалог
+      if (data.type === "agent-current-dialog-request") {
+        if (frame && frame.contentWindow) {
+          frame.contentWindow.postMessage(
+            {
+              type: "agent-current-dialog-response",
+              dialog: getCurrentAgentDialog()
+            },
+            "*"
+          );
+        }
+        return;
+      }
     });
   }
 
   /* =========================================================
   BOOTSTRAP / ИНИЦИАЛИЗАЦИЯ
-  Initializes runtime, loads tenant config, builds shell and opens first page
-  Инициализирует runtime, загружает tenant-конфиг, собирает shell и открывает первую страницу
   ========================================================= */
 
   async function bootstrap() {
@@ -409,11 +446,9 @@
 
   /* =========================================================
   PUBLIC SHELL API / ПУБЛИЧНОЕ API SHELL
-  Exposes minimal shell API for debugging and future integrations
-  Открывает минимальное API shell для отладки и будущих интеграций
   ========================================================= */
 
-    window.AICAppShell = {
+  window.AICAppShell = {
     navigate,
     getCurrentTab: () => currentTab,
     getFeatures: () => APPFEATURES,
@@ -459,6 +494,10 @@
 
     // === Agent stats API / API статистики агента ===
     getAgentStats: () => getAgentStats(),
-    setAgentStats: (stats) => setAgentStats(stats)
+    setAgentStats: (stats) => setAgentStats(stats),
+
+    // Текущий диалог агента
+    getCurrentAgentDialog: () => getCurrentAgentDialog(),
+    setCurrentAgentDialog: (dialog) => setCurrentAgentDialog(dialog)
   };
 })();
