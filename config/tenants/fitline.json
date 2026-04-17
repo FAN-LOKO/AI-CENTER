@@ -325,6 +325,18 @@
     "agentStatsEmptyValue": "—",
     "agentStatsSequenceFallback": "000",
     "agentStatsAccordionClosedIcon": "▼",
-    "agentStatsAccordionOpenIcon": "▲"
+    "agentStatsAccordionOpenIcon": "▲",
+
+    "dialogsBrowserTitle": "Диалоги",
+    "dialogsPageTitle": "Диалоги",
+    "dialogsPageSubtitle": "Список клиентских диалогов и быстрый переход в переписку.",
+    "dialogsCounterLabel": "Всего диалогов",
+    "dialogsTodayCounterLabel": "Диалогов сегодня",
+    "dialogsEmptyText": "Диалогов пока нет.",
+    "dialogsDisabledText": "Модуль диалогов сейчас недоступен.",
+    "dialogsUsernameFallback": "@username",
+    "dialogsChannelFallback": "Telegram",
+    "dialogsMessageFallback": "Сообщений пока нет",
+    "dialogsSequenceFallback": "000"
   }
 }
