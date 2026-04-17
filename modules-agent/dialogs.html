@@ -85,35 +85,21 @@
     let TENANTCONFIG = null;
     let APPFEATURES = {
       home: true,
-      myAgent: true,
       modules: true,
       sharedChat: true,
       affiliate: true,
       payments: true,
-      settings: true
+      settings: true,
+      stats: true,
+      dialogs: true,
+      agentDialogs: true
     };
-
-    let currentDialogState = {
-      dialogId: '',
-      title: 'Диалог с клиентом',
-      subtitle: 'Клиент: @username • Канал: Telegram',
-      status: 'Активен',
-      clientName: '@username',
-      channel: 'Telegram',
-      timeLabel: '',
-      messages: []
-    };
-
-    let mediaRecorder = null;
-    let recordedChunks = [];
-    let mediaStream = null;
-    let isRecording = false;
 
     function getShell() {
       try {
         return window.parent?.AICAppShell || null;
       } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] shell access failed', error);
+        console.error('[AI CENTER][Dialogs] shell access failed', error);
         return null;
       }
     }
@@ -122,7 +108,7 @@
       try {
         return getShell()?.getTenantConfig?.() || null;
       } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] tenant config read failed', error);
+        console.error('[AI CENTER][Dialogs] tenant config read failed', error);
         return null;
       }
     }
@@ -131,7 +117,7 @@
       try {
         return getShell()?.getAppFeatures?.() || {};
       } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] app features read failed', error);
+        console.error('[AI CENTER][Dialogs] app features read failed', error);
         return {};
       }
     }
@@ -140,508 +126,204 @@
       return TENANTCONFIG?.texts?.[key] ?? fallback;
     }
 
-    function navigateAgent(page) {
-      if (APPFEATURES.myAgent === false) {
-        console.warn('[AI CENTER][Agent Dialogs] agent module is disabled');
-        return;
-      }
+    function isDialogsAvailable() {
+      if (APPFEATURES.modules === false) return false;
+      if (APPFEATURES.dialogs === false) return false;
+      if (APPFEATURES.agentDialogs === false) return false;
+      return true;
+    }
 
-      try {
-        window.parent?.postMessage?.(
-          { type: 'navigate', page, tab: 'modules' },
-          '*'
-        );
-      } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] navigate failed', error);
-      }
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function formatSequenceNumber(value) {
       const n = Number(value);
       if (!Number.isFinite(n) || n <= 0) {
-        return '000';
+        return getText('dialogsSequenceFallback', '000');
       }
       return String(n).padStart(3, '0');
     }
 
-    function getDialogDisplayNumber(dialogId) {
-      const currentId = String(dialogId || '').trim();
-      if (!currentId) return '000';
-
-      try {
-        const stats = getShell()?.getAgentStats?.();
-        const dialogs = Array.isArray(stats?.dialogs) ? stats.dialogs : [];
-        const index = dialogs.findIndex(
-          (item) => String(item?.id || item?.dialogId || '') === currentId
-        );
-
-        if (index >= 0) {
-          return formatSequenceNumber(index + 1);
-        }
-      } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] display number resolve failed', error);
-      }
-
-      return '000';
+    function setTextContent(id, value, fallback = '') {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value ?? fallback;
     }
 
-    function normalizeDialogState(raw) {
-      const data = raw && typeof raw === 'object' ? raw : {};
-      const dialogId = data.dialogId || data.id || '';
-      const clientName = data.clientName || data.username || '@username';
-      const channel = data.channel || 'Telegram';
-      const displayNumber = dialogId ? getDialogDisplayNumber(dialogId) : '000';
-      const titleFromNumber =
-        displayNumber && displayNumber !== '000'
-          ? getText('agentDialogTitleWithNumberPrefix', 'Диалог') + ' ' + displayNumber
-          : getText('agentDialogDefaultTitle', 'Диалог с клиентом');
-
-      return {
-        dialogId,
-        title: data.title || titleFromNumber,
-        subtitle:
-          data.subtitle ||
-          `${getText('agentDialogClientPrefix', 'Клиент:')} ${clientName} • ${getText('agentDialogChannelPrefix', 'Канал:')} ${channel}`,
-        status: data.status || getText('agentDialogStatusActive', 'Активен'),
-        clientName,
-        channel,
-        timeLabel: data.timeLabel || '',
-        messages: Array.isArray(data.messages) ? data.messages : []
-      };
-    }
-
-    function getAgentDialogState() {
-      try {
-        const directState = getShell()?.getCurrentAgentDialog?.();
-        if (directState && typeof directState === 'object') {
-          return normalizeDialogState(directState);
-        }
-      } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] current dialog read failed', error);
-      }
-
-      return normalizeDialogState(currentDialogState);
-    }
-
-    function requestAgentDialog() {
-      if (APPFEATURES.myAgent === false) return;
-
-      try {
-        window.parent?.postMessage?.({ type: 'agent-dialog-request' }, '*');
-      } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] request failed', error);
-      }
-    }
-
-    function setAgentDialogState(nextState) {
-      currentDialogState = normalizeDialogState(nextState);
-      applyDialogState(currentDialogState);
-    }
-
-    function applyDialogMeta(meta = {}) {
-      const dialogIdLabel = document.getElementById('dialogIdLabel');
-      const dialogStatusLabel = document.getElementById('dialogStatusLabel');
-      const dialogTitle = document.getElementById('dialogTitle');
-      const dialogSubtitle = document.getElementById('dialogSubtitle');
-      const dialogLastClientTimeLabel = document.getElementById('dialogLastClientTimeLabel');
-
-      const dialogId = meta.dialogId || '';
-      const displayNumber = dialogId ? getDialogDisplayNumber(dialogId) : '000';
-
-      if (dialogTitle) {
-        if (displayNumber && displayNumber !== '000') {
-          dialogTitle.textContent =
-            getText('agentDialogTitleWithNumberPrefix', 'Диалог') + ' ' + displayNumber;
-        } else {
-          dialogTitle.textContent = meta.title || getText('agentDialogDefaultTitle', 'Диалог с клиентом');
-        }
-      }
-
-      if (dialogSubtitle) {
-        dialogSubtitle.textContent =
-          meta.subtitle ||
-          `${getText('agentDialogClientPrefix', 'Клиент:')} ${meta.clientName || '@username'} • ${getText('agentDialogChannelPrefix', 'Канал:')} ${meta.channel || 'Telegram'}`;
-      }
-
-      if (dialogIdLabel) {
-        dialogIdLabel.textContent = displayNumber;
-      }
-
-      if (dialogStatusLabel) {
-        dialogStatusLabel.textContent =
-          meta.status || getText('agentDialogStatusActive', 'Активен');
-      }
-
-      if (dialogLastClientTimeLabel) {
-        dialogLastClientTimeLabel.textContent =
-          meta.timeLabel || getText('agentDialogEmptyTime', '—');
-      }
-    }
-
-    function clearMessages() {
-      const container = document.getElementById('messagesContainer');
-      if (!container) return;
-      container.innerHTML = '';
-    }
-
-    function renderEmptyMessages() {
-      const container = document.getElementById('messagesContainer');
-      if (!container) return;
-
-      container.innerHTML =
-        '<div class="module-notice">' +
-        getText('agentDialogEmptyMessages', 'История сообщений пока пуста.') +
-        '</div>';
-    }
-
-    function appendMessage(msg) {
-      const container = document.getElementById('messagesContainer');
-      if (!container || !msg) return;
-
-      const from = msg.from === 'agent' ? 'agent' : 'client';
-
-      const wrapper = document.createElement('div');
-      wrapper.className = 'chat-message chat-message-' + from;
-
-      const meta = document.createElement('div');
-      meta.className = 'chat-message-meta';
-
-      const authorSpan = document.createElement('span');
-      authorSpan.className = 'chat-author';
-      authorSpan.textContent =
-        typeof msg.author === 'string' && msg.author.trim()
-          ? msg.author
-          : from === 'agent'
-            ? getText('agentDialogAuthorAgent', 'Агент')
-            : getText('agentDialogAuthorClient', 'Клиент');
-
-      const timeSpan = document.createElement('span');
-      timeSpan.className = 'chat-time';
-      timeSpan.textContent = msg.time || '';
-
-      meta.appendChild(authorSpan);
-      meta.appendChild(timeSpan);
-
-      const bubble = document.createElement('div');
-      bubble.className = 'chat-bubble';
-      bubble.textContent = msg.text || '';
-
-      wrapper.appendChild(meta);
-      wrapper.appendChild(bubble);
-      container.appendChild(wrapper);
-      container.scrollTop = container.scrollHeight;
-    }
-
-    function renderMessages(messages) {
-      clearMessages();
-
-      if (!Array.isArray(messages) || messages.length === 0) {
-        renderEmptyMessages();
-        return;
-      }
-
-      messages.forEach(appendMessage);
-    }
-
-    function applyDialogState(state) {
-      applyDialogMeta(state);
-      renderMessages(state.messages || []);
-    }
-
-    function showClientStatus(message) {
-      const statusEl = document.getElementById('clientSendMessageStatus');
-      if (!statusEl) return;
-
-      statusEl.textContent = message;
-      statusEl.classList.remove('error');
-      statusEl.classList.add('success');
-    }
-
-    function showClientError(message) {
-      const statusEl = document.getElementById('clientSendMessageStatus');
-      if (!statusEl) {
-        alert(message);
-        return;
-      }
-
-      statusEl.textContent = message;
-      statusEl.classList.remove('success');
-      statusEl.classList.add('error');
-    }
-
-    function getDialogMetaForSend() {
-      const state = getAgentDialogState();
-
-      return {
-        dialogId: state.dialogId || '',
-        clientName: state.clientName || '@username',
-        channel: state.channel || 'Telegram'
-      };
-    }
-
-    function syncDialogAvailability() {
-      const disabled = APPFEATURES.myAgent === false;
-      const input = document.getElementById('clientMessageInput');
-      const sendBtn = document.getElementById('clientSendMessageButton');
-      const voiceBtn = document.getElementById('clientVoiceButton');
-
-      if (input) input.disabled = disabled;
-      if (sendBtn) sendBtn.disabled = disabled;
-      if (voiceBtn) voiceBtn.disabled = disabled;
-
-      if (disabled) {
-        showClientError(
-          getText('agentDialogDisabledText', 'Модуль агента сейчас недоступен.')
-        );
-      }
-    }
-
-    function sendClientTextMessage() {
-      if (APPFEATURES.myAgent === false) {
-        showClientError(
-          getText('agentDialogDisabledText', 'Модуль агента сейчас недоступен.')
-        );
-        return;
-      }
-
-      const input = document.getElementById('clientMessageInput');
-      if (!input) return;
-
-      const text = (input.value || '').trim();
-      if (!text) return;
-
-      const dialogMeta = getDialogMetaForSend();
-
-      const outgoingMessage = {
-        from: 'agent',
-        author: getText('agentDialogAuthorYou', 'Вы'),
-        time: new Date().toLocaleTimeString('ru-RU', {
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        text
-      };
-
-      const container = document.getElementById('messagesContainer');
-      if (container?.querySelector('.module-notice')) {
-        clearMessages();
-      }
-
-      appendMessage(outgoingMessage);
-      input.value = '';
-      showClientStatus(
-        getText('agentDialogTextSentStatus', 'Сообщение отправлено клиенту...')
+    function applyTenantTexts() {
+      setTextContent(
+        'dialogsPageTitle',
+        getText('dialogsPageTitle', 'Диалоги')
       );
 
+      setTextContent(
+        'dialogsPageSubtitle',
+        getText('dialogsPageSubtitle', 'Список клиентских диалогов и быстрый переход в переписку.')
+      );
+
+      setTextContent(
+        'dialogsCounterLabel',
+        getText('dialogsCounterLabel', 'Всего диалогов')
+      );
+
+      setTextContent(
+        'dialogsTodayCounterLabel',
+        getText('dialogsTodayCounterLabel', 'Диалогов сегодня')
+      );
+
+      document.title =
+        getText('dialogsBrowserTitle', '') ||
+        getText('dialogsPageTitle', '') ||
+        'Диалоги';
+    }
+
+    function getDialogsPayload() {
       try {
-        window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium');
+        const shell = getShell();
+
+        const payload =
+          shell?.getAgentModuleStats?.() ||
+          shell?.getAgentStats?.() ||
+          shell?.getDialogsData?.();
+
+        if (payload && typeof payload === 'object') return payload;
       } catch (error) {
-        console.warn('[AI CENTER][Agent Dialogs] haptic failed', error);
+        console.error('[AI CENTER][Dialogs] dialogs payload read failed', error);
       }
+
+      return {
+        dialogs: [],
+        stats: {}
+      };
+    }
+
+    function getDialogsList() {
+      const payload = getDialogsPayload();
+      return Array.isArray(payload?.dialogs) ? payload.dialogs : [];
+    }
+
+    function renderDialogsCounters(dialogs, payload) {
+      const total = Array.isArray(dialogs) ? dialogs.length : 0;
+      const todayCount = Number(
+        payload?.stats?.dialogsToday ??
+        payload?.dialogsToday ??
+        0
+      );
+
+      const totalEl = document.getElementById('dialogsCounter');
+      const todayEl = document.getElementById('dialogsTodayCounter');
+
+      if (totalEl) totalEl.textContent = String(total);
+      if (todayEl) todayEl.textContent = String(todayCount);
+    }
+
+    function openDialog(dialog) {
+      if (!isDialogsAvailable()) {
+        console.warn('[AI CENTER][Dialogs] dialogs module is disabled');
+        return;
+      }
+
+      const username =
+        dialog?.username ||
+        dialog?.clientName ||
+        getText('dialogsUsernameFallback', '@username');
+
+      const channel =
+        dialog?.channel ||
+        getText('dialogsChannelFallback', 'Telegram');
+
+      const timeLabel = dialog?.timeLabel || dialog?.time || '';
+      const lastMessage =
+        dialog?.lastMessage ||
+        dialog?.message ||
+        getText('dialogsMessageFallback', 'Сообщений пока нет');
 
       try {
         window.parent?.postMessage?.(
           {
-            type: 'client-send-message',
-            dialogId: dialogMeta.dialogId,
-            clientName: dialogMeta.clientName,
-            channel: dialogMeta.channel,
-            text
+            type: 'agent-open-dialog',
+            dialogId: dialog?.id || dialog?.dialogId || '',
+            username,
+            channel,
+            timeLabel,
+            lastMessage,
+            source: 'dialogs'
           },
           '*'
         );
       } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] send message failed', error);
+        console.error('[AI CENTER][Dialogs] open dialog failed', error);
       }
     }
 
-    function getSupportedMimeType() {
-      const candidates = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/mp4',
-        'audio/m4a',
-        'audio/aac',
-        'audio/ogg',
-        'audio/wav'
-      ];
+    function renderDialogsList(dialogs) {
+      const container = document.getElementById('dialogsList');
+      if (!container) return;
 
-      if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) {
-        return '';
-      }
-
-      for (const type of candidates) {
-        try {
-          if (MediaRecorder.isTypeSupported(type)) return type;
-        } catch (error) {
-          console.warn('[AI CENTER][Agent Dialogs] mime check failed', type, error);
-        }
-      }
-
-      return '';
-    }
-
-    function cleanupVoiceState() {
-      if (mediaStream) {
-        mediaStream.getTracks().forEach((track) => track.stop());
-        mediaStream = null;
-      }
-
-      mediaRecorder = null;
-      recordedChunks = [];
-      isRecording = false;
-
-      document.getElementById('clientVoiceButton')?.classList.remove('recording');
-    }
-
-    async function startVoiceRecording() {
-      if (APPFEATURES.myAgent === false) {
-        showClientError(
-          getText('agentDialogDisabledText', 'Модуль агента сейчас недоступен.')
-        );
+      if (!isDialogsAvailable()) {
+        container.innerHTML = `<div class="module-notice">${escapeHtml(
+          getText('dialogsDisabledText', 'Модуль диалогов сейчас недоступен.')
+        )}</div>`;
         return;
       }
 
-      if (!navigator.mediaDevices?.getUserMedia) {
-        showClientError(
-          getText(
-            'agentDialogVoiceUnsupported',
-            'Запись голоса не поддерживается на этом устройстве/в этом браузере.'
-          )
-        );
+      if (!Array.isArray(dialogs) || dialogs.length === 0) {
+        container.innerHTML = `<div class="module-notice">${escapeHtml(
+          getText('dialogsEmptyText', 'Диалогов пока нет.')
+        )}</div>`;
         return;
       }
 
-      if (isRecording) return;
+      container.innerHTML = '';
 
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        recordedChunks = [];
+      dialogs.forEach((dialog, index) => {
+        const item = document.createElement('div');
+        item.className = 'dialog-item';
 
-        const mimeType = getSupportedMimeType();
-        const options = mimeType ? { mimeType } : undefined;
+        const username =
+          dialog?.username ||
+          dialog?.clientName ||
+          getText('dialogsUsernameFallback', '@username');
 
-        mediaRecorder = new MediaRecorder(mediaStream, options);
+        const timeLabel = dialog?.timeLabel || dialog?.time || '';
+        const lastMessage =
+          dialog?.lastMessage ||
+          dialog?.message ||
+          getText('dialogsMessageFallback', 'Сообщений пока нет');
 
-        mediaRecorder.addEventListener('dataavailable', (event) => {
-          if (event.data.size > 0) recordedChunks.push(event.data);
-        });
+        const displayNumber = formatSequenceNumber(index + 1);
 
-        mediaRecorder.addEventListener('stop', () => {
-          const blobType = mimeType || 'audio/webm';
-          const blob = new Blob(recordedChunks, { type: blobType });
+        item.innerHTML = `
+          <div class="dialog-item-row">
+            <span class="dialog-user">${displayNumber} • ${escapeHtml(username)}</span>
+            <span class="dialog-time">${escapeHtml(timeLabel)}</span>
+          </div>
+          <div class="dialog-last-msg">${escapeHtml(lastMessage)}</div>
+        `;
 
-          const container = document.getElementById('messagesContainer');
-          if (container?.querySelector('.module-notice')) {
-            clearMessages();
-          }
-
-          appendMessage({
-            from: 'agent',
-            author: getText('agentDialogAuthorVoice', 'Вы (голосовое)'),
-            time: new Date().toLocaleTimeString('ru-RU', {
-              hour: '2-digit',
-              minute: '2-digit'
-            }),
-            text: getText('agentDialogVoiceLabel', 'Голосовое сообщение')
-          });
-
-          const dialogMeta = getDialogMetaForSend();
-
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64Audio = reader.result;
-
-            try {
-              window.parent?.postMessage?.(
-                {
-                  type: 'client-send-voice',
-                  dialogId: dialogMeta.dialogId,
-                  clientName: dialogMeta.clientName,
-                  channel: dialogMeta.channel,
-                  audio: base64Audio,
-                  mimeType: blob.type || blobType
-                },
-                '*'
-              );
-            } catch (error) {
-              console.error('[AI CENTER][Agent Dialogs] send voice failed', error);
-            }
-
-            showClientStatus(
-              getText('agentDialogVoiceSentStatus', 'Голосовое отправлено клиенту...')
-            );
-
-            cleanupVoiceState();
-          };
-
-          reader.onerror = () => {
-            showClientError(
-              getText(
-                'agentDialogVoiceReadError',
-                'Не удалось обработать голосовое сообщение.'
-              )
-            );
-            cleanupVoiceState();
-          };
-
-          reader.readAsDataURL(blob);
-        });
-
-        mediaRecorder.start();
-        isRecording = true;
-        document.getElementById('clientVoiceButton')?.classList.add('recording');
-
-        try {
-          window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium');
-        } catch (error) {
-          console.warn('[AI CENTER][Agent Dialogs] haptic failed', error);
-        }
-
-        showClientStatus(
-          getText('agentDialogVoiceRecordingStatus', 'Идёт запись голосового...')
-        );
-      } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] microphone access failed', error);
-        showClientError(
-          getText(
-            'agentDialogVoiceAccessError',
-            'Не удалось получить доступ к микрофону. Проверьте разрешения в Telegram/браузере.'
-          )
-        );
-        cleanupVoiceState();
-      }
+        item.addEventListener('click', () => openDialog(dialog));
+        container.appendChild(item);
+      });
     }
 
-    function stopVoiceRecording() {
-      if (!mediaRecorder || !isRecording) return;
+    function renderDialogsPage() {
+      const payload = getDialogsPayload();
+      const dialogs = Array.isArray(payload?.dialogs) ? payload.dialogs : [];
 
-      try {
-        mediaRecorder.stop();
-        isRecording = false;
-        document.getElementById('clientVoiceButton')?.classList.remove('recording');
-
-        showClientStatus(
-          getText('agentDialogVoiceProcessingStatus', 'Обработка голосового сообщения...')
-        );
-      } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] stop recording failed', error);
-        showClientError(
-          getText(
-            'agentDialogVoiceStopError',
-            'Не удалось завершить запись голосового сообщения.'
-          )
-        );
-        cleanupVoiceState();
-      }
+      renderDialogsCounters(dialogs, payload);
+      renderDialogsList(dialogs);
     }
 
     function applyAppFeatures(features) {
       APPFEATURES = { ...APPFEATURES, ...(features || {}) };
-      syncDialogAvailability();
+      renderDialogsPage();
     }
-
-    window.navigateAgent = navigateAgent;
 
     window.addEventListener('message', (event) => {
       try {
@@ -650,88 +332,30 @@
 
         if (data.type === 'app-features') {
           applyAppFeatures(data.features || {});
-          return;
         }
 
-        if (data.type === 'agent-dialog-response' && data.dialog) {
-          setAgentDialogState(data.dialog);
-        }
-
-        if (data.type === 'agent-dialog-update' && data.dialog) {
-          setAgentDialogState(data.dialog);
-        }
-
-        if (data.type === 'agent-dialog-meta') {
-          setAgentDialogState({ ...getAgentDialogState(), ...data });
-        }
-
-        if (data.type === 'agent-dialog-history' && Array.isArray(data.messages)) {
-          setAgentDialogState({ ...getAgentDialogState(), messages: data.messages });
-        }
-
-        if (data.type === 'agent-dialog-new-message' && data.message) {
-          const state = getAgentDialogState();
-          const nextMessages = Array.isArray(state.messages)
-            ? [...state.messages, data.message]
-            : [data.message];
-
-          setAgentDialogState({ ...state, messages: nextMessages });
+        if (
+          data.type === 'agent-dialog-update' ||
+          data.type === 'agent-stats-update' ||
+          data.type === 'agent-module-stats-update' ||
+          data.type === 'agent-dialogs-update'
+        ) {
+          renderDialogsPage();
         }
       } catch (error) {
-        console.error('[AI CENTER][Agent Dialogs] message handler failed', error);
+        console.error('[AI CENTER][Dialogs] message handling failed', error);
       }
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-      try {
-        window.Telegram?.WebApp?.ready?.();
-      } catch (error) {
-        console.warn('[AI CENTER][Agent Dialogs] Telegram WebApp ready failed', error);
-      }
-
       TENANTCONFIG = getTenantConfig();
       APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
 
-      applyDialogState(getAgentDialogState());
-      requestAgentDialog();
-      syncDialogAvailability();
-
-      const input = document.getElementById('clientMessageInput');
-      const sendBtn = document.getElementById('clientSendMessageButton');
-      const voiceBtn = document.getElementById('clientVoiceButton');
-
-      if (sendBtn) {
-        sendBtn.addEventListener('click', sendClientTextMessage);
-      }
-
-      if (input) {
-        input.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            sendClientTextMessage();
-          }
-        });
-      }
-
-      if (voiceBtn) {
-        ['mousedown', 'touchstart'].forEach((eventName) => {
-          voiceBtn.addEventListener(eventName, (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            if (!isRecording) startVoiceRecording();
-          });
-        });
-
-        ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach((eventName) => {
-          voiceBtn.addEventListener(eventName, (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            if (isRecording) stopVoiceRecording();
-          });
-        });
-      }
+      applyTenantTexts();
+      renderDialogsPage();
 
       window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+      window.parent?.postMessage?.({ type: 'request-agent-module-stats' }, '*');
     });
   })();
 </script>
