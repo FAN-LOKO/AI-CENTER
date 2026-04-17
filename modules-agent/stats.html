@@ -17,58 +17,102 @@
       <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/dialogs.html')">Диалоги</button>
     </div>
 
-    <div class="module-page-content">
+    <div class="module-page-content module-stats-page">
       <section class="card-section">
         <div class="card-section-header">
           <h2 class="card-section-title">Краткая статистика</h2>
           <p class="card-section-subtitle">Основные показатели работы агента</p>
         </div>
         <div class="card-section-body">
-          <div class="profile-row"><span class="profile-label">Диалоги</span><span class="profile-value" id="statDialogsTotal">0</span></div>
-          <div class="profile-row"><span class="profile-label">Выданные реферальные ссылки</span><span class="profile-value" id="statRefLinksTotal">0</span></div>
-          <div class="profile-row"><span class="profile-label">Новых диалогов за сегодня</span><span class="profile-value" id="statDialogsToday">0</span></div>
-          <div class="profile-row"><span class="profile-label">Новых ссылок за сегодня</span><span class="profile-value" id="statRefLinksToday">0</span></div>
+          <div class="module-summary">
+            <div class="module-summary-row">
+              <div class="module-summary-label">Диалоги</div>
+              <div class="module-summary-value" id="statDialogsTotal">0</div>
+            </div>
+
+            <div class="module-summary-row">
+              <div class="module-summary-label">Выданные реферальные ссылки</div>
+              <div class="module-summary-value" id="statRefLinksTotal">0</div>
+            </div>
+
+            <div class="module-summary-row">
+              <div class="module-summary-label">Новых диалогов за сегодня</div>
+              <div class="module-summary-value" id="statDialogsToday">0</div>
+            </div>
+
+            <div class="module-summary-row">
+              <div class="module-summary-label">Новых ссылок за сегодня</div>
+              <div class="module-summary-value" id="statRefLinksToday">0</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="card-section accordion-card">
-        <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+      <section class="card-section accordion-card open">
+        <button class="card-section-header accordion-header" type="button" onclick="toggleAccordion(this)">
           <span class="card-section-title">Детализация</span>
-          <span class="accordion-icon">▼</span>
-        </div>
-        <div class="accordion-body open">
-          <section class="card-section accordion-card">
-            <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+          <span class="accordion-header-icon">▲</span>
+        </button>
+
+        <div class="card-section-body accordion-body" style="display: block;">
+          <section class="card-section accordion-card open">
+            <button class="card-section-header accordion-header" type="button" onclick="toggleAccordion(this)">
               <span class="card-section-title">Список диалогов</span>
-              <span class="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-body open">
-              <p class="card-section-subtitle">Кликните по диалогу, чтобы открыть его и продолжить общение с клиентом.</p>
-              <div id="dialogsList">
+              <span class="accordion-header-icon">▲</span>
+            </button>
+
+            <div class="card-section-body accordion-body" style="display: block;">
+              <p class="card-section-subtitle">
+                Кликните по диалогу, чтобы открыть его и продолжить общение с клиентом.
+              </p>
+
+              <div id="dialogsList" class="stats-dialogs-list">
                 <div class="dialog-item" onclick="openDialog('dlg-1', '@user1', 'Telegram')">
-                  <div class="dialog-item-row"><span class="dialog-user">@user1</span><span class="dialog-time">18.03.2026 • 10:45</span></div>
+                  <div class="dialog-item-row">
+                    <span class="dialog-user">@user1</span>
+                    <span class="dialog-time">18.03.2026 • 10:45</span>
+                  </div>
                   <div class="dialog-last-msg">Спасибо за инфо!</div>
                 </div>
+
                 <div class="dialog-item" onclick="openDialog('dlg-2', '@user2', 'Telegram')">
-                  <div class="dialog-item-row"><span class="dialog-user">@user2</span><span class="dialog-time">18.03.2026 • 09:12</span></div>
+                  <div class="dialog-item-row">
+                    <span class="dialog-user">@user2</span>
+                    <span class="dialog-time">18.03.2026 • 09:12</span>
+                  </div>
                   <div class="dialog-last-msg">Можно подробнее про условия?</div>
                 </div>
               </div>
             </div>
           </section>
 
-          <section class="card-section accordion-card">
-            <div class="card-section-header accordion-header open" onclick="toggleAccordion(this)">
+          <section class="card-section accordion-card open">
+            <button class="card-section-header accordion-header" type="button" onclick="toggleAccordion(this)">
               <span class="card-section-title">Выданные ссылки</span>
-              <span class="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-body open">
-              <p class="card-section-subtitle">Здесь будут отображаться последние выданные клиентам ссылки.</p>
-              <div id="issuedLinksList">
-                <div class="form-group">
-                  <div class="profile-row"><span class="profile-label">Кому</span><span class="profile-value">@user1</span></div>
-                  <div class="profile-row"><span class="profile-label">Тип ссылки</span><span class="profile-value">Клиентская ссылка</span></div>
-                  <div class="profile-row"><span class="profile-label">Время</span><span class="profile-value">10:45</span></div>
+              <span class="accordion-header-icon">▲</span>
+            </button>
+
+            <div class="card-section-body accordion-body" style="display: block;">
+              <p class="card-section-subtitle">
+                Здесь будут отображаться последние выданные клиентам ссылки.
+              </p>
+
+              <div id="issuedLinksList" class="stats-issued-links-list">
+                <div class="stats-issued-card">
+                  <div class="module-summary">
+                    <div class="module-summary-row">
+                      <div class="module-summary-label">Кому</div>
+                      <div class="module-summary-value">@user1</div>
+                    </div>
+                    <div class="module-summary-row">
+                      <div class="module-summary-label">Тип ссылки</div>
+                      <div class="module-summary-value">Клиентская ссылка</div>
+                    </div>
+                    <div class="module-summary-row">
+                      <div class="module-summary-label">Время</div>
+                      <div class="module-summary-value">10:45</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -80,20 +124,27 @@
 
   <script>
     function navigateAgent(page) {
-      try { window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*'); } catch (e) { console.error(e); }
+      try {
+        window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*');
+      } catch (e) {
+        console.error(e);
+      }
     }
 
-    function toggleAccordion(headerEl) {
-      const body = headerEl.nextElementSibling;
-      if (!body) return;
-      const isOpen = body.classList.contains('open');
-      body.classList.toggle('open', !isOpen);
-      headerEl.classList.toggle('open', !isOpen);
+    function toggleAccordion(button) {
+      const card = button.closest('.accordion-card');
+      const body = card?.querySelector(':scope > .accordion-body');
+      if (!card || !body) return;
+
+      const isOpen = card.classList.contains('open');
+      card.classList.toggle('open', !isOpen);
+      body.style.display = isOpen ? 'none' : 'block';
     }
 
     function getAgentStatsState() {
-      try { return window.parent?.AICAppShell?.getAgentStats?.() || null; }
-      catch (error) {
+      try {
+        return window.parent?.AICAppShell?.getAgentStats?.() || null;
+      } catch (error) {
         console.error('[AI CENTER][Agent Stats] stats state read failed', error);
         return null;
       }
@@ -117,19 +168,25 @@
     function renderDialogs(dialogs) {
       const listEl = document.getElementById('dialogsList');
       if (!listEl) return;
+
       if (!Array.isArray(dialogs) || dialogs.length === 0) {
         listEl.innerHTML = '<div class="module-notice">Пока нет данных по диалогам.</div>';
         return;
       }
+
       listEl.innerHTML = dialogs.map((dialog) => {
         const dialogId = dialog.id || '';
         const username = dialog.username || 'Без имени';
         const channel = dialog.channel || 'Telegram';
         const time = dialog.timeLabel || '—';
         const lastMessage = dialog.lastMessage || 'Сообщений пока нет';
+
         return `
           <div class="dialog-item" onclick="openDialog(${JSON.stringify(dialogId)}, ${JSON.stringify(username)}, ${JSON.stringify(channel)})">
-            <div class="dialog-item-row"><span class="dialog-user">${escapeHtml(username)}</span><span class="dialog-time">${escapeHtml(time)}</span></div>
+            <div class="dialog-item-row">
+              <span class="dialog-user">${escapeHtml(username)}</span>
+              <span class="dialog-time">${escapeHtml(time)}</span>
+            </div>
             <div class="dialog-last-msg">${escapeHtml(lastMessage)}</div>
           </div>
         `;
@@ -139,15 +196,28 @@
     function renderIssuedLinks(items) {
       const listEl = document.getElementById('issuedLinksList');
       if (!listEl) return;
+
       if (!Array.isArray(items) || items.length === 0) {
         listEl.innerHTML = '<div class="module-notice">Пока нет данных по выданным ссылкам.</div>';
         return;
       }
+
       listEl.innerHTML = items.map((item) => `
-        <div class="form-group">
-          <div class="profile-row"><span class="profile-label">Кому</span><span class="profile-value">${escapeHtml(item.username || '—')}</span></div>
-          <div class="profile-row"><span class="profile-label">Тип ссылки</span><span class="profile-value">${escapeHtml(item.linkType || '—')}</span></div>
-          <div class="profile-row"><span class="profile-label">Время</span><span class="profile-value">${escapeHtml(item.timeLabel || '—')}</span></div>
+        <div class="stats-issued-card">
+          <div class="module-summary">
+            <div class="module-summary-row">
+              <div class="module-summary-label">Кому</div>
+              <div class="module-summary-value">${escapeHtml(item.username || '—')}</div>
+            </div>
+            <div class="module-summary-row">
+              <div class="module-summary-label">Тип ссылки</div>
+              <div class="module-summary-value">${escapeHtml(item.linkType || '—')}</div>
+            </div>
+            <div class="module-summary-row">
+              <div class="module-summary-label">Время</div>
+              <div class="module-summary-value">${escapeHtml(item.timeLabel || '—')}</div>
+            </div>
+          </div>
         </div>
       `).join('');
     }
@@ -166,7 +236,9 @@
       try {
         window.parent?.postMessage?.({ type: 'agent-open-dialog', dialogId, username, channel }, '*');
         window.parent?.postMessage?.({ type: 'navigate', page: 'modules-agent/dialogs.html', tab: 'modules' }, '*');
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
