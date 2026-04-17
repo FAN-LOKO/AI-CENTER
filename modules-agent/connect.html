@@ -149,11 +149,62 @@
   </div>
 
   <script>
-    function navigateAgent(page) {
+  (function () {
+    let TENANTCONFIG = null;
+    let APPFEATURES = {
+      home: true,
+      myAgent: true,
+      modules: true,
+      sharedChat: true,
+      affiliate: true,
+      payments: true,
+      settings: true
+    };
+
+    function getShell() {
       try {
-        window.parent?.postMessage?.({ type: 'navigate', page, tab: 'modules' }, '*');
-      } catch (e) {
-        console.error(e);
+        return window.parent?.AICAppShell || null;
+      } catch (error) {
+        console.error('[AI CENTER][Agent Connect] shell access failed', error);
+        return null;
+      }
+    }
+
+    function getTenantConfig() {
+      try {
+        return getShell()?.getTenantConfig?.() || null;
+      } catch (error) {
+        console.error('[AI CENTER][Agent Connect] tenant config read failed', error);
+        return null;
+      }
+    }
+
+    function getAppFeatures() {
+      try {
+        return getShell()?.getAppFeatures?.() || {};
+      } catch (error) {
+        console.error('[AI CENTER][Agent Connect] app features read failed', error);
+        return {};
+      }
+    }
+
+    function getText(key, fallback = '') {
+      return TENANTCONFIG?.texts?.[key] ?? fallback;
+    }
+
+    function navigateAgent(page) {
+      if (APPFEATURES.myAgent === false) {
+        console.warn('[AI CENTER][Agent Connect] agent module is disabled');
+        return;
+      }
+
+      try {
+        window.parent?.postMessage?.(
+          { type: 'navigate', page, tab: 'modules' },
+          '*'
+        );
+      } catch (error) {
+        console.error('[AI CENTER][Agent Connect] navigate failed', error);
       }
     }
 
@@ -169,15 +220,21 @@
 
     function getAgentProfileState() {
       try {
-        return window.parent?.AICAppShell?.getAgentProfile?.() || null;
+        return getShell()?.getAgentProfile?.() || null;
       } catch (error) {
         console.error('[AI CENTER][Agent Connect] profile state read failed', error);
         return null;
       }
     }
 
-    function setBadgeState(element, connected, connectedText = 'Подключен', disconnectedText = 'Не подключен') {
+    function setBadgeState(
+      element,
+      connected,
+      connectedText = 'Подключен',
+      disconnectedText = 'Не подключен'
+    ) {
       if (!element) return;
+
       element.textContent = connected ? connectedText : disconnectedText;
       element.classList.remove(
         'status-badge--success',
@@ -186,14 +243,40 @@
         'status-badge--info',
         'status-badge--neutral'
       );
-      element.classList.add(connected ? 'status-badge--success' : 'status-badge--danger');
+      element.classList.add(
+        connected ? 'status-badge--success' : 'status-badge--danger'
+      );
+    }
+
+    function setConnectNote(message, type) {
+      const noteEl = document.getElementById('telegramConnectNote');
+      if (!noteEl) return;
+
+      if (!message) {
+        noteEl.hidden = true;
+        noteEl.textContent = '';
+        noteEl.classList.remove('settings-error-text', 'settings-success-text');
+        return;
+      }
+
+      noteEl.hidden = false;
+      noteEl.textContent = message;
+      noteEl.classList.remove('settings-error-text', 'settings-success-text');
+      noteEl.classList.add(
+        type === 'error' ? 'settings-error-text' : 'settings-success-text'
+      );
     }
 
     function applyConnectState() {
       const state = getAgentProfileState() || {};
 
       const telegramStatusEl = document.getElementById('telegramStatus');
-      setBadgeState(telegramStatusEl, Boolean(state.connected));
+      setBadgeState(
+        telegramStatusEl,
+        Boolean(state.connected),
+        getText('agentConnectStatusConnected', 'Подключен'),
+        getText('agentConnectStatusDisconnected', 'Не подключен')
+      );
 
       const tokenInput = document.getElementById('telegramBotToken');
       if (tokenInput && state.token) {
@@ -201,48 +284,149 @@
       }
     }
 
+    function applyTenantTexts() {
+      const titleEl = document.getElementById('agentConnectTitle');
+      const subtitleEl = document.getElementById('agentConnectSubtitle');
+      const statusLabelEl = document.getElementById('telegramStatusLabel');
+      const tokenLabelEl = document.getElementById('telegramTokenLabel');
+      const connectBtn = document.getElementById('telegramConnectBtn');
+
+      if (titleEl) {
+        titleEl.textContent = getText('agentConnectTitle', 'Подключение Telegram-бота');
+      }
+
+      if (subtitleEl) {
+        subtitleEl.textContent = getText(
+          'agentConnectSubtitle',
+          'Укажите API Token и подключите Telegram-бота к модулю.'
+        );
+      }
+
+      if (statusLabelEl) {
+        statusLabelEl.textContent = getText('agentConnectStatusLabel', 'Статус');
+      }
+
+      if (tokenLabelEl) {
+        tokenLabelEl.textContent = getText('agentConnectTokenLabel', 'API Token');
+      }
+
+      if (connectBtn) {
+        connectBtn.textContent = getText('agentConnectButton', 'Подключить');
+      }
+
+      document.title =
+        getText('agentConnectPageTitle', '') ||
+        getText('agentConnectTitle', '') ||
+        'Подключение Telegram-бота';
+    }
+
+    function syncAvailability() {
+      const disabled = APPFEATURES.myAgent === false;
+      const tokenInput = document.getElementById('telegramBotToken');
+      const connectBtn = document.getElementById('telegramConnectBtn');
+
+      if (tokenInput) tokenInput.disabled = disabled;
+      if (connectBtn) connectBtn.disabled = disabled;
+
+      if (disabled) {
+        setConnectNote(
+          getText('agentConnectDisabledText', 'Модуль агента сейчас недоступен.'),
+          'error'
+        );
+      } else {
+        setConnectNote('', 'success');
+      }
+    }
+
     function bindConnectActions() {
       const connectBtn = document.getElementById('telegramConnectBtn');
       const tokenInput = document.getElementById('telegramBotToken');
-      const noteEl = document.getElementById('telegramConnectNote');
       const telegramStatusEl = document.getElementById('telegramStatus');
 
       if (!connectBtn || !tokenInput) return;
 
       connectBtn.addEventListener('click', () => {
+        if (APPFEATURES.myAgent === false) {
+          setConnectNote(
+            getText('agentConnectDisabledText', 'Модуль агента сейчас недоступен.'),
+            'error'
+          );
+          return;
+        }
+
         const token = tokenInput.value.trim();
 
         if (!token) {
-          if (noteEl) {
-            noteEl.hidden = false;
-            noteEl.textContent = 'Введите API Token перед подключением.';
-          }
+          setConnectNote(
+            getText('agentConnectTokenRequired', 'Введите API Token перед подключением.'),
+            'error'
+          );
           return;
         }
 
         try {
-          window.parent?.AICAppShell?.setAgentProfile?.({
+          getShell()?.setAgentProfile?.({
             token,
             connected: true
           });
         } catch (error) {
           console.error('[AI CENTER][Agent Connect] profile state write failed', error);
+          setConnectNote(
+            getText('agentConnectSaveError', 'Не удалось сохранить состояние подключения.'),
+            'error'
+          );
+          return;
         }
 
-        setBadgeState(telegramStatusEl, true);
+        setBadgeState(
+          telegramStatusEl,
+          true,
+          getText('agentConnectStatusConnected', 'Подключен'),
+          getText('agentConnectStatusDisconnected', 'Не подключен')
+        );
 
-        if (noteEl) {
-          noteEl.hidden = false;
-          noteEl.textContent = 'Telegram-бот отмечен как подключенный.';
-        }
+        setConnectNote(
+          getText('agentConnectSuccess', 'Telegram-бот отмечен как подключенный.'),
+          'success'
+        );
       });
     }
 
+    function applyAppFeatures(features) {
+      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+      syncAvailability();
+    }
+
+    window.navigateAgent = navigateAgent;
+    window.toggleAccordion = toggleAccordion;
+
+    window.addEventListener('message', function (event) {
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+
+      if (data.type === 'app-features') {
+        applyAppFeatures(data.features || {});
+      }
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
-      try { window.Telegram?.WebApp?.ready?.(); } catch (e) {}
+      try {
+        window.Telegram?.WebApp?.ready?.();
+      } catch (error) {
+        console.warn('[AI CENTER][Agent Connect] Telegram WebApp ready failed', error);
+      }
+
+      TENANTCONFIG = getTenantConfig();
+      APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
+
+      applyTenantTexts();
       applyConnectState();
       bindConnectActions();
+      syncAvailability();
+
+      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
     });
-  </script>
+  })();
+</script>
 </body>
 </html>
