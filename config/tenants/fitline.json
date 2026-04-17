@@ -268,6 +268,20 @@
     "agentDialogVoiceUnsupported": "Запись голоса не поддерживается на этом устройстве/в этом браузере.",
     "agentDialogVoiceAccessError": "Не удалось получить доступ к микрофону. Проверьте разрешения в Telegram/браузере.",
     "agentDialogVoiceReadError": "Не удалось обработать голосовое сообщение.",
-    "agentDialogVoiceStopError": "Не удалось завершить запись голосового сообщения."
+    "agentDialogVoiceStopError": "Не удалось завершить запись голосового сообщения.",
+
+    "agentLinksBrowserTitle": "Ссылки и контакты",
+    "agentLinksPageTitle": "Ссылки и контакты",
+    "agentLinksPageSubtitle": "Сохраните партнёрские ссылки и ссылки на ваши соцсети.",
+    "agentLinksPmTitle": "Партнёрские ссылки",
+    "agentLinksSocialTitle": "Социальные сети",
+    "agentLinksPmSaveButton": "Сохранить партнёрские ссылки",
+    "agentLinksSocialSaveButton": "Сохранить соцсети",
+    "agentLinksDisabledText": "Модуль агента сейчас недоступен.",
+    "agentLinksPmRequiredError": "Введите обе ссылки: партнёрскую и клиентскую.",
+    "agentLinksPmSaved": "Партнёрские ссылки сохранены.",
+    "agentLinksPmSaveError": "Не удалось сохранить партнёрские ссылки.",
+    "agentLinksSocialSaved": "Ссылки на соцсети сохранены.",
+    "agentLinksSocialSaveError": "Не удалось сохранить ссылки на соцсети."
   }
 }
