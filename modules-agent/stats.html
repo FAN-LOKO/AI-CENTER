@@ -243,51 +243,57 @@
     }
 
     function renderIssuedLinksList(issuedLinks, dialogs) {
-      const container = document.getElementById('issuedLinksList');
-      if (!container) return;
+  const container = document.getElementById('issuedLinksList');
+  if (!container) return;
 
-      if (!Array.isArray(issuedLinks) || issuedLinks.length === 0) {
-        container.innerHTML = '<div class="module-notice">Выданных ссылок пока нет.</div>';
-        return;
-      }
+  console.log('[STATS PAGE] renderIssuedLinksList called');
+  console.log('[STATS PAGE] issuedLinks:', issuedLinks);
+  console.log('[STATS PAGE] dialogs:', dialogs);
+  console.log('[STATS PAGE] first issued link:', issuedLinks?.[0]);
+  console.log('[STATS PAGE] first issued link dialogId:', issuedLinks?.[0]?.dialogId);
 
-      container.innerHTML = issuedLinks.map((item) => {
-        const clientName = item?.clientName || item?.username || '@username';
-        const linkType = item?.type || item?.linkType || item?.title || 'Клиентская';
-        const issuedAt = item?.issuedAt || item?.timeLabel || item?.time || '—';
-        const dialogNumber = item?.dialogId
-          ? getDialogDisplayNumberById(item.dialogId, dialogs)
-          : '—';
+  if (!Array.isArray(issuedLinks) || issuedLinks.length === 0) {
+    container.innerHTML = '<div class="module-notice">Выданных ссылок пока нет.</div>';
+    return;
+  }
 
-        return `
-          <div class="stats-issued-card">
-            <div class="module-summary">
-              <div class="stats-issued-head">
-                <div class="stats-issued-client-label">Кому</div>
-                <div class="stats-issued-client-name">${escapeHtml(clientName)}</div>
+  container.innerHTML = issuedLinks.map((item) => {
+    const clientName = item?.clientName || item?.username || '@username';
+    const linkType = item?.type || item?.linkType || item?.title || 'Клиентская';
+    const issuedAt = item?.issuedAt || item?.timeLabel || item?.time || '—';
+    const dialogNumber = item?.dialogId
+      ? getDialogDisplayNumberById(item.dialogId, dialogs)
+      : '—';
+
+    return `
+      <div class="stats-issued-card">
+        <div class="module-summary">
+          <div class="stats-issued-head">
+            <div class="stats-issued-client-label">Кому</div>
+            <div class="stats-issued-client-name">${escapeHtml(clientName)}</div>
+          </div>
+
+          <div class="stats-issued-links">
+            <div class="stats-issued-link">
+              <div class="profile-row">
+                <div class="profile-label">Диалог</div>
+                <div class="profile-value">${escapeHtml(dialogNumber)}</div>
               </div>
-
-              <div class="stats-issued-links">
-                <div class="stats-issued-link">
-                  <div class="profile-row">
-                    <div class="profile-label">Диалог</div>
-                    <div class="profile-value">${escapeHtml(dialogNumber)}</div>
-                  </div>
-                  <div class="profile-row">
-                    <div class="profile-label">Тип ссылки</div>
-                    <div class="profile-value">${escapeHtml(linkType)}</div>
-                  </div>
-                  <div class="profile-row">
-                    <div class="profile-label">Время</div>
-                    <div class="profile-value">${escapeHtml(issuedAt)}</div>
-                  </div>
-                </div>
+              <div class="profile-row">
+                <div class="profile-label">Тип ссылки</div>
+                <div class="profile-value">${escapeHtml(linkType)}</div>
+              </div>
+              <div class="profile-row">
+                <div class="profile-label">Время</div>
+                <div class="profile-value">${escapeHtml(issuedAt)}</div>
               </div>
             </div>
           </div>
-        `;
-      }).join('');
-    }
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
     function renderAgentStatsPage() {
       const statsData = getAgentStats();
@@ -317,8 +323,10 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-      renderAgentStatsPage();
-    });
+  console.log('[STATS PAGE] loaded');
+  console.log('[STATS PAGE] issuedLinksList:', document.getElementById('issuedLinksList'));
+  renderAgentStatsPage();
+});
   </script>
 
   <script src="../js/stats.js"></script>
