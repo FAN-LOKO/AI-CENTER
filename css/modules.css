@@ -1217,6 +1217,14 @@ textarea.form-input,
   text-align: left;
 }
 
+.module-stats-page .accordion-card.open > .accordion-header .accordion-header-icon::before {
+  transform: translate(-50%, -38%) rotate(225deg);
+}
+
+.module-stats-page .card-section-subtitle {
+  margin: 0 0 12px;
+}
+
 /* dialogs */
 
 .stats-dialogs-list {
