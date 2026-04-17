@@ -195,17 +195,14 @@
     "paymentsHeaderTitle": "Оплата",
     "paymentsHeaderSubtitle": "Выберите тариф для подключения модуля",
     "paymentsHeaderLead": "Стоимость на этой странице указана в долларах США. На странице оплаты сумма будет показана в валюте пользователя.",
-
     "paymentsBalanceTitle": "Баланс",
     "paymentsBalanceSubtitle": "Текущий баланс вашего аккаунта",
     "paymentsBalanceAmount": "0",
     "paymentsBalanceCurrency": "USD",
     "paymentsBalanceNote": "История оплат, пополнение баланса и автоматические списания появятся позже.",
-
     "paymentsAgentHeaderTitle": "Модуль «Агент»",
     "paymentsModuleIntroTitle": "Выберите период доступа",
     "paymentsModuleIntroText": "Подберите удобный тариф, подтвердите согласие с условиями оферты и перейдите к оплате.",
-
     "paymentsOfferTextBase": "Согласен с",
     "paymentsOfferLinkText": "условиями оферты",
     "paymentsBadgeBestValue": "Выгодно",
@@ -215,13 +212,27 @@
     "paymentsGiftPrefix": "В подарок",
     "paymentsDurationSuffix": "календарных дней",
     "paymentsPriceSuffix": "$",
-
     "paymentsDisabledText": "Раздел оплат сейчас недоступен.",
     "paymentsEmptyText": "Тарифы пока не настроены для этого бренда.",
     "paymentsMetaPeriodLabel": "Период",
     "paymentsGiftDaysSuffix": "дней",
     "paymentsDefaultPlanDescription": "Доступ к модулю",
     "paymentsActionPayPrefix": "Оплатить",
-    "paymentsPlanFallbackName": "Тариф"
+    "paymentsPlanFallbackName": "Тариф",
+
+    "settingsPageTitle": "Настройки",
+    "settingsHeaderTitle": "Настройки",
+    "settingsHeaderSubtitle": "Управление профилем и системной информацией",
+    "settingsProfileTitle": "Профиль",
+    "settingsProfileLead": "Укажите имя и email для входа в PWA и дальнейшей синхронизации данных.",
+    "settingsFullNameLabel": "Имя",
+    "settingsEmailLabel": "Email",
+    "settingsSaveButton": "Сохранить",
+    "settingsVersionTitle": "Информация о версии",
+    "settingsDisabledText": "Раздел настроек сейчас недоступен.",
+    "settingsEmailRequiredError": "Укажите email для входа в PWA",
+    "settingsEmailInvalidError": "Введите корректный email",
+    "settingsProfileSaved": "Данные профиля сохранены",
+    "settingsProfileSaveError": "Не удалось сохранить профиль"
   }
 }
