@@ -65,27 +65,17 @@
     }
   ],
   issuedLinks: [
-    {
-      username: "@anna_fit",
-      linkType: "Оплата тарифа Start",
-      timeLabel: "17.04.2026 • 12:20"
-    },
-    {
-      username: "@sergey_run",
-      linkType: "Пробный доступ",
-      timeLabel: "17.04.2026 • 11:50"
-    },
-    {
-      username: "@olga_wellness",
-      linkType: "Консультация / бриф",
-      timeLabel: "16.04.2026 • 19:15"
-    },
-    {
-      username: "@ivan_gym",
-      linkType: "Коммерческое предложение",
-      timeLabel: "15.04.2026 • 14:03"
-    }
-  ]
+  {
+    username: "@anna_fit",
+    linkType: "Оплата тарифа Start",
+    timeLabel: "17.04.2026 • 12:20"
+  },
+  {
+    username: "@sergey_run",
+    linkType: "Пробный доступ",
+    timeLabel: "17.04.2026 • 11:50"
+  }
+]
 };
 
   function setAgentStats(nextStats) {
