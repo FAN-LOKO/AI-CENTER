@@ -51,20 +51,36 @@
   </div>
 
   <script>
-    function goBackToModules() {
-      try {
-        window.parent?.postMessage?.(
-          {
-            type: "navigate",
-            page: "modules.html",
-            tab: "modules"
-          },
-          "*"
-        );
-      } catch (error) {
-        console.error(error);
-      }
+  function getAppFeatures() {
+    try {
+      return window.parent?.AICAppShell?.getAppFeatures?.() || {};
+    } catch (error) {
+      console.error('[ModulesBack] app features read failed', error);
+      return {};
     }
-  </script>
+  }
+
+  function goBackToModules() {
+    try {
+      const features = getAppFeatures();
+
+      if (features.modules === false) {
+        console.warn('[ModulesBack] modules page is disabled by feature flag');
+        return;
+      }
+
+      window.parent?.postMessage?.(
+        {
+          type: 'navigate',
+          page: 'modules.html',
+          tab: 'modules'
+        },
+        '*'
+      );
+    } catch (error) {
+      console.error('[ModulesBack] navigation failed', error);
+    }
+  }
+</script>
 </body>
 </html>
