@@ -253,45 +253,52 @@
       });
     }
 
-    function renderIssuedLinksList(issuedLinks) {
-      const container = document.getElementById('issuedLinksList');
-      if (!container) return;
+   function renderIssuedLinksList(issuedLinks, dialogs) {
+  const container = document.getElementById('issuedLinksList');
+  if (!container) return;
 
-      if (!Array.isArray(issuedLinks) || issuedLinks.length === 0) {
-        container.innerHTML = '<div class="module-notice">Выданных ссылок пока нет.</div>';
-        return;
-      }
+  if (!Array.isArray(issuedLinks) || issuedLinks.length === 0) {
+    container.innerHTML = '<div class="module-notice">Выданных ссылок пока нет.</div>';
+    return;
+  }
 
-      container.innerHTML = issuedLinks.map((item) => {
-        const clientName = item?.clientName || item?.username || '@username';
-        const linkType = item?.type || item?.linkType || 'Клиентская';
-        const issuedAt = item?.issuedAt || item?.timeLabel || item?.time || '—';
+  container.innerHTML = issuedLinks.map((item) => {
+    const clientName = item?.clientName || item?.username || '@username';
+    const linkType = item?.type || item?.linkType || item?.title || 'Клиентская';
+    const issuedAt = item?.issuedAt || item?.timeLabel || item?.time || '—';
+    const dialogNumber = item?.dialogId
+      ? getDialogDisplayNumberById(item.dialogId, dialogs)
+      : '—';
 
-        return `
-          <div class="stats-issued-card">
-            <div class="module-summary">
-              <div class="stats-issued-head">
-                <div class="stats-issued-client-label">Кому</div>
-                <div class="stats-issued-client-name">${escapeHtml(clientName)}</div>
+    return `
+      <div class="stats-issued-card">
+        <div class="module-summary">
+          <div class="stats-issued-head">
+            <div class="stats-issued-client-label">Кому</div>
+            <div class="stats-issued-client-name">${escapeHtml(clientName)}</div>
+          </div>
+
+          <div class="stats-issued-links">
+            <div class="stats-issued-link">
+              <div class="profile-row">
+                <div class="profile-label">Диалог</div>
+                <div class="profile-value">${escapeHtml(dialogNumber)}</div>
               </div>
-
-              <div class="stats-issued-links">
-                <div class="stats-issued-link">
-                  <div class="profile-row">
-                    <div class="profile-label">Тип ссылки</div>
-                    <div class="profile-value">${escapeHtml(linkType)}</div>
-                  </div>
-                  <div class="profile-row">
-                    <div class="profile-label">Время выдачи</div>
-                    <div class="profile-value">${escapeHtml(issuedAt)}</div>
-                  </div>
-                </div>
+              <div class="profile-row">
+                <div class="profile-label">Тип ссылки</div>
+                <div class="profile-value">${escapeHtml(linkType)}</div>
+              </div>
+              <div class="profile-row">
+                <div class="profile-label">Время</div>
+                <div class="profile-value">${escapeHtml(issuedAt)}</div>
               </div>
             </div>
           </div>
-        `;
-      }).join('');
-    }
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
     function renderAgentStatsPage() {
       const statsData = getAgentStats();
