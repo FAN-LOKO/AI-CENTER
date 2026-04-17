@@ -112,11 +112,10 @@ function renderDialogs(dialogs) {
     const lastMessage = dialog.lastMessage || 'Сообщений пока нет';
 
     return (
-      '<div class="dialog-item" onclick="openDialog(' +
-      JSON.stringify(dialogId) + ', ' +
-      JSON.stringify(username) + ', ' +
-      JSON.stringify(channel) +
-      ')">' +
+      '<div class="dialog-item" ' +
+        'data-dialog-id="' + escapeHtml(dialogId) + '" ' +
+        'data-username="' + escapeHtml(username) + '" ' +
+        'data-channel="' + escapeHtml(channel) + '">' +
         '<div class="dialog-item-row">' +
           '<span class="dialog-user">' + escapeHtml(username) + '</span>' +
           '<span class="dialog-time">' + escapeHtml(time) + '</span>' +
@@ -174,6 +173,22 @@ function applyStats() {
   renderIssuedLinks(stats.issuedLinks);
 }
 
+function bindDialogsClick() {
+  const listEl = document.getElementById('dialogsList');
+  if (!listEl) return;
+
+  listEl.addEventListener('click', function (event) {
+    const item = event.target.closest('.dialog-item');
+    if (!item) return;
+
+    const dialogId = item.getAttribute('data-dialog-id') || '';
+    const username = item.getAttribute('data-username') || '';
+    const channel = item.getAttribute('data-channel') || 'Telegram';
+
+    openDialog(dialogId, username, channel);
+  });
+}
+
 window.addEventListener('message', function (event) {
   const data = event && event.data;
   if (!data || typeof data !== 'object') return;
@@ -193,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.Telegram?.WebApp?.ready?.();
   } catch (e) {}
 
+  bindDialogsClick();
   applyStats();
   requestAgentStats();
 });
