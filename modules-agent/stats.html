@@ -87,36 +87,42 @@
           </section>
 
           <section class="card-section accordion-card open">
-            <button class="card-section-header accordion-header" type="button" onclick="toggleAccordion(this)">
-              <span class="card-section-title">Выданные ссылки</span>
-              <span class="accordion-header-icon">▲</span>
-            </button>
+  <button class="card-section-header accordion-header" type="button" onclick="toggleAccordion(this)">
+    <span class="stats-accordion-head">
+      <span class="card-section-title">Выданные ссылки</span>
+      <span class="stats-accordion-subtitle">
+        Здесь будут отображаться последние выданные клиентам ссылки.
+      </span>
+    </span>
+    <span class="accordion-header-icon">▲</span>
+  </button>
 
-            <div class="card-section-body accordion-body" style="display: block;">
-              <p class="card-section-subtitle">
-                Здесь будут отображаться последние выданные клиентам ссылки.
-              </p>
+  <div class="card-section-body accordion-body" style="display: block;">
+    <div id="issuedLinksList" class="stats-issued-links-list">
+      <div class="stats-issued-card">
+        <div class="module-summary">
+          <div class="stats-issued-head">
+            <div class="stats-issued-client-label">Кому</div>
+            <div class="stats-issued-client-name">@user1</div>
+          </div>
 
-              <div id="issuedLinksList" class="stats-issued-links-list">
-                <div class="stats-issued-card">
-                  <div class="module-summary">
-                    <div class="module-summary-row">
-                      <div class="module-summary-label">Кому</div>
-                      <div class="module-summary-value">@user1</div>
-                    </div>
-                    <div class="module-summary-row">
-                      <div class="module-summary-label">Тип ссылки</div>
-                      <div class="module-summary-value">Клиентская ссылка</div>
-                    </div>
-                    <div class="module-summary-row">
-                      <div class="module-summary-label">Время</div>
-                      <div class="module-summary-value">10:45</div>
-                    </div>
-                  </div>
-                </div>
+          <div class="stats-issued-links">
+            <div class="stats-issued-link">
+              <div class="profile-row">
+                <div class="profile-label">Тип ссылки</div>
+                <div class="profile-value">Клиентская</div>
+              </div>
+              <div class="profile-row">
+                <div class="profile-label">Время выдачи</div>
+                <div class="profile-value">17.04.2026 • 10:45</div>
               </div>
             </div>
-          </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
         </div>
       </section>
     </div>
