@@ -1,9 +1,14 @@
 {
+  "_comment": "TENANT OVERLAY / FitLine-specific конфиг. Здесь живет только то, что относится именно к FitLine: бренд, домены, тема, тарифы, тексты, legal, support и точечные tenant overrides.",
+
   "tenantId": "fitline",
   "brandKey": "fitline",
   "brandLabel": "FIT",
   "appName": "AI FIT CENTER",
+  "logoMode": "text",
+
   "domains": {
+    "_comment": "Домены и алиасы tenant",
     "primary": "fit.ai-center.app",
     "aliases": [
       "www.fit.ai-center.app",
@@ -11,8 +16,9 @@
       "localhost"
     ]
   },
-  "logoMode": "text",
+
   "theme": {
+    "_comment": "Brand theme FitLine",
     "primary": "#3b82f6",
     "primaryDark": "#0b3c78",
     "primarySoft": "#7ec8ff",
@@ -21,7 +27,9 @@
     "bgAccent": "#3b82f6",
     "bgEnd": "#0b3c78"
   },
+
   "features": {
+    "_comment": "Tenant-specific feature flags. Здесь только то, что реально отличается от product base.",
     "home": true,
     "myAgent": true,
     "modules": true,
@@ -30,8 +38,56 @@
     "payments": true,
     "settings": true
   },
+
+  "navigation": {
+    "_comment": "Если нужно, tenant может переопределять отдельные элементы навигации",
+    "tabs": []
+  },
+
+  "support": {
+    "_comment": "Support-сущности и контакты бренда",
+    "email": "support@fit.ai-center.app",
+    "telegram": "@fitline_support",
+    "hours": "Пн–Пт, 10:00–19:00"
+  },
+
+  "legal": {
+    "_comment": "Юридические сущности tenant",
+    "companyName": "FitLine / AI FIT CENTER",
+    "offerRequired": true,
+    "privacyRequired": true,
+    "personalDataRequired": true
+  },
+
+  "policyLinks": {
+    "_comment": "Юридические ссылки tenant",
+    "privacy": "https://fit.ai-center.app/privacy",
+    "personalData": "https://fit.ai-center.app/personal-data",
+    "terms": "https://fit.ai-center.app/terms"
+  },
+
+  "affiliate": {
+    "_comment": "Tenant-specific правила партнерской программы",
+    "enabled": false,
+    "levels": [
+      {
+        "line": 1,
+        "percent": 10
+      },
+      {
+        "line": 2,
+        "percent": 5
+      },
+      {
+        "line": 3,
+        "percent": 3
+      }
+    ]
+  },
+
   "plans": [
     {
+      "_comment": "Тарифы tenant. Это уже не product base, а конкретная коммерческая модель FitLine.",
       "id": "agent_30",
       "moduleId": "ai-agent",
       "name": "1 месяц",
@@ -74,12 +130,19 @@
       "highlight": false
     }
   ],
-  "policyLinks": {
-    "privacy": "https://fit.ai-center.app/privacy",
-    "personalData": "https://fit.ai-center.app/personal-data",
-    "terms": "https://fit.ai-center.app/terms"
-  },
+
+  "modules": [
+    {
+      "_comment": "Точечный override модуля AI Agent для FitLine. Общая база модуля живет в product-config.json.",
+      "id": "ai-agent",
+      "titleRu": "Мой агент",
+      "page": "my-agent.html"
+    }
+  ],
+
   "texts": {
+    "_comment": "Все tenant-specific UI тексты бренда FitLine",
+
     "appTitle": "AI FIT CENTER",
     "headerTitle": "AI FIT CENTER",
 
@@ -132,8 +195,6 @@
 
     "modulesDefaultShortDescription": "Описание модуля будет заполнено в tenant-конфиге.",
     "modulesDefaultFullDescription": "Описание модуля будет добавлено позже.",
-    "modulesSubscriptionStatusPaid": "Платные модули доступны",
-    "modulesSubscriptionStatusBase": "Доступ только к базовым модулям",
     "modulesActionOpen": "Открыть модуль",
     "modulesActionPay": "Перейти к оплате",
     "modulesDetailsTitle": "Подробнее о модуле",
