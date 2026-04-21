@@ -27,6 +27,7 @@
    * - пользовательские модули
    * - статистика агента
    * - выбранный диалог агента
+   * - текущий moduleId для страницы payments
    * ========================================================= */
 
   let APPFEATURES = {
@@ -95,6 +96,7 @@
   };
 
   let CURRENT_AGENT_DIALOG = null;
+  let CURRENT_PAYMENT_MODULE_ID = null;
 
   /* =========================================================
    * USER MODULES HELPERS
@@ -179,6 +181,31 @@
   }
 
   /* =========================================================
+   * PAYMENT CONTEXT HELPERS
+   * Что здесь:
+   * - хранение текущего moduleId для payments
+   * - передача payment context в iframe
+   * ========================================================= */
+
+  function setCurrentPaymentModuleId(moduleId) {
+    CURRENT_PAYMENT_MODULE_ID = moduleId ? String(moduleId) : null;
+
+    if (frame && frame.contentWindow) {
+      frame.contentWindow.postMessage(
+        {
+          type: "payment-module-context",
+          moduleId: CURRENT_PAYMENT_MODULE_ID
+        },
+        "*"
+      );
+    }
+  }
+
+  function getCurrentPaymentModuleId() {
+    return CURRENT_PAYMENT_MODULE_ID;
+  }
+
+  /* =========================================================
    * PAGE CONFIGURATION
    * Что здесь:
    * - единая карта вкладок и файлов страниц
@@ -235,6 +262,7 @@
    * - отправка профиля пользователя в страницу
    * - отправка feature flags в страницу
    * - отправка user modules в страницу
+   * - отправка payment context в страницу
    * - единый пуш состояния shell в текущий iframe
    * ========================================================= */
 
@@ -274,10 +302,23 @@
     );
   }
 
+  function sendPaymentModuleContextToFrame() {
+    if (!frame || !frame.contentWindow) return;
+
+    frame.contentWindow.postMessage(
+      {
+        type: "payment-module-context",
+        moduleId: getCurrentPaymentModuleId()
+      },
+      "*"
+    );
+  }
+
   function pushShellStateToFrame() {
     sendFeaturesToFrame();
     sendUserProfileToFrame();
     sendUserModulesToFrame();
+    sendPaymentModuleContextToFrame();
   }
 
   /* =========================================================
@@ -346,7 +387,7 @@
   /* =========================================================
    * NAV BUTTON BINDINGS
    * Что здесь:
-   * - обработчики клика по нижней навигации
+   * - привязка нижней навигации
    * ========================================================= */
 
   function bindNavButtons() {
@@ -364,9 +405,7 @@
   /* =========================================================
    * SHELL HEADER ACTIONS
    * Что здесь:
-   * - обработчики кнопок header
-   * - переход в settings
-   * - notifications feedback
+   * - действия header-кнопок shell
    * ========================================================= */
 
   function bindShellButtons() {
@@ -390,13 +429,13 @@
   /* =========================================================
    * MESSAGE BUS
    * Что здесь:
-   * - обработка сообщений от дочерних страниц
+   * - маршрутизация сообщений между страницами и shell
    * - навигация
-   * - shared chat badge
-   * - профиль пользователя
-   * - user modules
+   * - user profile
    * - feature flags
-   * - agent stats / dialogs
+   * - user modules
+   * - agent stats
+   * - payment module context
    * ========================================================= */
 
   function bindMessageBus() {
@@ -413,6 +452,10 @@
           const fallbackTab = getFallbackTab();
           navigate(getPageByTab(fallbackTab), fallbackTab);
           return;
+        }
+
+        if (data.page === "payments.html") {
+          setCurrentPaymentModuleId(data.moduleId || null);
         }
 
         navigate(data.page || getPageByTab(targetTab), targetTab);
@@ -433,7 +476,15 @@
       }
 
       if (data.type === "request-user-profile") {
-        sendUserProfileToFrame();
+        if (USERPROFILE && frame && frame.contentWindow) {
+          frame.contentWindow.postMessage(
+            {
+              type: "user-profile",
+              profile: USERPROFILE
+            },
+            "*"
+          );
+        }
         return;
       }
 
@@ -443,18 +494,23 @@
         return;
       }
 
+      if (data.type === "request-app-features") {
+        sendFeaturesToFrame();
+        return;
+      }
+
       if (data.type === "request-user-modules") {
         sendUserModulesToFrame();
         return;
       }
 
-      if (data.type === "save-user-modules") {
-        setUserModules(data.modules || []);
+      if (data.type === "request-payment-module-context") {
+        sendPaymentModuleContextToFrame();
         return;
       }
 
-      if (data.type === "request-app-features") {
-        sendFeaturesToFrame();
+      if (data.type === "set-payment-module-context") {
+        setCurrentPaymentModuleId(data.moduleId || null);
         return;
       }
 
@@ -479,37 +535,24 @@
       if (data.type === "agent-dialogs-update" && Array.isArray(data.dialogs)) {
         setAgentStats({
           ...getAgentStats(),
-          dialogs: data.dialogs
+          dialogs: data.dialogs,
+          dialogsTotal: data.dialogs.length
         });
         return;
       }
 
-      if (data.type === "agent-open-dialog") {
-        const dialogs = getAgentStats().dialogs || [];
-        const dialog =
-          dialogs.find((d) => String(d.id) === String(data.dialogId)) || {
-            id: data.dialogId || null,
-            username: data.username || "",
-            channel: data.channel || "",
-            timeLabel: data.timeLabel || "",
-            lastMessage: data.lastMessage || ""
-          };
-
-        setCurrentAgentDialog(dialog);
-        navigate("modules-agent/dialogs.html", "modules");
+      if (data.type === "agent-issued-links-update" && Array.isArray(data.issuedLinks)) {
+        setAgentStats({
+          ...getAgentStats(),
+          issuedLinks: data.issuedLinks,
+          refLinksTotal: data.issuedLinks.length
+        });
         return;
       }
 
-      if (data.type === "agent-current-dialog-request") {
-        if (frame && frame.contentWindow) {
-          frame.contentWindow.postMessage(
-            {
-              type: "agent-current-dialog-response",
-              dialog: getCurrentAgentDialog()
-            },
-            "*"
-          );
-        }
+      if (data.type === "agent-current-dialog-set") {
+        setCurrentAgentDialog(data.dialog || null);
+        return;
       }
     });
   }
@@ -517,23 +560,22 @@
   /* =========================================================
    * BOOTSTRAP
    * Что здесь:
-   * - запуск runtime
-   * - загрузка tenant config
-   * - применение feature flags
+   * - инициализация runtime
+   * - инициализация tenant
    * - сборка page config
-   * - биндинг навигации и message bus
-   * - открытие стартовой страницы
+   * - старт shell
    * ========================================================= */
 
   async function bootstrap() {
-    Runtime.ready();
-    Runtime.expand();
-
     try {
-      const tenantConfig = await window.AICTenant.load();
-      APPFEATURES = tenantConfig.features || APPFEATURES;
+      Runtime.ready();
+      Runtime.expand();
+
+      if (window.AICTenant && typeof window.AICTenant.load === "function") {
+        await window.AICTenant.load();
+      }
     } catch (error) {
-      console.error("Tenant config load failed:", error);
+      console.error("[AI CENTER][Shell] bootstrap failed", error);
     }
 
     buildPageConfig();
@@ -551,17 +593,12 @@
   /* =========================================================
    * PUBLIC SHELL API
    * Что здесь:
-   * - публичные методы shell для child pages
-   * - tenant config getters
-   * - runtime info
-   * - user/profile/modules getters-setters
-   * - agent stats getters-setters
+   * - публичные методы shell для страниц
    * ========================================================= */
 
   window.AICAppShell = {
     navigate,
     getCurrentTab: () => currentTab,
-    getFeatures: () => APPFEATURES,
     getAppFeatures: () => APPFEATURES,
     getPageConfig: () => PAGECONFIG,
 
@@ -603,13 +640,6 @@
     getTenantSections: () =>
       (window.AICTenant ? window.AICTenant.getSections() : {}),
 
-    getCurrentUser: () => USERPROFILE,
-    getUserProfile: () => USERPROFILE,
-    setUserProfile: (profile) => {
-      USERPROFILE = profile || null;
-      sendUserProfileToFrame();
-    },
-
     getUserModules: () => getUserModules(),
     setUserModules: (modules) => setUserModules(modules),
 
@@ -617,6 +647,9 @@
     setAgentStats: (stats) => setAgentStats(stats),
 
     getCurrentAgentDialog: () => getCurrentAgentDialog(),
-    setCurrentAgentDialog: (dialog) => setCurrentAgentDialog(dialog)
+    setCurrentAgentDialog: (dialog) => setCurrentAgentDialog(dialog),
+
+    getCurrentPaymentModuleId: () => getCurrentPaymentModuleId(),
+    setCurrentPaymentModuleId: (moduleId) => setCurrentPaymentModuleId(moduleId)
   };
 })();
