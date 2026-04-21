@@ -395,7 +395,10 @@
       return `
         <div class="home-module-item${frozen ? ' is-frozen' : ''}">
           <div class="home-module-top">
-            <div class="home-module-title">${mod.title}</div>
+            <div class="home-module-title">
+  ${mod.title}
+  <span class="home-module-title-ru">/ ${mod.titleRu}</span>
+</div>
             <span class="home-module-badge ${badge.cls}">${badge.text}</span>
           </div>
           <p class="home-module-status ${status.cls}">${status.text}</p>
