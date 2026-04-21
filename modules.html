@@ -85,13 +85,66 @@
     }
 
     function getTenantModulesRaw() {
-      try {
-        return window.parent?.AICAppShell?.getTenantModules?.() || [];
-      } catch (error) {
-        console.error('[AI CENTER][Modules] tenant modules read failed', error);
-        return [];
-      }
+  const fallbackModules = [
+    {
+      id: 'ai-agent',
+      title: 'My Agent',
+      titleRu: 'Мой агент',
+      shortDescription: 'Подключение и управление ИИ-агентом для диалогов и первичной квалификации.',
+      fullDescription: [
+        'Подключение соцсетей и каналов общения, включая Telegram и другие площадки.',
+        'Готовый ИИ-агент на платформенной модели без настройки API со стороны пользователя.',
+        'Обработка входящих сообщений, первичный рекрутинг и квалификация обращений.',
+        'История диалогов и возможность ручного вмешательства в общение.',
+        'Базовая статистика по диалогам, обращениям и лидам.'
+      ],
+      page: 'modules-agent-profile.html',
+      enabled: true,
+      category: 'core',
+      requiresPayment: false
+    },
+    {
+      id: 'knowledge-hub',
+      title: 'Knowledge Hub',
+      titleRu: 'База знаний',
+      shortDescription: 'Материалы, обучение и AI-поиск по знаниям компании и продукта.',
+      fullDescription: [
+        'Материалы по продукту, бизнес-модели, скриптам, возражениям, презентациям и эфирам.',
+        'Обучающие дорожки для разных ролей: новичок, партнёр, лидер.',
+        'AI-поиск по базе знаний и быстрый доступ к нужным материалам.',
+        'Привязка материалов к другим модулям платформы.'
+      ],
+      page: 'modules-knowledge-hub.html',
+      enabled: true,
+      category: 'core',
+      requiresPayment: false
+    },
+    {
+      id: 'support-desk',
+      title: 'Support Desk',
+      titleRu: 'Поддержка',
+      shortDescription: 'Поддержка, обращения, сервисные вопросы и сопровождение пользователей.',
+      fullDescription: [
+        'Единая точка входа для сервисных запросов.',
+        'Помощь по onboarding, оплатам и доступам.',
+        'Передача обращений в поддержку и контроль статуса.',
+        'База быстрых ответов по типовым вопросам.'
+      ],
+      page: 'modules-support-desk.html',
+      enabled: true,
+      category: 'core',
+      requiresPayment: false
     }
+  ];
+
+  try {
+    const raw = window.parent?.AICAppShell?.getTenantModules?.();
+    return Array.isArray(raw) && raw.length ? raw : fallbackModules;
+  } catch (error) {
+    console.error('[AI CENTER][Modules] tenant modules read failed', error);
+    return fallbackModules;
+  }
+}
 
     /* =========================================================
      * MODULE CATALOG HELPERS
