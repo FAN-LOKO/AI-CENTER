@@ -2,15 +2,22 @@
   'use strict';
 
   /* =========================================================
-     TENANT DEFAULTS / ЗНАЧЕНИЯ TENANT ПО УМОЛЧАНИЮ
-     ========================================================= */
+   * TENANT DEFAULTS
+   * Что здесь:
+   * - tenant по умолчанию
+   * - базовая папка конфигов
+   * - имя общего продуктового конфига
+   * ========================================================= */
   const DEFAULT_TENANT = 'fitline';
   const TENANT_CONFIG_BASE = 'config/tenants';
+  const PRODUCT_CONFIG_NAME = 'product-config.json';
 
   /* =========================================================
-     HOST MAP / МАППИНГ ДОМЕНОВ НА TENANT
-     Один shell — много брендов. Источник резолва по hostname.
-     ========================================================= */
+   * HOST MAP
+   * Что здесь:
+   * - маппинг hostname -> tenantId
+   * - один shell, много компаний
+   * ========================================================= */
   const HOST_MAP = {
     'fit.ai-center.app': 'fitline',
     'www.fit.ai-center.app': 'fitline',
@@ -18,8 +25,10 @@
   };
 
   /* =========================================================
-     HELPERS / ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-     ========================================================= */
+   * URL / HOST HELPERS
+   * Что здесь:
+   * - вспомогательные функции для текущего хоста
+   * ========================================================= */
   function getHostname() {
     return window.location.hostname || '';
   }
@@ -65,12 +74,11 @@
   }
 
   /* =========================================================
-     TENANT RESOLUTION / ОПРЕДЕЛЕНИЕ TENANT
-     Приоритет:
-     1) hostname
-     2) ?tenant=... только на localhost
-     3) fallback tenant
-     ========================================================= */
+   * TENANT RESOLUTION
+   * Что здесь:
+   * - определение tenantId
+   * - приоритет: hostname -> query(local) -> fallback
+   * ========================================================= */
   function resolveTenantId() {
     const hostname = getHostname();
     const tenantFromHost = getTenantFromHostname();
@@ -115,37 +123,144 @@
   }
 
   /* =========================================================
-     CONFIG LOADING / ЗАГРУЗКА TENANT-КОНФИГА
-     ========================================================= */
-  async function loadTenantConfig(tenantId) {
-    const configUrl = `${TENANT_CONFIG_BASE}/${tenantId}.json`;
+   * FETCH HELPERS
+   * Что здесь:
+   * - загрузка json-файлов
+   * - загрузка общего product-config
+   * - загрузка tenant override
+   * ========================================================= */
+  async function fetchJsonConfig(configUrl, debugMeta = {}) {
     const response = await fetch(configUrl, { cache: 'no-store' });
 
     if (!response.ok) {
       console.error('[AI CENTER][Tenant] config fetch failed', {
-        tenantId,
         status: response.status,
         statusText: response.statusText,
         configUrl,
+        ...debugMeta,
         ...getHostDebugContext()
       });
 
-      throw new Error(`Failed to load tenant config: ${tenantId}`);
+      throw new Error(`Failed to load config: ${configUrl}`);
     }
 
     const config = await response.json();
 
     if (!config || typeof config !== 'object') {
-      throw new Error(`Invalid tenant config payload: ${tenantId}`);
+      throw new Error(`Invalid config payload: ${configUrl}`);
     }
 
     return config;
   }
 
+  async function loadProductConfig() {
+    const configUrl = `${TENANT_CONFIG_BASE}/${PRODUCT_CONFIG_NAME}`;
+    return fetchJsonConfig(configUrl, {
+      configType: 'product',
+      configName: PRODUCT_CONFIG_NAME
+    });
+  }
+
+  async function loadTenantConfig(tenantId) {
+    const configUrl = `${TENANT_CONFIG_BASE}/${tenantId}.json`;
+    return fetchJsonConfig(configUrl, {
+      configType: 'tenant',
+      tenantId
+    });
+  }
+
   /* =========================================================
-     THEME APPLICATION / ПРИМЕНЕНИЕ ТЕМЫ
-     Применяет tenant theme в CSS custom properties
-     ========================================================= */
+   * MERGE HELPERS
+   * Что здесь:
+   * - merge простых объектов
+   * - merge массивов модулей по id
+   * - сборка итогового runtime config
+   * ========================================================= */
+
+  function isPlainObject(value) {
+    return !!value && typeof value === 'object' && !Array.isArray(value);
+  }
+
+  function mergeShallowObjects(baseObj, overrideObj) {
+    return {
+      ...(isPlainObject(baseObj) ? baseObj : {}),
+      ...(isPlainObject(overrideObj) ? overrideObj : {})
+    };
+  }
+
+  function mergeModuleArrays(baseModules, overrideModules) {
+    const baseList = Array.isArray(baseModules) ? baseModules : [];
+    const overrideList = Array.isArray(overrideModules) ? overrideModules : [];
+
+    const overrideMap = new Map();
+    overrideList.forEach((module) => {
+      if (!module || !module.id) return;
+      overrideMap.set(module.id, module);
+    });
+
+    const merged = baseList.map((baseModule) => {
+      if (!baseModule || !baseModule.id) return baseModule;
+      const overrideModule = overrideMap.get(baseModule.id);
+
+      if (!overrideModule) {
+        return { ...baseModule };
+      }
+
+      overrideMap.delete(baseModule.id);
+
+      return {
+        ...baseModule,
+        ...overrideModule
+      };
+    });
+
+    overrideMap.forEach((module) => {
+      merged.push({ ...module });
+    });
+
+    return merged;
+  }
+
+  function buildMergedConfig(productConfig, tenantConfig, tenantId) {
+    const product = isPlainObject(productConfig) ? productConfig : {};
+    const tenant = isPlainObject(tenantConfig) ? tenantConfig : {};
+
+    const merged = {
+      ...product,
+      ...tenant,
+
+      tenantId: tenant.tenantId || tenantId || product.tenantId || null,
+
+      domains: mergeShallowObjects(product.domains, tenant.domains),
+      theme: mergeShallowObjects(product.theme, tenant.theme),
+      features: mergeShallowObjects(product.features, tenant.features),
+      home: mergeShallowObjects(product.home, tenant.home),
+      support: mergeShallowObjects(product.support, tenant.support),
+      legal: mergeShallowObjects(product.legal, tenant.legal),
+      affiliate: mergeShallowObjects(product.affiliate, tenant.affiliate),
+      navigation: mergeShallowObjects(product.navigation, tenant.navigation),
+      sections: mergeShallowObjects(product.sections, tenant.sections),
+      policyLinks: mergeShallowObjects(product.policyLinks, tenant.policyLinks),
+      texts: mergeShallowObjects(product.texts, tenant.texts),
+
+      modules: mergeModuleArrays(product.modules, tenant.modules),
+
+      plans: Array.isArray(tenant.plans)
+        ? tenant.plans
+        : Array.isArray(product.plans)
+          ? product.plans
+          : []
+    };
+
+    return merged;
+  }
+
+  /* =========================================================
+   * THEME APPLICATION
+   * Что здесь:
+   * - применение tenant theme в CSS custom properties
+   * - установка theme-color
+   * ========================================================= */
   function applyTheme(theme) {
     if (!theme || typeof theme !== 'object') return;
 
@@ -191,9 +306,11 @@
   }
 
   /* =========================================================
-     TEXT APPLICATION / ПРИМЕНЕНИЕ ТЕКСТОВ
-     Безопасно обновляет shell-элементы, если они есть на странице
-     ========================================================= */
+   * TEXT APPLICATION
+   * Что здесь:
+   * - безопасное обновление shell-текстов
+   * - применение app title и nav labels
+   * ========================================================= */
   function setTextIfExists(id, value) {
     if (!value) return;
     const el = document.getElementById(id);
@@ -218,8 +335,10 @@
   }
 
   /* =========================================================
-     BRANDING APPLICATION / ПРИМЕНЕНИЕ БРЕНДИНГА
-     ========================================================= */
+   * BRANDING APPLICATION
+   * Что здесь:
+   * - применение theme + texts из итогового merged config
+   * ========================================================= */
   function applyBranding(config) {
     if (!config || typeof config !== 'object') return;
 
@@ -228,10 +347,16 @@
   }
 
   /* =========================================================
-     TENANT LOADER API / API ЗАГРУЗЧИКА TENANT
-     ========================================================= */
+   * TENANT LOADER API
+   * Что здесь:
+   * - загрузка product config и tenant config
+   * - merge в единый runtime config
+   * - публичные геттеры для shell и страниц
+   * ========================================================= */
   const TenantLoader = {
     config: null,
+    productConfig: null,
+    tenantConfig: null,
     tenantId: null,
     loadPromise: null,
 
@@ -242,20 +367,29 @@
 
       this.loadPromise = (async () => {
         const tenantId = resolveTenantId();
-        const config = await loadTenantConfig(tenantId);
+
+        const [productConfig, tenantConfig] = await Promise.all([
+          loadProductConfig(),
+          loadTenantConfig(tenantId)
+        ]);
+
+        const mergedConfig = buildMergedConfig(productConfig, tenantConfig, tenantId);
 
         this.tenantId = tenantId;
-        this.config = config;
+        this.productConfig = productConfig;
+        this.tenantConfig = tenantConfig;
+        this.config = mergedConfig;
 
-        applyBranding(config);
+        applyBranding(mergedConfig);
 
-        console.info('[AI CENTER][Tenant] config loaded', {
-          tenantId: config.tenantId || tenantId,
-          appName: config.appName || 'AI CENTER',
-          primaryDomain: config.domains?.primary || null
+        console.info('[AI CENTER][Tenant] merged config loaded', {
+          tenantId: mergedConfig.tenantId || tenantId,
+          appName: mergedConfig.appName || 'AI CENTER',
+          primaryDomain: mergedConfig.domains?.primary || null,
+          modulesCount: Array.isArray(mergedConfig.modules) ? mergedConfig.modules.length : 0
         });
 
-        return config;
+        return mergedConfig;
       })();
 
       return this.loadPromise;
@@ -263,6 +397,14 @@
 
     getConfig() {
       return this.config;
+    },
+
+    getProductConfig() {
+      return this.productConfig;
+    },
+
+    getTenantOverlay() {
+      return this.tenantConfig;
     },
 
     getTenantId() {
@@ -276,7 +418,9 @@
         host: getHost(),
         origin: getOrigin(),
         search: getSearch(),
-        domains: this.config?.domains || {}
+        domains: this.config?.domains || {},
+        hasProductConfig: !!this.productConfig,
+        hasTenantOverlay: !!this.tenantConfig
       };
     },
 
@@ -318,13 +462,17 @@
 
     reset() {
       this.config = null;
+      this.productConfig = null;
+      this.tenantConfig = null;
       this.tenantId = null;
       this.loadPromise = null;
     }
   };
 
   /* =========================================================
-     GLOBAL EXPORT / ГЛОБАЛЬНЫЙ ЭКСПОРТ
-     ========================================================= */
+   * GLOBAL EXPORT
+   * Что здесь:
+   * - экспорт tenant loader в window
+   * ========================================================= */
   window.AICTenant = TenantLoader;
 })();
