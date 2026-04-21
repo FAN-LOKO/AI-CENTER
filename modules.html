@@ -19,13 +19,13 @@
 
       <div class="card-section-body modules-summary-body">
         <div class="profile-row">
-          <span class="profile-label">Доступ</span>
-          <span class="profile-value" id="subscriptionStatusLabel">Проверка доступа...</span>
+          <span class="profile-label">Каталог</span>
+          <span class="profile-value" id="subscriptionStatusLabel">Загрузка модулей...</span>
         </div>
         <div class="profile-row">
           <span class="profile-label">Открытие модулей</span>
           <span class="profile-value">
-            Готовые модули открываются сразу. Остальные временно ведут на страницу «Модуль в разработке».
+            Готовые модули открываются сразу. Платные модули без доступа ведут на страницу оплаты. Модули в разработке временно ведут на страницу «Модуль в разработке».
           </span>
         </div>
       </div>
@@ -35,336 +35,454 @@
   </div>
 
   <script>
-  let TENANTCONFIG = null;
-  let APPFEATURES = {
-    home: true,
-    myAgent: true,
-    modules: true,
-    sharedChat: true,
-    affiliate: true,
-    payments: true,
-    settings: true
-  };
+    /* =========================================================
+     * PAGE STATE
+     * Что здесь:
+     * - tenant config страницы
+     * - feature flags
+     * - fallback route для модулей без страницы
+     * - tenant catalog модулей
+     * - user access map по модулям
+     * - флаг готовности страницы
+     * ========================================================= */
 
-  const MODULE_FALLBACK_PAGE = 'module-coming-soon.html';
+    let TENANTCONFIG = null;
+    let APPFEATURES = {
+      home: true,
+      myAgent: true,
+      modules: true,
+      sharedChat: true,
+      affiliate: true,
+      payments: true,
+      settings: true
+    };
 
-  let TENANTMODULES = [];
-  let USERMODULEACCESS = {};
-  let _modulesReady = false;
+    const MODULE_FALLBACK_PAGE = 'module-coming-soon.html';
 
-  function getTenantConfig() {
-    try {
-      return window.parent?.AICAppShell?.getTenantConfig?.() || null;
-    } catch (error) {
-      console.error('[AI CENTER][Modules] tenant config read failed', error);
-      return null;
-    }
-  }
+    let TENANTMODULES = [];
+    let USERMODULEACCESS = {};
+    let _modulesReady = false;
 
-  function getText(key, fallback = '') {
-    return TENANTCONFIG?.texts?.[key] ?? fallback;
-  }
+    /* =========================================================
+     * SHELL HELPERS
+     * Что здесь:
+     * - чтение tenant config из shell
+     * - чтение текстов из tenant config
+     * - чтение tenant modules из shell
+     * ========================================================= */
 
-  function getTenantModulesRaw() {
-    try {
-      return window.parent?.AICAppShell?.getTenantModules?.() || [];
-    } catch (error) {
-      console.error('[AI CENTER][Modules] tenant modules read failed', error);
-      return [];
-    }
-  }
-
-  function getModuleRoute(module) {
-    if (!module) return MODULE_FALLBACK_PAGE;
-    return module.page || MODULE_FALLBACK_PAGE;
-  }
-
-  function normalizeAccessMap(raw) {
-    if (!raw || typeof raw !== 'object') return {};
-    return raw;
-  }
-
-  function getTenantModules() {
-    try {
-      const shellModules = getTenantModulesRaw();
-
-      return shellModules
-        .filter(module => module && module.enabled !== false)
-        .map(module => ({
-          id: module.id,
-          title: module.titleRu || module.title || module.id,
-          titleRu: module.titleRu || module.title || module.id,
-          shortDescription:
-            module.shortDescription ||
-            getText('modulesDefaultShortDescription', 'Описание модуля будет заполнено в tenant-конфиге.'),
-          fullDescription:
-            Array.isArray(module.fullDescription) && module.fullDescription.length
-              ? module.fullDescription
-              : [getText('modulesDefaultFullDescription', 'Описание модуля будет добавлено позже.')],
-          page: getModuleRoute(module),
-          requiresPayment: !!module.requiresPayment,
-          category: module.category || 'core'
-        }));
-    } catch (error) {
-      console.error('[AI CENTER][Modules] tenant modules normalize failed', error);
-      return [];
-    }
-  }
-
-  function waitForTenantModules(attempt = 0) {
-    const modules = getTenantModules();
-
-    if (modules.length || attempt >= 20) {
-      return Promise.resolve(modules);
+    function getTenantConfig() {
+      try {
+        return window.parent?.AICAppShell?.getTenantConfig?.() || null;
+      } catch (error) {
+        console.error('[AI CENTER][Modules] tenant config read failed', error);
+        return null;
+      }
     }
 
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve(waitForTenantModules(attempt + 1));
-      }, 150);
-    });
-  }
+    function getText(key, fallback = '') {
+      return TENANTCONFIG?.texts?.[key] ?? fallback;
+    }
 
-  function getModuleAccess(moduleId) {
-    const accessMap = normalizeAccessMap(USERMODULEACCESS);
-    return accessMap[moduleId] || null;
-  }
+    function getTenantModulesRaw() {
+      try {
+        return window.parent?.AICAppShell?.getTenantModules?.() || [];
+      } catch (error) {
+        console.error('[AI CENTER][Modules] tenant modules read failed', error);
+        return [];
+      }
+    }
 
-  function isModuleAccessible(module) {
-    if (!module) return false;
+    /* =========================================================
+     * MODULE CATALOG HELPERS
+     * Что здесь:
+     * - определение route модуля
+     * - нормализация user access map
+     * - получение полного каталога модулей tenant
+     * - ожидание загрузки tenant modules из shell
+     * ========================================================= */
 
-    const isFallback = getModuleRoute(module) === MODULE_FALLBACK_PAGE;
-    if (isFallback) return true;
+    function getModuleRoute(module) {
+      if (!module) return MODULE_FALLBACK_PAGE;
+      return module.page || MODULE_FALLBACK_PAGE;
+    }
 
-    if (!module.requiresPayment) return true;
+    function normalizeAccessMap(raw) {
+      if (!raw || typeof raw !== 'object') return {};
+      return raw;
+    }
 
-    const access = getModuleAccess(module.id);
-    return !!access?.paid && !access?.frozen;
-  }
+    function getTenantModules() {
+      try {
+        const shellModules = getTenantModulesRaw();
 
-  function getSubscriptionStatusText() {
-    const paidModules = TENANTMODULES.filter(m => m.requiresPayment);
-    const hasAnyPaidAccess = paidModules.some(m => {
-      const access = getModuleAccess(m.id);
+        return shellModules
+          .filter(module => module && module.enabled !== false)
+          .map(module => ({
+            id: module.id,
+            title: module.titleRu || module.title || module.id,
+            titleRu: module.titleRu || module.title || module.id,
+            shortDescription:
+              module.shortDescription ||
+              getText('modulesDefaultShortDescription', 'Описание модуля будет заполнено в tenant-конфиге.'),
+            fullDescription:
+              Array.isArray(module.fullDescription) && module.fullDescription.length
+                ? module.fullDescription
+                : [getText('modulesDefaultFullDescription', 'Описание модуля будет добавлено позже.')],
+            page: getModuleRoute(module),
+            requiresPayment: !!module.requiresPayment,
+            category: module.category || 'core'
+          }));
+      } catch (error) {
+        console.error('[AI CENTER][Modules] tenant modules normalize failed', error);
+        return [];
+      }
+    }
+
+    function waitForTenantModules(attempt = 0) {
+      const modules = getTenantModules();
+
+      if (modules.length || attempt >= 20) {
+        return Promise.resolve(modules);
+      }
+
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve(waitForTenantModules(attempt + 1));
+        }, 150);
+      });
+    }
+
+    /* =========================================================
+     * USER ACCESS HELPERS
+     * Что здесь:
+     * - получение access state по модулю
+     * - проверка, доступен ли модуль прямо сейчас
+     * - вычисление текста общей сводки страницы
+     * - вычисление текста кнопки карточки
+     * ========================================================= */
+
+    function getModuleAccess(moduleId) {
+      const accessMap = normalizeAccessMap(USERMODULEACCESS);
+      return accessMap[moduleId] || null;
+    }
+
+    function isModuleAccessible(module) {
+      if (!module) return false;
+
+      const isFallback = getModuleRoute(module) === MODULE_FALLBACK_PAGE;
+      if (isFallback) return true;
+
+      if (!module.requiresPayment) return true;
+
+      const access = getModuleAccess(module.id);
       return !!access?.paid && !access?.frozen;
-    });
+    }
 
-    return hasAnyPaidAccess
-      ? getText('modulesSubscriptionStatusPaid', 'Платные модули доступны')
-      : getText('modulesSubscriptionStatusBase', 'Доступ только к базовым модулям');
-  }
+    function getCatalogStatusText() {
+      if (!TENANTMODULES.length) {
+        return getText('modulesEmptyText', 'Для этого tenant пока не настроен список модулей.');
+      }
 
-  function openModule(module) {
-    if (!module) return;
-    if (APPFEATURES.modules === false) return;
+      return `Всего модулей в каталоге: ${TENANTMODULES.length}`;
+    }
 
-    const moduleRoute = getModuleRoute(module);
-    const isFallback = moduleRoute === MODULE_FALLBACK_PAGE;
-    const hasAccess = isFallback || isModuleAccessible(module);
+    function getModuleOpenButtonText(module) {
+      if (!module) {
+        return getText('modulesActionOpen', 'Открыть модуль');
+      }
 
-    if (hasAccess) {
+      if (getModuleRoute(module) === MODULE_FALLBACK_PAGE) {
+        return getText('modulesActionOpen', 'Открыть модуль');
+      }
+
+      if (!module.requiresPayment) {
+        return getText('modulesActionOpen', 'Открыть модуль');
+      }
+
+      return isModuleAccessible(module)
+        ? getText('modulesActionOpen', 'Открыть модуль')
+        : getText('modulesActionPay', 'Перейти к оплате');
+    }
+
+    /* =========================================================
+     * MODULE NAVIGATION
+     * Что здесь:
+     * - переход в сам модуль
+     * - переход в оплату, если модуль платный и не активирован
+     * - переход в fallback страницу, если модуль в разработке
+     * ========================================================= */
+
+    function openModule(module) {
+      if (!module) return;
+      if (APPFEATURES.modules === false) return;
+
+      const moduleRoute = getModuleRoute(module);
+      const isFallback = moduleRoute === MODULE_FALLBACK_PAGE;
+      const hasAccess = isFallback || isModuleAccessible(module);
+
+      if (hasAccess) {
+        window.parent?.postMessage?.(
+          {
+            type: 'navigate',
+            page: moduleRoute,
+            tab: 'modules'
+          },
+          '*'
+        );
+        return;
+      }
+
+      if (APPFEATURES.payments === false) return;
+
       window.parent?.postMessage?.(
         {
           type: 'navigate',
-          page: moduleRoute,
-          tab: 'modules'
+          page: 'payments.html',
+          tab: 'payments'
         },
         '*'
       );
-      return;
     }
 
-    if (APPFEATURES.payments === false) return;
+    /* =========================================================
+     * ACCORDION HELPERS
+     * Что здесь:
+     * - закрытие всех раскрытых карточек
+     * ========================================================= */
 
-    window.parent?.postMessage?.(
-      {
-        type: 'navigate',
-        page: 'payments.html',
-        tab: 'payments'
-      },
-      '*'
-    );
-  }
-
-  function closeAllModuleCards() {
-    document.querySelectorAll('.module-card-expanded.open').forEach(el => {
-      el.classList.remove('open');
-    });
-
-    document.querySelectorAll('.module-accordion-card.open').forEach(el => {
-      el.classList.remove('open');
-    });
-
-    document.querySelectorAll('.module-card-toggle').forEach(btn => {
-      btn.setAttribute('aria-expanded', 'false');
-    });
-  }
-
-  function getModuleOpenButtonText(module) {
-    if (!module) return getText('modulesActionOpen', 'Открыть модуль');
-
-    if (getModuleRoute(module) === MODULE_FALLBACK_PAGE) {
-      return getText('modulesActionOpen', 'Открыть модуль');
-    }
-
-    if (!module.requiresPayment) {
-      return getText('modulesActionOpen', 'Открыть модуль');
-    }
-
-    return isModuleAccessible(module)
-      ? getText('modulesActionOpen', 'Открыть модуль')
-      : getText('modulesActionPay', 'Перейти к оплате');
-  }
-
-  function createModuleCard(module) {
-    const section = document.createElement('section');
-    section.className = 'card-section module-accordion-card';
-
-    section.innerHTML = `
-      <div class="card-section-header module-card-header">
-        <button class="module-card-toggle" type="button" aria-expanded="false">
-          <div class="module-card-header-text">
-            <div class="module-card-title">
-              ${module.title}
-              <span class="module-card-title-ru">/ ${module.titleRu}</span>
-            </div>
-          </div>
-          <span class="module-card-chevron">▾</span>
-        </button>
-      </div>
-
-      <div class="card-section-body module-card-main">
-        <p class="module-card-short-description">${module.shortDescription}</p>
-        <button
-          class="btn btn-block"
-          type="button"
-          data-module-id="${module.id}"
-          data-module-page="${module.page}"
-        >
-          ${getModuleOpenButtonText(module)}
-        </button>
-      </div>
-
-      <div class="card-section-body module-card-expanded">
-        <div class="module-card-expanded-title">
-          ${getText('modulesDetailsTitle', 'Подробнее о модуле')}
-        </div>
-        <ul class="module-card-description-list">
-          ${module.fullDescription.map(item => `<li>${item}</li>`).join('')}
-        </ul>
-      </div>
-    `;
-
-    const toggleBtn = section.querySelector('.module-card-toggle');
-    const expandedBody = section.querySelector('.module-card-expanded');
-    const openBtn = section.querySelector('.btn');
-
-    toggleBtn.addEventListener('click', () => {
-      const isOpen = section.classList.contains('open');
-      closeAllModuleCards();
-
-      if (!isOpen) {
-        section.classList.add('open');
-        expandedBody.classList.add('open');
-        toggleBtn.setAttribute('aria-expanded', 'true');
-      }
-    });
-
-    openBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      openModule(module);
-    });
-
-    return section;
-  }
-
-  function renderModulesList() {
-    const modulesList = document.getElementById('modulesList');
-    const subscriptionStatusLabel = document.getElementById('subscriptionStatusLabel');
-
-    if (subscriptionStatusLabel) {
-      subscriptionStatusLabel.textContent = getSubscriptionStatusText();
-    }
-
-    if (!modulesList) return;
-
-    modulesList.innerHTML = '';
-
-    if (APPFEATURES.modules === false) {
-      modulesList.innerHTML = `
-        <section class="card-section">
-          <div class="card-section-body modules-empty-state">
-            <p class="module-card-short-description">
-              ${getText('modulesDisabledText', 'Раздел модулей сейчас недоступен.')}
-            </p>
-          </div>
-        </section>
-      `;
-      return;
-    }
-
-    if (!TENANTMODULES.length) {
-      modulesList.innerHTML = `
-        <section class="card-section">
-          <div class="card-section-body modules-empty-state">
-            <p class="module-card-short-description">
-              ${getText('modulesEmptyText', 'Для этого tenant пока не настроен список модулей.')}
-            </p>
-          </div>
-        </section>
-      `;
-      return;
-    }
-
-    TENANTMODULES.forEach(module => {
-      modulesList.appendChild(createModuleCard(module));
-    });
-  }
-
-  function applyAppFeatures(features) {
-    APPFEATURES = { ...APPFEATURES, ...(features || {}) };
-
-    if (_modulesReady) {
-      renderModulesList();
-    }
-  }
-
-  window.addEventListener('message', event => {
-    const data = event.data;
-    if (!data || typeof data !== 'object') return;
-
-    if (data.type === 'app-features') {
-      applyAppFeatures(data.features || {});
-    } else if (data.type === 'user-modules' && Array.isArray(data.modules)) {
-      const accessMap = {};
-
-      data.modules.forEach(module => {
-        if (!module || !module.id) return;
-        accessMap[module.id] = {
-          paid: !!module.paid,
-          frozen: !!module.frozen,
-          daysLeft: typeof module.daysLeft === 'number' ? module.daysLeft : null
-        };
+    function closeAllModuleCards() {
+      document.querySelectorAll('.module-card-expanded.open').forEach(el => {
+        el.classList.remove('open');
       });
 
-      USERMODULEACCESS = accessMap;
+      document.querySelectorAll('.module-accordion-card.open').forEach(el => {
+        el.classList.remove('open');
+      });
+
+      document.querySelectorAll('.module-card-toggle').forEach(btn => {
+        btn.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    /* =========================================================
+     * CARD RENDERING
+     * Что здесь:
+     * - создание одной карточки модуля
+     * - бейдж статуса модуля
+     * - контент раскрывающейся части карточки
+     * ========================================================= */
+
+    function getModuleStatusBadge(module) {
+      if (getModuleRoute(module) === MODULE_FALLBACK_PAGE) {
+        return {
+          text: 'Скоро',
+          cls: 'is-soon'
+        };
+      }
+
+      if (!module.requiresPayment) {
+        return {
+          text: 'Бесплатно',
+          cls: 'is-free'
+        };
+      }
+
+      return isModuleAccessible(module)
+        ? {
+            text: 'Активен',
+            cls: 'is-active'
+          }
+        : {
+            text: 'Платный',
+            cls: 'is-paid'
+          };
+    }
+
+    function createModuleCard(module) {
+      const section = document.createElement('section');
+      section.className = 'card-section module-accordion-card';
+
+      const badge = getModuleStatusBadge(module);
+
+      section.innerHTML = `
+        <div class="card-section-header module-card-header">
+          <button class="module-card-toggle" type="button" aria-expanded="false">
+            <div class="module-card-header-text">
+              <div class="module-card-title">
+                ${module.title}
+                <span class="module-card-title-ru">/ ${module.titleRu}</span>
+              </div>
+              <span class="module-card-badge ${badge.cls}">${badge.text}</span>
+            </div>
+            <span class="module-card-chevron">▾</span>
+          </button>
+        </div>
+
+        <div class="card-section-body module-card-main">
+          <p class="module-card-short-description">${module.shortDescription}</p>
+          <button
+            class="btn btn-block"
+            type="button"
+            data-module-id="${module.id}"
+            data-module-page="${module.page}"
+          >
+            ${getModuleOpenButtonText(module)}
+          </button>
+        </div>
+
+        <div class="card-section-body module-card-expanded">
+          <div class="module-card-expanded-title">
+            ${getText('modulesDetailsTitle', 'Подробнее о модуле')}
+          </div>
+          <ul class="module-card-description-list">
+            ${module.fullDescription.map(item => `<li>${item}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+
+      const toggleBtn = section.querySelector('.module-card-toggle');
+      const expandedBody = section.querySelector('.module-card-expanded');
+      const openBtn = section.querySelector('.btn');
+
+      toggleBtn.addEventListener('click', () => {
+        const isOpen = section.classList.contains('open');
+        closeAllModuleCards();
+
+        if (!isOpen) {
+          section.classList.add('open');
+          expandedBody.classList.add('open');
+          toggleBtn.setAttribute('aria-expanded', 'true');
+        }
+      });
+
+      openBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        openModule(module);
+      });
+
+      return section;
+    }
+
+    /* =========================================================
+     * PAGE RENDERING
+     * Что здесь:
+     * - отрисовка общей витрины модулей
+     * - empty/disabled state
+     * - обновление summary строки
+     * ========================================================= */
+
+    function renderModulesList() {
+      const modulesList = document.getElementById('modulesList');
+      const subscriptionStatusLabel = document.getElementById('subscriptionStatusLabel');
+
+      if (subscriptionStatusLabel) {
+        subscriptionStatusLabel.textContent = getCatalogStatusText();
+      }
+
+      if (!modulesList) return;
+
+      modulesList.innerHTML = '';
+
+      if (APPFEATURES.modules === false) {
+        modulesList.innerHTML = `
+          <section class="card-section">
+            <div class="card-section-body modules-empty-state">
+              <p class="module-card-short-description">
+                ${getText('modulesDisabledText', 'Раздел модулей сейчас недоступен.')}
+              </p>
+            </div>
+          </section>
+        `;
+        return;
+      }
+
+      if (!TENANTMODULES.length) {
+        modulesList.innerHTML = `
+          <section class="card-section">
+            <div class="card-section-body modules-empty-state">
+              <p class="module-card-short-description">
+                ${getText('modulesEmptyText', 'Для этого tenant пока не настроен список модулей.')}
+              </p>
+            </div>
+          </section>
+        `;
+        return;
+      }
+
+      TENANTMODULES.forEach(module => {
+        modulesList.appendChild(createModuleCard(module));
+      });
+    }
+
+    /* =========================================================
+     * FEATURE FLAGS
+     * Что здесь:
+     * - применение feature flags со стороны shell
+     * - повторный рендер страницы после обновления
+     * ========================================================= */
+
+    function applyAppFeatures(features) {
+      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
 
       if (_modulesReady) {
         renderModulesList();
       }
     }
-  });
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    TENANTCONFIG = getTenantConfig();
-    TENANTMODULES = await waitForTenantModules();
-    _modulesReady = true;
+    /* =========================================================
+     * MESSAGE BUS
+     * Что здесь:
+     * - получение app features от shell
+     * - получение user modules от shell
+     * - обновление user access map без изменения каталога
+     * ========================================================= */
 
-    renderModulesList();
+    window.addEventListener('message', event => {
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
 
-    window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
-    window.parent?.postMessage?.({ type: 'request-user-modules' }, '*');
-  });
-</script>
+      if (data.type === 'app-features') {
+        applyAppFeatures(data.features || {});
+      } else if (data.type === 'user-modules' && Array.isArray(data.modules)) {
+        const accessMap = {};
+
+        data.modules.forEach(module => {
+          if (!module || !module.id) return;
+          accessMap[module.id] = {
+            paid: !!module.paid,
+            frozen: !!module.frozen,
+            daysLeft: typeof module.daysLeft === 'number' ? module.daysLeft : null
+          };
+        });
+
+        USERMODULEACCESS = accessMap;
+
+        if (_modulesReady) {
+          renderModulesList();
+        }
+      }
+    });
+
+    /* =========================================================
+     * BOOTSTRAP
+     * Что здесь:
+     * - получение tenant config
+     * - получение каталога модулей
+     * - первый рендер страницы
+     * - запрос feature flags и user modules из shell
+     * ========================================================= */
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      TENANTCONFIG = getTenantConfig();
+      TENANTMODULES = await waitForTenantModules();
+      _modulesReady = true;
+
+      renderModulesList();
+
+      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+      window.parent?.postMessage?.({ type: 'request-user-modules' }, '*');
+    });
+  </script>
 </body>
 </html>
