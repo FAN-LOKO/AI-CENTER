@@ -127,23 +127,24 @@
   }
 
   function getTenantModulesRaw() {
-    try {
-      const raw = window.parent?.AICAppShell?.getTenantModules?.() || [];
-      return raw
-        .filter(m => m && m.enabled !== false)
-        .map(m => ({
-          id: m.id,
-          title: m.titleRu || m.title || m.id,
-          page: m.page,
-          requiresPayment: !!m.requiresPayment,
-          enabled: m.enabled !== false,
-          category: m.category || 'core'
-        }));
-    } catch (e) {
-      console.error('[Home] tenant modules read failed', e);
-      return [];
-    }
+  try {
+    const raw = window.parent?.AICAppShell?.getTenantModules?.() || [];
+    return raw
+      .filter(m => m && m.enabled !== false)
+      .map(m => ({
+        id: m.id,
+        title: m.title || m.titleRu || m.id,
+        titleRu: m.titleRu || m.title || m.id,
+        page: m.page,
+        requiresPayment: !!m.requiresPayment,
+        enabled: m.enabled !== false,
+        category: m.category || 'core'
+      }));
+  } catch (e) {
+    console.error('[Home] tenant modules read failed', e);
+    return [];
   }
+}
 
   function waitForTenantModules(attempt) {
     attempt = attempt || 0;
