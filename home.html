@@ -134,25 +134,67 @@
       }
 
       function getTenantModulesRaw() {
-        try {
-          const raw = window.parent?.AICAppShell?.getTenantModules?.() || [];
-          return raw
-            .filter(m => m && m.enabled !== false)
-            .map(m => ({
-              id: m.id,
-              title: m.title || m.titleRu || m.id,
-              titleRu: m.titleRu || m.title || m.id,
-              displayTitle: `${m.title || m.titleRu || m.id} / ${m.titleRu || m.title || m.id}`,
-              page: m.page,
-              requiresPayment: !!m.requiresPayment,
-              enabled: m.enabled !== false,
-              category: m.category || 'core'
-            }));
-        } catch (e) {
-          console.error('[Home] tenant modules read failed', e);
-          return [];
-        }
-      }
+  const fallbackModules = [
+    {
+      id: 'ai-agent',
+      title: 'My Agent',
+      titleRu: 'Мой агент',
+      page: 'modules-agent-profile.html',
+      requiresPayment: false,
+      enabled: true,
+      category: 'core'
+    },
+    {
+      id: 'knowledge-hub',
+      title: 'Knowledge Hub',
+      titleRu: 'База знаний',
+      page: 'modules-knowledge-hub.html',
+      requiresPayment: false,
+      enabled: true,
+      category: 'core'
+    },
+    {
+      id: 'support-desk',
+      title: 'Support Desk',
+      titleRu: 'Поддержка',
+      page: 'modules-support-desk.html',
+      requiresPayment: false,
+      enabled: true,
+      category: 'core'
+    }
+  ];
+
+  try {
+    const raw = window.parent?.AICAppShell?.getTenantModules?.();
+    const source = Array.isArray(raw) && raw.length ? raw : fallbackModules;
+
+    return source
+      .filter(m => m && m.enabled !== false)
+      .map(m => ({
+        id: m.id,
+        title: m.title || m.titleRu || m.id,
+        titleRu: m.titleRu || m.title || m.id,
+        displayTitle: `${m.title || m.titleRu || m.id} / ${m.titleRu || m.title || m.id}`,
+        page: m.page,
+        requiresPayment: !!m.requiresPayment,
+        enabled: m.enabled !== false,
+        category: m.category || 'core'
+      }));
+  } catch (e) {
+    console.error('[Home] tenant modules read failed', e);
+
+    return fallbackModules.map(m => ({
+      id: m.id,
+      title: m.title || m.titleRu || m.id,
+      titleRu: m.titleRu || m.title || m.id,
+      displayTitle: `${m.title || m.titleRu || m.id} / ${m.titleRu || m.title || m.id}`,
+      page: m.page,
+      requiresPayment: !!m.requiresPayment,
+      enabled: m.enabled !== false,
+      category: m.category || 'core'
+    }));
+  }
+}
 
       function waitForTenantModules(attempt) {
         attempt = attempt || 0;
