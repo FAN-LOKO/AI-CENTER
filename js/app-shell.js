@@ -1,9 +1,11 @@
 (function () {
   /* =========================================================
-  SHELL DEPENDENCIES / ЗАВИСИМОСТИ SHELL
-  Runtime adapter, iframe reference, navigation buttons
-  Runtime-адаптер, iframe-контейнер, кнопки навигации
-  ========================================================= */
+   * SHELL DEPENDENCIES
+   * Что здесь:
+   * - runtime-адаптер
+   * - iframe-контейнер страниц
+   * - кнопки нижней навигации
+   * ========================================================= */
 
   const Runtime = window.AICRuntime || {
     ready() {},
@@ -16,8 +18,16 @@
   const navBtns = document.querySelectorAll(".nav-btn");
 
   /* =========================================================
-  SHELL STATE / СОСТОЯНИЕ SHELL
-  ========================================================= */
+   * SHELL STATE
+   * Что здесь:
+   * - feature flags приложения
+   * - карта страниц
+   * - текущая вкладка
+   * - профиль пользователя
+   * - пользовательские модули
+   * - статистика агента
+   * - выбранный диалог агента
+   * ========================================================= */
 
   let APPFEATURES = {
     home: true,
@@ -33,7 +43,15 @@
   let currentTab = "home";
   let USERPROFILE = null;
 
-  // Agent stats state / Состояние статистики агента
+  let USERMODULES = [
+    {
+      id: "ai-agent",
+      paid: false,
+      frozen: true,
+      daysLeft: null
+    }
+  ];
+
   let AGENT_STATS = {
     dialogsTotal: 3,
     refLinksTotal: 4,
@@ -76,8 +94,46 @@
     ]
   };
 
-  // Текущий выбранный диалог (по клику из stats)
   let CURRENT_AGENT_DIALOG = null;
+
+  /* =========================================================
+   * USER MODULES HELPERS
+   * Что здесь:
+   * - нормализация user state по модулям
+   * - получение списка модулей пользователя
+   * - сохранение списка модулей пользователя
+   * ========================================================= */
+
+  function normalizeUserModules(modules) {
+    if (!Array.isArray(modules)) return [];
+
+    return modules
+      .filter((mod) => mod && mod.id)
+      .map((mod) => ({
+        id: String(mod.id),
+        paid: !!mod.paid,
+        frozen: !!mod.frozen,
+        daysLeft: typeof mod.daysLeft === "number" ? mod.daysLeft : null
+      }));
+  }
+
+  function getUserModules() {
+    return USERMODULES;
+  }
+
+  function setUserModules(nextModules) {
+    USERMODULES = normalizeUserModules(nextModules);
+    sendUserModulesToFrame();
+  }
+
+  /* =========================================================
+   * AGENT STATS HELPERS
+   * Что здесь:
+   * - установка статистики агента
+   * - получение статистики агента
+   * - установка текущего выбранного диалога
+   * - получение текущего выбранного диалога
+   * ========================================================= */
 
   function setAgentStats(nextStats) {
     AGENT_STATS = {
@@ -89,7 +145,6 @@
       issuedLinks: Array.isArray(nextStats?.issuedLinks) ? nextStats.issuedLinks : []
     };
 
-    // Пушим обновление в текущий frame (если открыт stats или dialogs)
     if (frame && frame.contentWindow) {
       frame.contentWindow.postMessage(
         {
@@ -108,7 +163,6 @@
   function setCurrentAgentDialog(dialog) {
     CURRENT_AGENT_DIALOG = dialog || null;
 
-    // При желании можно пушнуть выбранный диалог в открытую страницу диалогов
     if (frame && frame.contentWindow && CURRENT_AGENT_DIALOG) {
       frame.contentWindow.postMessage(
         {
@@ -125,8 +179,11 @@
   }
 
   /* =========================================================
-  PAGE CONFIGURATION / КОНФИГУРАЦИЯ СТРАНИЦ
-  ========================================================= */
+   * PAGE CONFIGURATION
+   * Что здесь:
+   * - единая карта вкладок и файлов страниц
+   * - привязка feature flags к доступности страниц
+   * ========================================================= */
 
   function buildPageConfig() {
     PAGECONFIG = {
@@ -144,8 +201,12 @@
   }
 
   /* =========================================================
-  NAVIGATION HELPERS / ВСПОМОГАТЕЛЬНАЯ ЛОГИКА НАВИГАЦИИ
-  ========================================================= */
+   * NAVIGATION HELPERS
+   * Что здесь:
+   * - проверка доступности вкладки
+   * - fallback-вкладка
+   * - преобразование tab <-> page
+   * ========================================================= */
 
   function isTabEnabled(tab) {
     return !!PAGECONFIG[tab] && !!PAGECONFIG[tab].enabled;
@@ -169,8 +230,13 @@
   }
 
   /* =========================================================
-  SHELL -> PAGE MESSAGING / СООБЩЕНИЯ ОТ SHELL К СТРАНИЦАМ
-  ========================================================= */
+   * SHELL -> PAGE MESSAGING
+   * Что здесь:
+   * - отправка профиля пользователя в страницу
+   * - отправка feature flags в страницу
+   * - отправка user modules в страницу
+   * - единый пуш состояния shell в текущий iframe
+   * ========================================================= */
 
   function sendUserProfileToFrame() {
     if (!frame || !frame.contentWindow || !USERPROFILE) return;
@@ -179,6 +245,18 @@
       {
         type: "user-profile",
         profile: USERPROFILE
+      },
+      "*"
+    );
+  }
+
+  function sendUserModulesToFrame() {
+    if (!frame || !frame.contentWindow) return;
+
+    frame.contentWindow.postMessage(
+      {
+        type: "user-modules",
+        modules: getUserModules()
       },
       "*"
     );
@@ -196,13 +274,19 @@
     );
   }
 
-  if (USERPROFILE) {
+  function pushShellStateToFrame() {
+    sendFeaturesToFrame();
     sendUserProfileToFrame();
+    sendUserModulesToFrame();
   }
 
   /* =========================================================
-  SHELL UI STATE / UI-СОСТОЯНИЕ SHELL
-  ========================================================= */
+   * SHELL UI STATE
+   * Что здесь:
+   * - скрытие/показ кнопок навигации
+   * - подсветка активной вкладки
+   * - скрытие badge у shared chat
+   * ========================================================= */
 
   function updateNavVisibility() {
     navBtns.forEach((btn) => {
@@ -226,8 +310,13 @@
   }
 
   /* =========================================================
-  NAVIGATION ACTIONS / ДЕЙСТВИЯ НАВИГАЦИИ
-  ========================================================= */
+   * NAVIGATION ACTIONS
+   * Что здесь:
+   * - центральный navigate(...)
+   * - смена iframe-страницы
+   * - обновление active nav
+   * - отправка shell state в открытую страницу
+   * ========================================================= */
 
   function navigate(page, tab) {
     let targetTab = tab || getTabByPage(page) || currentTab;
@@ -251,12 +340,14 @@
       hideSharedChatBadge();
     }
 
-    setTimeout(sendFeaturesToFrame, 150);
+    setTimeout(pushShellStateToFrame, 150);
   }
 
   /* =========================================================
-  NAV BUTTON BINDINGS / ПРИВЯЗКА КНОПОК НАВИГАЦИИ
-  ========================================================= */
+   * NAV BUTTON BINDINGS
+   * Что здесь:
+   * - обработчики клика по нижней навигации
+   * ========================================================= */
 
   function bindNavButtons() {
     navBtns.forEach((btn) => {
@@ -271,8 +362,12 @@
   }
 
   /* =========================================================
-  SHELL HEADER ACTIONS / ДЕЙСТВИЯ HEADER В SHELL
-  ========================================================= */
+   * SHELL HEADER ACTIONS
+   * Что здесь:
+   * - обработчики кнопок header
+   * - переход в settings
+   * - notifications feedback
+   * ========================================================= */
 
   function bindShellButtons() {
     const settingsButton = document.getElementById("settingsButton");
@@ -293,13 +388,21 @@
   }
 
   /* =========================================================
-  MESSAGE BUS / ШИНА СООБЩЕНИЙ
-  ========================================================= */
+   * MESSAGE BUS
+   * Что здесь:
+   * - обработка сообщений от дочерних страниц
+   * - навигация
+   * - shared chat badge
+   * - профиль пользователя
+   * - user modules
+   * - feature flags
+   * - agent stats / dialogs
+   * ========================================================= */
 
   function bindMessageBus() {
     window.addEventListener("message", (e) => {
       console.log("[shell] message received", e.data);
-      
+
       const data = e.data;
       if (!data || typeof data !== "object") return;
 
@@ -330,15 +433,7 @@
       }
 
       if (data.type === "request-user-profile") {
-        if (USERPROFILE && frame && frame.contentWindow) {
-          frame.contentWindow.postMessage(
-            {
-              type: "user-profile",
-              profile: USERPROFILE
-            },
-            "*"
-          );
-        }
+        sendUserProfileToFrame();
         return;
       }
 
@@ -348,12 +443,21 @@
         return;
       }
 
+      if (data.type === "request-user-modules") {
+        sendUserModulesToFrame();
+        return;
+      }
+
+      if (data.type === "save-user-modules") {
+        setUserModules(data.modules || []);
+        return;
+      }
+
       if (data.type === "request-app-features") {
         sendFeaturesToFrame();
         return;
       }
 
-      // Страница статистики просит актуальные данные
       if (data.type === "agent-stats-request") {
         if (frame && frame.contentWindow) {
           frame.contentWindow.postMessage(
@@ -367,13 +471,11 @@
         return;
       }
 
-      // Где-то внутри модулей обновили агрегированную статистику
       if (data.type === "agent-stats-save" && data.stats) {
         setAgentStats(data.stats);
         return;
       }
 
-      // Обновление только по диалогам
       if (data.type === "agent-dialogs-update" && Array.isArray(data.dialogs)) {
         setAgentStats({
           ...getAgentStats(),
@@ -382,8 +484,6 @@
         return;
       }
 
-      // === КЛИК ПО ДИАЛОГУ ИЗ СТАТИСТИКИ ===
-      // stats.html шлёт: { type: 'agent-open-dialog', dialogId, username, channel }
       if (data.type === "agent-open-dialog") {
         const dialogs = getAgentStats().dialogs || [];
         const dialog =
@@ -395,15 +495,11 @@
             lastMessage: data.lastMessage || ""
           };
 
-        // сохраняем текущий диалог
         setCurrentAgentDialog(dialog);
-
-        // открываем страницу диалогов агента
         navigate("modules-agent/dialogs.html", "modules");
         return;
       }
 
-      // Страница диалогов может запросить текущий выбранный диалог
       if (data.type === "agent-current-dialog-request") {
         if (frame && frame.contentWindow) {
           frame.contentWindow.postMessage(
@@ -414,14 +510,20 @@
             "*"
           );
         }
-        return;
       }
     });
   }
 
   /* =========================================================
-  BOOTSTRAP / ИНИЦИАЛИЗАЦИЯ
-  ========================================================= */
+   * BOOTSTRAP
+   * Что здесь:
+   * - запуск runtime
+   * - загрузка tenant config
+   * - применение feature flags
+   * - сборка page config
+   * - биндинг навигации и message bus
+   * - открытие стартовой страницы
+   * ========================================================= */
 
   async function bootstrap() {
     Runtime.ready();
@@ -447,13 +549,20 @@
   document.addEventListener("DOMContentLoaded", bootstrap);
 
   /* =========================================================
-  PUBLIC SHELL API / ПУБЛИЧНОЕ API SHELL
-  ========================================================= */
+   * PUBLIC SHELL API
+   * Что здесь:
+   * - публичные методы shell для child pages
+   * - tenant config getters
+   * - runtime info
+   * - user/profile/modules getters-setters
+   * - agent stats getters-setters
+   * ========================================================= */
 
   window.AICAppShell = {
     navigate,
     getCurrentTab: () => currentTab,
     getFeatures: () => APPFEATURES,
+    getAppFeatures: () => APPFEATURES,
     getPageConfig: () => PAGECONFIG,
 
     getVersionInfo: () =>
@@ -494,11 +603,19 @@
     getTenantSections: () =>
       (window.AICTenant ? window.AICTenant.getSections() : {}),
 
-    // === Agent stats API / API статистики агента ===
+    getCurrentUser: () => USERPROFILE,
+    getUserProfile: () => USERPROFILE,
+    setUserProfile: (profile) => {
+      USERPROFILE = profile || null;
+      sendUserProfileToFrame();
+    },
+
+    getUserModules: () => getUserModules(),
+    setUserModules: (modules) => setUserModules(modules),
+
     getAgentStats: () => getAgentStats(),
     setAgentStats: (stats) => setAgentStats(stats),
 
-    // Текущий диалог агента
     getCurrentAgentDialog: () => getCurrentAgentDialog(),
     setCurrentAgentDialog: (dialog) => setCurrentAgentDialog(dialog)
   };
