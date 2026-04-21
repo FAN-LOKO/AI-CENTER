@@ -1,5 +1,15 @@
 {
+  "_comment": "PRODUCT CONFIG / Общий продуктовый слой для всех tenants. Здесь живут общие правила платформы, базовые feature flags, навигация и единый каталог модулей.",
+
+  "product": {
+    "_comment": "Идентификация общего продукта",
+    "productId": "ai-center",
+    "productName": "AI CENTER",
+    "configVersion": 1
+  },
+
   "features": {
+    "_comment": "Базовые feature flags продукта. Tenant может переопределить их в своем overlay.",
     "home": true,
     "myAgent": true,
     "modules": true,
@@ -8,7 +18,51 @@
     "payments": true,
     "settings": true
   },
+
+  "navigation": {
+    "_comment": "Общая структура вкладок shell. Tenant может менять подписи через texts и при необходимости enabled через features.",
+    "tabs": [
+      {
+        "id": "home",
+        "page": "home.html",
+        "featureKey": "home"
+      },
+      {
+        "id": "my-agent",
+        "page": "my-agent.html",
+        "featureKey": "myAgent"
+      },
+      {
+        "id": "modules",
+        "page": "modules.html",
+        "featureKey": "modules"
+      },
+      {
+        "id": "shared-chat",
+        "page": "shared-chat.html",
+        "featureKey": "sharedChat"
+      },
+      {
+        "id": "affiliate",
+        "page": "partner.html",
+        "featureKey": "affiliate"
+      },
+      {
+        "id": "payments",
+        "page": "payments.html",
+        "featureKey": "payments"
+      },
+      {
+        "id": "settings",
+        "page": "settings.html",
+        "featureKey": "settings"
+      }
+    ]
+  },
+
   "home": {
+    "_comment": "Общие правила карточки 'Мои модули' на Home для всех компаний",
+    "agentModuleId": "ai-agent",
     "alwaysVisibleModuleIds": [
       "ai-agent",
       "knowledge-hub",
@@ -18,32 +72,51 @@
       "knowledge-hub",
       "support-desk"
     ],
-    "agentModuleId": "ai-agent",
-    "moduleOrder": [
-      "ai-agent",
+    "pinnedBottomModuleIds": [
       "knowledge-hub",
       "support-desk"
-    ]
+    ],
+    "layoutRule": "agent-first-then-paid-then-free-bottom"
   },
+
+  "sections": {
+    "_comment": "Общие продуктовые секции/метаданные для shell и страниц",
+    "modules": {
+      "title": "Модули сервиса",
+      "mode": "catalog"
+    },
+    "home": {
+      "title": "Главная",
+      "showModulesCard": true,
+      "showAffiliateCard": true
+    }
+  },
+
   "modules": [
     {
+      "_comment": "Базовый модуль: всегда показывается первым на Home, на витрине присутствует всегда",
       "id": "ai-agent",
       "title": "AI Agent",
-      "titleRu": "AI Агент",
-      "shortDescription": "Подключение и управление ИИ-агентом для диалогов и первичной квалификации.",
+      "titleRu": "Мой агент",
+      "shortDescription": "Подключение и управление AI-агентом для диалогов, первичной квалификации и сопровождения клиента.",
       "fullDescription": [
-        "Подключение соцсетей и каналов общения, включая Telegram и другие площадки.",
-        "Готовый ИИ-агент на платформенной модели без настройки API со стороны пользователя.",
-        "Обработка входящих сообщений, первичный рекрутинг и квалификация обращений.",
-        "История диалогов и возможность ручного вмешательства в общение.",
-        "Базовая статистика по диалогам, обращениям и лидам."
+        "Подключение Telegram-бота и других каналов общения.",
+        "AI-агент для первичной обработки входящих сообщений и лидов.",
+        "История диалогов и ручное сопровождение клиента.",
+        "Базовая статистика по диалогам, обращениям и выданным ссылкам.",
+        "Ключевой обязательный модуль платформы."
       ],
-      "page": "modules-agent-profile.html",
+      "page": "my-agent.html",
       "enabled": true,
       "category": "core",
-      "requiresPayment": false
+      "requiresPayment": true,
+      "placement": {
+        "home": "fixed-top",
+        "modulesCatalog": "default"
+      }
     },
     {
+      "_comment": "Бесплатный модуль: всегда показывается внизу карточки Home",
       "id": "knowledge-hub",
       "title": "Knowledge Hub",
       "titleRu": "База знаний",
@@ -58,12 +131,17 @@
       "page": "modules-knowledge-hub-index.html",
       "enabled": true,
       "category": "core",
-      "requiresPayment": false
+      "requiresPayment": false,
+      "placement": {
+        "home": "fixed-bottom",
+        "modulesCatalog": "default"
+      }
     },
     {
+      "_comment": "Бесплатный модуль: всегда показывается внизу карточки Home",
       "id": "support-desk",
       "title": "Support Desk",
-      "titleRu": "Поддержка",
+      "titleRu": "Центр поддержки",
       "shortDescription": "Help-центр, тикеты и AI-помощник по платформе.",
       "fullDescription": [
         "Встроенный help-центр с AI-помощником по платформе и ключевым сценариям.",
@@ -75,16 +153,21 @@
       "page": "modules-support-desk-index.html",
       "enabled": true,
       "category": "service",
-      "requiresPayment": false
+      "requiresPayment": false,
+      "placement": {
+        "home": "fixed-bottom",
+        "modulesCatalog": "default"
+      }
     },
     {
+      "_comment": "Платный дополнительный модуль",
       "id": "media-lab",
       "title": "Media Lab",
       "titleRu": "Медиа-лаборатория",
       "shortDescription": "Создание, публикация и анализ контента с помощью AI.",
       "fullDescription": [
         "Генерация изображений и каруселей с лицом пользователя и продуктом.",
-        "Готовые сценарии постов, сториз и reels, а также доработка своих сценариев через ИИ.",
+        "Готовые сценарии постов, сториз и reels, а также доработка своих сценариев через AI.",
         "Подбор и адаптация трендовых идей по теме компании и продукта.",
         "Публикация в несколько соцсетей, отложенный постинг и контент-календарь.",
         "Анализ вовлечённости, комментариев и рекомендации по темам и форматам."
@@ -92,9 +175,14 @@
       "page": "modules-media-lab-index.html",
       "enabled": true,
       "category": "service",
-      "requiresPayment": true
+      "requiresPayment": true,
+      "placement": {
+        "home": "paid-dynamic",
+        "modulesCatalog": "default"
+      }
     },
     {
+      "_comment": "Платный дополнительный модуль",
       "id": "leader-stage",
       "title": "Leader Stage",
       "titleRu": "Лидерская сцена",
@@ -109,9 +197,14 @@
       "page": "modules-leader-stage-index.html",
       "enabled": true,
       "category": "growth",
-      "requiresPayment": true
+      "requiresPayment": true,
+      "placement": {
+        "home": "paid-dynamic",
+        "modulesCatalog": "default"
+      }
     },
     {
+      "_comment": "Платный дополнительный модуль",
       "id": "lead-flow",
       "title": "Lead Flow",
       "titleRu": "Поток лидов",
@@ -126,9 +219,14 @@
       "page": "modules-lead-flow-index.html",
       "enabled": true,
       "category": "growth",
-      "requiresPayment": true
+      "requiresPayment": true,
+      "placement": {
+        "home": "paid-dynamic",
+        "modulesCatalog": "default"
+      }
     },
     {
+      "_comment": "Платный дополнительный модуль",
       "id": "business-room",
       "title": "Business Room",
       "titleRu": "Бизнес-комната",
@@ -143,7 +241,11 @@
       "page": "modules-business-room-index.html",
       "enabled": true,
       "category": "growth",
-      "requiresPayment": true
+      "requiresPayment": true,
+      "placement": {
+        "home": "paid-dynamic",
+        "modulesCatalog": "default"
+      }
     }
   ]
 }
