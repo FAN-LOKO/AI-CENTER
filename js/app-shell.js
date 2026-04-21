@@ -1,17 +1,20 @@
 (function () {
   /* =========================================================
    * SHELL DEPENDENCIES
-   * Что здесь:
-   * - runtime-адаптер
-   * - iframe-контейнер страниц
-   * - кнопки нижней навигации
+   * What is here / Что здесь:
+   * - runtime adapter / runtime-адаптер
+   * - iframe container / iframe-контейнер страниц
+   * - bottom navigation buttons / кнопки нижней навигации
    * ========================================================= */
 
   const Runtime = window.AICRuntime || {
     ready() {},
     expand() {},
     hapticSelection() {},
-    hapticNotify() {}
+    hapticNotify() {},
+    getVersionInfo() {
+      return null;
+    }
   };
 
   const frame = document.getElementById("pageFrame");
@@ -19,15 +22,17 @@
 
   /* =========================================================
    * SHELL STATE
-   * Что здесь:
-   * - feature flags приложения
-   * - карта страниц
-   * - текущая вкладка
-   * - профиль пользователя
-   * - пользовательские модули
-   * - статистика агента
-   * - выбранный диалог агента
-   * - текущий moduleId для страницы payments
+   * What is here / Что здесь:
+   * - app feature flags / feature flags приложения
+   * - page config map / карта страниц
+   * - current active tab / текущая вкладка
+   * - user profile / профиль пользователя
+   * - tenant config / tenant-конфиг
+   * - tenant catalog modules / полный каталог модулей tenant
+   * - user modules access state / пользовательские модули и доступ
+   * - agent stats / статистика агента
+   * - selected agent dialog / выбранный диалог агента
+   * - selected payment module id / текущий moduleId для payments
    * ========================================================= */
 
   let APPFEATURES = {
@@ -43,6 +48,8 @@
   let PAGECONFIG = {};
   let currentTab = "home";
   let USERPROFILE = null;
+  let TENANTCONFIG = null;
+  let TENANTMODULES = [];
 
   let USERMODULES = [
     {
@@ -64,7 +71,8 @@
         username: "@anna_fit",
         channel: "Telegram",
         timeLabel: "17.04.2026 • 12:15",
-        lastMessage: "Здравствуйте, хочу узнать про тариф с ботом-консультантом"
+        lastMessage:
+          "Здравствуйте, хочу узнать про тариф с ботом-консультантом"
       },
       {
         id: "dlg-102",
@@ -78,7 +86,8 @@
         username: "@olga_wellness",
         channel: "Telegram",
         timeLabel: "16.04.2026 • 19:08",
-        lastMessage: "Подскажите, можно ли подключить минимальную CRM на n8n"
+        lastMessage:
+          "Подскажите, можно ли подключить минимальную CRM на n8n"
       }
     ],
     issuedLinks: [
@@ -99,11 +108,89 @@
   let CURRENT_PAYMENT_MODULE_ID = null;
 
   /* =========================================================
+   * TENANT HELPERS
+   * What is here / Что здесь:
+   * - read tenant config from tenant loader / чтение tenant config из tenant loader
+   * - read tenant modules catalog / чтение каталога модулей tenant
+   * - normalize tenant modules / нормализация tenant-модулей
+   * ========================================================= */
+
+  function normalizeTenantModules(modules) {
+    if (!Array.isArray(modules)) return [];
+
+    return modules
+      .filter((mod) => mod && mod.id)
+      .map((mod) => ({
+        id: String(mod.id),
+        title:
+          typeof mod.title === "string"
+            ? mod.title
+            : mod.title && typeof mod.title.en === "string"
+              ? mod.title.en
+              : mod.title && typeof mod.title.ru === "string"
+                ? mod.title.ru
+                : String(mod.id),
+        titleRu:
+          typeof mod.titleRu === "string"
+            ? mod.titleRu
+            : mod.title && typeof mod.title === "object" && typeof mod.title.ru === "string"
+              ? mod.title.ru
+              : typeof mod.title === "string"
+                ? mod.title
+                : String(mod.id),
+        shortDescription: String(mod.shortDescription || ""),
+        fullDescription: Array.isArray(mod.fullDescription)
+          ? mod.fullDescription
+          : [],
+        page: typeof mod.page === "string" ? mod.page : null,
+        enabled: mod.enabled !== false,
+        category: typeof mod.category === "string" ? mod.category : "core",
+        requiresPayment: !!mod.requiresPayment
+      }));
+  }
+
+  function loadTenantStateFromProvider() {
+    try {
+      if (!window.AICTenant) {
+        TENANTCONFIG = null;
+        TENANTMODULES = [];
+        return;
+      }
+
+      if (typeof window.AICTenant.getConfig === "function") {
+        TENANTCONFIG = window.AICTenant.getConfig() || null;
+      } else {
+        TENANTCONFIG = null;
+      }
+
+      if (typeof window.AICTenant.getModules === "function") {
+        TENANTMODULES = normalizeTenantModules(window.AICTenant.getModules() || []);
+      } else if (Array.isArray(TENANTCONFIG?.modules)) {
+        TENANTMODULES = normalizeTenantModules(TENANTCONFIG.modules);
+      } else {
+        TENANTMODULES = [];
+      }
+    } catch (error) {
+      console.error("[AI CENTER][Shell] tenant state load failed", error);
+      TENANTCONFIG = null;
+      TENANTMODULES = [];
+    }
+  }
+
+  function getTenantConfig() {
+    return TENANTCONFIG;
+  }
+
+  function getTenantModules() {
+    return TENANTMODULES;
+  }
+
+  /* =========================================================
    * USER MODULES HELPERS
-   * Что здесь:
-   * - нормализация user state по модулям
-   * - получение списка модулей пользователя
-   * - сохранение списка модулей пользователя
+   * What is here / Что здесь:
+   * - normalize user module access state / нормализация user state по модулям
+   * - get user modules access list / получение списка модулей пользователя
+   * - save user modules access list / сохранение списка модулей пользователя
    * ========================================================= */
 
   function normalizeUserModules(modules) {
@@ -130,11 +217,11 @@
 
   /* =========================================================
    * AGENT STATS HELPERS
-   * Что здесь:
-   * - установка статистики агента
-   * - получение статистики агента
-   * - установка текущего выбранного диалога
-   * - получение текущего выбранного диалога
+   * What is here / Что здесь:
+   * - set agent stats / установка статистики агента
+   * - get agent stats / получение статистики агента
+   * - set selected current dialog / установка текущего выбранного диалога
+   * - get selected current dialog / получение текущего выбранного диалога
    * ========================================================= */
 
   function setAgentStats(nextStats) {
@@ -144,7 +231,9 @@
       dialogsToday: Number(nextStats?.dialogsToday || 0),
       refLinksToday: Number(nextStats?.refLinksToday || 0),
       dialogs: Array.isArray(nextStats?.dialogs) ? nextStats.dialogs : [],
-      issuedLinks: Array.isArray(nextStats?.issuedLinks) ? nextStats.issuedLinks : []
+      issuedLinks: Array.isArray(nextStats?.issuedLinks)
+        ? nextStats.issuedLinks
+        : []
     };
 
     if (frame && frame.contentWindow) {
@@ -182,9 +271,9 @@
 
   /* =========================================================
    * PAYMENT CONTEXT HELPERS
-   * Что здесь:
-   * - хранение текущего moduleId для payments
-   * - передача payment context в iframe
+   * What is here / Что здесь:
+   * - keep current moduleId for payments / хранение текущего moduleId для payments
+   * - send payment context to iframe / передача payment context в iframe
    * ========================================================= */
 
   function setCurrentPaymentModuleId(moduleId) {
@@ -207,9 +296,9 @@
 
   /* =========================================================
    * PAGE CONFIGURATION
-   * Что здесь:
-   * - единая карта вкладок и файлов страниц
-   * - привязка feature flags к доступности страниц
+   * What is here / Что здесь:
+   * - unified tabs/page config map / единая карта вкладок и файлов страниц
+   * - feature flags mapping for pages / привязка feature flags к доступности страниц
    * ========================================================= */
 
   function buildPageConfig() {
@@ -229,10 +318,10 @@
 
   /* =========================================================
    * NAVIGATION HELPERS
-   * Что здесь:
-   * - проверка доступности вкладки
-   * - fallback-вкладка
-   * - преобразование tab <-> page
+   * What is here / Что здесь:
+   * - check tab availability / проверка доступности вкладки
+   * - fallback tab / fallback-вкладка
+   * - convert tab <-> page / преобразование tab <-> page
    * ========================================================= */
 
   function isTabEnabled(tab) {
@@ -240,7 +329,13 @@
   }
 
   function getFallbackTab() {
-    const fallbackOrder = ["home", "my-agent", "modules", "shared-chat", "payments"];
+    const fallbackOrder = [
+      "home",
+      "my-agent",
+      "modules",
+      "shared-chat",
+      "payments"
+    ];
     return fallbackOrder.find((tab) => isTabEnabled(tab)) || "home";
   }
 
@@ -258,12 +353,14 @@
 
   /* =========================================================
    * SHELL -> PAGE MESSAGING
-   * Что здесь:
-   * - отправка профиля пользователя в страницу
-   * - отправка feature flags в страницу
-   * - отправка user modules в страницу
-   * - отправка payment context в страницу
-   * - единый пуш состояния shell в текущий iframe
+   * What is here / Что здесь:
+   * - send user profile to page / отправка профиля пользователя в страницу
+   * - send app features to page / отправка feature flags в страницу
+   * - send tenant config to page / отправка tenant config в страницу
+   * - send tenant modules to page / отправка tenant modules в страницу
+   * - send user access modules to page / отправка user modules в страницу
+   * - send payment context to page / отправка payment context в страницу
+   * - push full shell state to current iframe / единый пуш состояния shell в текущий iframe
    * ========================================================= */
 
   function sendUserProfileToFrame() {
@@ -285,6 +382,30 @@
       {
         type: "user-modules",
         modules: getUserModules()
+      },
+      "*"
+    );
+  }
+
+  function sendTenantConfigToFrame() {
+    if (!frame || !frame.contentWindow || !TENANTCONFIG) return;
+
+    frame.contentWindow.postMessage(
+      {
+        type: "tenant-config",
+        config: TENANTCONFIG
+      },
+      "*"
+    );
+  }
+
+  function sendTenantModulesToFrame() {
+    if (!frame || !frame.contentWindow) return;
+
+    frame.contentWindow.postMessage(
+      {
+        type: "tenant-modules",
+        modules: getTenantModules()
       },
       "*"
     );
@@ -316,6 +437,8 @@
 
   function pushShellStateToFrame() {
     sendFeaturesToFrame();
+    sendTenantConfigToFrame();
+    sendTenantModulesToFrame();
     sendUserProfileToFrame();
     sendUserModulesToFrame();
     sendPaymentModuleContextToFrame();
@@ -323,10 +446,10 @@
 
   /* =========================================================
    * SHELL UI STATE
-   * Что здесь:
-   * - скрытие/показ кнопок навигации
-   * - подсветка активной вкладки
-   * - скрытие badge у shared chat
+   * What is here / Что здесь:
+   * - show/hide nav buttons / скрытие/показ кнопок навигации
+   * - highlight active tab / подсветка активной вкладки
+   * - hide shared chat badge / скрытие badge у shared chat
    * ========================================================= */
 
   function updateNavVisibility() {
@@ -352,11 +475,11 @@
 
   /* =========================================================
    * NAVIGATION ACTIONS
-   * Что здесь:
-   * - центральный navigate(...)
-   * - смена iframe-страницы
-   * - обновление active nav
-   * - отправка shell state в открытую страницу
+   * What is here / Что здесь:
+   * - central navigate(...) / центральный navigate(...)
+   * - switch iframe page / смена iframe-страницы
+   * - update active nav / обновление active nav
+   * - push shell state to opened page / отправка shell state в открытую страницу
    * ========================================================= */
 
   function navigate(page, tab) {
@@ -386,8 +509,8 @@
 
   /* =========================================================
    * NAV BUTTON BINDINGS
-   * Что здесь:
-   * - привязка нижней навигации
+   * What is here / Что здесь:
+   * - bind bottom navigation / привязка нижней навигации
    * ========================================================= */
 
   function bindNavButtons() {
@@ -404,8 +527,8 @@
 
   /* =========================================================
    * SHELL HEADER ACTIONS
-   * Что здесь:
-   * - действия header-кнопок shell
+   * What is here / Что здесь:
+   * - shell header buttons actions / действия header-кнопок shell
    * ========================================================= */
 
   function bindShellButtons() {
@@ -428,14 +551,16 @@
 
   /* =========================================================
    * MESSAGE BUS
-   * Что здесь:
-   * - маршрутизация сообщений между страницами и shell
-   * - навигация
-   * - user profile
-   * - feature flags
-   * - user modules
-   * - agent stats
-   * - payment module context
+   * What is here / Что здесь:
+   * - routing messages between pages and shell / маршрутизация сообщений между страницами и shell
+   * - navigation / навигация
+   * - tenant config / tenant config
+   * - tenant modules / tenant modules
+   * - user profile / user profile
+   * - feature flags / feature flags
+   * - user modules access / user modules
+   * - agent stats / agent stats
+   * - payment module context / payment module context
    * ========================================================= */
 
   function bindMessageBus() {
@@ -476,21 +601,23 @@
       }
 
       if (data.type === "request-user-profile") {
-        if (USERPROFILE && frame && frame.contentWindow) {
-          frame.contentWindow.postMessage(
-            {
-              type: "user-profile",
-              profile: USERPROFILE
-            },
-            "*"
-          );
-        }
+        sendUserProfileToFrame();
         return;
       }
 
       if (data.type === "save-user-profile") {
         USERPROFILE = data.profile || data;
         sendUserProfileToFrame();
+        return;
+      }
+
+      if (data.type === "request-tenant-config") {
+        sendTenantConfigToFrame();
+        return;
+      }
+
+      if (data.type === "request-tenant-modules") {
+        sendTenantModulesToFrame();
         return;
       }
 
@@ -541,7 +668,10 @@
         return;
       }
 
-      if (data.type === "agent-issued-links-update" && Array.isArray(data.issuedLinks)) {
+      if (
+        data.type === "agent-issued-links-update" &&
+        Array.isArray(data.issuedLinks)
+      ) {
         setAgentStats({
           ...getAgentStats(),
           issuedLinks: data.issuedLinks,
@@ -559,11 +689,12 @@
 
   /* =========================================================
    * BOOTSTRAP
-   * Что здесь:
-   * - инициализация runtime
-   * - инициализация tenant
-   * - сборка page config
-   * - старт shell
+   * What is here / Что здесь:
+   * - initialize runtime / инициализация runtime
+   * - initialize tenant / инициализация tenant
+   * - read tenant config and modules / чтение tenant config и модулей
+   * - build page config / сборка page config
+   * - start shell / старт shell
    * ========================================================= */
 
   async function bootstrap() {
@@ -578,6 +709,7 @@
       console.error("[AI CENTER][Shell] bootstrap failed", error);
     }
 
+    loadTenantStateFromProvider();
     buildPageConfig();
     updateNavVisibility();
     bindNavButtons();
@@ -592,26 +724,30 @@
 
   /* =========================================================
    * PUBLIC SHELL API
-   * Что здесь:
-   * - публичные методы shell для страниц
+   * What is here / Что здесь:
+   * - public shell methods for pages / публичные методы shell для страниц
    * ========================================================= */
 
   window.AICAppShell = {
     navigate,
+
     getCurrentTab: () => currentTab,
     getAppFeatures: () => APPFEATURES,
+    getFeatures: () => APPFEATURES,
     getPageConfig: () => PAGECONFIG,
 
     getVersionInfo: () =>
-      (window.AICRuntime && typeof window.AICRuntime.getVersionInfo === "function"
+      window.AICRuntime &&
+      typeof window.AICRuntime.getVersionInfo === "function"
         ? window.AICRuntime.getVersionInfo()
         : window.AICRuntime && window.AICRuntime.version
           ? window.AICRuntime.version
-          : null),
+          : null,
 
     getRuntimeInfo: () => ({
       version:
-        window.AICRuntime && typeof window.AICRuntime.getVersionInfo === "function"
+        window.AICRuntime &&
+        typeof window.AICRuntime.getVersionInfo === "function"
           ? window.AICRuntime.getVersionInfo()
           : window.AICRuntime && window.AICRuntime.version
             ? window.AICRuntime.version
@@ -622,23 +758,33 @@
           : null
     }),
 
-    getTenantConfig: () =>
-      (window.AICTenant ? window.AICTenant.getConfig() : null),
+    getTenantConfig: () => getTenantConfig(),
 
     getTenantDebugContext: () =>
-      (window.AICTenant ? window.AICTenant.getDebugContext() : null),
+      window.AICTenant &&
+      typeof window.AICTenant.getDebugContext === "function"
+        ? window.AICTenant.getDebugContext()
+        : null,
 
     getTenantDomains: () =>
-      (window.AICTenant ? window.AICTenant.getDomains() : {}),
+      window.AICTenant &&
+      typeof window.AICTenant.getDomains === "function"
+        ? window.AICTenant.getDomains()
+        : {},
 
-    getTenantModules: () =>
-      (window.AICTenant ? window.AICTenant.getModules() : []),
+    getTenantModules: () => getTenantModules(),
 
     getTenantPlans: () =>
-      (window.AICTenant ? window.AICTenant.getPlans() : []),
+      window.AICTenant && typeof window.AICTenant.getPlans === "function"
+        ? window.AICTenant.getPlans()
+        : Array.isArray(TENANTCONFIG?.plans)
+          ? TENANTCONFIG.plans
+          : [],
 
     getTenantSections: () =>
-      (window.AICTenant ? window.AICTenant.getSections() : {}),
+      window.AICTenant && typeof window.AICTenant.getSections === "function"
+        ? window.AICTenant.getSections()
+        : TENANTCONFIG?.sections || {},
 
     getUserModules: () => getUserModules(),
     setUserModules: (modules) => setUserModules(modules),
