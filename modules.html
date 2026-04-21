@@ -119,20 +119,20 @@
         return shellModules
           .filter(module => module && module.enabled !== false)
           .map(module => ({
-            id: module.id,
-            title: module.titleRu || module.title || module.id,
-            titleRu: module.titleRu || module.title || module.id,
-            shortDescription:
-              module.shortDescription ||
-              getText('modulesDefaultShortDescription', 'Описание модуля будет заполнено в tenant-конфиге.'),
-            fullDescription:
-              Array.isArray(module.fullDescription) && module.fullDescription.length
-                ? module.fullDescription
-                : [getText('modulesDefaultFullDescription', 'Описание модуля будет добавлено позже.')],
-            page: getModuleRoute(module),
-            requiresPayment: !!module.requiresPayment,
-            category: module.category || 'core'
-          }));
+  id: module.id,
+  title: module.title || module.titleRu || module.id,
+  titleRu: module.titleRu || module.title || module.id,
+  shortDescription:
+    module.shortDescription ||
+    getText('modulesDefaultShortDescription', 'Описание модуля будет заполнено в tenant-конфиге.'),
+  fullDescription:
+    Array.isArray(module.fullDescription) && module.fullDescription.length
+      ? module.fullDescription
+      : [getText('modulesDefaultFullDescription', 'Описание модуля будет добавлено позже.')],
+  page: getModuleRoute(module),
+  requiresPayment: !!module.requiresPayment,
+  category: module.category || 'core'
+}))
       } catch (error) {
         console.error('[AI CENTER][Modules] tenant modules normalize failed', error);
         return [];
