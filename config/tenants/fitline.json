@@ -129,15 +129,5 @@
       "buttonText": "Оплатить 12 месяцев",
       "highlight": false
     }
-  ],
-
-  "modules": [
-    {
-      "_comment": "Точечный override рабочего модуля Agent для FitLine. Личный чат пользователя живет на my-agent.html и не должен подменять модуль.",
-      "id": "ai-agent",
-      "title": "Agent",
-      "titleRu": "Агент",
-      "page": "modules-agent/profile.html"
-    }
   ]
 }
