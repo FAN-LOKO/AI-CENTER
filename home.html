@@ -8,7 +8,6 @@
   </head>
   <body>
     <div class="page home-page">
-
       <!-- Профиль -->
       <section class="card-section home-profile-card">
         <div class="card-section-header">
@@ -45,8 +44,12 @@
 
         <div class="card-section-body">
           <div class="home-links-row">
-            <button type="button" class="home-text-link" id="allModulesLink">Все модули</button>
-            <button type="button" class="home-text-link" id="paymentLink">Перейти к оплатам</button>
+            <button type="button" class="home-text-link" id="allModulesLink">
+              Все модули
+            </button>
+            <button type="button" class="home-text-link" id="paymentLink">
+              Перейти к оплатам
+            </button>
           </div>
 
           <div id="homeModulesList" class="home-module-list"></div>
@@ -62,7 +65,8 @@
         <div class="card-section-body">
           <div class="home-card-stack">
             <p class="home-card-text">
-              Зарабатывайте с помощью партнёрской программы и получайте вознаграждение за приглашённых клиентов и партнёров.
+              Зарабатывайте с помощью партнёрской программы и получайте
+              вознаграждение за приглашённых клиентов и партнёров.
             </p>
 
             <div class="home-affiliate-balance">
@@ -76,10 +80,10 @@
           </div>
         </div>
       </section>
-
     </div>
 
     <script>
+      // --- Глобальные состояния Home ---
       let APPFEATURES = {
         home: true,
         myAgent: true,
@@ -95,6 +99,8 @@
       let USERMODULES = [];
       let _modulesReady = false;
       let _lastHomeModulesSignature = '';
+
+      // --- Helpers: tenant/home config ---
 
       function getHomeModulesListEl() {
         return document.getElementById('homeModulesList');
@@ -114,15 +120,27 @@
       }
 
       function getHomeConfig() {
+        // Правила home приходят из merged tenant config (product-config + overlay)
         return TENANTCONFIG?.home || {};
       }
 
       function getHomeAlwaysVisibleIds() {
-        return getHomeConfig().alwaysVisibleModuleIds || ['ai-agent', 'knowledge-hub', 'support-desk'];
+        return (
+          getHomeConfig().alwaysVisibleModuleIds || [
+            'ai-agent',
+            'knowledge-hub',
+            'support-desk'
+          ]
+        );
       }
 
       function getHomeFreeVisibleIds() {
-        return getHomeConfig().freeVisibleModuleIds || ['knowledge-hub', 'support-desk'];
+        return (
+          getHomeConfig().freeVisibleModuleIds || [
+            'knowledge-hub',
+            'support-desk'
+          ]
+        );
       }
 
       function getHomeAgentId() {
@@ -130,71 +148,84 @@
       }
 
       function getHomeModuleOrder() {
-        return getHomeConfig().moduleOrder || ['ai-agent', 'knowledge-hub', 'support-desk'];
+        return (
+          getHomeConfig().moduleOrder || [
+            'ai-agent',
+            'knowledge-hub',
+            'support-desk'
+          ]
+        );
       }
 
+      // --- Tenant modules (каталог продукта) ---
+
       function getTenantModulesRaw() {
-  const fallbackModules = [
-    {
-      id: 'ai-agent',
-      title: 'My Agent',
-      titleRu: 'Мой агент',
-      page: 'modules-agent/profile.html',
-      requiresPayment: false,
-      enabled: true,
-      category: 'core'
-    },
-    {
-      id: 'knowledge-hub',
-      title: 'Knowledge Hub',
-      titleRu: 'База знаний',
-      page: 'modules-knowledge-hub.html',
-      requiresPayment: false,
-      enabled: true,
-      category: 'core'
-    },
-    {
-      id: 'support-desk',
-      title: 'Support Desk',
-      titleRu: 'Поддержка',
-      page: 'modules-support-desk.html',
-      requiresPayment: false,
-      enabled: true,
-      category: 'core'
-    }
-  ];
+        // Fallback на случай, если shell/tenant-loader не отдал каталог
+        const fallbackModules = [
+          {
+            id: 'ai-agent',
+            title: 'Agent Connect',
+            titleRu: 'Подключение агента',
+            page: 'modules-agent/profile.html',
+            requiresPayment: false,
+            enabled: true,
+            category: 'core'
+          },
+          {
+            id: 'knowledge-hub',
+            title: 'Knowledge Hub',
+            titleRu: 'База знаний',
+            page: 'modules-knowledge-hub/index.html',
+            requiresPayment: false,
+            enabled: true,
+            category: 'core'
+          },
+          {
+            id: 'support-desk',
+            title: 'Support Desk',
+            titleRu: 'Центр поддержки',
+            page: 'modules-support-desk/index.html',
+            requiresPayment: false,
+            enabled: true,
+            category: 'core'
+          }
+        ];
 
-  try {
-    const raw = window.parent?.AICAppShell?.getTenantModules?.();
-    const source = Array.isArray(raw) && raw.length ? raw : fallbackModules;
+        try {
+          const raw = window.parent?.AICAppShell?.getTenantModules?.();
+          const source = Array.isArray(raw) && raw.length ? raw : fallbackModules;
 
-    return source
-      .filter(m => m && m.enabled !== false)
-      .map(m => ({
-        id: m.id,
-        title: m.title || m.titleRu || m.id,
-        titleRu: m.titleRu || m.title || m.id,
-        displayTitle: `${m.title || m.titleRu || m.id} / ${m.titleRu || m.title || m.id}`,
-        page: m.page,
-        requiresPayment: !!m.requiresPayment,
-        enabled: m.enabled !== false,
-        category: m.category || 'core'
-      }));
-  } catch (e) {
-    console.error('[Home] tenant modules read failed', e);
+          return source
+            .filter(m => m && m.enabled !== false)
+            .map(m => ({
+              id: m.id,
+              title: m.title || m.titleRu || m.id,
+              titleRu: m.titleRu || m.title || m.id,
+              displayTitle: `${m.title || m.titleRu || m.id} / ${
+                m.titleRu || m.title || m.id
+              }`,
+              page: m.page,
+              requiresPayment: !!m.requiresPayment,
+              enabled: m.enabled !== false,
+              category: m.category || 'core'
+            }));
+        } catch (e) {
+          console.error('[Home] tenant modules read failed', e);
 
-    return fallbackModules.map(m => ({
-      id: m.id,
-      title: m.title || m.titleRu || m.id,
-      titleRu: m.titleRu || m.title || m.id,
-      displayTitle: `${m.title || m.titleRu || m.id} / ${m.titleRu || m.title || m.id}`,
-      page: m.page,
-      requiresPayment: !!m.requiresPayment,
-      enabled: m.enabled !== false,
-      category: m.category || 'core'
-    }));
-  }
-}
+          return fallbackModules.map(m => ({
+            id: m.id,
+            title: m.title || m.titleRu || m.id,
+            titleRu: m.titleRu || m.title || m.id,
+            displayTitle: `${m.title || m.titleRu || m.id} / ${
+              m.titleRu || m.title || m.id
+            }`,
+            page: m.page,
+            requiresPayment: !!m.requiresPayment,
+            enabled: m.enabled !== false,
+            category: m.category || 'core'
+          }));
+        }
+      }
 
       function waitForTenantModules(attempt) {
         attempt = attempt || 0;
@@ -204,15 +235,23 @@
           if (mods.length > 0) {
             resolve(mods);
           } else if (attempt < 20) {
-            setTimeout(() => waitForTenantModules(attempt + 1).then(resolve), 150);
+            setTimeout(
+              () => waitForTenantModules(attempt + 1).then(resolve),
+              150
+            );
           } else {
-            console.warn('[Home] tenant modules not available after 20 attempts');
+            console.warn(
+              '[Home] tenant modules not available after 20 attempts'
+            );
             resolve([]);
           }
         });
       }
 
+      // --- User access ---
+
       function getDefaultUserModuleAccess() {
+        // По умолчанию считаем, что базовый модуль агента активен с небольшим запасом дней
         return {
           'ai-agent': {
             paid: true,
@@ -226,6 +265,8 @@
         if (!raw || typeof raw !== 'object') return {};
         return raw;
       }
+
+      // --- Построение списка модулей для карточки "Мои модули" ---
 
       function buildHomeModulesFromTenant(tenantModules, accessMap) {
         const normalizedAccess = normalizeUserAccessMap(accessMap);
@@ -248,11 +289,13 @@
             const isAgent = m.id === agentId;
 
             if (isAlwaysFree) {
+              // Всегда бесплатные модули (Knowledge Hub, Support Desk)
               return {
                 id: m.id,
                 title: m.title,
                 titleRu: m.titleRu,
-                displayTitle: m.displayTitle || `${m.title} / ${m.titleRu}`,
+                displayTitle:
+                  m.displayTitle || `${m.title} / ${m.titleRu || m.title}`,
                 page: m.page,
                 requiresPayment: false,
                 category: m.category,
@@ -265,34 +308,44 @@
             }
 
             if (isAgent) {
+              // Базовый модуль "Подключение агента"
               return {
                 id: m.id,
                 title: m.title,
                 titleRu: m.titleRu,
-                displayTitle: m.displayTitle || `${m.title} / ${m.titleRu}`,
+                displayTitle:
+                  m.displayTitle || `${m.title} / ${m.titleRu || m.title}`,
                 page: m.page,
                 requiresPayment: false,
                 category: m.category,
                 visible: true,
                 paid: true,
                 frozen: false,
-                daysLeft: typeof access?.daysLeft === 'number' ? access.daysLeft : 5,
+                daysLeft:
+                  typeof access?.daysLeft === 'number'
+                    ? access.daysLeft
+                    : 5,
                 isAgent: true
               };
             }
 
+            // Остальные модули
             return {
               id: m.id,
               title: m.title,
               titleRu: m.titleRu,
-              displayTitle: m.displayTitle || `${m.title} / ${m.titleRu}`,
+              displayTitle:
+                m.displayTitle || `${m.title} / ${m.titleRu || m.title}`,
               page: m.page,
               requiresPayment: !!m.requiresPayment,
               category: m.category,
               visible: !!access?.paid,
               paid: !!access?.paid,
               frozen: !!access?.frozen,
-              daysLeft: typeof access?.daysLeft === 'number' ? access.daysLeft : null,
+              daysLeft:
+                typeof access?.daysLeft === 'number'
+                  ? access.daysLeft
+                  : null,
               isAgent: false
             };
           })
@@ -348,7 +401,10 @@
 
           if (d !== null && d > 0) {
             return {
-              text: getText('homeStatusPaidDaysLeft', 'Оплачен, осталось {days} дн.').replace('{days}', d),
+              text: getText(
+                'homeStatusPaidDaysLeft',
+                'Оплачен, осталось {days} дн.'
+              ).replace('{days}', d),
               cls: ''
             };
           }
@@ -361,7 +417,10 @@
 
         if (typeof mod.daysLeft === 'number' && mod.daysLeft > 0) {
           return {
-            text: getText('homeStatusPaidDaysLeft', 'Оплачен, осталось {days} дн.').replace('{days}', mod.daysLeft),
+            text: getText(
+              'homeStatusPaidDaysLeft',
+              'Оплачен, осталось {days} дн.'
+            ).replace('{days}', mod.daysLeft),
             cls: ''
           };
         }
@@ -371,6 +430,8 @@
           cls: ''
         };
       }
+
+      // --- Рендер карточки "Мои модули" ---
 
       function getVisibleHomeModules() {
         return USERMODULES.filter(m => {
@@ -399,7 +460,8 @@
             id: mod.id,
             frozen: !!mod.frozen,
             paid: !!mod.paid,
-            daysLeft: typeof mod.daysLeft === 'number' ? mod.daysLeft : null
+            daysLeft:
+              typeof mod.daysLeft === 'number' ? mod.daysLeft : null
           }))
         );
 
@@ -410,34 +472,53 @@
         _lastHomeModulesSignature = nextSignature;
 
         if (!visible.length) {
-          container.innerHTML =
-            `<p class="home-empty-note">${getText('homeEmptyModulesText', 'Пока нет доступных модулей. Как только они появятся, вы увидите их здесь.')}</p>`;
+          container.innerHTML = `<p class="home-empty-note">${getText(
+            'homeEmptyModulesText',
+            'Пока нет доступных модулей. Как только они появятся, вы увидите их здесь.'
+          )}</p>`;
           return;
         }
 
         const agentId = getHomeAgentId();
 
-        container.innerHTML = visible.map(mod => {
-          const badge = getModuleBadge(mod);
-          const status = getModuleStatusText(mod);
-          const frozen = !!mod.frozen;
-          const actionText = frozen
-            ? (mod.id === agentId
-                ? getText('homeActionPayModule', 'Оплатить модуль')
-                : getText('homeActionUnavailable', 'Недоступен'))
-            : getText('homeActionOpenModule', 'Открыть модуль');
+        container.innerHTML = visible
+          .map(mod => {
+            const badge = getModuleBadge(mod);
+            const status = getModuleStatusText(mod);
+            const frozen = !!mod.frozen;
 
-          return `
+            let actionText = getText(
+              'homeActionOpenModule',
+              'Открыть модуль'
+            );
+
+            if (frozen) {
+              actionText =
+                mod.id === agentId
+                  ? getText(
+                      'homeActionPayModule',
+                      'Оплатить модуль'
+                    )
+                  : getText('homeActionUnavailable', 'Недоступен');
+            }
+
+            return `
             <div class="home-module-item${frozen ? ' is-frozen' : ''}">
               <div class="home-module-top">
-                <div class="home-module-title">${mod.displayTitle || mod.title}</div>
-                <span class="home-module-badge ${badge.cls}">${badge.text}</span>
+                <div class="home-module-title">${
+                  mod.displayTitle || mod.title
+                }</div>
+                <span class="home-module-badge ${badge.cls}">${
+                  badge.text
+                }</span>
               </div>
               <p class="home-module-status ${status.cls}">${status.text}</p>
               <div class="home-module-actions">
                 <button
                   type="button"
-                  class="btn btn-block home-module-open-btn${frozen ? ' disabled' : ''}"
+                  class="btn btn-block home-module-open-btn${
+                    frozen ? ' disabled' : ''
+                  }"
                   data-module-page="${mod.page}"
                   data-module-id="${mod.id}"
                   data-frozen="${frozen ? '1' : '0'}"
@@ -446,30 +527,31 @@
                 </button>
               </div>
             </div>`;
-        }).join('');
+          })
+          .join('');
 
         container.querySelectorAll('[data-module-page]').forEach(btn => {
           btn.addEventListener('click', () => {
             const page = btn.getAttribute('data-module-page');
             const moduleId = btn.getAttribute('data-module-id');
             const frozen = btn.getAttribute('data-frozen') === '1';
+            const agentId = getHomeAgentId();
 
-            if (moduleId === getHomeAgentId()) {
-              if (page) navigateFromHome(page, 'modules');
-              return;
-            }
+            if (!page) return;
 
-            if (frozen && moduleId === getHomeAgentId()) {
+            if (frozen) {
+              // Замороженные платные модули ведут на оплаты
               navigateFromHome('payments.html', 'payments');
               return;
             }
 
-            if (frozen) return;
-
-            if (page) navigateFromHome(page, 'modules');
+            // Активные модули (включая базовый Agent Connect)
+            navigateFromHome(page, 'modules');
           });
         });
       }
+
+      // --- Видимость карточек Home ---
 
       function syncHomeCardsVisibility() {
         const affiliateCard = document.getElementById('homeAffiliateCard');
@@ -491,8 +573,10 @@
 
         const subtitleEl = document.getElementById('homeProfileSubtitle');
         if (subtitleEl) {
-          subtitleEl.textContent =
-            getText('homeProfileSubtitle', TENANTCONFIG?.appName || 'Telegram WebApp');
+          subtitleEl.textContent = getText(
+            'homeProfileSubtitle',
+            TENANTCONFIG?.appName || 'Telegram WebApp'
+          );
         }
 
         syncHomeCardsVisibility();
@@ -505,17 +589,23 @@
         if (_modulesReady) renderHomeModules();
       }
 
+      // --- Telegram профиль ---
+
       function getTelegramUser() {
         return window.Telegram?.WebApp?.initDataUnsafe?.user || null;
       }
 
       function getTelegramFullName(user) {
         if (!user) return '';
-        return [user.first_name || '', user.last_name || ''].filter(Boolean).join(' ').trim();
+        return [user.first_name || '', user.last_name || '']
+          .filter(Boolean)
+          .join(' ')
+          .trim();
       }
 
       function setHomeAvatar(user, fullName) {
-        const fallbackEl = document.getElementById('homeProfileAvatarFallback');
+        const fallbackEl =
+          document.getElementById('homeProfileAvatarFallback');
         const imgEl = document.getElementById('homeProfileAvatarImage');
         const letter = (fullName || 'U').charAt(0).toUpperCase();
 
@@ -546,10 +636,23 @@
 
         if (!user) {
           if (nameEl) nameEl.textContent = '';
-          if (usernameEl) usernameEl.textContent = getText('homeGuestUsername', 'username');
-          if (idEl) idEl.textContent = getText('homeGuestId', 'ID');
-          if (statusEl) statusEl.textContent = getText('homeGuestStatus', 'GUEST');
-          if (noteEl) noteEl.textContent = getText('homeDefaultNote', 'Telegram Mini App.');
+          if (usernameEl)
+            usernameEl.textContent = getText(
+              'homeGuestUsername',
+              'username'
+            );
+          if (idEl)
+            idEl.textContent = getText('homeGuestId', 'ID');
+          if (statusEl)
+            statusEl.textContent = getText(
+              'homeGuestStatus',
+              'GUEST'
+            );
+          if (noteEl)
+            noteEl.textContent = getText(
+              'homeDefaultNote',
+              'Telegram Mini App.'
+            );
           setHomeAvatar(null, 'U');
           return;
         }
@@ -559,11 +662,25 @@
         if (usernameEl) {
           usernameEl.textContent = user.username
             ? `@${user.username}`
-            : getText('homeUnknownUsername', 'username не указан');
+            : getText(
+                'homeUnknownUsername',
+                'username не указан'
+              );
         }
-        if (idEl) idEl.textContent = user.id ? `ID: ${user.id}` : getText('homeGuestId', 'ID');
-        if (statusEl) statusEl.textContent = getText('homeOnlineStatus', 'ONLINE');
-        if (noteEl) noteEl.textContent = getText('homeDefaultNote', 'Telegram Mini App.');
+        if (idEl)
+          idEl.textContent = user.id
+            ? `ID: ${user.id}`
+            : getText('homeGuestId', 'ID');
+        if (statusEl)
+          statusEl.textContent = getText(
+            'homeOnlineStatus',
+            'ONLINE'
+          );
+        if (noteEl)
+          noteEl.textContent = getText(
+            'homeDefaultNote',
+            'Telegram Mini App.'
+          );
         setHomeAvatar(user, fullName || 'U');
       }
 
@@ -574,6 +691,8 @@
         if (profile.fullName && nameEl) nameEl.textContent = profile.fullName;
         if (profile.email && noteEl) noteEl.textContent = profile.email;
       }
+
+      // --- PostMessage обработчики ---
 
       window.addEventListener('message', event => {
         const data = event.data;
@@ -589,17 +708,25 @@
             accessMap[mod.id] = {
               paid: !!mod.paid,
               frozen: !!mod.frozen,
-              daysLeft: typeof mod.daysLeft === 'number' ? mod.daysLeft : null
+              daysLeft:
+                typeof mod.daysLeft === 'number'
+                  ? mod.daysLeft
+                  : null
             };
           });
 
+          // Базовый модуль подключения агента всегда есть, daysLeft можем доопределять
           accessMap['ai-agent'] = {
             paid: true,
             frozen: false,
-            daysLeft: accessMap['ai-agent']?.daysLeft ?? 5
+            daysLeft:
+              accessMap['ai-agent']?.daysLeft ?? 5
           };
 
-          USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, accessMap);
+          USERMODULES = buildHomeModulesFromTenant(
+            TENANTMODULES,
+            accessMap
+          );
           _modulesReady = true;
           renderHomeModules();
         } else if (data.type === 'user-profile') {
@@ -607,32 +734,55 @@
         }
       });
 
+      // --- Инициализация ---
+
       document.addEventListener('DOMContentLoaded', async () => {
-        document.getElementById('allModulesLink')?.addEventListener('click', () =>
-          navigateFromHome('modules.html', 'modules'));
+        document
+          .getElementById('allModulesLink')
+          ?.addEventListener('click', () =>
+            navigateFromHome('modules.html', 'modules')
+          );
 
-        document.getElementById('paymentLink')?.addEventListener('click', () =>
-          navigateFromHome('payments.html', 'payments'));
+        document
+          .getElementById('paymentLink')
+          ?.addEventListener('click', () =>
+            navigateFromHome('payments.html', 'payments')
+          );
 
-        document.getElementById('openAffiliateButton')?.addEventListener('click', () =>
-          navigateFromHome('partner.html', 'affiliate'));
+        document
+          .getElementById('openAffiliateButton')
+          ?.addEventListener('click', () =>
+            navigateFromHome('partner.html', 'affiliate')
+          );
 
         TENANTCONFIG = getTenantConfig();
-
         fillTelegramProfile();
 
         TENANTMODULES = await waitForTenantModules();
 
         const defaultAccessMap = getDefaultUserModuleAccess();
-        USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, defaultAccessMap);
+        USERMODULES = buildHomeModulesFromTenant(
+          TENANTMODULES,
+          defaultAccessMap
+        );
         _modulesReady = true;
 
         applyTenantContent();
         renderHomeModules();
 
-        window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
-        window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
-        window.parent?.postMessage?.({ type: 'request-user-modules' }, '*');
+        // Запрашиваем фичи, профиль и модули пользователя у shell
+        window.parent?.postMessage?.(
+          { type: 'request-app-features' },
+          '*'
+        );
+        window.parent?.postMessage?.(
+          { type: 'request-user-profile' },
+          '*'
+        );
+        window.parent?.postMessage?.(
+          { type: 'request-user-modules' },
+          '*'
+        );
       });
     </script>
   </body>
