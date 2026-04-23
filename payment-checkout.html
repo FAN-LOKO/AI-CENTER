@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Оформление оплаты</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="page payment-checkout-page">
+      <section class="card-section">
+        <div class="card-section-header">
+          <h1 class="card-section-title" id="checkoutTitle">Оформление оплаты</h1>
+          <p class="card-section-subtitle" id="checkoutSubtitle">
+            Проверьте выбранный тариф и способ оплаты
+          </p>
+        </div>
+        <div class="card-section-body">
+          <p class="payments-lead" id="checkoutLead">
+            Сумма указана в долларах США. На стороне платёжного сервиса она может быть показана в валюте пользователя.
+          </p>
+        </div>
+      </section>
+
+      <section class="accordion-card open" id="checkoutSummarySection">
+        <button
+          class="accordion-header"
+          type="button"
+          id="checkoutSummaryButton"
+          aria-expanded="true"
+        >
+          <span class="accordion-header-title" id="checkoutSummaryTitle">
+            Выбранный тариф
+          </span>
+          <span class="accordion-header-icon">▴</span>
+        </button>
+
+        <div class="accordion-body">
+          <div class="payments-tariff-card payment-checkout-summary-card">
+            <div class="payments-tariff-top">
+              <div class="payments-tariff-heading-group">
+                <h3 class="payments-tariff-name" id="checkoutPlanName">Тариф</h3>
+                <p class="payments-tariff-desc" id="checkoutModuleName">Модуль</p>
+              </div>
+              <div class="payments-tariff-price-wrap">
+                <span class="payments-tariff-price" id="checkoutPrice">$0</span>
+              </div>
+            </div>
+
+            <div class="payments-plan-meta-grid">
+              <div class="payments-plan-meta-item">
+                <span class="payments-plan-meta-label" id="checkoutPeriodLabel">Период</span>
+                <strong class="payments-plan-meta-value" id="checkoutDuration">—</strong>
+              </div>
+              <div class="payments-plan-meta-item">
+                <span class="payments-plan-meta-label" id="checkoutSavingLabel">Экономия</span>
+                <strong class="payments-plan-meta-value payments-plan-meta-value-success" id="checkoutSaving">$0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="accordion-card open" id="checkoutMethodsSection">
+        <button
+          class="accordion-header"
+          type="button"
+          id="checkoutMethodsButton"
+          aria-expanded="true"
+        >
+          <span class="accordion-header-title" id="checkoutMethodsTitle">
+            Способ оплаты
+          </span>
+          <span class="accordion-header-icon">▴</span>
+        </button>
+
+        <div class="accordion-body">
+          <div class="payments-tariffs-grid" id="checkoutMethodsList"></div>
+
+          <div class="payments-module-intro payment-checkout-action-box">
+            <div class="payments-module-intro-main">
+              <div class="payments-module-intro-title" id="checkoutSelectedMethodTitle">
+                Способ оплаты не выбран
+              </div>
+              <p class="payments-module-intro-text" id="checkoutSelectedMethodText">
+                Выберите один из доступных способов оплаты, чтобы продолжить.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-primary btn-block payments-pay-button"
+              id="checkoutContinueButton"
+              disabled
+            >
+              Перейти к оплате
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        /* =========================================================
+         * PAGE STATE
+         * Что здесь:
+         * - tenant config
+         * - payment context
+         * - выбранный способ оплаты
+         * ========================================================= */
+        let TENANTCONFIG = null;
+        let PAYMENTCONTEXT = null;
+        let SELECTEDMETHOD = null;
+
+        /* =========================================================
+         * SHELL HELPERS
+         * Что здесь:
+         * - чтение tenant config
+         * - чтение payment context
+         * ========================================================= */
+        function getTenantConfig() {
+          try {
+            return window.parent?.AICAppShell?.getTenantConfig?.() || null;
+          } catch (error) {
+            console.error('[AI CENTER][Checkout] tenant config read failed', error);
+            return null;
+          }
+        }
+
+        function getPaymentContext() {
+          try {
+            return window.parent?.AICAppShell?.getCurrentPaymentContext?.() || null;
+          } catch (error) {
+            console.error('[AI CENTER][Checkout] payment context read failed', error);
+            return null;
+          }
+        }
+
+        function getTenantModules() {
+          try {
+            return window.parent?.AICAppShell?.getTenantModules?.() || [];
+          } catch (error) {
+            console.error('[AI CENTER][Checkout] tenant modules read failed', error);
+            return [];
+          }
+        }
+
+        function getText(key, fallback = '') {
+          return TENANTCONFIG?.texts?.[key] ?? fallback;
+        }
+
+        /* =========================================================
+         * FORMAT HELPERS
+         * Что здесь:
+         * - экранирование HTML
+         * - форматирование USD
+         * ========================================================= */
+        function escapeHtml(value) {
+          return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function formatUsd(value) {
+          const number = Number(value || 0);
+          if (Number.isNaN(number)) return '$0';
+          return '$' + number.toLocaleString('en-US');
+        }
+
+        /* =========================================================
+         * TENANT PAYMENT METHODS
+         * Что здесь:
+         * - получение payment methods из tenant config
+         * - фильтрация только включённых способов
+         * ========================================================= */
+        function getPaymentMethods() {
+          const methods = Array.isArray(TENANTCONFIG?.paymentMethods)
+            ? TENANTCONFIG.paymentMethods
+            : [];
+
+          return methods.filter(function (method) {
+            return method && method.enabled !== false;
+          });
+        }
+
+        function getModuleTitle(moduleId) {
+          const modules = getTenantModules();
+          const module = modules.find(function (item) {
+            return item && item.id === moduleId;
+          });
+
+          return (
+            module?.titleRu ||
+            module?.title ||
+            getText('checkoutModuleFallback', 'Модуль')
+          );
+        }
+
+        /* =========================================================
+         * SUMMARY RENDER
+         * Что здесь:
+         * - рендер выбранного тарифа
+         * - отображение цены, модуля, периода, экономии
+         * ========================================================= */
+        function renderSummary() {
+          const planNameEl = document.getElementById('checkoutPlanName');
+          const moduleNameEl = document.getElementById('checkoutModuleName');
+          const priceEl = document.getElementById('checkoutPrice');
+          const durationEl = document.getElementById('checkoutDuration');
+          const savingEl = document.getElementById('checkoutSaving');
+
+          if (!PAYMENTCONTEXT) {
+            if (planNameEl) {
+              planNameEl.textContent = getText('checkoutPlanMissingTitle', 'Тариф не выбран');
+            }
+
+            if (moduleNameEl) {
+              moduleNameEl.textContent = getText('checkoutPlanMissingText', 'Вернитесь на страницу оплаты и выберите тариф.');
+            }
+
+            if (priceEl) {
+              priceEl.textContent = '$0';
+            }
+
+            if (durationEl) {
+              durationEl.textContent = '—';
+            }
+
+            if (savingEl) {
+              savingEl.textContent = '$0';
+            }
+
+            return;
+          }
+
+          if (planNameEl) {
+            planNameEl.textContent = PAYMENTCONTEXT.name || getText('checkoutPlanFallbackName', 'Тариф');
+          }
+
+          if (moduleNameEl) {
+            moduleNameEl.textContent = getModuleTitle(PAYMENTCONTEXT.moduleId);
+          }
+
+          if (priceEl) {
+            priceEl.textContent = formatUsd(PAYMENTCONTEXT.priceUsd);
+          }
+
+          if (durationEl) {
+            durationEl.textContent = PAYMENTCONTEXT.durationDays
+              ? PAYMENTCONTEXT.durationDays + ' ' + getText('paymentsDurationSuffix', 'календарных дней')
+              : '—';
+          }
+
+          if (savingEl) {
+            savingEl.textContent = formatUsd(PAYMENTCONTEXT.savingUsd || 0);
+          }
+        }
+
+        /* =========================================================
+         * METHODS RENDER
+         * Что здесь:
+         * - карточки способов оплаты
+         * - пустое состояние при отсутствии методов
+         * ========================================================= */
+        function renderMethods() {
+          const listEl = document.getElementById('checkoutMethodsList');
+          if (!listEl) return;
+
+          const methods = getPaymentMethods();
+
+          if (!methods.length) {
+            listEl.innerHTML =
+              '<section class="card-section">' +
+                '<div class="card-section-body">' +
+                  '<p class="payments-muted-text">' +
+                    escapeHtml(getText('checkoutNoMethodsText', 'Для этого бренда пока не настроены способы оплаты.')) +
+                  '</p>' +
+                '</div>' +
+              '</section>';
+
+            return;
+          }
+
+          listEl.innerHTML = methods
+            .map(function (method) {
+              return (
+                '<article class="payments-tariff-card payment-method-card" data-method-id="' + escapeHtml(method.id) + '">' +
+                  '<div class="payments-tariff-top">' +
+                    '<div class="payments-tariff-heading-group">' +
+                      '<h3 class="payments-tariff-name">' + escapeHtml(method.title || method.id) + '</h3>' +
+                      '<p class="payments-tariff-desc">' +
+                        escapeHtml(
+                          method.description ||
+                          getText('checkoutMethodDescriptionFallback', 'Способ оплаты будет подключён после настройки платёжного сервиса.')
+                        ) +
+                      '</p>' +
+                    '</div>' +
+                  '</div>' +
+                '</article>'
+              );
+            })
+            .join('');
+
+          bindMethodCards();
+        }
+
+        /* =========================================================
+         * METHOD SELECTION
+         * Что здесь:
+         * - выбор карточки способа оплаты
+         * - обновление action box
+         * ========================================================= */
+        function updateSelectedMethodBox() {
+          const titleEl = document.getElementById('checkoutSelectedMethodTitle');
+          const textEl = document.getElementById('checkoutSelectedMethodText');
+          const buttonEl = document.getElementById('checkoutContinueButton');
+
+          if (!SELECTEDMETHOD) {
+            if (titleEl) {
+              titleEl.textContent = getText('checkoutMethodNotSelectedTitle', 'Способ оплаты не выбран');
+            }
+
+            if (textEl) {
+              textEl.textContent = getText(
+                'checkoutMethodNotSelectedText',
+                'Выберите один из доступных способов оплаты, чтобы продолжить.'
+              );
+            }
+
+            if (buttonEl) {
+              buttonEl.disabled = true;
+              buttonEl.style.opacity = '0.5';
+              buttonEl.style.cursor = 'not-allowed';
+            }
+
+            return;
+          }
+
+          if (titleEl) {
+            titleEl.textContent =
+              getText('checkoutMethodSelectedPrefix', 'Выбран способ оплаты:') +
+              ' ' +
+              (SELECTEDMETHOD.title || SELECTEDMETHOD.id);
+          }
+
+          if (textEl) {
+            textEl.textContent =
+              SELECTEDMETHOD.description ||
+              getText(
+                'checkoutMethodSelectedText',
+                'На следующем этапе сюда будет подключён реальный платёжный сервис.'
+              );
+          }
+
+          if (buttonEl) {
+            buttonEl.disabled = false;
+            buttonEl.style.opacity = '1';
+            buttonEl.style.cursor = 'pointer';
+          }
+        }
+
+        function bindMethodCards() {
+          const cards = document.querySelectorAll('.payment-method-card');
+
+          cards.forEach(function (card) {
+            card.addEventListener('click', function () {
+              const methodId = card.getAttribute('data-method-id');
+              const methods = getPaymentMethods();
+
+              SELECTEDMETHOD =
+                methods.find(function (method) {
+                  return method && method.id === methodId;
+                }) || null;
+
+              cards.forEach(function (item) {
+                item.classList.remove('payment-method-card-selected');
+              });
+
+              card.classList.add('payment-method-card-selected');
+              updateSelectedMethodBox();
+            });
+          });
+        }
+
+        /* =========================================================
+         * ACTION BUTTON
+         * Что здесь:
+         * - временная заглушка продолжения оплаты
+         * ========================================================= */
+        function bindContinueButton() {
+          const button = document.getElementById('checkoutContinueButton');
+          if (!button) return;
+
+          button.addEventListener('click', function () {
+            if (!SELECTEDMETHOD || !PAYMENTCONTEXT) return;
+
+            window.parent?.postMessage?.(
+              {
+                type: 'notify',
+                message:
+                  (getText('checkoutPendingMessage', 'Платёжный сервис будет подключён позже.') +
+                    ' ' +
+                    (SELECTEDMETHOD.title || SELECTEDMETHOD.id))
+              },
+              '*'
+            );
+          });
+        }
+
+        /* =========================================================
+         * CONTENT APPLY
+         * Что здесь:
+         * - применение tenant текстов страницы
+         * ========================================================= */
+        function applyTenantContent() {
+          TENANTCONFIG = getTenantConfig();
+          PAYMENTCONTEXT = getPaymentContext();
+
+          const texts = TENANTCONFIG?.texts || {};
+          const appName = TENANTCONFIG?.appName || 'AI CENTER';
+
+          document.title =
+            texts.checkoutPageTitle ||
+            ('Оформление оплаты — ' + appName);
+
+          const titleEl = document.getElementById('checkoutTitle');
+          const subtitleEl = document.getElementById('checkoutSubtitle');
+          const leadEl = document.getElementById('checkoutLead');
+          const summaryTitleEl = document.getElementById('checkoutSummaryTitle');
+          const methodsTitleEl = document.getElementById('checkoutMethodsTitle');
+          const periodLabelEl = document.getElementById('checkoutPeriodLabel');
+          const savingLabelEl = document.getElementById('checkoutSavingLabel');
+          const buttonEl = document.getElementById('checkoutContinueButton');
+
+          if (titleEl) {
+            titleEl.textContent = texts.checkoutHeaderTitle || 'Оформление оплаты';
+          }
+
+          if (subtitleEl) {
+            subtitleEl.textContent =
+              texts.checkoutHeaderSubtitle ||
+              'Проверьте выбранный тариф и способ оплаты';
+          }
+
+          if (leadEl) {
+            leadEl.textContent =
+              texts.checkoutHeaderLead ||
+              'Сумма указана в долларах США. На стороне платёжного сервиса она может быть показана в валюте пользователя.';
+          }
+
+          if (summaryTitleEl) {
+            summaryTitleEl.textContent =
+              texts.checkoutSummaryTitle || 'Выбранный тариф';
+          }
+
+          if (methodsTitleEl) {
+            methodsTitleEl.textContent =
+              texts.checkoutMethodsTitle || 'Способ оплаты';
+          }
+
+          if (periodLabelEl) {
+            periodLabelEl.textContent =
+              texts.checkoutPeriodLabel || 'Период';
+          }
+
+          if (savingLabelEl) {
+            savingLabelEl.textContent =
+              texts.checkoutSavingLabel || 'Экономия';
+          }
+
+          if (buttonEl) {
+            buttonEl.textContent =
+              texts.checkoutContinueButton || 'Перейти к оплате';
+          }
+
+          renderSummary();
+          renderMethods();
+          updateSelectedMethodBox();
+        }
+
+        /* =========================================================
+         * ACCORDIONS
+         * Что здесь:
+         * - переключение секций checkout
+         * ========================================================= */
+        function bindAccordion(buttonId, sectionId) {
+          const button = document.getElementById(buttonId);
+          const section = document.getElementById(sectionId);
+
+          if (!button || !section) return;
+
+          button.addEventListener('click', function () {
+            const isOpen = section.classList.contains('open');
+            section.classList.toggle('open', !isOpen);
+            button.setAttribute('aria-expanded', String(!isOpen));
+
+            const icon = button.querySelector('.accordion-header-icon');
+            if (icon) {
+              icon.textContent = isOpen ? '▾' : '▴';
+            }
+          });
+        }
+
+        /* =========================================================
+         * MESSAGE BUS
+         * Что здесь:
+         * - получение payment context из shell
+         * ========================================================= */
+        window.addEventListener('message', function (event) {
+          const data = event.data;
+          if (!data || typeof data !== 'object') return;
+
+          if (data.type === 'payment-context') {
+            PAYMENTCONTEXT = data.context || null;
+            renderSummary();
+            return;
+          }
+
+          if (data.type === 'tenant-config') {
+            TENANTCONFIG = data.config || null;
+            applyTenantContent();
+          }
+        });
+
+        /* =========================================================
+         * BOOTSTRAP
+         * Что здесь:
+         * - загрузка tenant config и payment context
+         * - привязка аккордеонов и кнопки
+         * ========================================================= */
+        document.addEventListener('DOMContentLoaded', function () {
+          bindAccordion('checkoutSummaryButton', 'checkoutSummarySection');
+          bindAccordion('checkoutMethodsButton', 'checkoutMethodsSection');
+          bindContinueButton();
+          applyTenantContent();
+
+          window.parent?.postMessage?.({ type: 'request-tenant-config' }, '*');
+          window.parent?.postMessage?.({ type: 'request-payment-context' }, '*');
+        });
+      })();
+    </script>
+  </body>
+</html>
