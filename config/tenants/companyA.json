@@ -1,0 +1,144 @@
+{
+  "tenantId": "companyA",
+  "appName": "Company A AI",
+  "brandName": "Company A",
+  "features": {
+    "home": true,
+    "myAgent": true,
+    "modules": true,
+    "sharedChat": true,
+    "affiliate": true,
+    "payments": true,
+    "settings": true
+  },
+  "policyLinks": {
+    "terms": "#"
+  },
+  "paymentMethods": [
+    {
+      "id": "usdt-trc20",
+      "enabled": true,
+      "title": "USDT TRC20",
+      "description": "Оплата в USDT по сети TRC20 будет доступна после подключения платёжного сервиса."
+    },
+    {
+      "id": "btc",
+      "enabled": true,
+      "title": "Bitcoin",
+      "description": "Оплата в Bitcoin будет доступна после подключения платёжного сервиса."
+    }
+  ],
+  "plans": [
+    {
+      "id": "ai-agent-30",
+      "moduleId": "ai-agent",
+      "name": "1 месяц",
+      "description": "30 календарных дней доступа к модулю",
+      "durationDays": 30,
+      "priceUsd": 35,
+      "buttonText": "Оплатить 1 месяц"
+    },
+    {
+      "id": "ai-agent-180",
+      "moduleId": "ai-agent",
+      "name": "6 месяцев",
+      "description": "180 календарных дней доступа к модулю",
+      "durationDays": 180,
+      "priceUsd": 175,
+      "compareAtUsd": 210,
+      "savingUsd": 35,
+      "badge": "Выгодно",
+      "buttonText": "Оплатить 6 месяцев"
+    },
+    {
+      "id": "ai-agent-360",
+      "moduleId": "ai-agent",
+      "name": "12 месяцев",
+      "description": "360 календарных дней доступа к модулю + 60 дней в подарок",
+      "durationDays": 360,
+      "giftDays": 60,
+      "priceUsd": 350,
+      "compareAtUsd": 420,
+      "savingUsd": 70,
+      "badge": "Лучшее предложение",
+      "buttonText": "Оплатить 12 месяцев"
+    }
+  ],
+  "texts": {
+    "navPayments": "Оплата",
+    "paymentsPageTitle": "Оплата — Company A AI",
+    "paymentsHeaderTitle": "Оплата",
+    "paymentsHeaderSubtitle": "Выберите тариф для подключения модуля",
+    "paymentsHeaderLead": "Стоимость на этой странице указана в долларах США. На странице оплаты сумма будет показана в валюте пользователя.",
+    "paymentsAgentHeaderTitle": "Модуль",
+    "paymentsModuleIntroTitle": "Выберите период доступа",
+    "paymentsModuleIntroText": "Подберите удобный тариф, подтвердите согласие с условиями оферты и перейдите к оплате.",
+    "paymentsMetaPeriodLabel": "Период",
+    "paymentsDurationSuffix": "календарных дней",
+    "paymentsGiftPrefix": "В подарок",
+    "paymentsGiftDaysSuffix": "дней",
+    "paymentsComparePrefix": "При ежемесячной оплате:",
+    "paymentsSavingPrefix": "Экономия",
+    "paymentsDefaultPlanDescription": "Доступ к модулю",
+    "paymentsPlanFallbackName": "Тариф",
+    "paymentsOfferTextBase": "Согласен с",
+    "paymentsOfferLinkText": "условиями оферты",
+    "paymentsActionPayPrefix": "Оплатить",
+    "paymentsDisabledText": "Раздел оплат сейчас недоступен.",
+    "paymentsEmptyText": "Тарифы пока не настроены для этого бренда.",
+
+    "checkoutPageTitle": "Оформление оплаты — Company A AI",
+    "checkoutHeaderTitle": "Оформление оплаты",
+    "checkoutHeaderSubtitle": "Проверьте выбранный тариф и способ оплаты",
+    "checkoutHeaderLead": "Сумма указана в долларах США. На стороне платёжного сервиса она может быть показана в валюте пользователя.",
+    "checkoutSummaryTitle": "Выбранный тариф",
+    "checkoutMethodsTitle": "Способ оплаты",
+    "checkoutPeriodLabel": "Период",
+    "checkoutSavingLabel": "Экономия",
+    "checkoutContinueButton": "Перейти к оплате",
+    "checkoutModuleFallback": "Модуль",
+    "checkoutPlanFallbackName": "Тариф",
+    "checkoutPlanMissingTitle": "Тариф не выбран",
+    "checkoutPlanMissingText": "Вернитесь на страницу оплаты и выберите тариф.",
+    "checkoutNoMethodsText": "Для Company A пока не настроены способы оплаты.",
+    "checkoutMethodDescriptionFallback": "Способ оплаты будет подключён после настройки платёжного сервиса.",
+    "checkoutMethodNotSelectedTitle": "Способ оплаты не выбран",
+    "checkoutMethodNotSelectedText": "Выберите один из доступных способов оплаты, чтобы продолжить.",
+    "checkoutMethodSelectedPrefix": "Выбран способ оплаты:",
+    "checkoutMethodSelectedText": "На следующем этапе сюда будет подключён реальный платёжный сервис.",
+    "checkoutPendingMessage": "Платёжный сервис будет подключён позже.",
+
+    "partnerPageTitle": "Партнёрка — Company A AI",
+    "partnerTitle": "Партнёрка",
+    "partnerHeaderTitle": "Партнёрка",
+    "partnerHeaderSubtitle": "Зарабатывайте вместе с Company A AI",
+    "partnerLead": "Делитесь реферальной ссылкой и получайте процент с оплат ваших партнёров.",
+    "partnerReferralTitle": "Ваша реферальная ссылка",
+    "partnerReferralText": "Скопируйте ссылку и отправьте её своим клиентам или партнёрам.",
+    "partnerCopyButton": "Копировать",
+    "partnerStatsTitle": "Статистика",
+    "partnerStatTotalLabel": "Всего человек",
+    "partnerStatLine1Label": "1 линия",
+    "partnerStatLine2Label": "2 линия",
+    "partnerStatLine3Label": "3 линия",
+    "partnerTreeTitle": "Древо партнёров",
+    "partnerTreeLineTitle": "1 линия",
+    "partnerTreeEmptyText": "Партнёры появятся после подключения.",
+    "partnerTermsTitle": "Условия партнёрки",
+    "partnerRulesTitle": "Правила партнёрки",
+    "partnerTermsList": [
+      "Реферальное вознаграждение — 10% с первой линии",
+      "5% со второй линии",
+      "3% с третьей линии",
+      "Выплаты начисляются автоматически при оплате партнёра",
+      "Без ограничения по количеству партнёров"
+    ],
+    "partnerRulesList": [
+      "Запрещено использование спама и вводящей в заблуждение рекламы",
+      "Выплаты начисляются только с реальных оплат",
+      "Реферал должен зарегистрироваться через вашу реферальную ссылку",
+      "Права на комиссию сохраняются при повторных оплатах партнёра",
+      "Нарушение правил ведёт к отключению от партнёрской программы"
+    ]
+  }
+}
