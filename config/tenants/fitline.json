@@ -1,35 +1,8 @@
 {
-  "_comment": "TENANT OVERLAY / FitLine-specific конфиг. Здесь живет только то, что относится именно к FitLine: бренд, домены, тема, тарифы, тексты, legal, support и точечные tenant overrides.",
-
   "tenantId": "fitline",
-  "brandKey": "fitline",
-  "brandLabel": "FIT",
-  "appName": "AI FIT CENTER",
-  "logoMode": "text",
-
-  "domains": {
-    "_comment": "Домены и алиасы tenant",
-    "primary": "fit.ai-center.app",
-    "aliases": [
-      "www.fit.ai-center.app",
-      "fitline.local",
-      "localhost"
-    ]
-  },
-
-  "theme": {
-    "_comment": "Brand theme FitLine",
-    "primary": "#3b82f6",
-    "primaryDark": "#0b3c78",
-    "primarySoft": "#7ec8ff",
-    "bgStart": "#cfe9ff",
-    "bgMid": "#7ec8ff",
-    "bgAccent": "#3b82f6",
-    "bgEnd": "#0b3c78"
-  },
-
+  "appName": "FitLine AI",
+  "brandName": "FitLine",
   "features": {
-    "_comment": "Tenant-specific feature flags. Здесь только то, что реально отличается от product base.",
     "home": true,
     "myAgent": true,
     "modules": true,
@@ -38,96 +11,134 @@
     "payments": true,
     "settings": true
   },
-
-  "navigation": {
-    "_comment": "Если нужно, tenant может переопределять отдельные элементы навигации",
-    "tabs": []
-  },
-
-  "support": {
-    "_comment": "Support-сущности и контакты бренда",
-    "email": "support@fit.ai-center.app",
-    "telegram": "@fitline_support",
-    "hours": "Пн–Пт, 10:00–19:00"
-  },
-
-  "legal": {
-    "_comment": "Юридические сущности tenant",
-    "companyName": "FitLine / AI FIT CENTER",
-    "offerRequired": true,
-    "privacyRequired": true,
-    "personalDataRequired": true
-  },
-
   "policyLinks": {
-    "_comment": "Юридические ссылки tenant",
-    "privacy": "https://fit.ai-center.app/privacy",
-    "personalData": "https://fit.ai-center.app/personal-data",
-    "terms": "https://fit.ai-center.app/terms"
+    "terms": "#"
   },
-
-  "affiliate": {
-    "_comment": "Tenant-specific правила партнерской программы",
-    "enabled": false,
-    "levels": [
-      {
-        "line": 1,
-        "percent": 10
-      },
-      {
-        "line": 2,
-        "percent": 5
-      },
-      {
-        "line": 3,
-        "percent": 3
-      }
-    ]
-  },
-
-  "plans": [
+  "paymentMethods": [
     {
-      "_comment": "Тарифы tenant. Это уже не product base, а конкретная коммерческая модель FitLine.",
-      "id": "agent_30",
-      "moduleId": "ai-agent",
-      "name": "1 месяц",
-      "durationDays": 30,
-      "priceUsd": 20,
-      "compareAtUsd": null,
-      "giftDays": 0,
-      "savingUsd": 0,
-      "badge": "",
-      "description": "30 календарных дней доступа к модулю «Агент».",
-      "buttonText": "Оплатить 1 месяц",
-      "highlight": false
+      "id": "card",
+      "enabled": true,
+      "title": "Банковская карта",
+      "description": "Оплата картой Visa / Mastercard будет доступна после подключения платёжного сервиса."
     },
     {
-      "id": "agent_180",
+      "id": "usdt-trc20",
+      "enabled": true,
+      "title": "USDT TRC20",
+      "description": "Оплата в USDT по сети TRC20 будет доступна после подключения платёжного сервиса."
+    }
+  ],
+  "plans": [
+    {
+      "id": "ai-agent-30",
+      "moduleId": "ai-agent",
+      "name": "1 месяц",
+      "description": "30 календарных дней доступа к модулю",
+      "durationDays": 30,
+      "priceUsd": 20,
+      "buttonText": "Оплатить 1 месяц"
+    },
+    {
+      "id": "ai-agent-180",
       "moduleId": "ai-agent",
       "name": "6 месяцев",
+      "description": "180 календарных дней доступа к модулю",
       "durationDays": 180,
       "priceUsd": 100,
       "compareAtUsd": 120,
-      "giftDays": 30,
       "savingUsd": 20,
       "badge": "Выгодно",
-      "description": "180 календарных дней доступа + 30 дней в подарок.",
-      "buttonText": "Оплатить 6 месяцев",
-      "highlight": true
+      "buttonText": "Оплатить 6 месяцев"
     },
     {
-      "id": "agent_360",
+      "id": "ai-agent-360",
       "moduleId": "ai-agent",
       "name": "12 месяцев",
+      "description": "360 календарных дней доступа к модулю + 60 дней в подарок",
       "durationDays": 360,
+      "giftDays": 60,
       "priceUsd": 200,
       "compareAtUsd": 240,
-      "giftDays": 60,
       "savingUsd": 40,
-      "badge": "Максимальная выгода",
-      "description": "360 календарных дней доступа + 60 дней в подарок.",
-      "buttonText": "Оплатить 12 месяцев",
-      "highlight": false
+      "badge": "Лучшее предложение",
+      "buttonText": "Оплатить 12 месяцев"
     }
-  ]
+  ],
+  "texts": {
+    "navPayments": "Оплата",
+    "paymentsPageTitle": "Оплата — FitLine AI",
+    "paymentsHeaderTitle": "Оплата",
+    "paymentsHeaderSubtitle": "Выберите тариф для подключения модуля",
+    "paymentsHeaderLead": "Стоимость на этой странице указана в долларах США. На странице оплаты сумма будет показана в валюте пользователя.",
+    "paymentsAgentHeaderTitle": "Модуль",
+    "paymentsModuleIntroTitle": "Выберите период доступа",
+    "paymentsModuleIntroText": "Подберите удобный тариф, подтвердите согласие с условиями оферты и перейдите к оплате.",
+    "paymentsMetaPeriodLabel": "Период",
+    "paymentsDurationSuffix": "календарных дней",
+    "paymentsGiftPrefix": "В подарок",
+    "paymentsGiftDaysSuffix": "дней",
+    "paymentsComparePrefix": "При ежемесячной оплате:",
+    "paymentsSavingPrefix": "Экономия",
+    "paymentsDefaultPlanDescription": "Доступ к модулю",
+    "paymentsPlanFallbackName": "Тариф",
+    "paymentsOfferTextBase": "Согласен с",
+    "paymentsOfferLinkText": "условиями оферты",
+    "paymentsActionPayPrefix": "Оплатить",
+    "paymentsDisabledText": "Раздел оплат сейчас недоступен.",
+    "paymentsEmptyText": "Тарифы пока не настроены для этого бренда.",
+
+    "checkoutPageTitle": "Оформление оплаты — FitLine AI",
+    "checkoutHeaderTitle": "Оформление оплаты",
+    "checkoutHeaderSubtitle": "Проверьте выбранный тариф и способ оплаты",
+    "checkoutHeaderLead": "Сумма указана в долларах США. На стороне платёжного сервиса она может быть показана в валюте пользователя.",
+    "checkoutSummaryTitle": "Выбранный тариф",
+    "checkoutMethodsTitle": "Способ оплаты",
+    "checkoutPeriodLabel": "Период",
+    "checkoutSavingLabel": "Экономия",
+    "checkoutContinueButton": "Перейти к оплате",
+    "checkoutModuleFallback": "Модуль",
+    "checkoutPlanFallbackName": "Тариф",
+    "checkoutPlanMissingTitle": "Тариф не выбран",
+    "checkoutPlanMissingText": "Вернитесь на страницу оплаты и выберите тариф.",
+    "checkoutNoMethodsText": "Для FitLine пока не настроены способы оплаты.",
+    "checkoutMethodDescriptionFallback": "Способ оплаты будет подключён после настройки платёжного сервиса.",
+    "checkoutMethodNotSelectedTitle": "Способ оплаты не выбран",
+    "checkoutMethodNotSelectedText": "Выберите один из доступных способов оплаты, чтобы продолжить.",
+    "checkoutMethodSelectedPrefix": "Выбран способ оплаты:",
+    "checkoutMethodSelectedText": "На следующем этапе сюда будет подключён реальный платёжный сервис.",
+    "checkoutPendingMessage": "Платёжный сервис будет подключён позже.",
+
+    "partnerPageTitle": "Партнёрка — FitLine AI",
+    "partnerTitle": "Партнёрка",
+    "partnerHeaderTitle": "Партнёрка",
+    "partnerHeaderSubtitle": "Зарабатывайте вместе с FitLine AI",
+    "partnerLead": "Делитесь реферальной ссылкой и получайте процент с оплат ваших партнёров.",
+    "partnerReferralTitle": "Ваша реферальная ссылка",
+    "partnerReferralText": "Скопируйте ссылку и отправьте её своим клиентам или партнёрам.",
+    "partnerCopyButton": "Копировать",
+    "partnerStatsTitle": "Статистика",
+    "partnerStatTotalLabel": "Всего человек",
+    "partnerStatLine1Label": "1 линия",
+    "partnerStatLine2Label": "2 линия",
+    "partnerStatLine3Label": "3 линия",
+    "partnerTreeTitle": "Древо партнёров",
+    "partnerTreeLineTitle": "1 линия",
+    "partnerTreeEmptyText": "Партнёры появятся после подключения.",
+    "partnerTermsTitle": "Условия партнёрки",
+    "partnerRulesTitle": "Правила партнёрки",
+    "partnerTermsList": [
+      "Реферальное вознаграждение — 10% с первой линии",
+      "5% со второй линии",
+      "3% с третьей линии",
+      "Выплаты начисляются автоматически при оплате партнёра",
+      "Без ограничения по количеству партнёров"
+    ],
+    "partnerRulesList": [
+      "Запрещено использование спама и вводящей в заблуждение рекламы",
+      "Выплаты начисляются только с реальных оплат",
+      "Реферал должен зарегистрироваться через вашу реферальную ссылку",
+      "Права на комиссию сохраняются при повторных оплатах партнёра",
+      "Нарушение правил ведёт к отключению от партнёрской программы"
+    ]
+  }
 }
