@@ -33,6 +33,7 @@
    * - agent stats / статистика агента
    * - selected agent dialog / выбранный диалог агента
    * - selected payment module id / текущий moduleId для payments
+   * - selected payment plan context / выбранный payment context
    * ========================================================= */
 
   let APPFEATURES = {
@@ -106,6 +107,7 @@
 
   let CURRENT_AGENT_DIALOG = null;
   let CURRENT_PAYMENT_MODULE_ID = null;
+  let CURRENT_PAYMENT_CONTEXT = null;
 
   /* =========================================================
    * TENANT HELPERS
@@ -288,6 +290,7 @@
    * PAYMENT CONTEXT HELPERS
    * What is here / Что здесь:
    * - keep current moduleId for payments / хранение текущего moduleId для payments
+   * - keep selected payment plan context / хранение выбранного payment plan
    * - send payment context to iframe / передача payment context в iframe
    * ========================================================= */
 
@@ -307,6 +310,28 @@
 
   function getCurrentPaymentModuleId() {
     return CURRENT_PAYMENT_MODULE_ID;
+  }
+
+  function setCurrentPaymentContext(context) {
+    CURRENT_PAYMENT_CONTEXT = context || null;
+
+    if (CURRENT_PAYMENT_CONTEXT && CURRENT_PAYMENT_CONTEXT.moduleId) {
+      CURRENT_PAYMENT_MODULE_ID = String(CURRENT_PAYMENT_CONTEXT.moduleId);
+    }
+
+    if (frame && frame.contentWindow) {
+      frame.contentWindow.postMessage(
+        {
+          type: "payment-context",
+          context: CURRENT_PAYMENT_CONTEXT
+        },
+        "*"
+      );
+    }
+  }
+
+  function getCurrentPaymentContext() {
+    return CURRENT_PAYMENT_CONTEXT;
   }
 
   /* =========================================================
@@ -374,7 +399,8 @@
    * - send tenant config to page / отправка tenant config в страницу
    * - send tenant modules to page / отправка tenant modules в страницу
    * - send user access modules to page / отправка user modules в страницу
-   * - send payment context to page / отправка payment context в страницу
+   * - send payment module context to page / отправка payment module context в страницу
+   * - send selected payment context to page / отправка выбранного payment context в страницу
    * - push full shell state to current iframe / единый пуш состояния shell в текущий iframe
    * ========================================================= */
 
@@ -450,6 +476,18 @@
     );
   }
 
+  function sendPaymentContextToFrame() {
+    if (!frame || !frame.contentWindow) return;
+
+    frame.contentWindow.postMessage(
+      {
+        type: "payment-context",
+        context: getCurrentPaymentContext()
+      },
+      "*"
+    );
+  }
+
   function pushShellStateToFrame() {
     sendFeaturesToFrame();
     sendTenantConfigToFrame();
@@ -457,6 +495,7 @@
     sendUserProfileToFrame();
     sendUserModulesToFrame();
     sendPaymentModuleContextToFrame();
+    sendPaymentContextToFrame();
   }
 
   /* =========================================================
@@ -500,8 +539,9 @@
   function navigate(page, tab) {
     let targetTab = tab || getTabByPage(page) || currentTab;
 
-    if (!isTabEnabled(targetTab)) {
+    if (tab && !isTabEnabled(targetTab)) {
       targetTab = getFallbackTab();
+      page = getPageByTab(targetTab);
     }
 
     const finalPage = page || getPageByTab(targetTab);
@@ -511,7 +551,7 @@
       frame.setAttribute("src", finalPage);
     }
 
-    currentTab = targetTab;
+    currentTab = targetTab || currentTab;
     updateActiveNav();
     Runtime.hapticSelection();
 
@@ -576,6 +616,7 @@
    * - user modules access / user modules
    * - agent stats / agent stats
    * - payment module context / payment module context
+   * - payment route / маршрут оплаты
    * ========================================================= */
 
   function bindMessageBus() {
@@ -588,7 +629,7 @@
       if (data.type === "navigate") {
         const targetTab = data.tab || getTabByPage(data.page) || currentTab;
 
-        if (!isTabEnabled(targetTab)) {
+        if (!isTabEnabled(targetTab) && data.tab) {
           const fallbackTab = getFallbackTab();
           navigate(getPageByTab(fallbackTab), fallbackTab);
           return;
@@ -599,6 +640,47 @@
         }
 
         navigate(data.page || getPageByTab(targetTab), targetTab);
+        return;
+      }
+
+      if (data.type === "payment") {
+        if (APPFEATURES.payments === false) return;
+
+        const plan = data.plan || null;
+        const moduleId =
+          data.moduleId ||
+          plan?.moduleId ||
+          getCurrentPaymentModuleId() ||
+          null;
+
+        setCurrentPaymentContext({
+          planId: plan?.id || data.tariff || null,
+          moduleId: moduleId,
+          name: plan?.name || null,
+          description: plan?.description || null,
+          durationDays:
+            typeof plan?.durationDays === "number" ? plan.durationDays : null,
+          priceUsd:
+            typeof plan?.priceUsd === "number"
+              ? plan.priceUsd
+              : Number(plan?.priceUsd || 0),
+          compareAtUsd:
+            typeof plan?.compareAtUsd === "number"
+              ? plan.compareAtUsd
+              : Number(plan?.compareAtUsd || 0),
+          savingUsd:
+            typeof plan?.savingUsd === "number"
+              ? plan.savingUsd
+              : Number(plan?.savingUsd || 0),
+          badge: plan?.badge || null
+        });
+
+        navigate("payment-checkout.html", null);
+        return;
+      }
+
+      if (data.type === "request-payment-context") {
+        sendPaymentContextToFrame();
         return;
       }
 
@@ -813,6 +895,9 @@
     setCurrentAgentDialog: (dialog) => setCurrentAgentDialog(dialog),
 
     getCurrentPaymentModuleId: () => getCurrentPaymentModuleId(),
-    setCurrentPaymentModuleId: (moduleId) => setCurrentPaymentModuleId(moduleId)
+    setCurrentPaymentModuleId: (moduleId) => setCurrentPaymentModuleId(moduleId),
+
+    getCurrentPaymentContext: () => getCurrentPaymentContext(),
+    setCurrentPaymentContext: (context) => setCurrentPaymentContext(context)
   };
 })();
