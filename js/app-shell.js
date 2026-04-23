@@ -113,6 +113,7 @@
    * - read tenant config from tenant loader / чтение tenant config из tenant loader
    * - read tenant modules catalog / чтение каталога модулей tenant
    * - normalize tenant modules / нормализация tenant-модулей
+   * - apply tenant feature flags / применение tenant feature flags
    * ========================================================= */
 
   function normalizeTenantModules(modules) {
@@ -175,6 +176,20 @@
       TENANTCONFIG = null;
       TENANTMODULES = [];
     }
+  }
+
+  function applyTenantFeatures() {
+    if (!TENANTCONFIG || !TENANTCONFIG.features) return;
+
+    APPFEATURES = {
+      ...APPFEATURES,
+      ...Object.keys(APPFEATURES).reduce((acc, key) => {
+        if (Object.prototype.hasOwnProperty.call(TENANTCONFIG.features, key)) {
+          acc[key] = !!TENANTCONFIG.features[key];
+        }
+        return acc;
+      }, {})
+    };
   }
 
   function getTenantConfig() {
@@ -693,6 +708,7 @@
    * - initialize runtime / инициализация runtime
    * - initialize tenant / инициализация tenant
    * - read tenant config and modules / чтение tenant config и модулей
+   * - apply tenant feature flags / применение tenant feature flags
    * - build page config / сборка page config
    * - start shell / старт shell
    * ========================================================= */
@@ -710,6 +726,7 @@
     }
 
     loadTenantStateFromProvider();
+    applyTenantFeatures();
     buildPageConfig();
     updateNavVisibility();
     bindNavButtons();
