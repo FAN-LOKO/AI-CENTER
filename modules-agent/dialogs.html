@@ -83,6 +83,9 @@
   <script>
 (function () {
   let TENANTCONFIG = null;
+  let CURRENT_DIALOG = null;
+  let LOCAL_DIALOGS = null;
+
   let APPFEATURES = {
     home: true,
     modules: true,
@@ -180,48 +183,74 @@
         shell?.getAgentStats?.() ||
         shell?.getDialogsData?.();
 
-      if (payload && typeof payload === 'object') return payload;
+      const shellSelectedDialog =
+        shell?.getCurrentAgentDialog?.() ||
+        shell?.getSelectedAgentDialog?.() ||
+        null;
+
+      const dialogs =
+        Array.isArray(LOCAL_DIALOGS)
+          ? LOCAL_DIALOGS
+          : Array.isArray(payload?.dialogs)
+          ? payload.dialogs
+          : [];
+
+      return {
+        ...(payload && typeof payload === 'object' ? payload : {}),
+        dialogs,
+        activeDialog: CURRENT_DIALOG || shellSelectedDialog || payload?.activeDialog || null,
+        selectedDialog: CURRENT_DIALOG || shellSelectedDialog || payload?.selectedDialog || null
+      };
     } catch (error) {
       console.error('[AI CENTER][Dialogs] dialogs payload read failed', error);
     }
 
     return {
-      dialogs: [],
+      dialogs: Array.isArray(LOCAL_DIALOGS) ? LOCAL_DIALOGS : [],
       stats: {},
-      activeDialog: null,
-      selectedDialog: null
+      activeDialog: CURRENT_DIALOG,
+      selectedDialog: CURRENT_DIALOG
     };
   }
 
   function getActiveDialog(payload) {
-    const shell = getShell();
+    const dialogs = Array.isArray(payload?.dialogs) ? payload.dialogs : [];
 
-    try {
-      const selected =
-        shell?.getSelectedAgentDialog?.() ||
-        payload?.selectedDialog ||
-        payload?.activeDialog;
+    const selected =
+      CURRENT_DIALOG ||
+      payload?.selectedDialog ||
+      payload?.activeDialog ||
+      null;
 
-      if (selected && typeof selected === 'object') {
-        const dialogs = Array.isArray(payload?.dialogs) ? payload.dialogs : [];
-        const selectedId = String(selected.id || selected.dialogId || '');
+    if (selected && typeof selected === 'object') {
+      const selectedId = String(selected.id || selected.dialogId || '');
 
-        if (selectedId) {
-          const matched = dialogs.find(
-            (dialog) => String(dialog?.id || dialog?.dialogId || '') === selectedId
-          );
-          if (matched) {
-            return { ...matched, ...selected };
-          }
+      if (selectedId) {
+        const matchedById = dialogs.find(
+          (dialog) => String(dialog?.id || dialog?.dialogId || '') === selectedId
+        );
+        if (matchedById) {
+          return { ...matchedById, ...selected };
         }
-
-        return selected;
       }
-    } catch (error) {
-      console.error('[AI CENTER][Dialogs] selected dialog read failed', error);
+
+      const selectedUsername = String(selected.username || '');
+      const selectedChannel = String(selected.channel || '');
+
+      if (selectedUsername && selectedChannel) {
+        const matchedByMeta = dialogs.find(
+          (dialog) =>
+            String(dialog?.username || '') === selectedUsername &&
+            String(dialog?.channel || '') === selectedChannel
+        );
+        if (matchedByMeta) {
+          return { ...matchedByMeta, ...selected };
+        }
+      }
+
+      return selected;
     }
 
-    const dialogs = Array.isArray(payload?.dialogs) ? payload.dialogs : [];
     return dialogs[0] || null;
   }
 
@@ -269,106 +298,103 @@
   }
 
   function normalizeMessage(message, dialog) {
-  const text =
-    message?.text ||
-    message?.message ||
-    '';
+    const text =
+      message?.text ||
+      message?.message ||
+      '';
 
-  const time =
-    message?.timeLabel ||
-    message?.time ||
-    dialog?.timeLabel ||
-    dialog?.time ||
-    '';
+    const time =
+      message?.timeLabel ||
+      message?.time ||
+      dialog?.timeLabel ||
+      dialog?.time ||
+      '';
 
-  const roleRaw = String(
-    message?.role ||
-    message?.authorRole ||
-    message?.author ||
-    message?.type ||
-    ''
-  ).toLowerCase();
+    const roleRaw = String(
+      message?.role ||
+      message?.authorRole ||
+      message?.author ||
+      message?.type ||
+      ''
+    ).toLowerCase();
 
-  // client / user / customer / lead → считаем клиентским
-  const isClient =
-    roleRaw.includes('client') ||
-    roleRaw.includes('user') ||
-    roleRaw.includes('customer') ||
-    roleRaw.includes('lead');
+    const isClient =
+      roleRaw.includes('client') ||
+      roleRaw.includes('user') ||
+      roleRaw.includes('customer') ||
+      roleRaw.includes('lead');
 
-  // agent / assistant / bot / manager → считаем агентским
-  const isAgent =
-    roleRaw.includes('agent') ||
-    roleRaw.includes('assistant') ||
-    roleRaw.includes('bot') ||
-    roleRaw.includes('manager');
+    const isAgent =
+      roleRaw.includes('agent') ||
+      roleRaw.includes('assistant') ||
+      roleRaw.includes('bot') ||
+      roleRaw.includes('manager');
 
-  const role = isClient ? 'client' : isAgent ? 'agent' : 'agent';
+    const role = isClient ? 'client' : isAgent ? 'agent' : 'agent';
 
-  return {
-    text,
-    time,
-    role,
-    author: message?.author || (role === 'client' ? 'Клиент' : 'Агент')
-  };
-}
-
-function renderMessages(dialog) {
-  const container = document.getElementById('messagesContainer');
-  if (!container) return;
-
-  if (!isDialogsAvailable()) {
-    container.innerHTML = `<div class="module-notice">${escapeHtml(
-      getText('dialogsDisabledText', 'Модуль диалогов сейчас недоступен.')
-    )}</div>`;
-    return;
+    return {
+      text,
+      time,
+      role,
+      author: message?.author || (role === 'client' ? 'Клиент' : 'Агент')
+    };
   }
 
-  if (!dialog) {
-    container.innerHTML = `<div class="module-notice">${escapeHtml(
-      getText('dialogsEmptyText', 'Диалогов пока нет.')
-    )}</div>`;
-    return;
-  }
+  function renderMessages(dialog) {
+    const container = document.getElementById('messagesContainer');
+    if (!container) return;
 
-  let messages = Array.isArray(dialog?.messages) ? dialog.messages : [];
+    if (!isDialogsAvailable()) {
+      container.innerHTML = `<div class="module-notice">${escapeHtml(
+        getText('dialogsDisabledText', 'Модуль диалогов сейчас недоступен.')
+      )}</div>`;
+      return;
+    }
 
-  // fallback: если нет массива messages, но есть lastMessage
-  if (!messages.length && (dialog?.lastMessage || dialog?.message)) {
-    messages = [
-      {
-        text: dialog?.lastMessage || dialog?.message || '',
-        timeLabel: dialog?.timeLabel || dialog?.time || '',
-        role: 'client',
-        author: 'Клиент'
-      }
-    ];
-  }
+    if (!dialog) {
+      container.innerHTML = `<div class="module-notice">${escapeHtml(
+        getText('dialogsEmptyText', 'Диалогов пока нет.')
+      )}</div>`;
+      return;
+    }
 
-  if (!messages.length) {
-    container.innerHTML = `<div class="module-notice">${escapeHtml(
-      getText('dialogsMessageFallback', 'История сообщений пока пуста.')
-    )}</div>`;
-    return;
-  }
+    let messages = Array.isArray(dialog?.messages) ? dialog.messages : [];
 
-  container.innerHTML = messages.map((rawMessage) => {
-    const message = normalizeMessage(rawMessage, dialog);
-    const isClient = message.role === 'client';
+    if (!messages.length && (dialog?.lastMessage || dialog?.message)) {
+      messages = [
+        {
+          text: dialog?.lastMessage || dialog?.message || '',
+          timeLabel: dialog?.timeLabel || dialog?.time || '',
+          role: 'client',
+          author: 'Клиент'
+        }
+      ];
+    }
 
-    return `
-      <div class="chat-message ${isClient ? 'chat-message-client' : 'chat-message-agent'}">
-        <div class="chat-message-meta">
-          <span class="chat-author">${escapeHtml(message.author)}</span>
-          <span class="chat-time">${escapeHtml(message.time)}</span>
+    if (!messages.length) {
+      container.innerHTML = `<div class="module-notice">${escapeHtml(
+        getText('dialogsMessageFallback', 'История сообщений пока пуста.')
+      )}</div>`;
+      return;
+    }
+
+    container.innerHTML = messages.map((rawMessage) => {
+      const message = normalizeMessage(rawMessage, dialog);
+      const isClient = message.role === 'client';
+
+      return `
+        <div class="chat-message ${isClient ? 'chat-message-client' : 'chat-message-agent'}">
+          <div class="chat-message-meta">
+            <span class="chat-author">${escapeHtml(message.author)}</span>
+            <span class="chat-time">${escapeHtml(message.time)}</span>
+          </div>
+          <div class="chat-bubble">
+            ${escapeHtml(message.text)}
+          </div>
         </div>
-        <div class="chat-bubble">
-          ${escapeHtml(message.text)}
-        </div>
-      </div>
-    `;
-  }).join('');
-}
+      `;
+    }).join('');
+  }
 
   function bindComposer(dialog) {
     const input = document.getElementById('clientMessageInput');
@@ -449,6 +475,8 @@ function renderMessages(dialog) {
     const payload = getDialogsPayload();
     const activeDialog = getActiveDialog(payload);
 
+    CURRENT_DIALOG = activeDialog || CURRENT_DIALOG;
+
     renderDialogHeader(activeDialog);
     renderMessages(activeDialog);
     bindComposer(activeDialog);
@@ -468,14 +496,31 @@ function renderMessages(dialog) {
 
       if (data.type === 'app-features') {
         applyAppFeatures(data.features || {});
+        return;
+      }
+
+      if (data.type === 'agent-current-dialog-set') {
+        CURRENT_DIALOG = data.dialog || null;
+        renderDialogsPage();
+        return;
+      }
+
+      if (data.type === 'agent-dialogs-update' && Array.isArray(data.dialogs)) {
+        LOCAL_DIALOGS = data.dialogs;
+        renderDialogsPage();
+        return;
+      }
+
+      if (data.type === 'agent-open-dialog') {
+        CURRENT_DIALOG = data.dialog || data.selectedDialog || data.activeDialog || null;
+        renderDialogsPage();
+        return;
       }
 
       if (
         data.type === 'agent-dialog-update' ||
         data.type === 'agent-stats-update' ||
-        data.type === 'agent-module-stats-update' ||
-        data.type === 'agent-dialogs-update' ||
-        data.type === 'agent-open-dialog'
+        data.type === 'agent-module-stats-update'
       ) {
         renderDialogsPage();
       }
@@ -493,6 +538,8 @@ function renderMessages(dialog) {
 
     window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
     window.parent?.postMessage?.({ type: 'request-agent-module-stats' }, '*');
+    window.parent?.postMessage?.({ type: 'agent-stats-request' }, '*');
+    window.parent?.postMessage?.({ type: 'request-current-agent-dialog' }, '*');
   });
 })();
 </script>
