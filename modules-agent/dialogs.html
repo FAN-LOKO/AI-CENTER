@@ -81,283 +81,348 @@
   </div>
 
   <script>
-  (function () {
-    let TENANTCONFIG = null;
-    let APPFEATURES = {
-      home: true,
-      modules: true,
-      sharedChat: true,
-      affiliate: true,
-      payments: true,
-      settings: true,
-      stats: true,
-      dialogs: true,
-      agentDialogs: true
+(function () {
+  let TENANTCONFIG = null;
+  let APPFEATURES = {
+    home: true,
+    modules: true,
+    sharedChat: true,
+    affiliate: true,
+    payments: true,
+    settings: true,
+    stats: true,
+    dialogs: true,
+    agentDialogs: true
+  };
+
+  function getShell() {
+    try {
+      return window.parent?.AICAppShell || null;
+    } catch (error) {
+      console.error('[AI CENTER][Dialogs] shell access failed', error);
+      return null;
+    }
+  }
+
+  function getTenantConfig() {
+    try {
+      return getShell()?.getTenantConfig?.() || null;
+    } catch (error) {
+      console.error('[AI CENTER][Dialogs] tenant config read failed', error);
+      return null;
+    }
+  }
+
+  function getAppFeatures() {
+    try {
+      return getShell()?.getAppFeatures?.() || {};
+    } catch (error) {
+      console.error('[AI CENTER][Dialogs] app features read failed', error);
+      return {};
+    }
+  }
+
+  function getText(key, fallback = '') {
+    return TENANTCONFIG?.texts?.[key] ?? fallback;
+  }
+
+  function navigateAgent(page) {
+    if (APPFEATURES.modules === false) {
+      console.warn('[AI CENTER][Dialogs] modules are disabled');
+      return;
+    }
+
+    try {
+      window.parent?.postMessage?.(
+        { type: 'navigate', page, tab: 'modules' },
+        '*'
+      );
+    } catch (error) {
+      console.error('[AI CENTER][Dialogs] navigate failed', error);
+    }
+  }
+
+  function isDialogsAvailable() {
+    if (APPFEATURES.modules === false) return false;
+    if (APPFEATURES.dialogs === false) return false;
+    if (APPFEATURES.agentDialogs === false) return false;
+    return true;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function setTextContent(id, value, fallback = '') {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value ?? fallback;
+  }
+
+  function applyTenantTexts() {
+    document.title =
+      getText('dialogsBrowserTitle', '') ||
+      getText('dialogsPageTitle', '') ||
+      'Диалоги';
+  }
+
+  function getDialogsPayload() {
+    try {
+      const shell = getShell();
+
+      const payload =
+        shell?.getAgentModuleStats?.() ||
+        shell?.getAgentStats?.() ||
+        shell?.getDialogsData?.();
+
+      if (payload && typeof payload === 'object') return payload;
+    } catch (error) {
+      console.error('[AI CENTER][Dialogs] dialogs payload read failed', error);
+    }
+
+    return {
+      dialogs: [],
+      stats: {},
+      activeDialog: null
     };
+  }
 
-    function getShell() {
-      try {
-        return window.parent?.AICAppShell || null;
-      } catch (error) {
-        console.error('[AI CENTER][Dialogs] shell access failed', error);
-        return null;
-      }
+  function getActiveDialog(payload) {
+    if (payload?.activeDialog && typeof payload.activeDialog === 'object') {
+      return payload.activeDialog;
     }
 
-    function getTenantConfig() {
-      try {
-        return getShell()?.getTenantConfig?.() || null;
-      } catch (error) {
-        console.error('[AI CENTER][Dialogs] tenant config read failed', error);
-        return null;
-      }
+    const dialogs = Array.isArray(payload?.dialogs) ? payload.dialogs : [];
+    return dialogs[0] || null;
+  }
+
+  function renderDialogHeader(dialog) {
+    const username =
+      dialog?.username ||
+      dialog?.clientName ||
+      getText('dialogsUsernameFallback', '@username');
+
+    const channel =
+      dialog?.channel ||
+      getText('dialogsChannelFallback', 'Telegram');
+
+    const dialogId =
+      dialog?.id ||
+      dialog?.dialogId ||
+      getText('dialogsEmptyValue', '—');
+
+    const lastTime =
+      dialog?.timeLabel ||
+      dialog?.time ||
+      getText('dialogsEmptyValue', '—');
+
+    setTextContent(
+      'dialogTitle',
+      getText('dialogsCurrentDialogTitle', 'Диалог с клиентом')
+    );
+
+    setTextContent(
+      'dialogSubtitle',
+      `${getText('dialogsClientLabel', 'Клиент')}: ${username} • ${getText('dialogsChannelLabel', 'Канал')}: ${channel}`
+    );
+
+    setTextContent('dialogIdLabel', dialogId);
+    setTextContent(
+      'dialogStatusLabel',
+      dialog?.status || getText('dialogsStatusActive', 'Активен')
+    );
+    setTextContent('dialogLastClientTimeLabel', lastTime);
+  }
+
+  function renderMessages(dialog) {
+    const container = document.getElementById('messagesContainer');
+    if (!container) return;
+
+    if (!isDialogsAvailable()) {
+      container.innerHTML = `<div class="module-notice">${escapeHtml(
+        getText('dialogsDisabledText', 'Модуль диалогов сейчас недоступен.')
+      )}</div>`;
+      return;
     }
 
-    function getAppFeatures() {
-      try {
-        return getShell()?.getAppFeatures?.() || {};
-      } catch (error) {
-        console.error('[AI CENTER][Dialogs] app features read failed', error);
-        return {};
-      }
+    const messages = Array.isArray(dialog?.messages) ? dialog.messages : [];
+
+    if (!dialog) {
+      container.innerHTML = `<div class="module-notice">${escapeHtml(
+        getText('dialogsEmptyText', 'Диалогов пока нет.')
+      )}</div>`;
+      return;
     }
 
-    function getText(key, fallback = '') {
-      return TENANTCONFIG?.texts?.[key] ?? fallback;
-    }
-
-    function isDialogsAvailable() {
-      if (APPFEATURES.modules === false) return false;
-      if (APPFEATURES.dialogs === false) return false;
-      if (APPFEATURES.agentDialogs === false) return false;
-      return true;
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function formatSequenceNumber(value) {
-      const n = Number(value);
-      if (!Number.isFinite(n) || n <= 0) {
-        return getText('dialogsSequenceFallback', '000');
-      }
-      return String(n).padStart(3, '0');
-    }
-
-    function setTextContent(id, value, fallback = '') {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.textContent = value ?? fallback;
-    }
-
-    function applyTenantTexts() {
-      setTextContent(
-        'dialogsPageTitle',
-        getText('dialogsPageTitle', 'Диалоги')
-      );
-
-      setTextContent(
-        'dialogsPageSubtitle',
-        getText('dialogsPageSubtitle', 'Список клиентских диалогов и быстрый переход в переписку.')
-      );
-
-      setTextContent(
-        'dialogsCounterLabel',
-        getText('dialogsCounterLabel', 'Всего диалогов')
-      );
-
-      setTextContent(
-        'dialogsTodayCounterLabel',
-        getText('dialogsTodayCounterLabel', 'Диалогов сегодня')
-      );
-
-      document.title =
-        getText('dialogsBrowserTitle', '') ||
-        getText('dialogsPageTitle', '') ||
-        'Диалоги';
-    }
-
-    function getDialogsPayload() {
-      try {
-        const shell = getShell();
-
-        const payload =
-          shell?.getAgentModuleStats?.() ||
-          shell?.getAgentStats?.() ||
-          shell?.getDialogsData?.();
-
-        if (payload && typeof payload === 'object') return payload;
-      } catch (error) {
-        console.error('[AI CENTER][Dialogs] dialogs payload read failed', error);
-      }
-
-      return {
-        dialogs: [],
-        stats: {}
-      };
-    }
-
-    function getDialogsList() {
-      const payload = getDialogsPayload();
-      return Array.isArray(payload?.dialogs) ? payload.dialogs : [];
-    }
-
-    function renderDialogsCounters(dialogs, payload) {
-      const total = Array.isArray(dialogs) ? dialogs.length : 0;
-      const todayCount = Number(
-        payload?.stats?.dialogsToday ??
-        payload?.dialogsToday ??
-        0
-      );
-
-      const totalEl = document.getElementById('dialogsCounter');
-      const todayEl = document.getElementById('dialogsTodayCounter');
-
-      if (totalEl) totalEl.textContent = String(total);
-      if (todayEl) todayEl.textContent = String(todayCount);
-    }
-
-    function openDialog(dialog) {
-      if (!isDialogsAvailable()) {
-        console.warn('[AI CENTER][Dialogs] dialogs module is disabled');
-        return;
-      }
-
-      const username =
-        dialog?.username ||
-        dialog?.clientName ||
-        getText('dialogsUsernameFallback', '@username');
-
-      const channel =
-        dialog?.channel ||
-        getText('dialogsChannelFallback', 'Telegram');
-
-      const timeLabel = dialog?.timeLabel || dialog?.time || '';
-      const lastMessage =
+    if (messages.length === 0) {
+      const fallbackMessage =
         dialog?.lastMessage ||
         dialog?.message ||
-        getText('dialogsMessageFallback', 'Сообщений пока нет');
+        getText('dialogsMessageFallback', 'История сообщений пока пуста.');
+
+      container.innerHTML = `
+        <div class="module-notice">${escapeHtml(fallbackMessage)}</div>
+      `;
+      return;
+    }
+
+    container.innerHTML = messages.map((message) => {
+      const author =
+        message?.author ||
+        message?.role ||
+        getText('dialogsAuthorFallback', 'Система');
+
+      const text =
+        message?.text ||
+        message?.message ||
+        '';
+
+      const time =
+        message?.timeLabel ||
+        message?.time ||
+        '';
+
+      return `
+        <div class="dialog-message-item">
+          <div class="dialog-message-meta">
+            <span class="dialog-message-author">${escapeHtml(author)}</span>
+            <span class="dialog-message-time">${escapeHtml(time)}</span>
+          </div>
+          <div class="dialog-message-text">${escapeHtml(text)}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function bindComposer(dialog) {
+    const input = document.getElementById('clientMessageInput');
+    const sendButton = document.getElementById('clientSendMessageButton');
+    const voiceButton = document.getElementById('clientVoiceButton');
+    const status = document.getElementById('clientSendMessageStatus');
+
+    if (!input || !sendButton || !voiceButton || !status) return;
+
+    const disabled = !isDialogsAvailable() || !dialog;
+    input.disabled = disabled;
+    sendButton.disabled = disabled;
+    voiceButton.disabled = disabled;
+
+    if (disabled) {
+      status.textContent = getText(
+        'dialogsComposerDisabledText',
+        'Отправка сообщений сейчас недоступна.'
+      );
+      return;
+    }
+
+    status.textContent = '';
+
+    sendButton.onclick = () => {
+      const text = String(input.value || '').trim();
+      if (!text) {
+        status.textContent = getText(
+          'dialogsComposerEmptyText',
+          'Введите сообщение перед отправкой.'
+        );
+        return;
+      }
 
       try {
         window.parent?.postMessage?.(
           {
-            type: 'agent-open-dialog',
+            type: 'agent-send-message',
             dialogId: dialog?.id || dialog?.dialogId || '',
-            username,
-            channel,
-            timeLabel,
-            lastMessage,
-            source: 'dialogs'
+            text
           },
           '*'
         );
+        input.value = '';
+        status.textContent = getText(
+          'dialogsComposerSentText',
+          'Сообщение отправлено.'
+        );
       } catch (error) {
-        console.error('[AI CENTER][Dialogs] open dialog failed', error);
+        console.error('[AI CENTER][Dialogs] send message failed', error);
+        status.textContent = getText(
+          'dialogsComposerErrorText',
+          'Не удалось отправить сообщение.'
+        );
       }
-    }
+    };
 
-    function renderDialogsList(dialogs) {
-      const container = document.getElementById('dialogsList');
-      if (!container) return;
-
-      if (!isDialogsAvailable()) {
-        container.innerHTML = `<div class="module-notice">${escapeHtml(
-          getText('dialogsDisabledText', 'Модуль диалогов сейчас недоступен.')
-        )}</div>`;
-        return;
-      }
-
-      if (!Array.isArray(dialogs) || dialogs.length === 0) {
-        container.innerHTML = `<div class="module-notice">${escapeHtml(
-          getText('dialogsEmptyText', 'Диалогов пока нет.')
-        )}</div>`;
-        return;
-      }
-
-      container.innerHTML = '';
-
-      dialogs.forEach((dialog, index) => {
-        const item = document.createElement('div');
-        item.className = 'dialog-item';
-
-        const username =
-          dialog?.username ||
-          dialog?.clientName ||
-          getText('dialogsUsernameFallback', '@username');
-
-        const timeLabel = dialog?.timeLabel || dialog?.time || '';
-        const lastMessage =
-          dialog?.lastMessage ||
-          dialog?.message ||
-          getText('dialogsMessageFallback', 'Сообщений пока нет');
-
-        const displayNumber = formatSequenceNumber(index + 1);
-
-        item.innerHTML = `
-          <div class="dialog-item-row">
-            <span class="dialog-user">${displayNumber} • ${escapeHtml(username)}</span>
-            <span class="dialog-time">${escapeHtml(timeLabel)}</span>
-          </div>
-          <div class="dialog-last-msg">${escapeHtml(lastMessage)}</div>
-        `;
-
-        item.addEventListener('click', () => openDialog(dialog));
-        container.appendChild(item);
-      });
-    }
-
-    function renderDialogsPage() {
-      const payload = getDialogsPayload();
-      const dialogs = Array.isArray(payload?.dialogs) ? payload.dialogs : [];
-
-      renderDialogsCounters(dialogs, payload);
-      renderDialogsList(dialogs);
-    }
-
-    function applyAppFeatures(features) {
-      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
-      renderDialogsPage();
-    }
-
-    window.addEventListener('message', (event) => {
+    voiceButton.onclick = () => {
       try {
-        const data = event?.data;
-        if (!data || typeof data !== 'object') return;
-
-        if (data.type === 'app-features') {
-          applyAppFeatures(data.features || {});
-        }
-
-        if (
-          data.type === 'agent-dialog-update' ||
-          data.type === 'agent-stats-update' ||
-          data.type === 'agent-module-stats-update' ||
-          data.type === 'agent-dialogs-update'
-        ) {
-          renderDialogsPage();
-        }
+        window.parent?.postMessage?.(
+          {
+            type: 'agent-record-voice',
+            dialogId: dialog?.id || dialog?.dialogId || ''
+          },
+          '*'
+        );
+        status.textContent = getText(
+          'dialogsVoicePendingText',
+          'Функция голосового сообщения будет доступна позже.'
+        );
       } catch (error) {
-        console.error('[AI CENTER][Dialogs] message handling failed', error);
+        console.error('[AI CENTER][Dialogs] voice message failed', error);
       }
-    });
+    };
+  }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      TENANTCONFIG = getTenantConfig();
-      APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
+  function renderDialogsPage() {
+    const payload = getDialogsPayload();
+    const activeDialog = getActiveDialog(payload);
 
-      applyTenantTexts();
-      renderDialogsPage();
+    renderDialogHeader(activeDialog);
+    renderMessages(activeDialog);
+    bindComposer(activeDialog);
+  }
 
-      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
-      window.parent?.postMessage?.({ type: 'request-agent-module-stats' }, '*');
-    });
-  })();
+  function applyAppFeatures(features) {
+    APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+    renderDialogsPage();
+  }
+
+  window.navigateAgent = navigateAgent;
+
+  window.addEventListener('message', (event) => {
+    try {
+      const data = event?.data;
+      if (!data || typeof data !== 'object') return;
+
+      if (data.type === 'app-features') {
+        applyAppFeatures(data.features || {});
+      }
+
+      if (
+        data.type === 'agent-dialog-update' ||
+        data.type === 'agent-stats-update' ||
+        data.type === 'agent-module-stats-update' ||
+        data.type === 'agent-dialogs-update'
+      ) {
+        renderDialogsPage();
+      }
+    } catch (error) {
+      console.error('[AI CENTER][Dialogs] message handling failed', error);
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    TENANTCONFIG = getTenantConfig();
+    APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
+
+    applyTenantTexts();
+    renderDialogsPage();
+
+    window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+    window.parent?.postMessage?.({ type: 'request-agent-module-stats' }, '*');
+  });
+})();
 </script>
 </body>
 </html>
