@@ -5,7 +5,16 @@
     "_comment": "Идентификация общего продукта",
     "productId": "ai-center",
     "productName": "AI CENTER",
-    "configVersion": 1
+    "configVersion": 2
+  },
+
+  "branding": {
+    "_comment": "Общие правила нейминга и отображения бренда shell для всех tenants.",
+    "shellNameMode": "pattern",
+    "shellNamePattern": "AI {brand} CENTER",
+    "shellNameFallback": "AI CENTER",
+    "showShellNameInHeader": true,
+    "showShellNameInHomeProfile": true
   },
 
   "features": {
