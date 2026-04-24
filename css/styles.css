@@ -1575,7 +1575,7 @@ a {
 }
 
 /* =========================================================
-   MODULES CATALOG CARDS
+   17. MODULES CATALOG CARDS
    Для modules.html:
    - в синем header название в одну строку
    - в белой части сверху: короткое описание слева, badge справа
@@ -1642,16 +1642,17 @@ a {
 }
 
 .module-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 10px;
+  row-gap: 8px;
   margin-bottom: 14px;
+  width: 100%;
 }
 
 .module-card-short-description {
   margin: 0;
-  flex: 1 1 auto;
   min-width: 0;
   font-size: 14px;
   line-height: 1.55;
@@ -1660,10 +1661,13 @@ a {
 }
 
 .module-card-top .module-card-badge {
-  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  justify-self: end;
+  align-self: start;
+  width: max-content;
+  max-width: 100%;
   min-height: 24px;
   padding: 4px 9px;
   border-radius: 999px;
@@ -1777,12 +1781,12 @@ a {
   }
 
   .module-card-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    grid-template-columns: 1fr;
+    row-gap: 8px;
   }
 
   .module-card-top .module-card-badge {
+    justify-self: start;
     min-height: 22px;
     padding: 4px 8px;
     font-size: 10px;
