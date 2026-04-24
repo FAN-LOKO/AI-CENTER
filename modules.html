@@ -445,84 +445,81 @@
      * ========================================================= */
 
     function createModuleCard(module) {
-      const section = document.createElement('section');
-      section.className = 'card-section accordion-card module-accordion-card';
+  const section = document.createElement('section');
+  section.className = 'card-section accordion-card module-accordion-card';
 
-      const badge = getModuleTypeBadge(module);
-      const isDisabledButton = isModuleButtonDisabled(module);
-      const buttonDisabledAttr = isDisabledButton ? 'disabled aria-disabled="true"' : '';
-      const buttonExtraClass = isDisabledButton ? ' btn-disabled' : '';
+  const badge = getModuleTypeBadge(module);
+  const isDisabledButton = isModuleButtonDisabled(module);
+  const buttonDisabledAttr = isDisabledButton ? 'disabled aria-disabled="true"' : '';
+  const buttonExtraClass = isDisabledButton ? ' btn-disabled' : '';
 
-      createModuleCard(module) замени только блок section.innerHTML на этот:
-
-xml
-section.innerHTML = `
-  <button class="card-section-header accordion-header module-card-toggle" type="button" aria-expanded="false">
-    <span class="module-card-header-text">
-      <span class="module-card-title">
-        ${module.title}
-        <span class="module-card-title-ru">/ ${module.titleRu}</span>
+  section.innerHTML = `
+    <button class="card-section-header accordion-header module-card-toggle" type="button" aria-expanded="false">
+      <span class="module-card-header-text">
+        <span class="module-card-title">
+          ${module.title}
+          <span class="module-card-title-ru">/ ${module.titleRu}</span>
+        </span>
       </span>
-    </span>
-    <span class="accordion-header-icon" aria-hidden="true"></span>
-  </button>
-
-  <div class="card-section-body module-card-main">
-    <div class="module-card-top-row">
-      <p class="module-card-short-description">${module.shortDescription}</p>
-      <span class="module-card-badge ${badge.cls}">${badge.text}</span>
-    </div>
-
-    <button
-      class="btn btn-block${buttonExtraClass}"
-      type="button"
-      data-module-id="${module.id}"
-      data-module-page="${module.page}"
-      ${buttonDisabledAttr}
-    >
-      ${getModuleOpenButtonText(module)}
+      <span class="accordion-header-icon" aria-hidden="true"></span>
     </button>
-  </div>
 
-  <div class="card-section-body accordion-body module-card-expanded">
-    <div class="module-card-expanded-title">
-      ${getText('modulesDetailsTitle', 'Подробнее о модуле')}
+    <div class="card-section-body module-card-main">
+      <div class="module-card-top-row">
+        <p class="module-card-short-description">${module.shortDescription}</p>
+        <span class="module-card-badge ${badge.cls}">${badge.text}</span>
+      </div>
+
+      <button
+        class="btn btn-block${buttonExtraClass}"
+        type="button"
+        data-module-id="${module.id}"
+        data-module-page="${module.page}"
+        ${buttonDisabledAttr}
+      >
+        ${getModuleOpenButtonText(module)}
+      </button>
     </div>
-    <ul class="module-card-description-list">
-      ${module.fullDescription.map(item => `<li>${item}</li>`).join('')}
-    </ul>
-  </div>
-`;
 
-      const toggleBtn = section.querySelector('.module-card-toggle');
-      const expandedBody = section.querySelector('.module-card-expanded');
-      const openBtn = section.querySelector('.btn');
+    <div class="card-section-body accordion-body module-card-expanded">
+      <div class="module-card-expanded-title">
+        ${getText('modulesDetailsTitle', 'Подробнее о модуле')}
+      </div>
+      <ul class="module-card-description-list">
+        ${module.fullDescription.map(item => `<li>${item}</li>`).join('')}
+      </ul>
+    </div>
+  `;
 
-      toggleBtn.addEventListener('click', () => {
-        const isOpen = section.classList.contains('open');
-        closeAllModuleCards();
+  const toggleBtn = section.querySelector('.module-card-toggle');
+  const expandedBody = section.querySelector('.module-card-expanded');
+  const openBtn = section.querySelector('.btn');
 
-        if (!isOpen) {
-          section.classList.add('open');
-          expandedBody.classList.add('open');
-          toggleBtn.setAttribute('aria-expanded', 'true');
-        }
-      });
+  toggleBtn.addEventListener('click', () => {
+    const isOpen = section.classList.contains('open');
+    closeAllModuleCards();
 
-      if (!isDisabledButton) {
-        openBtn.addEventListener('click', e => {
-          e.stopPropagation();
-          openModule(module);
-        });
-      } else {
-        openBtn.addEventListener('click', e => {
-          e.preventDefault();
-          e.stopPropagation();
-        });
-      }
-
-      return section;
+    if (!isOpen) {
+      section.classList.add('open');
+      expandedBody.classList.add('open');
+      toggleBtn.setAttribute('aria-expanded', 'true');
     }
+  });
+
+  if (!isDisabledButton) {
+    openBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      openModule(module);
+    });
+  } else {
+    openBtn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  }
+
+  return section;
+}
 
     /* =========================================================
      * PAGE RENDERING
