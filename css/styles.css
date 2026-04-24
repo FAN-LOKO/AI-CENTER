@@ -1645,6 +1645,9 @@ a {
 }
 
 .module-card-main {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   padding-top: 0;
 }
 
@@ -1652,11 +1655,11 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  align-self: flex-start;
+  align-self: flex-end;
   width: fit-content;
   max-width: 100%;
   min-height: 26px;
-  margin: 0 0 12px;
+  margin: 4px 0 12px;
   padding: 5px 10px;
   border-radius: 999px;
   font-size: 12px;
