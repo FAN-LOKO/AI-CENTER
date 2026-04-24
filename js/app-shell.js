@@ -777,7 +777,7 @@
         return;
       }
 
-            if (data.type === "agent-open-dialog") {
+                  if (data.type === "agent-open-dialog") {
         const stats = getAgentStats();
         const dialogs = Array.isArray(stats?.dialogs) ? stats.dialogs : [];
 
@@ -803,7 +803,11 @@
           };
 
         setCurrentAgentDialog(selectedDialog);
-        navigate("dialogs.html", "dialogs");
+
+        const dialogsPage = "dialogs.html";
+        const dialogsTab = getTabByPage(dialogsPage) || currentTab || getFallbackTab();
+
+        navigate(dialogsPage, dialogsTab);
 
         requestAnimationFrame(() => {
           if (frame && frame.contentWindow) {
