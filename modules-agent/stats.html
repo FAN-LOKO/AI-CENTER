@@ -95,421 +95,438 @@
   </div>
 
   <script>
-  (function () {
-    let TENANTCONFIG = null;
-    let APPFEATURES = {
-      home: true,
-      modules: true,
-      sharedChat: true,
-      affiliate: true,
-      payments: true,
-      settings: true,
-      stats: true,
-      dialogs: true,
-      agentDialogs: true
+(function () {
+  let TENANTCONFIG = null;
+  let APPFEATURES = {
+    home: true,
+    modules: true,
+    sharedChat: true,
+    affiliate: true,
+    payments: true,
+    settings: true,
+    stats: true,
+    dialogs: true,
+    agentDialogs: true
+  };
+
+  function getShell() {
+    try {
+      return window.parent?.AICAppShell || null;
+    } catch (error) {
+      console.error('[AI CENTER][Agent Stats] shell access failed', error);
+      return null;
+    }
+  }
+
+  function getTenantConfig() {
+    try {
+      return getShell()?.getTenantConfig?.() || null;
+    } catch (error) {
+      console.error('[AI CENTER][Agent Stats] tenant config read failed', error);
+      return null;
+    }
+  }
+
+  function getAppFeatures() {
+    try {
+      return getShell()?.getAppFeatures?.() || {};
+    } catch (error) {
+      console.error('[AI CENTER][Agent Stats] app features read failed', error);
+      return {};
+    }
+  }
+
+  function getText(key, fallback = '') {
+    return TENANTCONFIG?.texts?.[key] ?? fallback;
+  }
+
+  function navigateAgent(page) {
+    if (APPFEATURES.modules === false) {
+      console.warn('[AI CENTER][Agent Stats] modules are disabled');
+      return;
+    }
+
+    try {
+      window.parent?.postMessage?.(
+        { type: 'navigate', page, tab: 'modules' },
+        '*'
+      );
+    } catch (error) {
+      console.error('[AI CENTER][Agent Stats] navigate failed', error);
+    }
+  }
+
+  function isAgentStatsAvailable() {
+    if (APPFEATURES.modules === false) return false;
+    if (APPFEATURES.stats === false) return false;
+    if (APPFEATURES.agentDialogs === false) return false;
+    return true;
+  }
+
+  function toggleAccordion(button) {
+    const card = button.closest('.accordion-card');
+    const body = card?.querySelector('.accordion-body');
+    const icon = button.querySelector('.accordion-header-icon');
+
+    if (!card || !body || !icon) return;
+
+    const isOpen = card.classList.contains('open');
+
+    if (isOpen) {
+      card.classList.remove('open');
+      body.style.display = 'none';
+      icon.textContent = getText('agentStatsAccordionClosedIcon', '▼');
+    } else {
+      card.classList.add('open');
+      body.style.display = 'block';
+      icon.textContent = getText('agentStatsAccordionOpenIcon', '▲');
+    }
+  }
+
+  function formatSequenceNumber(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n <= 0) {
+      return getText('agentStatsSequenceFallback', '000');
+    }
+    return String(n).padStart(3, '0');
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function getAgentStats() {
+    try {
+      const shell = getShell();
+
+      const stats =
+        shell?.getAgentModuleStats?.() ||
+        shell?.getAgentStats?.();
+
+      if (stats && typeof stats === 'object') return stats;
+    } catch (error) {
+      console.error('[AI CENTER][Agent Stats] read failed', error);
+    }
+
+    return {
+      dialogs: [],
+      issuedLinks: [],
+      stats: {}
     };
+  }
 
-    function getShell() {
-      try {
-        return window.parent?.AICAppShell || null;
-      } catch (error) {
-        console.error('[AI CENTER][Agent Stats] shell access failed', error);
-        return null;
-      }
-    }
+  function setTextContent(id, value, fallback = '') {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value ?? fallback;
+  }
 
-    function getTenantConfig() {
-      try {
-        return getShell()?.getTenantConfig?.() || null;
-      } catch (error) {
-        console.error('[AI CENTER][Agent Stats] tenant config read failed', error);
-        return null;
-      }
-    }
+  function applyTenantTexts() {
+    setTextContent(
+      'agentStatsPageTitle',
+      getText('agentStatsPageTitle', 'Статистика агента')
+    );
+    setTextContent(
+      'agentStatsPageSubtitle',
+      getText('agentStatsPageSubtitle', 'Сводка по диалогам и выданным ссылкам.')
+    );
 
-    function getAppFeatures() {
-      try {
-        return getShell()?.getAppFeatures?.() || {};
-      } catch (error) {
-        console.error('[AI CENTER][Agent Stats] app features read failed', error);
-        return {};
-      }
-    }
+    setTextContent(
+      'statDialogsTotalLabel',
+      getText('agentStatsDialogsTotalLabel', 'Всего диалогов')
+    );
+    setTextContent(
+      'statRefLinksTotalLabel',
+      getText('agentStatsRefLinksTotalLabel', 'Всего ссылок')
+    );
+    setTextContent(
+      'statDialogsTodayLabel',
+      getText('agentStatsDialogsTodayLabel', 'Диалогов сегодня')
+    );
+    setTextContent(
+      'statRefLinksTodayLabel',
+      getText('agentStatsRefLinksTodayLabel', 'Ссылок сегодня')
+    );
 
-    function getText(key, fallback = '') {
-      return TENANTCONFIG?.texts?.[key] ?? fallback;
-    }
+    setTextContent(
+      'dialogsAccordionTitle',
+      getText('agentStatsDialogsSectionTitle', 'Диалоги')
+    );
+    setTextContent(
+      'issuedLinksAccordionTitle',
+      getText('agentStatsIssuedLinksSectionTitle', 'Выданные ссылки')
+    );
 
-    function isAgentStatsAvailable() {
-      if (APPFEATURES.modules === false) return false;
-      if (APPFEATURES.stats === false) return false;
-      if (APPFEATURES.agentDialogs === false) return false;
-      return true;
-    }
+    document.title =
+      getText('agentStatsBrowserTitle', '') ||
+      getText('agentStatsPageTitle', '') ||
+      'Статистика агента';
+  }
 
-    function toggleAccordion(button) {
-      const card = button.closest('.accordion-card');
-      const body = card?.querySelector('.accordion-body');
-      const icon = button.querySelector('.accordion-header-icon');
+  function renderStatsSummary(statsData) {
+    const dialogs = Array.isArray(statsData?.dialogs) ? statsData.dialogs : [];
+    const issuedLinks = Array.isArray(statsData?.issuedLinks) ? statsData.issuedLinks : [];
 
-      if (!card || !body || !icon) return;
+    const statDialogsTotal = document.getElementById('statDialogsTotal');
+    const statRefLinksTotal = document.getElementById('statRefLinksTotal');
+    const statDialogsToday = document.getElementById('statDialogsToday');
+    const statRefLinksToday = document.getElementById('statRefLinksToday');
 
-      const isOpen = card.classList.contains('open');
+    if (statDialogsTotal) statDialogsTotal.textContent = String(dialogs.length);
+    if (statRefLinksTotal) statRefLinksTotal.textContent = String(issuedLinks.length);
 
-      if (isOpen) {
-        card.classList.remove('open');
-        body.style.display = 'none';
-        icon.textContent = getText('agentStatsAccordionClosedIcon', '▼');
-      } else {
-        card.classList.add('open');
-        body.style.display = 'block';
-        icon.textContent = getText('agentStatsAccordionOpenIcon', '▲');
-      }
-    }
-
-    function formatSequenceNumber(value) {
-      const n = Number(value);
-      if (!Number.isFinite(n) || n <= 0) {
-        return getText('agentStatsSequenceFallback', '000');
-      }
-      return String(n).padStart(3, '0');
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function getAgentStats() {
-      try {
-        const shell = getShell();
-
-        const stats =
-          shell?.getAgentModuleStats?.() ||
-          shell?.getAgentStats?.();
-
-        if (stats && typeof stats === 'object') return stats;
-      } catch (error) {
-        console.error('[AI CENTER][Agent Stats] read failed', error);
-      }
-
-      return {
-        dialogs: [],
-        issuedLinks: [],
-        stats: {}
-      };
-    }
-
-    function setTextContent(id, value, fallback = '') {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.textContent = value ?? fallback;
-    }
-
-    function applyTenantTexts() {
-      setTextContent(
-        'agentStatsPageTitle',
-        getText('agentStatsPageTitle', 'Статистика агента')
+    if (statDialogsToday) {
+      statDialogsToday.textContent = String(
+        Number(statsData?.stats?.dialogsToday ?? statsData?.dialogsToday ?? 0)
       );
-      setTextContent(
-        'agentStatsPageSubtitle',
-        getText('agentStatsPageSubtitle', 'Сводка по диалогам и выданным ссылкам.')
-      );
-
-      setTextContent(
-        'statDialogsTotalLabel',
-        getText('agentStatsDialogsTotalLabel', 'Всего диалогов')
-      );
-      setTextContent(
-        'statRefLinksTotalLabel',
-        getText('agentStatsRefLinksTotalLabel', 'Всего ссылок')
-      );
-      setTextContent(
-        'statDialogsTodayLabel',
-        getText('agentStatsDialogsTodayLabel', 'Диалогов сегодня')
-      );
-      setTextContent(
-        'statRefLinksTodayLabel',
-        getText('agentStatsRefLinksTodayLabel', 'Ссылок сегодня')
-      );
-
-      setTextContent(
-        'dialogsAccordionTitle',
-        getText('agentStatsDialogsSectionTitle', 'Диалоги')
-      );
-      setTextContent(
-        'issuedLinksAccordionTitle',
-        getText('agentStatsIssuedLinksSectionTitle', 'Выданные ссылки')
-      );
-
-      document.title =
-        getText('agentStatsBrowserTitle', '') ||
-        getText('agentStatsPageTitle', '') ||
-        'Статистика агента';
     }
 
-    function renderStatsSummary(statsData) {
-      const dialogs = Array.isArray(statsData?.dialogs) ? statsData.dialogs : [];
-      const issuedLinks = Array.isArray(statsData?.issuedLinks) ? statsData.issuedLinks : [];
+    if (statRefLinksToday) {
+      statRefLinksToday.textContent = String(
+        Number(statsData?.stats?.issuedLinksToday ?? statsData?.refLinksToday ?? statsData?.issuedLinksToday ?? 0)
+      );
+    }
+  }
 
-      const statDialogsTotal = document.getElementById('statDialogsTotal');
-      const statRefLinksTotal = document.getElementById('statRefLinksTotal');
-      const statDialogsToday = document.getElementById('statDialogsToday');
-      const statRefLinksToday = document.getElementById('statRefLinksToday');
-
-      if (statDialogsTotal) statDialogsTotal.textContent = String(dialogs.length);
-      if (statRefLinksTotal) statRefLinksTotal.textContent = String(issuedLinks.length);
-
-      if (statDialogsToday) {
-        statDialogsToday.textContent = String(
-          Number(statsData?.stats?.dialogsToday ?? statsData?.dialogsToday ?? 0)
-        );
-      }
-
-      if (statRefLinksToday) {
-        statRefLinksToday.textContent = String(
-          Number(statsData?.stats?.issuedLinksToday ?? statsData?.refLinksToday ?? statsData?.issuedLinksToday ?? 0)
-        );
-      }
+  function openDialog(dialogId, username, channel, timeLabel, lastMessage) {
+    if (!isAgentStatsAvailable()) {
+      console.warn('[AI CENTER][Agent Stats] module dialogs are disabled');
+      return;
     }
 
-    function openDialog(dialogId, username, channel, timeLabel, lastMessage) {
-      if (!isAgentStatsAvailable()) {
-        console.warn('[AI CENTER][Agent Stats] module dialogs are disabled');
-        return;
-      }
+    try {
+      window.parent?.postMessage?.(
+        {
+          type: 'agent-open-dialog',
+          dialogId,
+          username,
+          channel,
+          timeLabel,
+          lastMessage,
+          source: 'stats'
+        },
+        '*'
+      );
+    } catch (error) {
+      console.error('[AI CENTER][Agent Stats] open dialog failed', error);
+    }
+  }
 
-      try {
-        window.parent?.postMessage?.(
-          {
-            type: 'agent-open-dialog',
-            dialogId,
-            username,
-            channel,
-            timeLabel,
-            lastMessage,
-            source: 'stats'
-          },
-          '*'
-        );
-      } catch (error) {
-        console.error('[AI CENTER][Agent Stats] open dialog failed', error);
-      }
+  function renderDialogsList(dialogs) {
+    const container = document.getElementById('dialogsList');
+    if (!container) return;
+
+    if (!isAgentStatsAvailable()) {
+      container.innerHTML = `<div class="module-notice">${escapeHtml(
+        getText('agentModuleDisabledText', 'Модуль диалогов сейчас недоступен.')
+      )}</div>`;
+      return;
     }
 
-    function renderDialogsList(dialogs) {
-      const container = document.getElementById('dialogsList');
-      if (!container) return;
+    if (!Array.isArray(dialogs) || dialogs.length === 0) {
+      container.innerHTML = `<div class="module-notice">${escapeHtml(
+        getText('agentStatsDialogsEmptyText', 'Диалогов пока нет.')
+      )}</div>`;
+      return;
+    }
 
-      if (!isAgentStatsAvailable()) {
-        container.innerHTML = `<div class="module-notice">${escapeHtml(
-          getText('agentModuleDisabledText', 'Модуль диалогов сейчас недоступен.')
-        )}</div>`;
-        return;
-      }
+    container.innerHTML = '';
 
-      if (!Array.isArray(dialogs) || dialogs.length === 0) {
-        container.innerHTML = `<div class="module-notice">${escapeHtml(
-          getText('agentStatsDialogsEmptyText', 'Диалогов пока нет.')
-        )}</div>`;
-        return;
-      }
+    dialogs.forEach((dialog, index) => {
+      const item = document.createElement('div');
+      item.className = 'dialog-item';
 
-      container.innerHTML = '';
+      const username =
+        dialog?.username ||
+        dialog?.clientName ||
+        getText('agentStatsUsernameFallback', '@username');
 
-      dialogs.forEach((dialog, index) => {
-        const item = document.createElement('div');
-        item.className = 'dialog-item';
+      const channel =
+        dialog?.channel ||
+        getText('agentStatsChannelFallback', 'Telegram');
 
-        const username =
-          dialog?.username ||
-          dialog?.clientName ||
-          getText('agentStatsUsernameFallback', '@username');
+      const timeLabel = dialog?.timeLabel || dialog?.time || '';
+      const lastMessage =
+        dialog?.lastMessage ||
+        dialog?.message ||
+        getText('agentStatsMessageFallback', 'Сообщений пока нет');
 
-        const channel =
-          dialog?.channel ||
-          getText('agentStatsChannelFallback', 'Telegram');
+      const displayNumber = formatSequenceNumber(index + 1);
 
-        const timeLabel = dialog?.timeLabel || dialog?.time || '';
-        const lastMessage =
-          dialog?.lastMessage ||
-          dialog?.message ||
-          getText('agentStatsMessageFallback', 'Сообщений пока нет');
+      item.innerHTML = `
+        <div class="dialog-item-row">
+          <span class="dialog-user">${displayNumber} • ${escapeHtml(username)}</span>
+          <span class="dialog-time">${escapeHtml(timeLabel)}</span>
+        </div>
+        <div class="dialog-last-msg">${escapeHtml(lastMessage)}</div>
+      `;
 
-        const displayNumber = formatSequenceNumber(index + 1);
-
-        item.innerHTML = `
-          <div class="dialog-item-row">
-            <span class="dialog-user">${displayNumber} • ${escapeHtml(username)}</span>
-            <span class="dialog-time">${escapeHtml(timeLabel)}</span>
-          </div>
-          <div class="dialog-last-msg">${escapeHtml(lastMessage)}</div>
-        `;
-
-        item.addEventListener('click', () => {
-          openDialog(dialog?.id || dialog?.dialogId || '', username, channel, timeLabel, lastMessage);
-        });
-
-        container.appendChild(item);
+      item.addEventListener('click', () => {
+        openDialog(dialog?.id || dialog?.dialogId || '', username, channel, timeLabel, lastMessage);
       });
+
+      container.appendChild(item);
+    });
+  }
+
+  function renderIssuedLinksList(issuedLinks, dialogs) {
+    const container = document.getElementById('issuedLinksList');
+    if (!container) return;
+
+    if (!isAgentStatsAvailable()) {
+      container.innerHTML = `<div class="module-notice">${escapeHtml(
+        getText('agentModuleDisabledText', 'Модуль диалогов сейчас недоступен.')
+      )}</div>`;
+      return;
     }
 
-    function renderIssuedLinksList(issuedLinks, dialogs) {
-      const container = document.getElementById('issuedLinksList');
-      if (!container) return;
+    if (!Array.isArray(issuedLinks) || issuedLinks.length === 0) {
+      container.innerHTML = `<div class="module-notice">${escapeHtml(
+        getText('agentStatsIssuedLinksEmptyText', 'Выданных ссылок пока нет.')
+      )}</div>`;
+      return;
+    }
 
-      if (!isAgentStatsAvailable()) {
-        container.innerHTML = `<div class="module-notice">${escapeHtml(
-          getText('agentModuleDisabledText', 'Модуль диалогов сейчас недоступен.')
-        )}</div>`;
-        return;
-      }
+    const dialogList = Array.isArray(dialogs) ? dialogs : [];
 
-      if (!Array.isArray(issuedLinks) || issuedLinks.length === 0) {
-        container.innerHTML = `<div class="module-notice">${escapeHtml(
-          getText('agentStatsIssuedLinksEmptyText', 'Выданных ссылок пока нет.')
-        )}</div>`;
-        return;
-      }
-
-      const dialogList = Array.isArray(dialogs) ? dialogs : [];
-
-      function resolveDialogNumber(linkItem) {
-        if (!linkItem || typeof linkItem !== 'object') {
-          return getText('agentStatsEmptyValue', '—');
-        }
-
-        if (linkItem.dialogId) {
-          const directIndex = dialogList.findIndex(
-            (dialog) => String(dialog?.id || dialog?.dialogId || '') === String(linkItem.dialogId)
-          );
-          if (directIndex >= 0) return formatSequenceNumber(directIndex + 1);
-        }
-
-        const linkClient = String(linkItem.clientName || linkItem.username || '').trim().toLowerCase();
-        if (linkClient) {
-          const byClientIndex = dialogList.findIndex((dialog) => {
-            const dialogClient = String(dialog?.username || dialog?.clientName || '').trim().toLowerCase();
-            return dialogClient && dialogClient === linkClient;
-          });
-          if (byClientIndex >= 0) return formatSequenceNumber(byClientIndex + 1);
-        }
-
+    function resolveDialogNumber(linkItem) {
+      if (!linkItem || typeof linkItem !== 'object') {
         return getText('agentStatsEmptyValue', '—');
       }
 
-      container.innerHTML = issuedLinks.map((item) => {
-        const clientName =
-          item?.clientName ||
-          item?.username ||
-          getText('agentStatsUsernameFallback', '@username');
+      if (linkItem.dialogId) {
+        const directIndex = dialogList.findIndex(
+          (dialog) => String(dialog?.id || dialog?.dialogId || '') === String(linkItem.dialogId)
+        );
+        if (directIndex >= 0) return formatSequenceNumber(directIndex + 1);
+      }
 
-        const linkType =
-          item?.type ||
-          item?.linkType ||
-          item?.title ||
-          getText('agentStatsLinkTypeFallback', 'Клиентская');
+      const linkClient = String(linkItem.clientName || linkItem.username || '').trim().toLowerCase();
+      if (linkClient) {
+        const byClientIndex = dialogList.findIndex((dialog) => {
+          const dialogClient = String(dialog?.username || dialog?.clientName || '').trim().toLowerCase();
+          return dialogClient && dialogClient === linkClient;
+        });
+        if (byClientIndex >= 0) return formatSequenceNumber(byClientIndex + 1);
+      }
 
-        const issuedAt =
-          item?.issuedAt ||
-          item?.timeLabel ||
-          item?.time ||
-          getText('agentStatsEmptyValue', '—');
+      return getText('agentStatsEmptyValue', '—');
+    }
 
-        const dialogNumber = resolveDialogNumber(item);
+    container.innerHTML = issuedLinks.map((item) => {
+      const clientName =
+        item?.clientName ||
+        item?.username ||
+        getText('agentStatsUsernameFallback', '@username');
 
-        return `
-          <div class="stats-issued-card">
-            <div class="module-summary">
-              <div class="stats-issued-head">
-                <div class="stats-issued-client-label">${escapeHtml(
-                  getText('agentStatsIssuedToLabel', 'Кому')
-                )}</div>
-                <div class="stats-issued-client-name">${escapeHtml(clientName)}</div>
-              </div>
+      const linkType =
+        item?.type ||
+        item?.linkType ||
+        item?.title ||
+        getText('agentStatsLinkTypeFallback', 'Клиентская');
 
-              <div class="stats-issued-links">
-                <div class="stats-issued-link">
-                  <div class="profile-row">
-                    <div class="profile-label">${escapeHtml(
-                      getText('agentStatsDialogLabel', 'Диалог')
-                    )}</div>
-                    <div class="profile-value">${escapeHtml(dialogNumber)}</div>
-                  </div>
-                  <div class="profile-row">
-                    <div class="profile-label">${escapeHtml(
-                      getText('agentStatsLinkTypeLabel', 'Тип ссылки')
-                    )}</div>
-                    <div class="profile-value">${escapeHtml(linkType)}</div>
-                  </div>
-                  <div class="profile-row">
-                    <div class="profile-label">${escapeHtml(
-                      getText('agentStatsTimeLabel', 'Время')
-                    )}</div>
-                    <div class="profile-value">${escapeHtml(issuedAt)}</div>
-                  </div>
+      const issuedAt =
+        item?.issuedAt ||
+        item?.timeLabel ||
+        item?.time ||
+        getText('agentStatsEmptyValue', '—');
+
+      const dialogNumber = resolveDialogNumber(item);
+
+      return `
+        <div class="stats-issued-card">
+          <div class="module-summary">
+            <div class="stats-issued-head">
+              <div class="stats-issued-client-label">${escapeHtml(
+                getText('agentStatsIssuedToLabel', 'Кому')
+              )}</div>
+              <div class="stats-issued-client-name">${escapeHtml(clientName)}</div>
+            </div>
+
+            <div class="stats-issued-links">
+              <div class="stats-issued-link">
+                <div class="profile-row">
+                  <div class="profile-label">${escapeHtml(
+                    getText('agentStatsDialogLabel', 'Диалог')
+                  )}</div>
+                  <div class="profile-value">${escapeHtml(dialogNumber)}</div>
+                </div>
+                <div class="profile-row">
+                  <div class="profile-label">${escapeHtml(
+                    getText('agentStatsLinkTypeLabel', 'Тип ссылки')
+                  )}</div>
+                  <div class="profile-value">${escapeHtml(linkType)}</div>
+                </div>
+                <div class="profile-row">
+                  <div class="profile-label">${escapeHtml(
+                    getText('agentStatsTimeLabel', 'Время')
+                  )}</div>
+                  <div class="profile-value">${escapeHtml(issuedAt)}</div>
                 </div>
               </div>
             </div>
           </div>
-        `;
-      }).join('');
-    }
+        </div>
+      `;
+    }).join('');
+  }
 
-    function renderAgentStatsPage() {
-      const statsData = getAgentStats();
-      const dialogs = Array.isArray(statsData?.dialogs) ? statsData.dialogs : [];
-      const issuedLinks = Array.isArray(statsData?.issuedLinks) ? statsData.issuedLinks : [];
+  function renderAgentStatsPage() {
+    const statsData = getAgentStats();
+    const dialogs = Array.isArray(statsData?.dialogs) ? statsData.dialogs : [];
+    const issuedLinks = Array.isArray(statsData?.issuedLinks) ? statsData.issuedLinks : [];
 
-      renderStatsSummary(statsData);
-      renderDialogsList(dialogs);
-      renderIssuedLinksList(issuedLinks, dialogs);
-    }
+    renderStatsSummary(statsData);
+    renderDialogsList(dialogs);
+    renderIssuedLinksList(issuedLinks, dialogs);
+  }
 
-    function applyAppFeatures(features) {
-      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
-      renderAgentStatsPage();
-    }
+  function applyAppFeatures(features) {
+    APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+    renderAgentStatsPage();
+  }
 
-    window.toggleAccordion = toggleAccordion;
+  window.navigateAgent = navigateAgent;
+  window.toggleAccordion = toggleAccordion;
 
-    window.addEventListener('message', (event) => {
-      try {
-        const data = event?.data;
-        if (!data || typeof data !== 'object') return;
+  window.addEventListener('message', (event) => {
+    try {
+      const data = event?.data;
+      if (!data || typeof data !== 'object') return;
 
-        if (data.type === 'app-features') {
-          applyAppFeatures(data.features || {});
-        }
-
-        if (
-          data.type === 'agent-stats-update' ||
-          data.type === 'agent-dialog-update' ||
-          data.type === 'agent-links-update' ||
-          data.type === 'agent-module-stats-update'
-        ) {
-          renderAgentStatsPage();
-        }
-      } catch (error) {
-        console.error('[AI CENTER][Agent Stats] message handling failed', error);
+      if (data.type === 'app-features') {
+        applyAppFeatures(data.features || {});
       }
-    });
 
-    document.addEventListener('DOMContentLoaded', () => {
-      TENANTCONFIG = getTenantConfig();
-      APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
+      if (
+        data.type === 'agent-stats-update' ||
+        data.type === 'agent-dialog-update' ||
+        data.type === 'agent-links-update' ||
+        data.type === 'agent-module-stats-update'
+      ) {
+        renderAgentStatsPage();
+      }
+    } catch (error) {
+      console.error('[AI CENTER][Agent Stats] message handling failed', error);
+    }
+  });
 
-      applyTenantTexts();
-      renderAgentStatsPage();
+  document.addEventListener('DOMContentLoaded', () => {
+    TENANTCONFIG = getTenantConfig();
+    APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
 
-      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
-      window.parent?.postMessage?.({ type: 'request-agent-module-stats' }, '*');
-    });
-  })();
+    applyTenantTexts();
+    renderAgentStatsPage();
+
+    window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+    window.parent?.postMessage?.({ type: 'request-agent-module-stats' }, '*');
+  });
+})();
 </script>
 </body>
 </html>
