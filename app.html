@@ -110,15 +110,195 @@
   <script src="js/app-shell.js"></script>
 
   <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", function () {
-        navigator.serviceWorker
-          .register("./sw.js")
-          .catch(function (error) {
-            console.error("Service worker registration failed:", error);
-          });
+    (function () {
+      const DEFAULT_TENANT = 'fitline';
+
+      function getTenantFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('tenant');
+      }
+
+      function getHostname() {
+        return window.location.hostname;
+      }
+
+      function isLocalhostHost(hostname) {
+        return (
+          hostname === 'localhost' ||
+          hostname === '127.0.0.1' ||
+          hostname === '0.0.0.0'
+        );
+      }
+
+      function getTenantFromHostname() {
+        const hostname = getHostname();
+
+        const hostMap = {
+          'fit.ai-center.app': 'fitline',
+          'www.fit.ai-center.app': 'fitline',
+          'fitline.local': 'fitline'
+        };
+
+        return hostMap[hostname] || null;
+      }
+
+      function resolveTenantId() {
+        const hostname = getHostname();
+        const tenantFromHost = getTenantFromHostname();
+        const tenantFromQuery = getTenantFromQuery();
+
+        if (tenantFromHost) {
+          console.info(
+            '[AI CENTER][App] tenant source=hostname, host=%s, tenant=%s',
+            hostname,
+            tenantFromHost
+          );
+          return tenantFromHost;
+        }
+
+        if (isLocalhostHost(hostname) && tenantFromQuery) {
+          console.info(
+            '[AI CENTER][App] tenant source=query, host=%s, tenant=%s',
+            hostname,
+            tenantFromQuery
+          );
+          return tenantFromQuery;
+        }
+
+        console.info(
+          '[AI CENTER][App] tenant source=fallback, host=%s, tenant=%s',
+          hostname,
+          DEFAULT_TENANT
+        );
+        return DEFAULT_TENANT;
+      }
+
+      async function fetchJson(url) {
+        const response = await fetch(url, { cache: 'no-store' });
+
+        if (!response.ok) {
+          console.error(
+            '[AI CENTER][App] config fetch failed',
+            url,
+            'status=',
+            response.status,
+            response.statusText
+          );
+          throw new Error('Failed to load config: ' + url);
+        }
+
+        return response.json();
+      }
+
+      function mergeConfig(baseConfig, tenantConfig) {
+        const base = baseConfig || {};
+        const tenant = tenantConfig || {};
+
+        return {
+          ...base,
+          ...tenant,
+          features: {
+            ...(base.features || {}),
+            ...(tenant.features || {})
+          },
+          theme: {
+            ...(base.theme || {}),
+            ...(tenant.theme || {})
+          },
+          policyLinks: {
+            ...(base.policyLinks || {}),
+            ...(tenant.policyLinks || {})
+          },
+          texts: {
+            ...(base.texts || {}),
+            ...(tenant.texts || {})
+          },
+          home: {
+            ...(base.home || {}),
+            ...(tenant.home || {})
+          },
+          branding: {
+            ...(base.branding || {}),
+            ...(tenant.branding || {})
+          }
+        };
+      }
+
+      async function loadMergedConfig(tenantId) {
+        const [productConfig, tenantConfig] = await Promise.all([
+          fetchJson('config/product-config.json'),
+          fetchJson(`config/tenants/${tenantId}.json`)
+        ]);
+
+        return mergeConfig(productConfig, tenantConfig);
+      }
+
+      function resolveAppName(config) {
+        const explicitAppName =
+          typeof config?.appName === 'string' ? config.appName.trim() : '';
+
+        if (explicitAppName) {
+          return explicitAppName;
+        }
+
+        const branding = config?.branding || {};
+        const pattern =
+          typeof branding.shellNamePattern === 'string' &&
+          branding.shellNamePattern.trim()
+            ? branding.shellNamePattern.trim()
+            : 'AI {brand} CENTER';
+
+        const fallback =
+          typeof branding.shellNameFallback === 'string' &&
+          branding.shellNameFallback.trim()
+            ? branding.shellNameFallback.trim()
+            : 'AI CENTER';
+
+        const brandToken =
+          (typeof config?.shellBrandName === 'string' &&
+            config.shellBrandName.trim()) ||
+          (typeof config?.brandName === 'string' &&
+            config.brandName.trim()) ||
+          '';
+
+        if (!brandToken) {
+          return fallback;
+        }
+
+        return pattern.replace('{brand}', brandToken).replace(/\s+/g, ' ').trim();
+      }
+
+      function applyAppBranding(config) {
+        const appName = resolveAppName(config);
+        const logoTextEl = document.getElementById('appLogoText');
+
+        document.title = appName || 'AI CENTER';
+
+        if (logoTextEl) {
+          logoTextEl.textContent = appName || 'AI CENTER';
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', async function () {
+        try {
+          const tenantId = resolveTenantId();
+          const config = await loadMergedConfig(tenantId);
+          applyAppBranding(config);
+        } catch (error) {
+          console.error('[AI CENTER][App] branding load failed', error);
+        }
       });
-    }
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker
+            .register('./sw.js')
+            .catch(function (error) {
+              console.error('Service worker registration failed:', error);
+            });
+        });
+      }
+    })();
   </script>
 </body>
 </html>
