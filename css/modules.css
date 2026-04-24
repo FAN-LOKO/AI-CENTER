@@ -1484,22 +1484,22 @@ textarea.form-input,
     0 2px 6px rgba(15, 23, 42, 0.02);
 }
 
-/* Клиент: светло‑голубой пузырь */
+/* Клиент: голубой пузырь */
 
 .chat-message-client .chat-bubble {
-  background: rgba(248, 250, 252, 0.98);
-  border: 1px solid rgba(148, 163, 184, 0.26);
-  color: #0f172a;
+  background: #e0ecff;
+  border: 1px solid rgba(96, 165, 250, 0.32);
+  color: #0b3c78;
   border-bottom-left-radius: 6px;
 }
 
-/* Агент: белый пузырь как в my-agent */
+/* Агент: белый пузырь */
 
 .chat-message-agent .chat-bubble {
   background: #ffffff;
   border: 1px solid rgba(148, 163, 184, 0.22);
   color: #0f172a;
-  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
 }
 
 /* Пользователь/оператор: зелёный акцент */
