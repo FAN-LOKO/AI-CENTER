@@ -167,20 +167,39 @@
   flex: 1 1 auto;
 }
 
+/* Вложенные аккордеоны модуля Агент:
+   стрелка на .accordion-icon должна крутиться при .open */
+
 .card-section.accordion-card .accordion-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
   margin-left: 8px;
-  font-size: 16px;
-  line-height: 1;
-  color: inherit;
-  transition: transform 0.2s ease;
+  color: #ffffff;
+  position: relative;
+  font-size: 0;
+  line-height: 0;
 }
 
-.card-section.accordion-card .accordion-header.open .accordion-icon {
-  transform: rotate(180deg);
+.card-section.accordion-card .accordion-icon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
+  transform: translate(-50%, -62%) rotate(45deg);
+  transition: transform 0.18s ease;
+}
+
+.card-section.accordion-card.open > .card-section-header .accordion-icon::before,
+.card-section.accordion-card.open > .accordion-header .accordion-icon::before {
+  transform: translate(-50%, -38%) rotate(225deg);
 }
 
 .card-section.accordion-card .accordion-body {
