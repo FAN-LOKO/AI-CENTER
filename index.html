@@ -8,8 +8,13 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   />
 
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Общие стили Mini App (shell + screens) -->
   <link rel="stylesheet" href="./css/styles.css" />
+
+  <!-- Tenant loader (темы, тексты, ссылки) -->
   <script src="./tenant-loader.js"></script>
 </head>
 <body>
@@ -18,9 +23,26 @@
       <section class="card-section auth-start-card" aria-labelledby="authStartTitle">
         <div class="card-section-header auth-start-header">
           <h1 class="card-section-title auth-start-title" id="authStartTitle">
-            <span class="auth-start-line auth-start-line-light">AI</span>
-            <span class="auth-start-line auth-start-line-accent">CENTER</span>
+            <span
+              class="auth-start-line auth-start-line-light"
+              id="authStartTitleTop"
+            >
+              AI
+            </span>
+            <span
+              class="auth-start-line auth-start-line-accent"
+              id="authStartTitleBrand"
+            >
+              FIT
+            </span>
+            <span
+              class="auth-start-line auth-start-line-light"
+              id="authStartTitleBottom"
+            >
+              CENTER
+            </span>
           </h1>
+
           <p class="card-section-subtitle auth-start-subtitle" id="authStartSubtitle">
             Добро пожаловать!
           </p>
@@ -89,393 +111,376 @@
   </div>
 
   <script>
-  (function () {
-    const DEFAULT_TENANT = 'fitline';
+    (function () {
+      const DEFAULT_TENANT = 'fitline';
 
-    function getTenantFromQuery() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('tenant');
-    }
-
-    function getHostname() {
-      return window.location.hostname;
-    }
-
-    function isLocalhostHost(hostname) {
-      return (
-        hostname === 'localhost' ||
-        hostname === '127.0.0.1' ||
-        hostname === '0.0.0.0'
-      );
-    }
-
-    function getTenantFromHostname() {
-      const hostname = getHostname();
-
-      const hostMap = {
-        'fit.ai-center.app': 'fitline',
-        'www.fit.ai-center.app': 'fitline',
-        'fitline.local': 'fitline'
-      };
-
-      return hostMap[hostname] || null;
-    }
-
-    function resolveTenantId() {
-      const hostname = getHostname();
-      const tenantFromHost = getTenantFromHostname();
-      const tenantFromQuery = getTenantFromQuery();
-
-      if (tenantFromHost) {
-        console.info(
-          '[AI CENTER][Index] tenant source=hostname, host=%s, tenant=%s',
-          hostname,
-          tenantFromHost
-        );
-        return tenantFromHost;
+      function getTenantFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('tenant');
       }
 
-      if (isLocalhostHost(hostname) && tenantFromQuery) {
-        console.info(
-          '[AI CENTER][Index] tenant source=query, host=%s, tenant=%s',
-          hostname,
-          tenantFromQuery
-        );
-        return tenantFromQuery;
+      function getHostname() {
+        return window.location.hostname;
       }
 
-      console.info(
-        '[AI CENTER][Index] tenant source=fallback, host=%s, tenant=%s',
-        hostname,
-        DEFAULT_TENANT
-      );
-      return DEFAULT_TENANT;
-    }
-
-    async function fetchJson(url) {
-      const response = await fetch(url, { cache: 'no-store' });
-
-      if (!response.ok) {
-        console.error(
-          '[AI CENTER][Index] config fetch failed',
-          url,
-          'status=',
-          response.status,
-          response.statusText
+      function isLocalhostHost(hostname) {
+        return (
+          hostname === 'localhost' ||
+          hostname === '127.0.0.1' ||
+          hostname === '0.0.0.0'
         );
-        throw new Error('Failed to load config: ' + url);
       }
 
-      return response.json();
-    }
+      function getTenantFromHostname() {
+        const hostname = getHostname();
 
-    function mergeConfig(baseConfig, tenantConfig) {
-      const base = baseConfig || {};
-      const tenant = tenantConfig || {};
+        const hostMap = {
+          'fit.ai-center.app': 'fitline',
+          'www.fit.ai-center.app': 'fitline',
+          'fitline.local': 'fitline'
+        };
 
-      return {
-        ...base,
-        ...tenant,
-        features: {
-          ...(base.features || {}),
-          ...(tenant.features || {})
-        },
-        theme: {
-          ...(base.theme || {}),
-          ...(tenant.theme || {})
-        },
-        policyLinks: {
-          ...(base.policyLinks || {}),
-          ...(tenant.policyLinks || {})
-        },
-        texts: {
-          ...(base.texts || {}),
-          ...(tenant.texts || {})
-        },
-        home: {
-          ...(base.home || {}),
-          ...(tenant.home || {})
-        },
-        branding: {
-          ...(base.branding || {}),
-          ...(tenant.branding || {})
+        return hostMap[hostname] || null;
+      }
+
+      function resolveTenantId() {
+        const hostname = getHostname();
+        const tenantFromHost = getTenantFromHostname();
+        const tenantFromQuery = getTenantFromQuery();
+
+        if (tenantFromHost) {
+          console.info(
+            '[AI CENTER][Index] tenant source=hostname, host=%s, tenant=%s',
+            hostname,
+            tenantFromHost
+          );
+          return tenantFromHost;
         }
-      };
-    }
 
-    async function loadMergedConfig(tenantId) {
-      const [productConfig, tenantConfig] = await Promise.all([
-        fetchJson('config/product-config.json'),
-        fetchJson(`config/tenants/${tenantId}.json`)
-      ]);
+        if (isLocalhostHost(hostname) && tenantFromQuery) {
+          console.info(
+            '[AI CENTER][Index] tenant source=query, host=%s, tenant=%s',
+            hostname,
+            tenantFromQuery
+          );
+          return tenantFromQuery;
+        }
 
-      return mergeConfig(productConfig, tenantConfig);
-    }
-
-    function resolveBrandToken(config) {
-      return (
-        config?.shellBrandName ||
-        config?.brand?.shellName ||
-        config?.brand?.name ||
-        config?.brandName ||
-        ''
-      ).trim();
-    }
-
-    function resolveAppName(config) {
-  const explicitAppName =
-    typeof config?.appName === 'string' ? config.appName.trim() : '';
-
-  if (explicitAppName) {
-    return explicitAppName;
-  }
-
-  const branding = config?.branding || {};
-  const pattern =
-    typeof branding.shellNamePattern === 'string' &&
-    branding.shellNamePattern.trim()
-      ? branding.shellNamePattern.trim()
-      : 'AI {brand} CENTER';
-
-  const fallback =
-    typeof branding.shellNameFallback === 'string' &&
-    branding.shellNameFallback.trim()
-      ? branding.shellNameFallback.trim()
-      : 'AI CENTER';
-
-  const brandToken =
-    (typeof config?.shellBrandName === 'string' && config.shellBrandName.trim()) ||
-    (typeof config?.brandName === 'string' && config.brandName.trim()) ||
-    '';
-
-  if (!brandToken) {
-    return fallback;
-  }
-
-  return pattern.replace('{brand}', brandToken).replace(/\s+/g, ' ').trim();
-}
-
-    function splitAppName(appName) {
-  const safeName =
-    typeof appName === 'string' && appName.trim()
-      ? appName.trim()
-      : 'AI CENTER';
-
-  const parts = safeName.split(/\s+/);
-
-  if (parts.length >= 3) {
-    return {
-      top: parts[0],
-      brand: parts[1],
-      bottom: parts.slice(2).join(' ')
-    };
-  }
-
-  if (parts.length === 2) {
-    return {
-      top: parts[0],
-      brand: parts[1],
-      bottom: ''
-    };
-  }
-
-  return {
-    top: 'AI',
-    brand: safeName,
-    bottom: 'CENTER'
-  };
-}
-
-    function applyTenantTheme(theme) {
-      if (!theme) return;
-
-      const root = document.documentElement;
-
-      if (theme.primary) {
-        root.style.setProperty('--tenant-primary', theme.primary);
-      }
-      if (theme.primaryDark) {
-        root.style.setProperty('--tenant-primary-dark', theme.primaryDark);
-      }
-      if (theme.primarySoft) {
-        root.style.setProperty('--tenant-primary-soft', theme.primarySoft);
-      }
-
-      if (theme.bgStart) {
-        root.style.setProperty('--tenant-bg-start', theme.bgStart);
-      }
-      if (theme.bgMid) {
-        root.style.setProperty('--tenant-bg-mid', theme.bgMid);
-      }
-      if (theme.bgAccent) {
-        root.style.setProperty('--tenant-bg-accent', theme.bgAccent);
-      }
-      if (theme.bgEnd) {
-        root.style.setProperty('--tenant-bg-end', theme.bgEnd);
-      }
-    }
-
-    function renderAuthTitle(titleEl, titleParts) {
-      if (!titleEl) return;
-
-      titleEl.innerHTML = '';
-
-      const topSpan = document.createElement('span');
-      topSpan.className = 'auth-start-line auth-start-line-light';
-      topSpan.textContent = titleParts.top || '';
-      titleEl.appendChild(topSpan);
-
-      if (titleParts.brand) {
-        const brandSpan = document.createElement('span');
-        brandSpan.className = 'auth-start-line auth-start-line-accent';
-        brandSpan.textContent = titleParts.brand;
-        titleEl.appendChild(brandSpan);
-      }
-
-      if (titleParts.bottom) {
-        const bottomSpan = document.createElement('span');
-        bottomSpan.className = 'auth-start-line auth-start-line-light';
-        bottomSpan.textContent = titleParts.bottom;
-        titleEl.appendChild(bottomSpan);
-      }
-    }
-
-    function applyTenantContent(config) {
-      if (!config) return;
-
-      const texts = config.texts || {};
-      const policyLinks = config.policyLinks || {};
-      const resolvedAppName = resolveAppName(config);
-
-      document.title = texts.appTitle || resolvedAppName || 'AI CENTER';
-
-      const titleEl = document.getElementById('authStartTitle');
-      const subtitleEl = document.getElementById('authStartSubtitle');
-      const consentIntroEl = document.getElementById('authConsentIntro');
-      const buttonEl = document.getElementById('startButton');
-      const footnoteEl = document.getElementById('authStartFootnote');
-      const privacyLinkEl = document.getElementById('authPrivacyLink');
-      const personalDataLinkEl = document.getElementById('authPersonalDataLink');
-
-      const titleParts = splitAppName(resolvedAppName);
-
-      renderAuthTitle(titleEl, titleParts);
-
-      if (subtitleEl) {
-        subtitleEl.textContent =
-          texts.authWelcome || 'Добро пожаловать!';
-      }
-
-      if (consentIntroEl) {
-        consentIntroEl.textContent =
-          texts.authConsentIntro ||
-          'Перед началом работы подтвердите согласие с политикой конфиденциальности и обработкой персональных данных.';
-      }
-
-      if (buttonEl) {
-        buttonEl.textContent = texts.authButton || 'Авторизоваться';
-      }
-
-      if (footnoteEl) {
-        footnoteEl.textContent =
-          texts.authFootnote ||
-          'Нажимая «Авторизоваться», вы разрешаете приложению использовать данные вашего Telegram-профиля для авторизации.';
-      }
-
-      if (privacyLinkEl) {
-        privacyLinkEl.textContent =
-          texts.authPrivacyLabel || 'политикой конфиденциальности';
-        privacyLinkEl.href = policyLinks.privacy || '#';
-      }
-
-      if (personalDataLinkEl) {
-        personalDataLinkEl.textContent =
-          texts.authPersonalDataLinkLabel || 'обработкой персональных данных';
-        personalDataLinkEl.href =
-          policyLinks.personalData ||
-          policyLinks.privacy ||
-          '#';
-      }
-
-      applyTenantTheme(config.theme || null);
-    }
-
-    function buildAppUrl() {
-      const search = window.location.search || '';
-      return `app.html${search}`;
-    }
-
-    function initTelegramWebApp() {
-      const tg = window.Telegram && window.Telegram.WebApp;
-      if (!tg) return;
-
-      try {
-        tg.ready && tg.ready();
-        tg.expand && tg.expand();
-      } catch (error) {
-        console.warn(
-          '[AI CENTER][Index] Telegram WebApp init warning',
-          error
+        console.info(
+          '[AI CENTER][Index] tenant source=fallback, host=%s, tenant=%s',
+          hostname,
+          DEFAULT_TENANT
         );
-      }
-    }
-
-    function bindConsentAndButton() {
-      const privacyCheckbox = document.getElementById('privacyCheckbox');
-      const dataCheckbox = document.getElementById('dataCheckbox');
-      const startButton = document.getElementById('startButton');
-
-      if (!privacyCheckbox || !dataCheckbox || !startButton) {
-        return;
+        return DEFAULT_TENANT;
       }
 
-      function updateButtonState() {
-        const enabled = privacyCheckbox.checked && dataCheckbox.checked;
+      async function fetchJson(url) {
+        const response = await fetch(url, { cache: 'no-store' });
 
-        startButton.disabled = !enabled;
-        startButton.classList.toggle('is-disabled', !enabled);
+        if (!response.ok) {
+          console.error(
+            '[AI CENTER][Index] config fetch failed',
+            url,
+            'status=',
+            response.status,
+            response.statusText
+          );
+          throw new Error('Failed to load config: ' + url);
+        }
+
+        return response.json();
       }
 
-      privacyCheckbox.addEventListener('change', updateButtonState);
-      dataCheckbox.addEventListener('change', updateButtonState);
+      function mergeConfig(baseConfig, tenantConfig) {
+        const base = baseConfig || {};
+        const tenant = tenantConfig || {};
 
-      startButton.addEventListener('click', function () {
-        if (startButton.disabled) return;
-
-        const tg = window.Telegram && window.Telegram.WebApp;
-        if (tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
-          try {
-            tg.HapticFeedback.impactOccurred('medium');
-          } catch (e) {
-            console.warn(
-              '[AI CENTER][Index] haptic feedback error',
-              e
-            );
+        return {
+          ...base,
+          ...tenant,
+          features: {
+            ...(base.features || {}),
+            ...(tenant.features || {})
+          },
+          theme: {
+            ...(base.theme || {}),
+            ...(tenant.theme || {})
+          },
+          policyLinks: {
+            ...(base.policyLinks || {}),
+            ...(tenant.policyLinks || {})
+          },
+          texts: {
+            ...(base.texts || {}),
+            ...(tenant.texts || {})
+          },
+          home: {
+            ...(base.home || {}),
+            ...(tenant.home || {})
+          },
+          branding: {
+            ...(base.branding || {}),
+            ...(tenant.branding || {})
           }
+        };
+      }
+
+      async function loadMergedConfig(tenantId) {
+        const [productConfig, tenantConfig] = await Promise.all([
+          fetchJson('config/product-config.json'),
+          fetchJson(`config/tenants/${tenantId}.json`)
+        ]);
+
+        return mergeConfig(productConfig, tenantConfig);
+      }
+
+      function resolveAppName(config) {
+        const explicitAppName =
+          typeof config?.appName === 'string' ? config.appName.trim() : '';
+
+        if (explicitAppName) {
+          return explicitAppName;
         }
 
-        window.location.href = buildAppUrl();
-      });
+        const branding = config?.branding || {};
+        const pattern =
+          typeof branding.shellNamePattern === 'string' &&
+          branding.shellNamePattern.trim()
+            ? branding.shellNamePattern.trim()
+            : 'AI {brand} CENTER';
 
-      updateButtonState();
-    }
+        const fallback =
+          typeof branding.shellNameFallback === 'string' &&
+          branding.shellNameFallback.trim()
+            ? branding.shellNameFallback.trim()
+            : 'AI CENTER';
 
-    document.addEventListener('DOMContentLoaded', async function () {
-      initTelegramWebApp();
-      bindConsentAndButton();
+        const brandToken =
+          (typeof config?.shellBrandName === 'string' &&
+            config.shellBrandName.trim()) ||
+          (typeof config?.brandName === 'string' &&
+            config.brandName.trim()) ||
+          '';
 
-      try {
-        const tenantId = resolveTenantId();
-        const config = await loadMergedConfig(tenantId);
-        applyTenantContent(config);
-      } catch (error) {
-        console.error(
-          '[AI CENTER][Index] tenant config load failed',
-          error
-        );
+        if (!brandToken) {
+          return fallback;
+        }
+
+        return pattern.replace('{brand}', brandToken).replace(/\s+/g, ' ').trim();
       }
-    });
-  })();
+
+      function resolveAuthTitleParts(config) {
+        const appName = resolveAppName(config);
+        const parts = appName.split(/\s+/).filter(Boolean);
+
+        if (parts.length >= 3) {
+          return {
+            top: parts[0],
+            brand: parts[1],
+            bottom: parts.slice(2).join(' ')
+          };
+        }
+
+        if (parts.length === 2) {
+          return {
+            top: parts[0],
+            brand: parts[1],
+            bottom: ''
+          };
+        }
+
+        return {
+          top: 'AI',
+          brand:
+            (typeof config?.shellBrandName === 'string' &&
+              config.shellBrandName.trim()) ||
+            (typeof config?.brandName === 'string' &&
+              config.brandName.trim()) ||
+            '',
+          bottom: 'CENTER'
+        };
+      }
+
+      function applyTenantTheme(theme) {
+        if (!theme) return;
+
+        const root = document.documentElement;
+
+        if (theme.primary) {
+          root.style.setProperty('--tenant-primary', theme.primary);
+        }
+        if (theme.primaryDark) {
+          root.style.setProperty('--tenant-primary-dark', theme.primaryDark);
+        }
+        if (theme.primarySoft) {
+          root.style.setProperty('--tenant-primary-soft', theme.primarySoft);
+        }
+
+        if (theme.bgStart) {
+          root.style.setProperty('--tenant-bg-start', theme.bgStart);
+        }
+        if (theme.bgMid) {
+          root.style.setProperty('--tenant-bg-mid', theme.bgMid);
+        }
+        if (theme.bgAccent) {
+          root.style.setProperty('--tenant-bg-accent', theme.bgAccent);
+        }
+        if (theme.bgEnd) {
+          root.style.setProperty('--tenant-bg-end', theme.bgEnd);
+        }
+      }
+
+      function applyTenantContent(config) {
+        if (!config) return;
+
+        const texts = config.texts || {};
+        const policyLinks = config.policyLinks || {};
+        const resolvedAppName = resolveAppName(config);
+
+        document.title = texts.appTitle || resolvedAppName || 'AI CENTER';
+
+        const titleTopEl = document.getElementById('authStartTitleTop');
+        const titleBrandEl = document.getElementById('authStartTitleBrand');
+        const titleBottomEl = document.getElementById('authStartTitleBottom');
+
+        const subtitleEl = document.getElementById('authStartSubtitle');
+        const consentIntroEl = document.getElementById('authConsentIntro');
+        const buttonEl = document.getElementById('startButton');
+        const footnoteEl = document.getElementById('authStartFootnote');
+        const privacyLinkEl = document.getElementById('authPrivacyLink');
+        const personalDataLinkEl = document.getElementById('authPersonalDataLink');
+
+        const titleParts = resolveAuthTitleParts(config);
+
+        if (titleTopEl) {
+          titleTopEl.textContent = titleParts.top || 'AI';
+        }
+
+        if (titleBrandEl) {
+          titleBrandEl.textContent = titleParts.brand || '';
+          titleBrandEl.style.display = titleParts.brand ? 'block' : 'none';
+        }
+
+        if (titleBottomEl) {
+          titleBottomEl.textContent = titleParts.bottom || '';
+          titleBottomEl.style.display = titleParts.bottom ? 'block' : 'none';
+        }
+
+        if (subtitleEl) {
+          subtitleEl.textContent =
+            texts.authWelcome || 'Добро пожаловать!';
+        }
+
+        if (consentIntroEl) {
+          consentIntroEl.textContent =
+            texts.authConsentIntro ||
+            'Перед началом работы подтвердите согласие с политикой конфиденциальности и обработкой персональных данных.';
+        }
+
+        if (buttonEl) {
+          buttonEl.textContent = texts.authButton || 'Авторизоваться';
+        }
+
+        if (footnoteEl) {
+          footnoteEl.textContent =
+            texts.authFootnote ||
+            'Нажимая «Авторизоваться», вы разрешаете приложению использовать данные вашего Telegram-профиля для авторизации.';
+        }
+
+        if (privacyLinkEl) {
+          privacyLinkEl.textContent =
+            texts.authPrivacyLabel || 'политикой конфиденциальности';
+          privacyLinkEl.href = policyLinks.privacy || '#';
+        }
+
+        if (personalDataLinkEl) {
+          personalDataLinkEl.textContent =
+            texts.authPersonalDataLinkLabel || 'обработкой персональных данных';
+          personalDataLinkEl.href =
+            policyLinks.personalData ||
+            policyLinks.privacy ||
+            '#';
+        }
+
+        applyTenantTheme(config.theme || null);
+      }
+
+      function buildAppUrl() {
+        const search = window.location.search || '';
+        return `app.html${search}`;
+      }
+
+      function initTelegramWebApp() {
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (!tg) return;
+
+        try {
+          tg.ready && tg.ready();
+          tg.expand && tg.expand();
+        } catch (error) {
+          console.warn(
+            '[AI CENTER][Index] Telegram WebApp init warning',
+            error
+          );
+        }
+      }
+
+      function bindConsentAndButton() {
+        const privacyCheckbox = document.getElementById('privacyCheckbox');
+        const dataCheckbox = document.getElementById('dataCheckbox');
+        const startButton = document.getElementById('startButton');
+
+        if (!privacyCheckbox || !dataCheckbox || !startButton) {
+          return;
+        }
+
+        function updateButtonState() {
+          const enabled = privacyCheckbox.checked && dataCheckbox.checked;
+
+          startButton.disabled = !enabled;
+          startButton.classList.toggle('is-disabled', !enabled);
+        }
+
+        privacyCheckbox.addEventListener('change', updateButtonState);
+        dataCheckbox.addEventListener('change', updateButtonState);
+
+        startButton.addEventListener('click', function () {
+          if (startButton.disabled) return;
+
+          const tg = window.Telegram && window.Telegram.WebApp;
+          if (tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
+            try {
+              tg.HapticFeedback.impactOccurred('medium');
+            } catch (e) {
+              console.warn(
+                '[AI CENTER][Index] haptic feedback error',
+                e
+              );
+            }
+          }
+
+          window.location.href = buildAppUrl();
+        });
+
+        updateButtonState();
+      }
+
+      document.addEventListener('DOMContentLoaded', async function () {
+        initTelegramWebApp();
+        bindConsentAndButton();
+
+        try {
+          const tenantId = resolveTenantId();
+          const config = await loadMergedConfig(tenantId);
+          applyTenantContent(config);
+        } catch (error) {
+          console.error(
+            '[AI CENTER][Index] tenant config load failed',
+            error
+          );
+        }
+      });
+    })();
   </script>
 </body>
 </html>
