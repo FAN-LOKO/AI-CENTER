@@ -1346,6 +1346,20 @@ a {
   gap: 14px;
 }
 
+.settings-page .card-section-body {
+  color: #334155;
+}
+
+.settings-page .card-section-title {
+  letter-spacing: 0.01em;
+}
+
+.settings-page .card-section-subtitle {
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .settings-form {
   display: flex;
   flex-direction: column;
@@ -1476,6 +1490,19 @@ a {
   font-weight: 700;
   color: #0f172a;
   word-break: break-word;
+}
+
+@media (max-width: 380px) {
+  .settings-info-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .settings-info-value {
+    max-width: 100%;
+    text-align: left;
+  }
 }
 
 /* =========================================================
