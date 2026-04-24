@@ -1575,33 +1575,6 @@ a {
 }
 
 /* =========================================================
-   17. MODULES PAGE HELPERS
-   Основная страница каталога modules.html
-   Важно:
-   - этот блок работает без css/modules.css
-   - стили рассчитаны на текущую разметку createModuleCard()
-   - не влияет на внутренние страницы модулей
-========================================================= */
-
-.modules-summary-body {
-  text-align: left;
-}
-
-.modules-summary-body .profile-row {
-  align-items: flex-start;
-}
-
-.modules-summary-body .profile-label,
-.modules-summary-body .profile-value,
-.modules-empty-state {
-  text-align: left;
-}
-
-.modules-summary-body .profile-value {
-  line-height: 1.45;
-}
-
-/* =========================================================
    MODULES CATALOG CARDS
 ========================================================= */
 
@@ -1611,23 +1584,14 @@ a {
 
 .module-card-toggle {
   width: 100%;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  display: block;
   text-align: left;
 }
 
-.module-card-toggle .accordion-header-icon {
-  flex: 0 0 auto;
-  margin-left: 4px;
-}
-
 .module-card-header-row {
-  flex: 1 1 auto;
-  min-width: 0;
+  width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
@@ -1638,31 +1602,36 @@ a {
 }
 
 .module-card-title {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
+  display: block;
   margin: 0;
   font-size: 15px;
   font-weight: 800;
-  line-height: 1.32;
+  line-height: 1.28;
   letter-spacing: 0.01em;
   color: #ffffff;
 }
 
 .module-card-title-ru {
-  display: inline;
-  font-size: 14px;
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.84);
 }
 
-.module-card-header-row > .module-card-badge {
+.module-card-header-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+.module-card-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
   min-height: 26px;
   padding: 5px 10px;
   border-radius: 999px;
@@ -1690,6 +1659,10 @@ a {
   color: #475569;
   border-color: rgba(148, 163, 184, 0.24);
   background: rgba(255, 255, 255, 0.96);
+}
+
+.module-card-header-side .accordion-header-icon {
+  flex: 0 0 auto;
 }
 
 .module-card-main {
@@ -1769,11 +1742,15 @@ a {
 
 @media (max-width: 480px) {
   .module-card-header-row {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
   }
 
-  .module-card-header-row > .module-card-badge {
+  .module-card-header-side {
+    gap: 8px;
+  }
+
+  .module-card-badge {
     min-height: 24px;
     padding: 4px 9px;
     font-size: 11px;
@@ -1784,7 +1761,7 @@ a {
   }
 
   .module-card-title-ru {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .module-card-short-description,
