@@ -777,6 +777,123 @@
         return;
       }
 
+            if (data.type === "agent-open-dialog") {
+        const stats = getAgentStats();
+        const dialogs = Array.isArray(stats?.dialogs) ? stats.dialogs : [];
+
+        const matchedDialog =
+          dialogs.find((dialog) => dialog.id === data.dialogId) ||
+          dialogs.find(
+            (dialog) =>
+              dialog.username === data.username &&
+              dialog.channel === data.channel
+          ) ||
+          null;
+
+        const selectedDialog =
+          matchedDialog || {
+            id: data.dialogId || `dlg-${Date.now()}`,
+            username: data.username || "@unknown",
+            channel: data.channel || "Telegram",
+            timeLabel: data.timeLabel || "",
+            status: data.status || "open",
+            tags: Array.isArray(data.tags) ? data.tags : [],
+            notes: data.notes || "",
+            messages: Array.isArray(data.messages) ? data.messages : []
+          };
+
+        setCurrentAgentDialog(selectedDialog);
+        navigate("dialogs.html", "dialogs");
+
+        requestAnimationFrame(() => {
+          if (frame && frame.contentWindow) {
+            frame.contentWindow.postMessage(
+              {
+                type: "agent-current-dialog-set",
+                dialog: selectedDialog
+              },
+              "*"
+            );
+
+            frame.contentWindow.postMessage(
+              {
+                type: "agent-dialogs-update",
+                dialogs
+              },
+              "*"
+            );
+          }
+        });
+
+        return;
+      }
+
+      if (data.type === "agent-send-message") {
+        const stats = getAgentStats();
+        const dialogs = Array.isArray(stats?.dialogs) ? stats.dialogs : [];
+        const currentDialog = getCurrentAgentDialog();
+
+        const targetDialogId =
+          data.dialogId || currentDialog?.id || null;
+
+        if (!targetDialogId) return;
+
+        const updatedDialogs = dialogs.map((dialog) => {
+          if (dialog.id !== targetDialogId) return dialog;
+
+          const nextMessages = Array.isArray(dialog.messages)
+            ? dialog.messages.slice()
+            : [];
+
+          nextMessages.push({
+            id: `msg-${Date.now()}`,
+            role: "agent",
+            text: data.text || "",
+            createdAt: new Date().toISOString(),
+            timeLabel: "только что",
+            status: "sent"
+          });
+
+          return {
+            ...dialog,
+            messages: nextMessages,
+            lastMessage: data.text || dialog.lastMessage || "",
+            timeLabel: "только что"
+          };
+        });
+
+        const updatedCurrentDialog =
+          updatedDialogs.find((dialog) => dialog.id === targetDialogId) || null;
+
+        setAgentStats({
+          ...stats,
+          dialogs: updatedDialogs,
+          dialogsTotal: updatedDialogs.length
+        });
+
+        setCurrentAgentDialog(updatedCurrentDialog);
+
+        if (frame && frame.contentWindow) {
+          frame.contentWindow.postMessage(
+            {
+              type: "agent-dialogs-update",
+              dialogs: updatedDialogs
+            },
+            "*"
+          );
+
+          frame.contentWindow.postMessage(
+            {
+              type: "agent-current-dialog-set",
+              dialog: updatedCurrentDialog
+            },
+            "*"
+          );
+        }
+
+        return;
+      }
+      
       if (data.type === "agent-current-dialog-set") {
         setCurrentAgentDialog(data.dialog || null);
         return;
