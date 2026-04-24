@@ -1509,7 +1509,8 @@ a {
    16. CHAT / MY AGENT / SHARED CHAT
    - полноценная страница my-agent
    - единый язык с modules / partner / settings
-   - более чистые bubbles, status и composer
+   - естественный рост окна сообщений без искусственной высоты
+   - более контрастная кнопка голосового сообщения
 ========================================================= */
 
 .page-my-agent {
@@ -1704,23 +1705,6 @@ a {
     0 5px 12px rgba(15, 23, 42, 0.10);
 }
 
-.btn.btn-icon .icon-mic {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-.btn.btn-icon .icon-mic path {
-  fill: #ffffff;
-}
-
-.btn.btn-icon:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 14px 28px rgba(59, 130, 246, 0.28),
-    0 5px 12px rgba(15, 23, 42, 0.10);
-}
-
 .btn.btn-icon:active {
   transform: translateY(0);
 }
@@ -1734,12 +1718,15 @@ a {
 
 .btn.btn-icon.recording {
   background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border-color: rgba(127, 29, 29, 0.32);
   box-shadow:
     0 10px 22px rgba(220, 38, 38, 0.24),
     0 3px 8px rgba(15, 23, 42, 0.08);
 }
 
 .btn.btn-icon .icon-mic {
+  width: 18px;
+  height: 18px;
   display: block;
 }
 
@@ -1816,7 +1803,6 @@ a {
   }
 
   .chat-messages {
-    min-height: 220px;
     max-height: 360px;
   }
 
