@@ -342,19 +342,24 @@
    * ========================================================= */
 
   function buildPageConfig() {
-    PAGECONFIG = {
-      home: { page: "home.html", enabled: APPFEATURES.home },
-      "my-agent": { page: "my-agent.html", enabled: APPFEATURES.myAgent },
-      modules: { page: "modules.html", enabled: APPFEATURES.modules },
-      "shared-chat": {
-        page: "shared-chat.html",
-        enabled: APPFEATURES.sharedChat
-      },
-      affiliate: { page: "partner.html", enabled: APPFEATURES.affiliate },
-      payments: { page: "payments.html", enabled: APPFEATURES.payments },
-      settings: { page: "settings.html", enabled: APPFEATURES.settings }
-    };
-  }
+  PAGECONFIG = {
+    home: { page: "home.html", enabled: APPFEATURES.home },
+    "my-agent": { page: "my-agent.html", enabled: APPFEATURES.myAgent },
+    modules: { page: "modules.html", enabled: APPFEATURES.modules },
+    "shared-chat": {
+      page: "shared-chat.html",
+      enabled: APPFEATURES.sharedChat
+    },
+    affiliate: { page: "partner.html", enabled: APPFEATURES.affiliate },
+    payments: { page: "payments.html", enabled: APPFEATURES.payments },
+    settings: { page: "settings.html", enabled: APPFEATURES.settings },
+
+    "agent-dialogs": {
+      page: "dialogs.html",
+      enabled: true
+    }
+  };
+}
 
   /* =========================================================
    * NAVIGATION HELPERS
@@ -620,290 +625,292 @@
    * ========================================================= */
 
   function bindMessageBus() {
-    window.addEventListener("message", (e) => {
-      console.log("[shell] message received", e.data);
+  window.addEventListener("message", (e) => {
+    console.log("[shell] message received", e.data);
 
-      const data = e.data;
-      if (!data || typeof data !== "object") return;
+    const data = e.data;
+    if (!data || typeof data !== "object") return;
 
-      if (data.type === "navigate") {
-        const targetTab = data.tab || getTabByPage(data.page) || currentTab;
+    if (data.type === "navigate") {
+      const targetTab = data.tab || getTabByPage(data.page) || currentTab;
 
-        if (!isTabEnabled(targetTab) && data.tab) {
-          const fallbackTab = getFallbackTab();
-          navigate(getPageByTab(fallbackTab), fallbackTab);
-          return;
-        }
-
-        if (data.page === "payments.html") {
-          setCurrentPaymentModuleId(data.moduleId || null);
-        }
-
-        navigate(data.page || getPageByTab(targetTab), targetTab);
+      if (!isTabEnabled(targetTab) && data.tab) {
+        const fallbackTab = getFallbackTab();
+        navigate(getPageByTab(fallbackTab), fallbackTab);
         return;
       }
 
-      if (data.type === "payment") {
-        if (APPFEATURES.payments === false) return;
-
-        const plan = data.plan || null;
-        const moduleId =
-          data.moduleId ||
-          plan?.moduleId ||
-          getCurrentPaymentModuleId() ||
-          null;
-
-        setCurrentPaymentContext({
-          planId: plan?.id || data.tariff || null,
-          moduleId: moduleId,
-          name: plan?.name || null,
-          description: plan?.description || null,
-          durationDays:
-            typeof plan?.durationDays === "number" ? plan.durationDays : null,
-          priceUsd:
-            typeof plan?.priceUsd === "number"
-              ? plan.priceUsd
-              : Number(plan?.priceUsd || 0),
-          compareAtUsd:
-            typeof plan?.compareAtUsd === "number"
-              ? plan.compareAtUsd
-              : Number(plan?.compareAtUsd || 0),
-          savingUsd:
-            typeof plan?.savingUsd === "number"
-              ? plan.savingUsd
-              : Number(plan?.savingUsd || 0),
-          badge: plan?.badge || null
-        });
-
-        navigate("payment-checkout.html", null);
-        return;
-      }
-
-      if (data.type === "request-payment-context") {
-        sendPaymentContextToFrame();
-        return;
-      }
-
-      if (data.type === "shared-chat-unread") {
-        const badge = document.getElementById("sharedChatBadge");
-        if (!badge) return;
-
-        if (currentTab === "shared-chat") {
-          badge.style.display = "none";
-          return;
-        }
-
-        badge.style.display = data.hasUnread ? "block" : "none";
-        return;
-      }
-
-      if (data.type === "request-user-profile") {
-        sendUserProfileToFrame();
-        return;
-      }
-
-      if (data.type === "save-user-profile") {
-        USERPROFILE = data.profile || data;
-        sendUserProfileToFrame();
-        return;
-      }
-
-      if (data.type === "request-tenant-config") {
-        sendTenantConfigToFrame();
-        return;
-      }
-
-      if (data.type === "request-tenant-modules") {
-        sendTenantModulesToFrame();
-        return;
-      }
-
-      if (data.type === "request-app-features") {
-        sendFeaturesToFrame();
-        return;
-      }
-
-      if (data.type === "request-user-modules") {
-        sendUserModulesToFrame();
-        return;
-      }
-
-      if (data.type === "request-payment-module-context") {
-        sendPaymentModuleContextToFrame();
-        return;
-      }
-
-      if (data.type === "set-payment-module-context") {
+      if (data.page === "payments.html") {
         setCurrentPaymentModuleId(data.moduleId || null);
+      }
+
+      navigate(data.page || getPageByTab(targetTab), targetTab);
+      return;
+    }
+
+    if (data.type === "payment") {
+      if (APPFEATURES.payments === false) return;
+
+      const plan = data.plan || null;
+      const moduleId =
+        data.moduleId ||
+        plan?.moduleId ||
+        getCurrentPaymentModuleId() ||
+        null;
+
+      setCurrentPaymentContext({
+        planId: plan?.id || data.tariff || null,
+        moduleId: moduleId,
+        name: plan?.name || null,
+        description: plan?.description || null,
+        durationDays:
+          typeof plan?.durationDays === "number" ? plan.durationDays : null,
+        priceUsd:
+          typeof plan?.priceUsd === "number"
+            ? plan.priceUsd
+            : Number(plan?.priceUsd || 0),
+        compareAtUsd:
+          typeof plan?.compareAtUsd === "number"
+            ? plan.compareAtUsd
+            : Number(plan?.compareAtUsd || 0),
+        savingUsd:
+          typeof plan?.savingUsd === "number"
+            ? plan.savingUsd
+            : Number(plan?.savingUsd || 0),
+        badge: plan?.badge || null
+      });
+
+      navigate("payment-checkout.html", null);
+      return;
+    }
+
+    if (data.type === "request-payment-context") {
+      sendPaymentContextToFrame();
+      return;
+    }
+
+    if (data.type === "shared-chat-unread") {
+      const badge = document.getElementById("sharedChatBadge");
+      if (!badge) return;
+
+      if (currentTab === "shared-chat") {
+        badge.style.display = "none";
         return;
       }
 
-      if (data.type === "agent-stats-request") {
+      badge.style.display = data.hasUnread ? "block" : "none";
+      return;
+    }
+
+    if (data.type === "request-user-profile") {
+      sendUserProfileToFrame();
+      return;
+    }
+
+    if (data.type === "save-user-profile") {
+      USERPROFILE = data.profile || data;
+      sendUserProfileToFrame();
+      return;
+    }
+
+    if (data.type === "request-tenant-config") {
+      sendTenantConfigToFrame();
+      return;
+    }
+
+    if (data.type === "request-tenant-modules") {
+      sendTenantModulesToFrame();
+      return;
+    }
+
+    if (data.type === "request-app-features") {
+      sendFeaturesToFrame();
+      return;
+    }
+
+    if (data.type === "request-user-modules") {
+      sendUserModulesToFrame();
+      return;
+    }
+
+    if (data.type === "request-payment-module-context") {
+      sendPaymentModuleContextToFrame();
+      return;
+    }
+
+    if (data.type === "set-payment-module-context") {
+      setCurrentPaymentModuleId(data.moduleId || null);
+      return;
+    }
+
+    if (data.type === "agent-stats-request") {
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage(
+          {
+            type: "agent-stats-response",
+            stats: getAgentStats()
+          },
+          "*"
+        );
+      }
+      return;
+    }
+
+    if (data.type === "agent-stats-save" && data.stats) {
+      setAgentStats(data.stats);
+      return;
+    }
+
+    if (data.type === "agent-dialogs-update" && Array.isArray(data.dialogs)) {
+      setAgentStats({
+        ...getAgentStats(),
+        dialogs: data.dialogs,
+        dialogsTotal: data.dialogs.length
+      });
+      return;
+    }
+
+    if (
+      data.type === "agent-issued-links-update" &&
+      Array.isArray(data.issuedLinks)
+    ) {
+      setAgentStats({
+        ...getAgentStats(),
+        issuedLinks: data.issuedLinks,
+        refLinksTotal: data.issuedLinks.length
+      });
+      return;
+    }
+
+    if (data.type === "agent-open-dialog") {
+      const stats = getAgentStats();
+      const dialogs = Array.isArray(stats?.dialogs) ? stats.dialogs : [];
+
+      const matchedDialog =
+        dialogs.find((dialog) => dialog.id === data.dialogId) ||
+        dialogs.find(
+          (dialog) =>
+            dialog.username === data.username &&
+            dialog.channel === data.channel
+        ) ||
+        null;
+
+      const selectedDialog =
+        matchedDialog || {
+          id: data.dialogId || `dlg-${Date.now()}`,
+          username: data.username || "@unknown",
+          channel: data.channel || "Telegram",
+          timeLabel: data.timeLabel || "",
+          status: data.status || "open",
+          tags: Array.isArray(data.tags) ? data.tags : [],
+          notes: data.notes || "",
+          messages: Array.isArray(data.messages) ? data.messages : []
+        };
+
+      setCurrentAgentDialog(selectedDialog);
+
+      const dialogsPage = "dialogs.html";
+      const dialogsTab =
+        getTabByPage(dialogsPage) || currentTab || getFallbackTab();
+
+      const postDialogState = () => {
         if (frame && frame.contentWindow) {
-          frame.contentWindow.postMessage(
-            {
-              type: "agent-stats-response",
-              stats: getAgentStats()
-            },
-            "*"
-          );
-        }
-        return;
-      }
-
-      if (data.type === "agent-stats-save" && data.stats) {
-        setAgentStats(data.stats);
-        return;
-      }
-
-      if (data.type === "agent-dialogs-update" && Array.isArray(data.dialogs)) {
-        setAgentStats({
-          ...getAgentStats(),
-          dialogs: data.dialogs,
-          dialogsTotal: data.dialogs.length
-        });
-        return;
-      }
-
-      if (
-        data.type === "agent-issued-links-update" &&
-        Array.isArray(data.issuedLinks)
-      ) {
-        setAgentStats({
-          ...getAgentStats(),
-          issuedLinks: data.issuedLinks,
-          refLinksTotal: data.issuedLinks.length
-        });
-        return;
-      }
-
-                  if (data.type === "agent-open-dialog") {
-        const stats = getAgentStats();
-        const dialogs = Array.isArray(stats?.dialogs) ? stats.dialogs : [];
-
-        const matchedDialog =
-          dialogs.find((dialog) => dialog.id === data.dialogId) ||
-          dialogs.find(
-            (dialog) =>
-              dialog.username === data.username &&
-              dialog.channel === data.channel
-          ) ||
-          null;
-
-        const selectedDialog =
-          matchedDialog || {
-            id: data.dialogId || `dlg-${Date.now()}`,
-            username: data.username || "@unknown",
-            channel: data.channel || "Telegram",
-            timeLabel: data.timeLabel || "",
-            status: data.status || "open",
-            tags: Array.isArray(data.tags) ? data.tags : [],
-            notes: data.notes || "",
-            messages: Array.isArray(data.messages) ? data.messages : []
-          };
-
-        setCurrentAgentDialog(selectedDialog);
-
-        const dialogsPage = "my-agent.html";
-        const dialogsTab = getTabByPage(dialogsPage) || currentTab || getFallbackTab();
-
-        navigate(dialogsPage, dialogsTab);
-
-        requestAnimationFrame(() => {
-          if (frame && frame.contentWindow) {
-            frame.contentWindow.postMessage(
-              {
-                type: "agent-current-dialog-set",
-                dialog: selectedDialog
-              },
-              "*"
-            );
-
-            frame.contentWindow.postMessage(
-              {
-                type: "agent-dialogs-update",
-                dialogs
-              },
-              "*"
-            );
-          }
-        });
-
-        return;
-      }
-
-      if (data.type === "agent-send-message") {
-        const stats = getAgentStats();
-        const dialogs = Array.isArray(stats?.dialogs) ? stats.dialogs : [];
-        const currentDialog = getCurrentAgentDialog();
-
-        const targetDialogId =
-          data.dialogId || currentDialog?.id || null;
-
-        if (!targetDialogId) return;
-
-        const updatedDialogs = dialogs.map((dialog) => {
-          if (dialog.id !== targetDialogId) return dialog;
-
-          const nextMessages = Array.isArray(dialog.messages)
-            ? dialog.messages.slice()
-            : [];
-
-          nextMessages.push({
-            id: `msg-${Date.now()}`,
-            role: "agent",
-            text: data.text || "",
-            createdAt: new Date().toISOString(),
-            timeLabel: "только что",
-            status: "sent"
-          });
-
-          return {
-            ...dialog,
-            messages: nextMessages,
-            lastMessage: data.text || dialog.lastMessage || "",
-            timeLabel: "только что"
-          };
-        });
-
-        const updatedCurrentDialog =
-          updatedDialogs.find((dialog) => dialog.id === targetDialogId) || null;
-
-        setAgentStats({
-          ...stats,
-          dialogs: updatedDialogs,
-          dialogsTotal: updatedDialogs.length
-        });
-
-        setCurrentAgentDialog(updatedCurrentDialog);
-
-        if (frame && frame.contentWindow) {
-          frame.contentWindow.postMessage(
-            {
-              type: "agent-dialogs-update",
-              dialogs: updatedDialogs
-            },
-            "*"
-          );
-
           frame.contentWindow.postMessage(
             {
               type: "agent-current-dialog-set",
-              dialog: updatedCurrentDialog
+              dialog: selectedDialog
+            },
+            "*"
+          );
+
+          frame.contentWindow.postMessage(
+            {
+              type: "agent-dialogs-update",
+              dialogs
             },
             "*"
           );
         }
+      };
 
-        return;
+      if (frame) {
+        frame.addEventListener("load", postDialogState, { once: true });
       }
-      
-      if (data.type === "agent-current-dialog-set") {
-        setCurrentAgentDialog(data.dialog || null);
-        return;
+
+      navigate(dialogsPage, dialogsTab);
+      return;
+    }
+
+    if (data.type === "agent-send-message") {
+      const stats = getAgentStats();
+      const dialogs = Array.isArray(stats?.dialogs) ? stats.dialogs : [];
+      const currentDialog = getCurrentAgentDialog();
+
+      const targetDialogId = data.dialogId || currentDialog?.id || null;
+      if (!targetDialogId) return;
+
+      const updatedDialogs = dialogs.map((dialog) => {
+        if (dialog.id !== targetDialogId) return dialog;
+
+        const nextMessages = Array.isArray(dialog.messages)
+          ? dialog.messages.slice()
+          : [];
+
+        nextMessages.push({
+          id: `msg-${Date.now()}`,
+          role: "agent",
+          text: data.text || "",
+          createdAt: new Date().toISOString(),
+          timeLabel: "только что",
+          status: "sent"
+        });
+
+        return {
+          ...dialog,
+          messages: nextMessages,
+          lastMessage: data.text || dialog.lastMessage || "",
+          timeLabel: "только что"
+        };
+      });
+
+      const updatedCurrentDialog =
+        updatedDialogs.find((dialog) => dialog.id === targetDialogId) || null;
+
+      setAgentStats({
+        ...stats,
+        dialogs: updatedDialogs,
+        dialogsTotal: updatedDialogs.length
+      });
+
+      setCurrentAgentDialog(updatedCurrentDialog);
+
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage(
+          {
+            type: "agent-dialogs-update",
+            dialogs: updatedDialogs
+          },
+          "*"
+        );
+
+        frame.contentWindow.postMessage(
+          {
+            type: "agent-current-dialog-set",
+            dialog: updatedCurrentDialog
+          },
+          "*"
+        );
       }
-    });
-  }
+
+      return;
+    }
+
+    if (data.type === "agent-current-dialog-set") {
+      setCurrentAgentDialog(data.dialog || null);
+      return;
+    }
+  });
+}
 
   /* =========================================================
    * BOOTSTRAP
