@@ -1601,9 +1601,10 @@ a {
    Что здесь:
    - карточки модулей на странице modules.html
    - синий header остаётся только для названия
-   - badge переносится в белую часть карточки, как по логике home
-   - краткое описание и раскрывающаяся часть
-   - disabled-кнопка для модулей в разработке
+   - в белой части карточки верхняя строка:
+     слева короткое описание, справа badge
+   - ниже кнопка открытия / заглушка
+   - раскрывающаяся часть с полным описанием
 ========================================================= */
 
 .module-accordion-card {
@@ -1645,21 +1646,34 @@ a {
 }
 
 .module-card-main {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
   padding-top: 0;
 }
 
-.module-card-main .module-card-badge {
+.module-card-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.module-card-short-description {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #334155;
+  text-align: left;
+}
+
+.module-card-top-row .module-card-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  align-self: flex-end;
   width: fit-content;
   max-width: 100%;
   min-height: 26px;
-  margin: 8px 0 12px;
   padding: 5px 10px;
   border-radius: 999px;
   font-size: 12px;
@@ -1686,14 +1700,6 @@ a {
   background: rgba(148, 163, 184, 0.14);
   color: #475569;
   border-color: rgba(148, 163, 184, 0.2);
-}
-
-.module-card-short-description {
-  margin: 0 0 14px;
-  font-size: 14px;
-  line-height: 1.55;
-  color: #334155;
-  text-align: left;
 }
 
 .module-card-expanded {
@@ -1768,7 +1774,13 @@ a {
     font-size: 14px;
   }
 
-  .module-card-main .module-card-badge {
+  .module-card-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .module-card-top-row .module-card-badge {
     min-height: 24px;
     padding: 4px 9px;
     font-size: 11px;
