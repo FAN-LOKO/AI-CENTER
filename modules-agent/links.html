@@ -34,7 +34,7 @@
             <label class="form-label" for="pmPartnerLink">
               Ваша партнёрская ссылка<br />
               <span class="profile-label">
-                вида https://www.pmebusiness.com/registrationv2?TP=XXXXXXXX
+                вида [https://www.pmebusiness.com/registrationv2?TP=XXXXXXXX](https://www.pmebusiness.com/registrationv2?TP=XXXXXXXX)
               </span>
             </label>
             <input
@@ -49,7 +49,7 @@
             <label class="form-label" for="pmClientLink">
               Ваша клиентская ссылка<br />
               <span class="profile-label">
-                вида https://www.fitline.com/?sponsor=XXXXXXXX
+                вида [https://www.fitline.com/?sponsor=XXXXXXXX](https://www.fitline.com/?sponsor=XXXXXXXX)
               </span>
             </label>
             <input
@@ -63,6 +63,8 @@
           <button class="btn btn-block" id="savePmLinksButton">
             Сохранить партнёрские ссылки
           </button>
+
+          <p id="savePmLinksMessage" class="connect-status-msg" hidden></p>
         </div>
       </section>
 
@@ -141,11 +143,10 @@
           <button class="btn btn-block" id="saveSocialLinksButton">
             Сохранить соцсети
           </button>
+
+          <p id="saveSocialLinksMessage" class="connect-status-msg" hidden></p>
         </div>
       </section>
-
-      <!-- Общий блок статуса сохранения -->
-      <p id="saveLinksMessage" class="connect-status-msg"></p>
     </div>
   </div>
 
@@ -230,8 +231,8 @@
       body.style.display = isOpen ? 'none' : 'block';
     }
 
-    function setStatus(message, type) {
-      const msgEl = document.getElementById('saveLinksMessage');
+    function setStatus(targetId, message, type) {
+      const msgEl = document.getElementById(targetId);
       if (!msgEl) return;
 
       if (!message) {
@@ -245,6 +246,11 @@
       msgEl.textContent = message;
       msgEl.className =
         'connect-status-msg ' + (type === 'error' ? 'error' : 'success');
+    }
+
+    function clearStatuses() {
+      setStatus('savePmLinksMessage', '', '');
+      setStatus('saveSocialLinksMessage', '', '');
     }
 
     function getLinksStateFromShell() {
@@ -389,9 +395,17 @@
 
       if (disabled) {
         setStatus(
+          'savePmLinksMessage',
           getText('agentLinksDisabledText', 'Модуль агента сейчас недоступен.'),
           'error'
         );
+        setStatus(
+          'saveSocialLinksMessage',
+          getText('agentLinksDisabledText', 'Модуль агента сейчас недоступен.'),
+          'error'
+        );
+      } else {
+        clearStatuses();
       }
     }
 
@@ -404,6 +418,7 @@
         savePmBtn.addEventListener('click', () => {
           if (APPFEATURES.myAgent === false) {
             setStatus(
+              'savePmLinksMessage',
               getText('agentLinksDisabledText', 'Модуль агента сейчас недоступен.'),
               'error'
             );
@@ -414,6 +429,7 @@
 
           if (!data.pmPartnerLink || !data.pmClientLink) {
             setStatus(
+              'savePmLinksMessage',
               getText(
                 'agentLinksPmRequiredError',
                 'Введите обе ссылки: партнёрскую и клиентскую.'
@@ -435,9 +451,12 @@
             };
 
             setStatus(
+              'savePmLinksMessage',
               getText('agentLinksPmSaved', 'Партнёрские ссылки сохранены.'),
               'success'
             );
+
+            setStatus('saveSocialLinksMessage', '', '');
 
             tg?.HapticFeedback?.notificationOccurred?.('success');
 
@@ -451,6 +470,7 @@
           } catch (error) {
             console.error('[AI CENTER][Agent Links] save pm links failed', error);
             setStatus(
+              'savePmLinksMessage',
               getText(
                 'agentLinksPmSaveError',
                 'Не удалось сохранить партнёрские ссылки.'
@@ -465,6 +485,7 @@
         saveSocialBtn.addEventListener('click', () => {
           if (APPFEATURES.myAgent === false) {
             setStatus(
+              'saveSocialLinksMessage',
               getText('agentLinksDisabledText', 'Модуль агента сейчас недоступен.'),
               'error'
             );
@@ -485,9 +506,12 @@
             };
 
             setStatus(
+              'saveSocialLinksMessage',
               getText('agentLinksSocialSaved', 'Ссылки на соцсети сохранены.'),
               'success'
             );
+
+            setStatus('savePmLinksMessage', '', '');
 
             tg?.HapticFeedback?.notificationOccurred?.('success');
 
@@ -501,6 +525,7 @@
           } catch (error) {
             console.error('[AI CENTER][Agent Links] save social links failed', error);
             setStatus(
+              'saveSocialLinksMessage',
               getText(
                 'agentLinksSocialSaveError',
                 'Не удалось сохранить ссылки на соцсети.'
