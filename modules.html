@@ -454,19 +454,18 @@
 
   section.innerHTML = `
     <button class="card-section-header accordion-header module-card-toggle" type="button" aria-expanded="false">
-      <span class="module-card-header-row">
-        <span class="module-card-header-main">
-          <span class="module-card-title">
-            ${module.title}
-            <span class="module-card-title-ru">/ ${module.titleRu}</span>
-          </span>
-        </span>
+  <span class="module-card-header-row">
+    <span class="module-card-header-main">
+      <span class="module-card-title">${module.title}</span>
+      <span class="module-card-title-ru">${module.titleRu}</span>
+    </span>
 
-        <span class="module-card-badge ${badge.cls}">${badge.text}</span>
-      </span>
-
+    <span class="module-card-header-side">
+      <span class="module-card-badge ${badge.cls}">${badge.text}</span>
       <span class="accordion-header-icon" aria-hidden="true"></span>
-    </button>
+    </span>
+  </span>
+</button>
 
     <div class="card-section-body module-card-main">
       <p class="module-card-short-description">${module.shortDescription}</p>
