@@ -1576,6 +1576,11 @@ a {
 
 /* =========================================================
    17. MODULES PAGE HELPERS
+   Основная страница каталога modules.html
+   Важно:
+   - этот блок работает без css/modules.css
+   - стили рассчитаны на текущую разметку createModuleCard()
+   - не влияет на внутренние страницы модулей
 ========================================================= */
 
 .modules-summary-body {
@@ -1598,12 +1603,6 @@ a {
 
 /* =========================================================
    MODULES CATALOG CARDS
-   Что здесь:
-   - карточки модулей на странице modules.html
-   - в синем header: название слева, badge справа
-   - справа от header также остаётся стрелка аккордеона
-   - в белой части: короткое описание и кнопка
-   - ниже раскрывающаяся часть с полным описанием
 ========================================================= */
 
 .module-accordion-card {
@@ -1644,16 +1643,19 @@ a {
   align-items: baseline;
   gap: 6px;
   min-width: 0;
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 1.3;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.32;
+  letter-spacing: 0.01em;
   color: #ffffff;
 }
 
 .module-card-title-ru {
-  font-size: 15px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.82);
+  display: inline;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .module-card-header-row > .module-card-badge {
