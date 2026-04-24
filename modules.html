@@ -18,15 +18,12 @@
 
       <div class="card-section-body modules-summary-body">
         <div class="profile-row">
-          <span class="profile-label">Каталог</span>
-          <span class="profile-value" id="subscriptionStatusLabel">Загрузка модулей...</span>
-        </div>
-        <div class="profile-row">
-          <span class="profile-label">Статус модулей</span>
-          <span class="profile-value">
-            Сейчас доступны 3 модуля: базовый модуль Агента и 2 бесплатных модуля. Остальные модули показаны как витрина и отмечены статусом «В разработке».
-          </span>
-        </div>
+  <span class="profile-label">Статус модулей</span>
+  <span class="profile-value">
+    Сейчас открыты 3 модуля: базовый модуль Агента и 2 бесплатных модуля.
+    Остальные модули показаны в каталоге как витрина и отмечены статусом «В разработке».
+  </span>
+</div>
       </div>
     </section>
 
@@ -334,12 +331,12 @@
     }
 
     function getCatalogStatusText() {
-      if (!TENANTMODULES.length) {
-        return getText('modulesEmptyText', 'Для этого tenant пока не настроен список модулей.');
-      }
+  if (!TENANTMODULES.length) {
+    return getText('modulesEmptyText', 'Для этого tenant пока не настроен список модулей.');
+  }
 
-      return `Всего модулей в каталоге: ${TENANTMODULES.length}`;
-    }
+  return `В каталоге доступно ${TENANTMODULES.length} модулей сервиса.`;
+}
 
     function getModuleOpenButtonText(module) {
       if (!module) return getText('modulesActionOpen', 'Открыть модуль');
