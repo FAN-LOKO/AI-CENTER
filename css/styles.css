@@ -1600,7 +1600,8 @@ a {
    MODULES CATALOG CARDS
    Что здесь:
    - карточки модулей на странице modules.html
-   - заголовок карточки и badge как на home
+   - синий header остаётся только для названия
+   - badge переносится в белую часть карточки, как по логике home
    - краткое описание и раскрывающаяся часть
    - disabled-кнопка для модулей в разработке
 ========================================================= */
@@ -1622,7 +1623,6 @@ a {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
   min-width: 0;
   flex: 1;
 }
@@ -1644,11 +1644,16 @@ a {
   color: #64748b;
 }
 
-.module-card-badge {
+.module-card-main {
+  padding-top: 0;
+}
+
+.module-card-main .module-card-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 26px;
+  margin: 0 0 12px;
   padding: 5px 10px;
   border-radius: 999px;
   font-size: 12px;
@@ -1674,10 +1679,6 @@ a {
   background: rgba(148, 163, 184, 0.14);
   color: #475569;
   border-color: rgba(148, 163, 184, 0.2);
-}
-
-.module-card-main {
-  padding-top: 0;
 }
 
 .module-card-short-description {
@@ -1760,7 +1761,7 @@ a {
     font-size: 14px;
   }
 
-  .module-card-badge {
+  .module-card-main .module-card-badge {
     min-height: 24px;
     padding: 4px 9px;
     font-size: 11px;
