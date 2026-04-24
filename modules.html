@@ -23,9 +23,9 @@
           <span class="profile-value" id="subscriptionStatusLabel">Загрузка модулей...</span>
         </div>
         <div class="profile-row">
-          <span class="profile-label">Открытие модулей</span>
+          <span class="profile-label">Статус модулей</span>
           <span class="profile-value">
-            Готовые модули открываются сразу. Платные модули без доступа ведут на страницу оплаты. Модули в разработке временно ведут на страницу «Модуль в разработке».
+            Сейчас доступны 3 модуля: базовый модуль Агента и 2 бесплатных модуля. Остальные модули показаны как витрина и отмечены статусом «В разработке».
           </span>
         </div>
       </div>
@@ -44,6 +44,7 @@
      * - tenant catalog модулей
      * - user access map по модулям
      * - флаг готовности страницы
+     * - список реально доступных модулей
      * ========================================================= */
 
     let TENANTCONFIG = null;
@@ -62,6 +63,10 @@
     let TENANTMODULES = [];
     let USERMODULEACCESS = {};
     let _modulesReady = false;
+
+    const AVAILABLE_MODULE_IDS = ['ai-agent', 'knowledge-hub', 'support-desk'];
+    const BASE_MODULE_IDS = ['ai-agent'];
+    const FREE_MODULE_IDS = ['knowledge-hub', 'support-desk'];
 
     /* =========================================================
      * SHELL HELPERS
@@ -88,8 +93,8 @@
       const fallbackModules = [
         {
           id: 'ai-agent',
-          title: 'My Agent',
-          titleRu: 'Мой агент',
+          title: 'Agent Connection',
+          titleRu: 'Подключение Агента',
           shortDescription: 'Подключение и управление ИИ-агентом для диалогов и первичной квалификации.',
           fullDescription: [
             'Подключение соцсетей и каналов общения, включая Telegram и другие площадки.',
@@ -100,14 +105,14 @@
           ],
           page: 'modules-agent/profile.html',
           enabled: true,
-          category: 'core',
+          category: 'base',
           requiresPayment: false
         },
         {
           id: 'knowledge-hub',
           title: 'Knowledge Hub',
           titleRu: 'База знаний',
-          shortDescription: 'Материалы, обучение и AI-поиск по знаниям компании и продукта.',
+          shortDescription: 'Материалы, обучение и AI-поиск по знаниям компании, продукта и процессов.',
           fullDescription: [
             'Материалы по продукту, бизнес-модели, скриптам, возражениям, презентациям и эфирам.',
             'Обучающие дорожки для разных ролей: новичок, партнёр, лидер.',
@@ -116,13 +121,13 @@
           ],
           page: 'modules-knowledge-hub.html',
           enabled: true,
-          category: 'core',
+          category: 'free',
           requiresPayment: false
         },
         {
           id: 'support-desk',
           title: 'Support Desk',
-          titleRu: 'Поддержка',
+          titleRu: 'Центр поддержки',
           shortDescription: 'Поддержка, обращения, сервисные вопросы и сопровождение пользователей.',
           fullDescription: [
             'Единая точка входа для сервисных запросов.',
@@ -132,14 +137,92 @@
           ],
           page: 'modules-support-desk.html',
           enabled: true,
-          category: 'core',
+          category: 'free',
           requiresPayment: false
+        },
+        {
+          id: 'media-lab',
+          title: 'Media Lab',
+          titleRu: 'Медиа Лаб',
+          shortDescription: 'Инструменты для создания контента, упаковки офферов и материалов для продвижения.',
+          fullDescription: [
+            'Генерация и упаковка контента для соцсетей и рассылок.',
+            'Шаблоны офферов, прогревов, постов и сторис.',
+            'Подготовка материалов для личного бренда и командного маркетинга.',
+            'Модуль планируется к запуску в следующих релизах.'
+          ],
+          page: MODULE_FALLBACK_PAGE,
+          enabled: true,
+          category: 'optional',
+          requiresPayment: true
+        },
+        {
+          id: 'team-space',
+          title: 'Team Space',
+          titleRu: 'Командный центр',
+          shortDescription: 'Пространство для совместной работы команды, управления задачами и внутренней координации.',
+          fullDescription: [
+            'Общий центр командных задач и ролей.',
+            'Внутренние заметки, распределение процессов и чек-листов.',
+            'Быстрый обзор активности команды и внутренних действий.',
+            'Модуль планируется к запуску в следующих релизах.'
+          ],
+          page: MODULE_FALLBACK_PAGE,
+          enabled: true,
+          category: 'optional',
+          requiresPayment: true
+        },
+        {
+          id: 'academy',
+          title: 'Academy',
+          titleRu: 'Академия',
+          shortDescription: 'Система обучения, треков развития и маршрутов роста для новичков и лидеров.',
+          fullDescription: [
+            'Пошаговые программы обучения для разных ролей.',
+            'Маршруты адаптации новичков и роста партнёров.',
+            'Материалы, задания и контроль прохождения.',
+            'Модуль планируется к запуску в следующих релизах.'
+          ],
+          page: MODULE_FALLBACK_PAGE,
+          enabled: true,
+          category: 'optional',
+          requiresPayment: true
+        },
+        {
+          id: 'analytics',
+          title: 'Analytics',
+          titleRu: 'Аналитика',
+          shortDescription: 'Сводки, отчёты и ключевые показатели по активности, заявкам, лидам и оплатам.',
+          fullDescription: [
+            'Единая витрина метрик по обращениям, диалогам и действиям.',
+            'Сводка ключевых показателей по команде и воронке.',
+            'Панели для анализа роста и эффективности.',
+            'Модуль планируется к запуску в следующих релизах.'
+          ],
+          page: MODULE_FALLBACK_PAGE,
+          enabled: true,
+          category: 'optional',
+          requiresPayment: true
         }
       ];
 
       try {
         const raw = window.parent?.AICAppShell?.getTenantModules?.();
-        return Array.isArray(raw) && raw.length ? raw : fallbackModules;
+
+        if (Array.isArray(raw) && raw.length) {
+          const merged = [...raw];
+
+          fallbackModules.forEach(fallbackModule => {
+            const exists = merged.some(module => module && module.id === fallbackModule.id);
+            if (!exists) {
+              merged.push(fallbackModule);
+            }
+          });
+
+          return merged;
+        }
+
+        return fallbackModules;
       } catch (error) {
         console.error('[AI CENTER][Modules] tenant modules read failed', error);
         return fallbackModules;
@@ -153,6 +236,7 @@
      * - нормализация user access map
      * - получение полного каталога модулей tenant
      * - ожидание загрузки tenant modules из shell
+     * - сортировка модулей по приоритету
      * ========================================================= */
 
     function getModuleRoute(module) {
@@ -163,6 +247,21 @@
     function normalizeAccessMap(raw) {
       if (!raw || typeof raw !== 'object') return {};
       return raw;
+    }
+
+    function getModuleSortWeight(moduleId) {
+      const order = [
+        'ai-agent',
+        'knowledge-hub',
+        'support-desk',
+        'media-lab',
+        'team-space',
+        'academy',
+        'analytics'
+      ];
+
+      const index = order.indexOf(moduleId);
+      return index === -1 ? 999 : index;
     }
 
     function getTenantModules() {
@@ -184,8 +283,9 @@
                 : [getText('modulesDefaultFullDescription', 'Описание модуля будет добавлено позже.')],
             page: getModuleRoute(module),
             requiresPayment: !!module.requiresPayment,
-            category: module.category || 'core'
-          }));
+            category: module.category || 'optional'
+          }))
+          .sort((a, b) => getModuleSortWeight(a.id) - getModuleSortWeight(b.id));
       } catch (error) {
         console.error('[AI CENTER][Modules] tenant modules normalize failed', error);
         return [];
@@ -211,6 +311,7 @@
      * Что здесь:
      * - получение access state по модулю
      * - проверка, доступен ли модуль прямо сейчас
+     * - проверка, находится ли модуль в активной поставке
      * - вычисление текста общей сводки страницы
      * - вычисление текста кнопки карточки
      * ========================================================= */
@@ -220,12 +321,13 @@
       return accessMap[moduleId] || null;
     }
 
+    function isAvailableModule(module) {
+      return !!module && AVAILABLE_MODULE_IDS.includes(module.id);
+    }
+
     function isModuleAccessible(module) {
       if (!module) return false;
-
-      const isFallback = getModuleRoute(module) === MODULE_FALLBACK_PAGE;
-      if (isFallback) return true;
-
+      if (!isAvailableModule(module)) return false;
       if (!module.requiresPayment) return true;
 
       const access = getModuleAccess(module.id);
@@ -243,61 +345,36 @@
     function getModuleOpenButtonText(module) {
       if (!module) return getText('modulesActionOpen', 'Открыть модуль');
 
-      if (module.id === 'ai-agent') {
-        return getText('modulesActionOpen', 'Открыть модуль');
+      if (!isAvailableModule(module)) {
+        return getText('modulesActionSoon', 'В разработке');
       }
 
-      if (getModuleRoute(module) === MODULE_FALLBACK_PAGE) {
-        return getText('modulesActionOpen', 'Открыть модуль');
-      }
+      return getText('modulesActionOpen', 'Открыть модуль');
+    }
 
-      if (!module.requiresPayment) {
-        return getText('modulesActionOpen', 'Открыть модуль');
-      }
-
-      return isModuleAccessible(module)
-        ? getText('modulesActionOpen', 'Открыть модуль')
-        : getText('modulesActionPay', 'Перейти к оплате');
+    function isModuleButtonDisabled(module) {
+      return !isAvailableModule(module);
     }
 
     /* =========================================================
      * MODULE NAVIGATION
      * Что здесь:
-     * - переход в сам модуль
-     * - переход в оплату, если модуль платный и не активирован
-     * - передача moduleId в shell для страницы payments
-     * - переход в fallback страницу, если модуль в разработке
+     * - переход только в реально доступные модули
+     * - защита от нажатия на модули в разработке
      * ========================================================= */
 
     function openModule(module) {
       if (!module) return;
       if (APPFEATURES.modules === false) return;
+      if (!isAvailableModule(module)) return;
 
       const moduleRoute = getModuleRoute(module);
-      const isFallback = moduleRoute === MODULE_FALLBACK_PAGE;
-      const isDemoOpenModule = module.id === 'ai-agent';
-      const hasAccess = isFallback || isDemoOpenModule || isModuleAccessible(module);
-
-      if (hasAccess) {
-        window.parent?.postMessage?.(
-          {
-            type: 'navigate',
-            page: moduleRoute,
-            tab: 'modules'
-          },
-          '*'
-        );
-        return;
-      }
-
-      if (APPFEATURES.payments === false) return;
 
       window.parent?.postMessage?.(
         {
           type: 'navigate',
-          page: 'payments.html',
-          tab: 'payments',
-          moduleId: module.id
+          page: moduleRoute,
+          tab: 'modules'
         },
         '*'
       );
@@ -324,44 +401,57 @@
     }
 
     /* =========================================================
-     * CARD RENDERING
+     * CARD BADGE HELPERS
      * Что здесь:
-     * - создание одной карточки модуля
-     * - бейдж статуса модуля
-     * - контент раскрывающейся части карточки
+     * - определение badge как на home
+     * - базовый / бесплатный / опциональный
      * ========================================================= */
 
-    function getModuleStatusBadge(module) {
-      if (getModuleRoute(module) === MODULE_FALLBACK_PAGE) {
+    function getModuleTypeBadge(module) {
+      if (!module) {
         return {
-          text: 'Скоро',
-          cls: 'is-soon'
+          text: 'Опциональный',
+          cls: 'is-optional'
         };
       }
 
-      if (!module.requiresPayment) {
+      if (BASE_MODULE_IDS.includes(module.id)) {
         return {
-          text: 'Бесплатно',
+          text: 'Базовый модуль',
+          cls: 'is-base'
+        };
+      }
+
+      if (FREE_MODULE_IDS.includes(module.id)) {
+        return {
+          text: 'Бесплатный',
           cls: 'is-free'
         };
       }
 
-      return isModuleAccessible(module)
-        ? {
-            text: 'Активен',
-            cls: 'is-active'
-          }
-        : {
-            text: 'Платный',
-            cls: 'is-paid'
-          };
+      return {
+        text: 'Опциональный',
+        cls: 'is-optional'
+      };
     }
+
+    /* =========================================================
+     * CARD RENDERING
+     * Что здесь:
+     * - создание одной карточки модуля
+     * - badge типа модуля
+     * - кнопка открытия / заглушка в разработке
+     * - контент раскрывающейся части карточки
+     * ========================================================= */
 
     function createModuleCard(module) {
       const section = document.createElement('section');
       section.className = 'card-section accordion-card module-accordion-card';
 
-      const badge = getModuleStatusBadge(module);
+      const badge = getModuleTypeBadge(module);
+      const isDisabledButton = isModuleButtonDisabled(module);
+      const buttonDisabledAttr = isDisabledButton ? 'disabled aria-disabled="true"' : '';
+      const buttonExtraClass = isDisabledButton ? ' btn-disabled' : '';
 
       section.innerHTML = `
         <button class="card-section-header accordion-header module-card-toggle" type="button" aria-expanded="false">
@@ -378,10 +468,11 @@
         <div class="card-section-body module-card-main">
           <p class="module-card-short-description">${module.shortDescription}</p>
           <button
-            class="btn btn-block"
+            class="btn btn-block${buttonExtraClass}"
             type="button"
             data-module-id="${module.id}"
             data-module-page="${module.page}"
+            ${buttonDisabledAttr}
           >
             ${getModuleOpenButtonText(module)}
           </button>
@@ -412,10 +503,17 @@
         }
       });
 
-      openBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        openModule(module);
-      });
+      if (!isDisabledButton) {
+        openBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          openModule(module);
+        });
+      } else {
+        openBtn.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+      }
 
       return section;
     }
