@@ -2,67 +2,18 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Подключение агента</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="../css/styles.css" />
-  <link rel="stylesheet" href="../css/modules.css" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+  />
+  <title>Подключение</title>
+
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../modules.css" />
 </head>
 <body class="module-body">
-  <div class="page page-my-agent">
-    <div class="module-tabs agent-tabs">
-      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/profile.html')">Профиль</button>
-      <button class="module-tab module-tab--third module-tab--active" type="button" onclick="navigateAgent('modules-agent/connect.html')">Подключение</button>
-      <button class="module-tab module-tab--third" type="button" onclick="navigateAgent('modules-agent/links.html')">Ссылки</button>
-      <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/stats.html')">Статистика</button>
-      <button class="module-tab module-tab--half" type="button" onclick="navigateAgent('modules-agent/dialogs.html')">Диалоги</button>
-    </div>
-
-    <div class="module-page-content module-connect-page">
-      <section class="card-section">
-        <div class="card-section-header">
-          <h2 class="card-section-title">Подключение агента</h2>
-          <p class="card-section-subtitle">Управляйте подключением агента к каналам</p>
-        </div>
-        <div class="card-section-body">
-          <div class="module-summary">
-            <div class="module-summary-row">
-              <div class="module-summary-label">Статус в Telegram</div>
-              <div class="module-summary-value">
-                <span class="status-badge status-badge--danger" id="telegramStatus">Не подключен</span>
-              </div>
-            </div>
-
-            <div class="module-summary-row">
-              <div class="module-summary-label">Статус TikTok</div>
-              <div class="module-summary-value">
-                <span class="status-badge status-badge--danger" id="tiktokStatus">Не подключен</span>
-              </div>
-            </div>
-
-            <div class="module-summary-row">
-              <div class="module-summary-label">Статус Instagram</div>
-              <div class="module-summary-value">
-                <span class="status-badge status-badge--danger" id="instagramStatus">Не подключен</span>
-              </div>
-            </div>
-
-            <div class="module-summary-row">
-              <div class="module-summary-label">Статус ВКонтакте</div>
-              <div class="module-summary-value">
-                <span class="status-badge status-badge--danger" id="vkStatus">Не подключен</span>
-              </div>
-            </div>
-
-            <div class="module-summary-row">
-              <div class="module-summary-label">Статус WhatsApp</div>
-              <div class="module-summary-value">
-                <span class="status-badge status-badge--danger" id="whatsappStatus">Не подключен</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
+  <div class="page page-my-agent module-page-content">
+    <div class="module-connect-page">
       <div class="accordion-card open">
         <button class="accordion-header" type="button" onclick="toggleAccordion(this)">
           <span class="accordion-header-title">Telegram</span>
@@ -75,14 +26,16 @@
               <span class="accordion-header-title">Как получить токен</span>
               <span class="accordion-header-icon"></span>
             </button>
+
             <div class="accordion-body" style="display: none;">
               <div class="connect-instructions-list">
                 <div class="connect-instruction-step">
+                  <h3 class="connect-instruction-title">Получение токена через BotFather</h3>
                   <ul class="connect-instruction-points">
                     <li>Откройте @BotFather в Telegram.</li>
                     <li>Отправьте команду <strong>/mybots</strong> или <strong>/newbot</strong>, если создаёте нового.</li>
-                    <li>Выберите вашего бота из списка.</li>
-                    <li>Нажмите «API Token».</li>
+                    <li>Выберите нужного бота из списка.</li>
+                    <li>Нажмите <strong>API Token</strong>.</li>
                     <li>Скопируйте токен и вставьте его в поле ниже.</li>
                   </ul>
                 </div>
@@ -95,9 +48,11 @@
               <span class="accordion-header-title">Введите токен</span>
               <span class="accordion-header-icon"></span>
             </button>
+
             <div class="accordion-body" style="display: none;">
               <div class="connect-form-block">
-                <label for="telegramBotToken" class="connect-field-label">Введите токен</label>
+                <label for="telegramBotToken" class="connect-field-label">Введите токен Telegram-бота</label>
+
                 <input
                   id="telegramBotToken"
                   class="connect-token-input"
@@ -106,10 +61,16 @@
                   autocomplete="off"
                   placeholder="API Token вашего бота"
                 />
+
                 <button type="button" class="btn connect-submit-btn" id="telegramConnectBtn">
                   Подключить
                 </button>
-                <p class="connect-form-note" id="telegramConnectNote" hidden></p>
+
+                <p class="connect-form-note">
+                  После подключения токен будет сохранён в настройках модуля и использован для связи с Telegram.
+                </p>
+
+                <p class="connect-status-msg" id="telegramConnectNote" hidden></p>
               </div>
             </div>
           </div>
@@ -119,6 +80,7 @@
               <span class="accordion-header-title">Инструкции</span>
               <span class="accordion-header-icon"></span>
             </button>
+
             <div class="accordion-body" style="display: none;">
               <div class="connect-links-list">
                 <a
@@ -145,288 +107,134 @@
           </div>
         </div>
       </div>
+
+      <div class="card-section">
+        <div class="card-section-header">
+          <h2 class="card-section-title">Статус подключения</h2>
+        </div>
+
+        <div class="card-section-body">
+          <div class="module-summary">
+            <div class="module-summary-row">
+              <span class="module-summary-label">Канал</span>
+              <span class="module-summary-value">Telegram</span>
+            </div>
+
+            <div class="module-summary-row">
+              <span class="module-summary-label">Состояние</span>
+              <span class="status-badge status-badge--neutral" id="telegramStatusBadge">Не подключён</span>
+            </div>
+
+            <div class="module-summary-row">
+              <span class="module-summary-label">Токен</span>
+              <span class="module-summary-value" id="telegramTokenMask">Не указан</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-  (function () {
-    let TENANTCONFIG = null;
-    let APPFEATURES = {
-      home: true,
-      myAgent: true,
-      modules: true,
-      sharedChat: true,
-      affiliate: true,
-      payments: true,
-      settings: true
-    };
+    function toggleAccordion(headerEl) {
+      const card = headerEl.closest(".accordion-card");
+      if (!card) return;
 
-    function getShell() {
-      try {
-        return window.parent?.AICAppShell || null;
-      } catch (error) {
-        console.error('[AI CENTER][Agent Connect] shell access failed', error);
-        return null;
-      }
-    }
+      const body = card.querySelector(":scope > .accordion-body");
+      if (!body) return;
 
-    function getTenantConfig() {
-      try {
-        return getShell()?.getTenantConfig?.() || null;
-      } catch (error) {
-        console.error('[AI CENTER][Agent Connect] tenant config read failed', error);
-        return null;
-      }
-    }
+      const isOpen = card.classList.contains("open");
 
-    function getAppFeatures() {
-      try {
-        return getShell()?.getAppFeatures?.() || {};
-      } catch (error) {
-        console.error('[AI CENTER][Agent Connect] app features read failed', error);
-        return {};
-      }
-    }
-
-    function getText(key, fallback = '') {
-      return TENANTCONFIG?.texts?.[key] ?? fallback;
-    }
-
-    function navigateAgent(page) {
-      if (APPFEATURES.myAgent === false) {
-        console.warn('[AI CENTER][Agent Connect] agent module is disabled');
-        return;
-      }
-
-      try {
-        window.parent?.postMessage?.(
-          { type: 'navigate', page, tab: 'modules' },
-          '*'
-        );
-      } catch (error) {
-        console.error('[AI CENTER][Agent Connect] navigate failed', error);
-      }
-    }
-
-    function toggleAccordion(button) {
-      const card = button.closest('.accordion-card');
-      const body = card?.querySelector(':scope > .accordion-body');
-      if (!card || !body) return;
-
-      const isOpen = card.classList.contains('open');
-      card.classList.toggle('open', !isOpen);
-      body.style.display = isOpen ? 'none' : 'block';
-    }
-
-    function getAgentProfileState() {
-      try {
-        return getShell()?.getAgentProfile?.() || null;
-      } catch (error) {
-        console.error('[AI CENTER][Agent Connect] profile state read failed', error);
-        return null;
-      }
-    }
-
-    function setBadgeState(
-      element,
-      connected,
-      connectedText = 'Подключен',
-      disconnectedText = 'Не подключен'
-    ) {
-      if (!element) return;
-
-      element.textContent = connected ? connectedText : disconnectedText;
-      element.classList.remove(
-        'status-badge--success',
-        'status-badge--danger',
-        'status-badge--warning',
-        'status-badge--info',
-        'status-badge--neutral'
-      );
-      element.classList.add(
-        connected ? 'status-badge--success' : 'status-badge--danger'
-      );
-    }
-
-    function setConnectNote(message, type) {
-      const noteEl = document.getElementById('telegramConnectNote');
-      if (!noteEl) return;
-
-      if (!message) {
-        noteEl.hidden = true;
-        noteEl.textContent = '';
-        noteEl.classList.remove('settings-error-text', 'settings-success-text');
-        return;
-      }
-
-      noteEl.hidden = false;
-      noteEl.textContent = message;
-      noteEl.classList.remove('settings-error-text', 'settings-success-text');
-      noteEl.classList.add(
-        type === 'error' ? 'settings-error-text' : 'settings-success-text'
-      );
-    }
-
-    function applyConnectState() {
-      const state = getAgentProfileState() || {};
-
-      const telegramStatusEl = document.getElementById('telegramStatus');
-      setBadgeState(
-        telegramStatusEl,
-        Boolean(state.connected),
-        getText('agentConnectStatusConnected', 'Подключен'),
-        getText('agentConnectStatusDisconnected', 'Не подключен')
-      );
-
-      const tokenInput = document.getElementById('telegramBotToken');
-      if (tokenInput && state.token) {
-        tokenInput.value = state.token;
-      }
-    }
-
-    function applyTenantTexts() {
-      const titleEl = document.getElementById('agentConnectTitle');
-      const subtitleEl = document.getElementById('agentConnectSubtitle');
-      const statusLabelEl = document.getElementById('telegramStatusLabel');
-      const tokenLabelEl = document.getElementById('telegramTokenLabel');
-      const connectBtn = document.getElementById('telegramConnectBtn');
-
-      if (titleEl) {
-        titleEl.textContent = getText('agentConnectTitle', 'Подключение Telegram-бота');
-      }
-
-      if (subtitleEl) {
-        subtitleEl.textContent = getText(
-          'agentConnectSubtitle',
-          'Укажите API Token и подключите Telegram-бота к модулю.'
-        );
-      }
-
-      if (statusLabelEl) {
-        statusLabelEl.textContent = getText('agentConnectStatusLabel', 'Статус');
-      }
-
-      if (tokenLabelEl) {
-        tokenLabelEl.textContent = getText('agentConnectTokenLabel', 'API Token');
-      }
-
-      if (connectBtn) {
-        connectBtn.textContent = getText('agentConnectButton', 'Подключить');
-      }
-
-      document.title =
-        getText('agentConnectPageTitle', '') ||
-        getText('agentConnectTitle', '') ||
-        'Подключение Telegram-бота';
-    }
-
-    function syncAvailability() {
-      const disabled = APPFEATURES.myAgent === false;
-      const tokenInput = document.getElementById('telegramBotToken');
-      const connectBtn = document.getElementById('telegramConnectBtn');
-
-      if (tokenInput) tokenInput.disabled = disabled;
-      if (connectBtn) connectBtn.disabled = disabled;
-
-      if (disabled) {
-        setConnectNote(
-          getText('agentConnectDisabledText', 'Модуль агента сейчас недоступен.'),
-          'error'
-        );
+      if (isOpen) {
+        card.classList.remove("open");
+        body.style.display = "none";
       } else {
-        setConnectNote('', 'success');
+        card.classList.add("open");
+        body.style.display = "block";
       }
     }
 
-    function bindConnectActions() {
-      const connectBtn = document.getElementById('telegramConnectBtn');
-      const tokenInput = document.getElementById('telegramBotToken');
-      const telegramStatusEl = document.getElementById('telegramStatus');
-
-      if (!connectBtn || !tokenInput) return;
-
-      connectBtn.addEventListener('click', () => {
-        if (APPFEATURES.myAgent === false) {
-          setConnectNote(
-            getText('agentConnectDisabledText', 'Модуль агента сейчас недоступен.'),
-            'error'
-          );
-          return;
-        }
-
-        const token = tokenInput.value.trim();
-
-        if (!token) {
-          setConnectNote(
-            getText('agentConnectTokenRequired', 'Введите API Token перед подключением.'),
-            'error'
-          );
-          return;
-        }
-
-        try {
-          getShell()?.setAgentProfile?.({
-            token,
-            connected: true
-          });
-        } catch (error) {
-          console.error('[AI CENTER][Agent Connect] profile state write failed', error);
-          setConnectNote(
-            getText('agentConnectSaveError', 'Не удалось сохранить состояние подключения.'),
-            'error'
-          );
-          return;
-        }
-
-        setBadgeState(
-          telegramStatusEl,
-          true,
-          getText('agentConnectStatusConnected', 'Подключен'),
-          getText('agentConnectStatusDisconnected', 'Не подключен')
-        );
-
-        setConnectNote(
-          getText('agentConnectSuccess', 'Telegram-бот отмечен как подключенный.'),
-          'success'
-        );
+    function initAccordions() {
+      document.querySelectorAll(".accordion-card").forEach((card) => {
+        const body = card.querySelector(":scope > .accordion-body");
+        if (!body) return;
+        body.style.display = card.classList.contains("open") ? "block" : "none";
       });
     }
 
-    function applyAppFeatures(features) {
-      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
-      syncAvailability();
+    function maskToken(token) {
+      if (!token || token.length < 10) return "Указан";
+      return token.slice(0, 6) + " •••••• " + token.slice(-4);
     }
 
-    window.navigateAgent = navigateAgent;
-    window.toggleAccordion = toggleAccordion;
+    function setTelegramStatus(isConnected, token) {
+      const badge = document.getElementById("telegramStatusBadge");
+      const tokenMask = document.getElementById("telegramTokenMask");
 
-    window.addEventListener('message', function (event) {
-      const data = event.data;
-      if (!data || typeof data !== 'object') return;
-
-      if (data.type === 'app-features') {
-        applyAppFeatures(data.features || {});
+      if (badge) {
+        badge.className = "status-badge " + (isConnected ? "status-badge--success" : "status-badge--neutral");
+        badge.textContent = isConnected ? "Подключён" : "Не подключён";
       }
-    });
 
-    document.addEventListener('DOMContentLoaded', () => {
+      if (tokenMask) {
+        tokenMask.textContent = isConnected && token ? maskToken(token) : "Не указан";
+      }
+    }
+
+    function showConnectNote(message, type) {
+      const note = document.getElementById("telegramConnectNote");
+      if (!note) return;
+
+      note.hidden = false;
+      note.textContent = message;
+      note.className = "connect-status-msg " + (type || "");
+    }
+
+    function saveTelegramToken(token) {
       try {
-        window.Telegram?.WebApp?.ready?.();
-      } catch (error) {
-        console.warn('[AI CENTER][Agent Connect] Telegram WebApp ready failed', error);
+        window.currentTelegramToken = token;
+
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage(
+            {
+              type: "module-connect-save",
+              channel: "telegram",
+              token: token
+            },
+            "*"
+          );
+        }
+      } catch (err) {
+        console.warn("[connect] save token failed", err);
       }
+    }
 
-      TENANTCONFIG = getTenantConfig();
-      APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
+    function bindConnectForm() {
+      const input = document.getElementById("telegramBotToken");
+      const button = document.getElementById("telegramConnectBtn");
 
-      applyTenantTexts();
-      applyConnectState();
-      bindConnectActions();
-      syncAvailability();
+      if (!input || !button) return;
 
-      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+      button.addEventListener("click", () => {
+        const token = (input.value || "").trim();
+
+        if (!token) {
+          showConnectNote("Введите токен Telegram-бота.", "error");
+          setTelegramStatus(false, "");
+          return;
+        }
+
+        saveTelegramToken(token);
+        setTelegramStatus(true, token);
+        showConnectNote("Telegram-бот успешно подключён.", "success");
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initAccordions();
+      bindConnectForm();
+      setTelegramStatus(false, "");
     });
-  })();
-</script>
+  </script>
 </body>
 </html>
