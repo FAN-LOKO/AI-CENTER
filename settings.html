@@ -13,16 +13,16 @@
   <div class="page settings-page">
     <section class="card-section">
       <div class="card-section-header">
-        <h2 class="card-section-title">Данные профиля</h2>
-        <p class="card-section-subtitle">
-          Эти данные используются для авторизации в PWA и коммуникации
+        <h2 class="card-section-title" id="settingsProfileTitle">Данные профиля</h2>
+        <p class="card-section-subtitle" id="settingsProfileLead">
+          Используются для входа в PWA и дальнейшей коммуникации
         </p>
       </div>
 
       <div class="card-section-body">
         <form class="settings-form" id="profileForm" novalidate>
           <div class="settings-field">
-            <label for="profileFullName" class="settings-label">ФИО</label>
+            <label for="profileFullName" class="settings-label" id="settingsFullNameLabel">ФИО</label>
             <input
               id="profileFullName"
               name="fullName"
@@ -34,7 +34,7 @@
           </div>
 
           <div class="settings-field">
-            <label for="profileEmail" class="settings-label">Email</label>
+            <label for="profileEmail" class="settings-label" id="settingsEmailLabel">Email</label>
             <input
               id="profileEmail"
               name="email"
@@ -68,9 +68,9 @@
 
     <section class="card-section">
       <div class="card-section-header">
-        <h2 class="card-section-title">О приложении</h2>
+        <h2 class="card-section-title" id="settingsVersionTitle">О приложении</h2>
         <p class="card-section-subtitle">
-          Общая информация о платформе AI FIT CENTER
+          Версия платформы, сборка и техническая информация
         </p>
       </div>
 
@@ -106,326 +106,325 @@
   </div>
 
   <script>
-  (function () {
-    let TENANTCONFIG = null;
-    let APPFEATURES = {
-      home: true,
-      myAgent: true,
-      modules: true,
-      sharedChat: true,
-      affiliate: true,
-      payments: true,
-      settings: true
-    };
+    (function () {
+      let TENANTCONFIG = null;
+      let APPFEATURES = {
+        home: true,
+        myAgent: true,
+        modules: true,
+        sharedChat: true,
+        affiliate: true,
+        payments: true,
+        settings: true
+      };
 
-    function getShell() {
-      try {
-        return window.parent?.AICAppShell || null;
-      } catch (error) {
-        console.error('[Settings] shell access failed', error);
-        return null;
-      }
-    }
-
-    function getTenantConfig() {
-      const shell = getShell();
-      try {
-        return shell?.getTenantConfig?.() || null;
-      } catch (error) {
-        console.error('[Settings] tenant config read failed', error);
-        return null;
-      }
-    }
-
-    function getAppFeatures() {
-      const shell = getShell();
-      try {
-        return shell?.getAppFeatures?.() || {};
-      } catch (error) {
-        console.error('[Settings] app features read failed', error);
-        return {};
-      }
-    }
-
-    function getText(key, fallback = '') {
-      return TENANTCONFIG?.texts?.[key] ?? fallback;
-    }
-
-    function requestUserProfile() {
-      try {
-        window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
-      } catch (error) {
-        console.error('[Settings] request-user-profile failed', error);
-      }
-    }
-
-    function applyUserProfile(profile) {
-      if (!profile || typeof profile !== 'object') return;
-
-      const fullNameInput = document.getElementById('profileFullName');
-      const emailInput = document.getElementById('profileEmail');
-
-      if (fullNameInput && typeof profile.fullName === 'string') {
-        fullNameInput.value = profile.fullName;
-      }
-
-      if (emailInput && typeof profile.email === 'string') {
-        emailInput.value = profile.email;
-      }
-    }
-
-    function validateEmail(email) {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-
-    function setStatus(message, type) {
-      const statusEl = document.getElementById('profileStatusMessage');
-      if (!statusEl) return;
-
-      if (!message) {
-        statusEl.hidden = true;
-        statusEl.textContent = '';
-        statusEl.className = 'settings-success-text';
-        return;
-      }
-
-      statusEl.hidden = false;
-      statusEl.textContent = message;
-      statusEl.className =
-        type === 'error' ? 'settings-error-text' : 'settings-success-text';
-    }
-
-    function fillVersionInfo() {
-      const shell = getShell();
-      const version =
-        shell && typeof shell.getVersionInfo === 'function'
-          ? shell.getVersionInfo()
-          : window.parent?.AICRuntime?.version || null;
-
-      const tenantConfig =
-        shell && typeof shell.getTenantConfig === 'function'
-          ? shell.getTenantConfig()
-          : null;
-
-      if (version) {
-        const appVersionEl = document.getElementById('settingsAppVersion');
-        const buildVersionEl = document.getElementById('settingsBuildVersion');
-        const commitHashEl = document.getElementById('settingsCommitHash');
-        const builtAtEl = document.getElementById('settingsBuiltAt');
-
-        if (appVersionEl) {
-          appVersionEl.textContent = version.appVersion || '—';
-        }
-
-        if (buildVersionEl) {
-          buildVersionEl.textContent = version.buildVersion || '—';
-        }
-
-        if (commitHashEl) {
-          commitHashEl.textContent = version.commitHash || '—';
-        }
-
-        if (builtAtEl) {
-          builtAtEl.textContent = version.builtAt || '—';
+      function getShell() {
+        try {
+          return window.parent?.AICAppShell || null;
+        } catch (error) {
+          console.error('[Settings] shell access failed', error);
+          return null;
         }
       }
 
-      if (tenantConfig) {
-        const tenantIdEl = document.getElementById('settingsTenantId');
-        if (tenantIdEl) {
-          tenantIdEl.textContent = tenantConfig.tenantId || '—';
+      function getTenantConfig() {
+        const shell = getShell();
+        try {
+          return shell?.getTenantConfig?.() || null;
+        } catch (error) {
+          console.error('[Settings] tenant config read failed', error);
+          return null;
         }
       }
-    }
 
-    function applyTenantTexts() {
-      const titleEl = document.getElementById('settingsTitle');
-      const subtitleEl = document.getElementById('settingsSubtitle');
-      const profileTitleEl = document.getElementById('settingsProfileTitle');
-      const profileLeadEl = document.getElementById('settingsProfileLead');
-      const fullNameLabelEl = document.getElementById('settingsFullNameLabel');
-      const emailLabelEl = document.getElementById('settingsEmailLabel');
-      const saveButtonEl = document.getElementById('profileSaveButton');
-      const versionTitleEl = document.getElementById('settingsVersionTitle');
-
-      if (titleEl) {
-        titleEl.textContent = getText('settingsHeaderTitle', 'Настройки');
-      }
-
-      if (subtitleEl) {
-        subtitleEl.textContent = getText(
-          'settingsHeaderSubtitle',
-          'Управление профилем и системной информацией'
-        );
-      }
-
-      if (profileTitleEl) {
-        profileTitleEl.textContent = getText('settingsProfileTitle', 'Профиль');
-      }
-
-      if (profileLeadEl) {
-        profileLeadEl.textContent = getText(
-          'settingsProfileLead',
-          'Укажите имя и email для входа в PWA и дальнейшей синхронизации данных.'
-        );
-      }
-
-      if (fullNameLabelEl) {
-        fullNameLabelEl.textContent = getText('settingsFullNameLabel', 'Имя');
-      }
-
-      if (emailLabelEl) {
-        emailLabelEl.textContent = getText('settingsEmailLabel', 'Email');
-      }
-
-      if (saveButtonEl) {
-        saveButtonEl.textContent = getText('settingsSaveButton', 'Сохранить');
-      }
-
-      if (versionTitleEl) {
-        versionTitleEl.textContent = getText(
-          'settingsVersionTitle',
-          'Информация о версии'
-        );
-      }
-
-      document.title =
-        getText('settingsPageTitle', '') ||
-        getText('navSettings', '') ||
-        'Настройки';
-    }
-
-    function renderDisabledState() {
-      const form = document.getElementById('profileForm');
-      const statusEl = document.getElementById('profileStatusMessage');
-
-      if (form) {
-        Array.from(form.elements).forEach(function (el) {
-          el.disabled = true;
-        });
-      }
-
-      if (statusEl) {
-        setStatus(
-          getText('settingsDisabledText', 'Раздел настроек сейчас недоступен.'),
-          'error'
-        );
-      }
-    }
-
-    function syncSettingsAvailability() {
-      const form = document.getElementById('profileForm');
-      if (!form) return;
-
-      const disabled = APPFEATURES.settings === false;
-
-      Array.from(form.elements).forEach(function (el) {
-        el.disabled = disabled;
-      });
-
-      if (disabled) {
-        renderDisabledState();
-      } else {
-        setStatus('', 'success');
-      }
-    }
-
-    function bindProfileForm() {
-      const form = document.getElementById('profileForm');
-      if (!form) return;
-
-      form.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        if (APPFEATURES.settings === false) {
-          setStatus(
-            getText('settingsDisabledText', 'Раздел настроек сейчас недоступен.'),
-            'error'
-          );
-          return;
+      function getAppFeatures() {
+        const shell = getShell();
+        try {
+          return shell?.getAppFeatures?.() || {};
+        } catch (error) {
+          console.error('[Settings] app features read failed', error);
+          return {};
         }
+      }
+
+      function getText(key, fallback = '') {
+        return TENANTCONFIG?.texts?.[key] ?? fallback;
+      }
+
+      function requestUserProfile() {
+        try {
+          window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
+        } catch (error) {
+          console.error('[Settings] request-user-profile failed', error);
+        }
+      }
+
+      function applyUserProfile(profile) {
+        if (!profile || typeof profile !== 'object') return;
 
         const fullNameInput = document.getElementById('profileFullName');
         const emailInput = document.getElementById('profileEmail');
 
-        const fullName = fullNameInput?.value?.trim() || '';
-        const email = emailInput?.value?.trim() || '';
+        if (fullNameInput && typeof profile.fullName === 'string') {
+          fullNameInput.value = profile.fullName;
+        }
 
-        if (!email) {
-          setStatus(
-            getText('settingsEmailRequiredError', 'Укажите email для входа в PWA'),
-            'error'
-          );
-          emailInput?.focus();
+        if (emailInput && typeof profile.email === 'string') {
+          emailInput.value = profile.email;
+        }
+      }
+
+      function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      function setStatus(message, type) {
+        const statusEl = document.getElementById('profileStatusMessage');
+        if (!statusEl) return;
+
+        if (!message) {
+          statusEl.hidden = true;
+          statusEl.textContent = '';
+          statusEl.className = 'settings-success-text';
           return;
         }
 
-        if (!validateEmail(email)) {
-          setStatus(
-            getText('settingsEmailInvalidError', 'Введите корректный email'),
-            'error'
-          );
-          emailInput?.focus();
-          return;
+        statusEl.hidden = false;
+        statusEl.textContent = message;
+        statusEl.className =
+          type === 'error' ? 'settings-error-text' : 'settings-success-text';
+      }
+
+      function fillVersionInfo() {
+        const shell = getShell();
+        const version =
+          shell && typeof shell.getVersionInfo === 'function'
+            ? shell.getVersionInfo()
+            : window.parent?.AICRuntime?.version || null;
+
+        const tenantConfig =
+          shell && typeof shell.getTenantConfig === 'function'
+            ? shell.getTenantConfig()
+            : null;
+
+        if (version) {
+          const appVersionEl = document.getElementById('settingsAppVersion');
+          const buildVersionEl = document.getElementById('settingsBuildVersion');
+          const commitHashEl = document.getElementById('settingsCommitHash');
+          const builtAtEl = document.getElementById('settingsBuiltAt');
+
+          if (appVersionEl) {
+            appVersionEl.textContent = version.appVersion || '—';
+          }
+
+          if (buildVersionEl) {
+            buildVersionEl.textContent = version.buildVersion || '—';
+          }
+
+          if (commitHashEl) {
+            commitHashEl.textContent = version.commitHash || '—';
+          }
+
+          if (builtAtEl) {
+            builtAtEl.textContent = version.builtAt || '—';
+          }
         }
 
-        const profile = {
-          fullName,
-          email
-        };
+        if (tenantConfig) {
+          const tenantIdEl = document.getElementById('settingsTenantId');
+          if (tenantIdEl) {
+            tenantIdEl.textContent = tenantConfig.tenantId || '—';
+          }
+        }
+      }
 
-        try {
-          window.parent?.postMessage?.(
-            {
-              type: 'save-user-profile',
-              profile
-            },
-            '*'
-          );
+      function applyTenantTexts() {
+        const profileTitleEl = document.getElementById('settingsProfileTitle');
+        const profileLeadEl = document.getElementById('settingsProfileLead');
+        const fullNameLabelEl = document.getElementById('settingsFullNameLabel');
+        const emailLabelEl = document.getElementById('settingsEmailLabel');
+        const saveButtonEl = document.getElementById('profileSaveButton');
+        const versionTitleEl = document.getElementById('settingsVersionTitle');
 
-          setStatus(
-            getText('settingsProfileSaved', 'Данные профиля сохранены'),
-            'success'
+        if (profileTitleEl) {
+          profileTitleEl.textContent = getText(
+            'settingsProfileTitle',
+            'Данные профиля'
           );
-        } catch (error) {
-          console.error('[Settings] save-user-profile failed', error);
+        }
+
+        if (profileLeadEl) {
+          profileLeadEl.textContent = getText(
+            'settingsProfileLead',
+            'Используются для входа в PWA и дальнейшей коммуникации'
+          );
+        }
+
+        if (fullNameLabelEl) {
+          fullNameLabelEl.textContent = getText(
+            'settingsFullNameLabel',
+            'ФИО'
+          );
+        }
+
+        if (emailLabelEl) {
+          emailLabelEl.textContent = getText(
+            'settingsEmailLabel',
+            'Email'
+          );
+        }
+
+        if (saveButtonEl) {
+          saveButtonEl.textContent = getText(
+            'settingsSaveButton',
+            'Сохранить'
+          );
+        }
+
+        if (versionTitleEl) {
+          versionTitleEl.textContent = getText(
+            'settingsVersionTitle',
+            'О приложении'
+          );
+        }
+
+        document.title =
+          getText('settingsPageTitle', '') ||
+          getText('navSettings', '') ||
+          'Настройки';
+      }
+
+      function renderDisabledState() {
+        const form = document.getElementById('profileForm');
+        const statusEl = document.getElementById('profileStatusMessage');
+
+        if (form) {
+          Array.from(form.elements).forEach(function (el) {
+            el.disabled = true;
+          });
+        }
+
+        if (statusEl) {
           setStatus(
-            getText('settingsProfileSaveError', 'Не удалось сохранить профиль'),
+            getText('settingsDisabledText', 'Раздел настроек сейчас недоступен.'),
             'error'
           );
+        }
+      }
+
+      function syncSettingsAvailability() {
+        const form = document.getElementById('profileForm');
+        if (!form) return;
+
+        const disabled = APPFEATURES.settings === false;
+
+        Array.from(form.elements).forEach(function (el) {
+          el.disabled = disabled;
+        });
+
+        if (disabled) {
+          renderDisabledState();
+        } else {
+          setStatus('', 'success');
+        }
+      }
+
+      function bindProfileForm() {
+        const form = document.getElementById('profileForm');
+        if (!form) return;
+
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+
+          if (APPFEATURES.settings === false) {
+            setStatus(
+              getText('settingsDisabledText', 'Раздел настроек сейчас недоступен.'),
+              'error'
+            );
+            return;
+          }
+
+          const fullNameInput = document.getElementById('profileFullName');
+          const emailInput = document.getElementById('profileEmail');
+
+          const fullName = fullNameInput?.value?.trim() || '';
+          const email = emailInput?.value?.trim() || '';
+
+          if (!email) {
+            setStatus(
+              getText('settingsEmailRequiredError', 'Укажите email для входа в PWA'),
+              'error'
+            );
+            emailInput?.focus();
+            return;
+          }
+
+          if (!validateEmail(email)) {
+            setStatus(
+              getText('settingsEmailInvalidError', 'Введите корректный email'),
+              'error'
+            );
+            emailInput?.focus();
+            return;
+          }
+
+          const profile = {
+            fullName,
+            email
+          };
+
+          try {
+            window.parent?.postMessage?.(
+              {
+                type: 'save-user-profile',
+                profile
+              },
+              '*'
+            );
+
+            setStatus(
+              getText('settingsProfileSaved', 'Данные профиля сохранены'),
+              'success'
+            );
+          } catch (error) {
+            console.error('[Settings] save-user-profile failed', error);
+            setStatus(
+              getText('settingsProfileSaveError', 'Не удалось сохранить профиль'),
+              'error'
+            );
+          }
+        });
+      }
+
+      function applyAppFeatures(features) {
+        APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+        syncSettingsAvailability();
+      }
+
+      window.addEventListener('message', function (event) {
+        const data = event.data;
+        if (!data || typeof data !== 'object') return;
+
+        if (data.type === 'user-profile') {
+          applyUserProfile(data.profile);
+        } else if (data.type === 'app-features') {
+          applyAppFeatures(data.features || {});
         }
       });
-    }
 
-    function applyAppFeatures(features) {
-      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
-      syncSettingsAvailability();
-    }
+      document.addEventListener('DOMContentLoaded', function () {
+        TENANTCONFIG = getTenantConfig();
+        APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
 
-    window.addEventListener('message', function (event) {
-      const data = event.data;
-      if (!data || typeof data !== 'object') return;
+        applyTenantTexts();
+        fillVersionInfo();
+        bindProfileForm();
+        syncSettingsAvailability();
+        requestUserProfile();
 
-      if (data.type === 'user-profile') {
-        applyUserProfile(data.profile);
-      } else if (data.type === 'app-features') {
-        applyAppFeatures(data.features || {});
-      }
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-      TENANTCONFIG = getTenantConfig();
-      APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
-
-      applyTenantTexts();
-      fillVersionInfo();
-      bindProfileForm();
-      syncSettingsAvailability();
-      requestUserProfile();
-
-      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
-    });
-  })();
-</script>
+        window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+      });
+    })();
+  </script>
 </body>
 </html>
