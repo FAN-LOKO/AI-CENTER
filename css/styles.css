@@ -1338,10 +1338,7 @@ a {
   }
 }
 
-/* =========================================================
-   15. SETTINGS
-========================================================= */
-
+/* 15. SETTINGS */
 .settings-page {
   padding: 12px 16px 16px;
   display: flex;
@@ -1366,7 +1363,7 @@ a {
   font-size: 13px;
   font-weight: 700;
   line-height: 1.3;
-  color: var(--text-primary);
+  color: #0f172a;
 }
 
 .settings-input {
@@ -1376,7 +1373,7 @@ a {
   border: 1px solid var(--border-mid);
   border-radius: 12px;
   background: rgba(248, 250, 252, 0.92);
-  color: var(--text-primary);
+  color: #0f172a;
   font: inherit;
   line-height: 1.4;
   outline: none;
@@ -1390,8 +1387,8 @@ a {
 }
 
 .settings-input::placeholder {
-  color: var(--text-muted);
-  opacity: 0.9;
+  color: #64748b;
+  opacity: 1;
 }
 
 .settings-input:hover {
@@ -1417,9 +1414,9 @@ a {
 
 .settings-helper-text {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #475569;
 }
 
 .settings-success-text,
@@ -1465,8 +1462,9 @@ a {
 .settings-info-label {
   margin: 0;
   font-size: 13px;
-  line-height: 1.4;
-  color: var(--text-muted);
+  line-height: 1.45;
+  font-weight: 600;
+  color: #475569;
 }
 
 .settings-info-value {
@@ -1474,9 +1472,9 @@ a {
   max-width: 58%;
   text-align: right;
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.45;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #0f172a;
   word-break: break-word;
 }
 
