@@ -8,13 +8,8 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   />
 
-  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Общие стили Mini App (shell + screens) -->
   <link rel="stylesheet" href="./css/styles.css" />
-
-  <!-- Tenant loader (темы, тексты, ссылки) -->
   <script src="./tenant-loader.js"></script>
 </head>
 <body>
@@ -24,8 +19,7 @@
         <div class="card-section-header auth-start-header">
           <h1 class="card-section-title auth-start-title" id="authStartTitle">
             <span class="auth-start-line auth-start-line-light">AI</span>
-            <span class="auth-start-line auth-start-line-accent">FIT</span>
-            <span class="auth-start-line auth-start-line-light">CENTER</span>
+            <span class="auth-start-line auth-start-line-accent">CENTER</span>
           </h1>
           <p class="card-section-subtitle auth-start-subtitle" id="authStartSubtitle">
             Добро пожаловать!
@@ -63,8 +57,17 @@
               type="checkbox"
               class="auth-consent-checkbox"
             />
-            <span id="authPersonalDataLabel">
-              Согласен с обработкой персональных данных
+            <span id="authPersonalDataLabelWrap">
+              Согласен с
+              <a
+                href="#"
+                class="auth-consent-link"
+                id="authPersonalDataLink"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                обработкой персональных данных
+              </a>
             </span>
           </label>
 
@@ -192,6 +195,10 @@
         home: {
           ...(base.home || {}),
           ...(tenant.home || {})
+        },
+        branding: {
+          ...(base.branding || {}),
+          ...(tenant.branding || {})
         }
       };
     }
@@ -205,14 +212,55 @@
       return mergeConfig(productConfig, tenantConfig);
     }
 
-    function splitAppName(appName) {
-      if (!appName || typeof appName !== 'string') {
-        return { top: 'AI', brand: 'FIT', bottom: 'CENTER' };
+    function resolveBrandToken(config) {
+      return (
+        config?.shellBrandName ||
+        config?.brand?.shellName ||
+        config?.brand?.name ||
+        config?.brandName ||
+        ''
+      ).trim();
+    }
+
+    function resolveAppName(config) {
+      const explicitAppName =
+        typeof config?.appName === 'string' ? config.appName.trim() : '';
+
+      if (explicitAppName) {
+        return explicitAppName;
       }
 
-      const parts = appName.trim().split(/\s+/);
+      const branding = config?.branding || {};
+      const pattern =
+        typeof branding.shellNamePattern === 'string' &&
+        branding.shellNamePattern.trim()
+          ? branding.shellNamePattern.trim()
+          : 'AI {brand} CENTER';
 
-      if (parts.length === 3) {
+      const fallback =
+        typeof branding.shellNameFallback === 'string' &&
+        branding.shellNameFallback.trim()
+          ? branding.shellNameFallback.trim()
+          : 'AI CENTER';
+
+      const brandToken = resolveBrandToken(config);
+
+      if (!brandToken) {
+        return fallback;
+      }
+
+      return pattern.replace('{brand}', brandToken).replace(/\s+/g, ' ').trim();
+    }
+
+    function splitAppName(appName) {
+      const safeName =
+        typeof appName === 'string' && appName.trim()
+          ? appName.trim()
+          : 'AI CENTER';
+
+      const parts = safeName.split(/\s+/);
+
+      if (parts.length >= 3) {
         return {
           top: parts[0],
           brand: parts[1],
@@ -229,9 +277,9 @@
       }
 
       return {
-        top: 'AI',
-        brand: appName.trim(),
-        bottom: 'CENTER'
+        top: safeName,
+        brand: '',
+        bottom: ''
       };
     }
 
@@ -264,39 +312,51 @@
       }
     }
 
+    function renderAuthTitle(titleEl, titleParts) {
+      if (!titleEl) return;
+
+      titleEl.innerHTML = '';
+
+      const topSpan = document.createElement('span');
+      topSpan.className = 'auth-start-line auth-start-line-light';
+      topSpan.textContent = titleParts.top || '';
+      titleEl.appendChild(topSpan);
+
+      if (titleParts.brand) {
+        const brandSpan = document.createElement('span');
+        brandSpan.className = 'auth-start-line auth-start-line-accent';
+        brandSpan.textContent = titleParts.brand;
+        titleEl.appendChild(brandSpan);
+      }
+
+      if (titleParts.bottom) {
+        const bottomSpan = document.createElement('span');
+        bottomSpan.className = 'auth-start-line auth-start-line-light';
+        bottomSpan.textContent = titleParts.bottom;
+        titleEl.appendChild(bottomSpan);
+      }
+    }
+
     function applyTenantContent(config) {
       if (!config) return;
 
       const texts = config.texts || {};
       const policyLinks = config.policyLinks || {};
+      const resolvedAppName = resolveAppName(config);
 
-      document.title = texts.appTitle || config.appName || 'AI CENTER';
+      document.title = texts.appTitle || resolvedAppName || 'AI CENTER';
 
       const titleEl = document.getElementById('authStartTitle');
       const subtitleEl = document.getElementById('authStartSubtitle');
       const consentIntroEl = document.getElementById('authConsentIntro');
-      const personalDataLabelEl = document.getElementById('authPersonalDataLabel');
       const buttonEl = document.getElementById('startButton');
       const footnoteEl = document.getElementById('authStartFootnote');
       const privacyLinkEl = document.getElementById('authPrivacyLink');
+      const personalDataLinkEl = document.getElementById('authPersonalDataLink');
 
-      const titleParts = splitAppName(config.appName || 'AI CENTER');
+      const titleParts = splitAppName(resolvedAppName);
 
-      if (titleEl) {
-        titleEl.innerHTML = [
-          '<span class="auth-start-line auth-start-line-light">',
-          titleParts.top,
-          '</span>',
-          '<span class="auth-start-line auth-start-line-accent">',
-          titleParts.brand,
-          '</span>',
-          titleParts.bottom
-            ? '<span class="auth-start-line auth-start-line-light">' +
-              titleParts.bottom +
-              '</span>'
-            : ''
-        ].join('');
-      }
+      renderAuthTitle(titleEl, titleParts);
 
       if (subtitleEl) {
         subtitleEl.textContent =
@@ -307,12 +367,6 @@
         consentIntroEl.textContent =
           texts.authConsentIntro ||
           'Перед началом работы подтвердите согласие с политикой конфиденциальности и обработкой персональных данных.';
-      }
-
-      if (personalDataLabelEl) {
-        personalDataLabelEl.textContent =
-          texts.authPersonalDataLabel ||
-          'Согласен с обработкой персональных данных';
       }
 
       if (buttonEl) {
@@ -329,6 +383,15 @@
         privacyLinkEl.textContent =
           texts.authPrivacyLabel || 'политикой конфиденциальности';
         privacyLinkEl.href = policyLinks.privacy || '#';
+      }
+
+      if (personalDataLinkEl) {
+        personalDataLinkEl.textContent =
+          texts.authPersonalDataLinkLabel || 'обработкой персональных данных';
+        personalDataLinkEl.href =
+          policyLinks.personalData ||
+          policyLinks.privacy ||
+          '#';
       }
 
       applyTenantTheme(config.theme || null);
@@ -410,6 +473,6 @@
       }
     });
   })();
-</script>
+  </script>
 </body>
 </html>
