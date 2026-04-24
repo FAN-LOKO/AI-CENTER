@@ -188,17 +188,49 @@
     return {
       dialogs: [],
       stats: {},
-      activeDialog: null
+      activeDialog: null,
+      selectedDialog: null
     };
   }
 
   function getActiveDialog(payload) {
-    if (payload?.activeDialog && typeof payload.activeDialog === 'object') {
-      return payload.activeDialog;
+    const shell = getShell();
+
+    try {
+      const selected =
+        shell?.getSelectedAgentDialog?.() ||
+        payload?.selectedDialog ||
+        payload?.activeDialog;
+
+      if (selected && typeof selected === 'object') {
+        const dialogs = Array.isArray(payload?.dialogs) ? payload.dialogs : [];
+        const selectedId = String(selected.id || selected.dialogId || '');
+
+        if (selectedId) {
+          const matched = dialogs.find(
+            (dialog) => String(dialog?.id || dialog?.dialogId || '') === selectedId
+          );
+          if (matched) {
+            return { ...matched, ...selected };
+          }
+        }
+
+        return selected;
+      }
+    } catch (error) {
+      console.error('[AI CENTER][Dialogs] selected dialog read failed', error);
     }
 
     const dialogs = Array.isArray(payload?.dialogs) ? payload.dialogs : [];
     return dialogs[0] || null;
+  }
+
+  function getDialogStatus(dialog) {
+    return (
+      dialog?.status ||
+      dialog?.state ||
+      getText('dialogsStatusActive', 'Активен')
+    );
   }
 
   function renderDialogHeader(dialog) {
@@ -232,11 +264,49 @@
     );
 
     setTextContent('dialogIdLabel', dialogId);
-    setTextContent(
-      'dialogStatusLabel',
-      dialog?.status || getText('dialogsStatusActive', 'Активен')
-    );
+    setTextContent('dialogStatusLabel', getDialogStatus(dialog));
     setTextContent('dialogLastClientTimeLabel', lastTime);
+  }
+
+  function normalizeMessage(message, dialog) {
+    const text =
+      message?.text ||
+      message?.message ||
+      '';
+
+    const time =
+      message?.timeLabel ||
+      message?.time ||
+      dialog?.timeLabel ||
+      dialog?.time ||
+      '';
+
+    const roleRaw = String(
+      message?.role ||
+      message?.authorRole ||
+      message?.author ||
+      message?.type ||
+      ''
+    ).toLowerCase();
+
+    const isClient =
+      roleRaw.includes('client') ||
+      roleRaw.includes('user') ||
+      roleRaw.includes('customer') ||
+      roleRaw.includes('lead');
+
+    const isAgent =
+      roleRaw.includes('agent') ||
+      roleRaw.includes('assistant') ||
+      roleRaw.includes('bot') ||
+      roleRaw.includes('manager');
+
+    return {
+      text,
+      time,
+      role: isClient ? 'client' : isAgent ? 'agent' : 'agent',
+      author: message?.author || (isClient ? 'Клиент' : 'Агент')
+    };
   }
 
   function renderMessages(dialog) {
@@ -250,8 +320,6 @@
       return;
     }
 
-    const messages = Array.isArray(dialog?.messages) ? dialog.messages : [];
-
     if (!dialog) {
       container.innerHTML = `<div class="module-notice">${escapeHtml(
         getText('dialogsEmptyText', 'Диалогов пока нет.')
@@ -259,41 +327,39 @@
       return;
     }
 
-    if (messages.length === 0) {
-      const fallbackMessage =
-        dialog?.lastMessage ||
-        dialog?.message ||
-        getText('dialogsMessageFallback', 'История сообщений пока пуста.');
+    let messages = Array.isArray(dialog?.messages) ? dialog.messages : [];
 
-      container.innerHTML = `
-        <div class="module-notice">${escapeHtml(fallbackMessage)}</div>
-      `;
+    if (!messages.length && (dialog?.lastMessage || dialog?.message)) {
+      messages = [
+        {
+          text: dialog?.lastMessage || dialog?.message || '',
+          timeLabel: dialog?.timeLabel || dialog?.time || '',
+          role: 'client',
+          author: 'Клиент'
+        }
+      ];
+    }
+
+    if (!messages.length) {
+      container.innerHTML = `<div class="module-notice">${escapeHtml(
+        getText('dialogsMessageFallback', 'История сообщений пока пуста.')
+      )}</div>`;
       return;
     }
 
-    container.innerHTML = messages.map((message) => {
-      const author =
-        message?.author ||
-        message?.role ||
-        getText('dialogsAuthorFallback', 'Система');
-
-      const text =
-        message?.text ||
-        message?.message ||
-        '';
-
-      const time =
-        message?.timeLabel ||
-        message?.time ||
-        '';
+    container.innerHTML = messages.map((rawMessage) => {
+      const message = normalizeMessage(rawMessage, dialog);
+      const isClient = message.role === 'client';
 
       return `
-        <div class="dialog-message-item">
-          <div class="dialog-message-meta">
-            <span class="dialog-message-author">${escapeHtml(author)}</span>
-            <span class="dialog-message-time">${escapeHtml(time)}</span>
+        <div class="dialog-message ${isClient ? 'dialog-message--client' : 'dialog-message--agent'}">
+          <div class="dialog-message-bubble">
+            <div class="dialog-message-text">${escapeHtml(message.text)}</div>
+            <div class="dialog-message-meta">
+              <span class="dialog-message-author">${escapeHtml(message.author)}</span>
+              <span class="dialog-message-time">${escapeHtml(message.time)}</span>
+            </div>
           </div>
-          <div class="dialog-message-text">${escapeHtml(text)}</div>
         </div>
       `;
     }).join('');
@@ -403,7 +469,8 @@
         data.type === 'agent-dialog-update' ||
         data.type === 'agent-stats-update' ||
         data.type === 'agent-module-stats-update' ||
-        data.type === 'agent-dialogs-update'
+        data.type === 'agent-dialogs-update' ||
+        data.type === 'agent-open-dialog'
       ) {
         renderDialogsPage();
       }
