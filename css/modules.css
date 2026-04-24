@@ -168,7 +168,8 @@
 }
 
 /* Вложенные аккордеоны модуля Агент:
-   стрелка на .accordion-icon должна крутиться при .open */
+   стрелка на .accordion-icon поворачивается,
+   когда открыт .accordion-body */
 
 .card-section.accordion-card .accordion-icon {
   display: inline-flex;
@@ -197,8 +198,7 @@
   transition: transform 0.18s ease;
 }
 
-.card-section.accordion-card.open > .card-section-header .accordion-icon::before,
-.card-section.accordion-card.open > .accordion-header .accordion-icon::before {
+.card-section.accordion-card:has(.accordion-body.open) .accordion-icon::before {
   transform: translate(-50%, -38%) rotate(225deg);
 }
 
