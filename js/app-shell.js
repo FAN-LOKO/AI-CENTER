@@ -804,7 +804,7 @@
 
         setCurrentAgentDialog(selectedDialog);
 
-        const dialogsPage = "dialogs.html";
+        const dialogsPage = "my-agent.html";
         const dialogsTab = getTabByPage(dialogsPage) || currentTab || getFallbackTab();
 
         navigate(dialogsPage, dialogsTab);
