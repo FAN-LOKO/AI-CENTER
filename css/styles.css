@@ -2259,14 +2259,14 @@ body {
   margin: 0;
   font-size: 13px;
   line-height: 1.55;
-  color: #6b7280;
+  color: #334155;
 }
 
 .payments-muted-text {
   margin: 0;
   font-size: 13px;
   line-height: 1.55;
-  color: #6b7280;
+  color: #334155;
 }
 
 .payments-balance-row {
@@ -2286,7 +2286,7 @@ body {
 .payments-balance-currency {
   font-size: 14px;
   line-height: 1.2;
-  color: #6b7280;
+  color: #475569;
 }
 
 .payments-accordion-body {
@@ -2317,7 +2317,7 @@ body {
   margin: 0;
   font-size: 13px;
   line-height: 1.55;
-  color: #475569;
+  color: #334155;
 }
 
 .payments-tariffs-grid {
@@ -2383,7 +2383,7 @@ body {
   margin: 0;
   font-size: 13px;
   line-height: 1.55;
-  color: #6b7280;
+  color: #334155;
 }
 
 .payments-tariff-price-wrap {
@@ -2420,7 +2420,7 @@ body {
 .payments-plan-meta-label {
   font-size: 12px;
   line-height: 1.4;
-  color: #64748b;
+  color: #475569;
 }
 
 .payments-plan-meta-value {
@@ -2462,7 +2462,7 @@ body {
 .payments-offer-text {
   font-size: 12px;
   line-height: 1.5;
-  color: #374151;
+  color: #334155;
 }
 
 .payments-offer-link {
