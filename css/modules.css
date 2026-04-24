@@ -1710,3 +1710,53 @@ textarea.form-input,
 .module-dialogs-page > .card-section:last-child {
   margin-bottom: 0 !important;
 }
+
+/* =========================================================
+   CONNECT PAGE FIX
+   Совместимость со старой разметкой аккордеонов на connect.html
+========================================================= */
+
+/* если в connect.html всё ещё используется старый .accordion-icon */
+.module-connect-page .accordion-icon,
+.module-connect-page .accordion-header-icon {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  font-size: 0 !important;
+  line-height: 0;
+  color: #ffffff;
+}
+
+/* рисуем стрелку и для старого, и для нового класса */
+.module-connect-page .accordion-icon::before,
+.module-connect-page .accordion-header-icon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
+  transform: translate(-50%, -62%) rotate(45deg);
+  transition: transform 0.18s ease;
+}
+
+/* новый паттерн: .accordion-card.open */
+.module-connect-page .accordion-card.open > .accordion-header .accordion-icon::before,
+.module-connect-page .accordion-card.open > .accordion-header .accordion-header-icon::before {
+  transform: translate(-50%, -38%) rotate(225deg);
+}
+
+/* старый паттерн: .accordion-body.open */
+.module-connect-page .accordion-card > .accordion-body.open ~ .accordion-header .accordion-icon::before,
+.module-connect-page .accordion-card > .accordion-body.open ~ .accordion-header .accordion-header-icon::before {
+  transform: translate(-50%, -38%) rotate(225deg);
+}
+
+/* если open вешается на сам header */
+.module-connect-page .accordion-header.open .accordion-icon::before,
+.module-connect-page .accordion-header.open .accordion-header-icon::before {
+  transform: translate(-50%, -38%) rotate(225deg);
+}
