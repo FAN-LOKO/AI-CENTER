@@ -316,15 +316,22 @@
       message?.author ||
       message?.authorName ||
       message?.from ||
+      message?.sender ||
       '';
+
+    const username =
+      String(dialog?.username || dialog?.clientName || '').toLowerCase();
 
     const roleRaw = String(
       message?.role ||
       message?.authorRole ||
       message?.authorType ||
       message?.type ||
+      message?.senderType ||
       rawAuthor
     ).toLowerCase();
+
+    const authorRaw = String(rawAuthor || '').toLowerCase();
 
     const isUser =
       roleRaw.includes('owner') ||
@@ -332,14 +339,26 @@
       roleRaw.includes('manager') ||
       roleRaw.includes('admin') ||
       roleRaw.includes('host') ||
+      roleRaw.includes('tenant') ||
+      roleRaw.includes('human') ||
+      authorRaw === 'вы' ||
+      authorRaw === 'пользователь' ||
+      authorRaw === 'оператор' ||
       (roleRaw.includes('user') && !roleRaw.includes('client'));
 
-    const isClient =
+    const isClientByRole =
       roleRaw.includes('client') ||
       roleRaw.includes('customer') ||
       roleRaw.includes('lead') ||
       roleRaw.includes('prospect') ||
       roleRaw.includes('subscriber');
+
+    const isClientByAuthor =
+      authorRaw === 'клиент' ||
+      authorRaw === 'лид' ||
+      authorRaw === 'потенциальный клиент' ||
+      (username && authorRaw.includes(username.replace('@', ''))) ||
+      authorRaw.startsWith('@');
 
     const isAgent =
       roleRaw.includes('agent') ||
@@ -348,9 +367,16 @@
       roleRaw.includes('ai');
 
     let role = 'agent';
-    if (isUser) role = 'user';
-    else if (isClient) role = 'client';
-    else if (isAgent) role = 'agent';
+
+    if (isUser) {
+      role = 'user';
+    } else if (isClientByRole || isClientByAuthor) {
+      role = 'client';
+    } else if (isAgent) {
+      role = 'agent';
+    } else if (!message?.role && !message?.authorRole && !message?.authorType) {
+      role = 'client';
+    }
 
     let authorLabel = rawAuthor || '';
     if (!authorLabel) {
@@ -393,7 +419,7 @@
           text: dialog?.lastMessage || dialog?.message || '',
           timeLabel: dialog?.timeLabel || dialog?.time || '',
           role: 'client',
-          author: 'Клиент'
+          author: dialog?.username || 'Клиент'
         }
       ];
     }
