@@ -1599,25 +1599,37 @@ a {
 .module-card-header-main {
   flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
 }
 
 .module-card-title {
-  display: block;
+  display: inline;
   margin: 0;
+  min-width: 0;
   font-size: 15px;
   font-weight: 800;
   line-height: 1.28;
   letter-spacing: 0.01em;
   color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .module-card-title-ru {
-  display: block;
-  margin-top: 2px;
+  display: inline;
+  margin: 0;
+  min-width: 0;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.25;
   color: rgba(255, 255, 255, 0.84);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .module-card-toggle .accordion-header-icon {
