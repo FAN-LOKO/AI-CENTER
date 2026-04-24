@@ -81,543 +81,547 @@
   </div>
 
   <script>
-(function () {
-  let TENANTCONFIG = null;
-  let CURRENT_DIALOG = null;
-  let LOCAL_DIALOGS = null;
+    (function () {
+      let TENANTCONFIG = null;
+      let CURRENT_DIALOG = null;
+      let LOCAL_DIALOGS = null;
 
-  let APPFEATURES = {
-    home: true,
-    modules: true,
-    sharedChat: true,
-    affiliate: true,
-    payments: true,
-    settings: true,
-    stats: true,
-    dialogs: true,
-    agentDialogs: true
-  };
-
-  function getShell() {
-    try {
-      return window.parent?.AICAppShell || null;
-    } catch (error) {
-      console.error('[AI CENTER][Dialogs] shell access failed', error);
-      return null;
-    }
-  }
-
-  function getTenantConfig() {
-    try {
-      return getShell()?.getTenantConfig?.() || null;
-    } catch (error) {
-      console.error('[AI CENTER][Dialogs] tenant config read failed', error);
-      return null;
-    }
-  }
-
-  function getAppFeatures() {
-    try {
-      return getShell()?.getAppFeatures?.() || {};
-    } catch (error) {
-      console.error('[AI CENTER][Dialogs] app features read failed', error);
-      return {};
-    }
-  }
-
-  function getText(key, fallback = '') {
-    return TENANTCONFIG?.texts?.[key] ?? fallback;
-  }
-
-  function navigateAgent(page) {
-    if (APPFEATURES.modules === false) {
-      console.warn('[AI CENTER][Dialogs] modules are disabled');
-      return;
-    }
-
-    try {
-      window.parent?.postMessage?.(
-        { type: 'navigate', page, tab: 'modules' },
-        '*'
-      );
-    } catch (error) {
-      console.error('[AI CENTER][Dialogs] navigate failed', error);
-    }
-  }
-
-  function isDialogsAvailable() {
-    if (APPFEATURES.modules === false) return false;
-    if (APPFEATURES.dialogs === false) return false;
-    if (APPFEATURES.agentDialogs === false) return false;
-    return true;
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  function setTextContent(id, value, fallback = '') {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = value ?? fallback;
-  }
-
-  function applyTenantTexts() {
-    document.title =
-      getText('dialogsBrowserTitle', '') ||
-      getText('dialogsPageTitle', '') ||
-      'Диалоги';
-  }
-
-  function getDialogsPayload() {
-    try {
-      const shell = getShell();
-
-      const payload =
-        shell?.getAgentModuleStats?.() ||
-        shell?.getAgentStats?.() ||
-        shell?.getDialogsData?.();
-
-      const shellSelectedDialog =
-        shell?.getCurrentAgentDialog?.() ||
-        shell?.getSelectedAgentDialog?.() ||
-        null;
-
-      const dialogs =
-        Array.isArray(LOCAL_DIALOGS)
-          ? LOCAL_DIALOGS
-          : Array.isArray(payload?.dialogs)
-          ? payload.dialogs
-          : [];
-
-      return {
-        ...(payload && typeof payload === 'object' ? payload : {}),
-        dialogs,
-        activeDialog:
-          CURRENT_DIALOG || shellSelectedDialog || payload?.activeDialog || null,
-        selectedDialog:
-          CURRENT_DIALOG || shellSelectedDialog || payload?.selectedDialog || null
+      let APPFEATURES = {
+        home: true,
+        modules: true,
+        sharedChat: true,
+        affiliate: true,
+        payments: true,
+        settings: true,
+        stats: true,
+        dialogs: true,
+        agentDialogs: true
       };
-    } catch (error) {
-      console.error('[AI CENTER][Dialogs] dialogs payload read failed', error);
-    }
 
-    return {
-      dialogs: Array.isArray(LOCAL_DIALOGS) ? LOCAL_DIALOGS : [],
-      stats: {},
-      activeDialog: CURRENT_DIALOG,
-      selectedDialog: CURRENT_DIALOG
-    };
-  }
-
-  function getActiveDialog(payload) {
-    const dialogs = Array.isArray(payload?.dialogs) ? payload.dialogs : [];
-
-    const selected =
-      CURRENT_DIALOG ||
-      payload?.selectedDialog ||
-      payload?.activeDialog ||
-      null;
-
-    if (selected && typeof selected === 'object') {
-      const selectedId = String(selected.id || selected.dialogId || '');
-
-      if (selectedId) {
-        const matchedById = dialogs.find(
-          (dialog) => String(dialog?.id || dialog?.dialogId || '') === selectedId
-        );
-        if (matchedById) {
-          return { ...matchedById, ...selected };
+      function getShell() {
+        try {
+          return window.parent?.AICAppShell || null;
+        } catch (error) {
+          console.error('[AI CENTER][Dialogs] shell access failed', error);
+          return null;
         }
       }
 
-      const selectedUsername = String(selected.username || '');
-      const selectedChannel = String(selected.channel || '');
-
-      if (selectedUsername && selectedChannel) {
-        const matchedByMeta = dialogs.find(
-          (dialog) =>
-            String(dialog?.username || '') === selectedUsername &&
-            String(dialog?.channel || '') === selectedChannel
-        );
-        if (matchedByMeta) {
-          return { ...matchedByMeta, ...selected };
+      function getTenantConfig() {
+        try {
+          return getShell()?.getTenantConfig?.() || null;
+        } catch (error) {
+          console.error('[AI CENTER][Dialogs] tenant config read failed', error);
+          return null;
         }
       }
 
-      return selected;
-    }
-
-    return dialogs[0] || null;
-  }
-
-  function getDialogStatus(dialog) {
-    return (
-      dialog?.status ||
-      dialog?.state ||
-      getText('dialogsStatusActive', 'Активен')
-    );
-  }
-
-  function renderDialogHeader(dialog) {
-    const username =
-      dialog?.username ||
-      dialog?.clientName ||
-      getText('dialogsUsernameFallback', '@username');
-
-    const channel =
-      dialog?.channel ||
-      getText('dialogsChannelFallback', 'Telegram');
-
-    const dialogId =
-      dialog?.id ||
-      dialog?.dialogId ||
-      getText('dialogsEmptyValue', '—');
-
-    const lastTime =
-      dialog?.timeLabel ||
-      dialog?.time ||
-      getText('dialogsEmptyValue', '—');
-
-    setTextContent(
-      'dialogTitle',
-      getText('dialogsCurrentDialogTitle', 'Диалог с клиентом')
-    );
-
-    setTextContent(
-      'dialogSubtitle',
-      `${getText('dialogsClientLabel', 'Клиент')}: ${username} • ${getText('dialogsChannelLabel', 'Канал')}: ${channel}`
-    );
-
-    setTextContent('dialogIdLabel', dialogId);
-    setTextContent('dialogStatusLabel', getDialogStatus(dialog));
-    setTextContent('dialogLastClientTimeLabel', lastTime);
-  }
-
-  function normalizeMessage(message, dialog) {
-    const text =
-      message?.text ||
-      message?.message ||
-      '';
-
-    const time =
-      message?.timeLabel ||
-      message?.time ||
-      dialog?.timeLabel ||
-      dialog?.time ||
-      '';
-
-    const rawAuthor =
-      message?.author ||
-      message?.authorName ||
-      message?.from ||
-      message?.sender ||
-      '';
-
-    const username =
-      String(dialog?.username || dialog?.clientName || '').toLowerCase();
-
-    const roleRaw = String(
-      message?.role ||
-      message?.authorRole ||
-      message?.authorType ||
-      message?.type ||
-      message?.senderType ||
-      rawAuthor
-    ).toLowerCase();
-
-    const authorRaw = String(rawAuthor || '').toLowerCase();
-
-    const isUser =
-      roleRaw.includes('owner') ||
-      roleRaw.includes('operator') ||
-      roleRaw.includes('manager') ||
-      roleRaw.includes('admin') ||
-      roleRaw.includes('host') ||
-      roleRaw.includes('tenant') ||
-      roleRaw.includes('human') ||
-      authorRaw === 'вы' ||
-      authorRaw === 'пользователь' ||
-      authorRaw === 'оператор' ||
-      (roleRaw.includes('user') && !roleRaw.includes('client'));
-
-    const isClientByRole =
-      roleRaw.includes('client') ||
-      roleRaw.includes('customer') ||
-      roleRaw.includes('lead') ||
-      roleRaw.includes('prospect') ||
-      roleRaw.includes('subscriber');
-
-    const isClientByAuthor =
-      authorRaw === 'клиент' ||
-      authorRaw === 'лид' ||
-      authorRaw === 'потенциальный клиент' ||
-      (username && authorRaw.includes(username.replace('@', ''))) ||
-      authorRaw.startsWith('@');
-
-    const isAgent =
-      roleRaw.includes('agent') ||
-      roleRaw.includes('assistant') ||
-      roleRaw.includes('bot') ||
-      roleRaw.includes('ai');
-
-    let role = 'agent';
-
-    if (isUser) {
-      role = 'user';
-    } else if (isClientByRole || isClientByAuthor) {
-      role = 'client';
-    } else if (isAgent) {
-      role = 'agent';
-    } else if (!message?.role && !message?.authorRole && !message?.authorType) {
-      role = 'client';
-    }
-
-    let authorLabel = rawAuthor || '';
-    if (!authorLabel) {
-      if (role === 'client') authorLabel = 'Клиент';
-      else if (role === 'user') authorLabel = 'Вы';
-      else authorLabel = 'Агент';
-    }
-
-    return {
-      text,
-      time,
-      role,
-      author: authorLabel
-    };
-  }
-
-  function renderMessages(dialog) {
-    const container = document.getElementById('messagesContainer');
-    if (!container) return;
-
-    if (!isDialogsAvailable()) {
-      container.innerHTML = `<div class="module-notice">${escapeHtml(
-        getText('dialogsDisabledText', 'Модуль диалогов сейчас недоступен.')
-      )}</div>`;
-      return;
-    }
-
-    if (!dialog) {
-      container.innerHTML = `<div class="module-notice">${escapeHtml(
-        getText('dialogsEmptyText', 'Диалогов пока нет.')
-      )}</div>`;
-      return;
-    }
-
-    let messages = Array.isArray(dialog?.messages) ? dialog.messages : [];
-
-    if (!messages.length && (dialog?.lastMessage || dialog?.message)) {
-      messages = [
-        {
-          text: dialog?.lastMessage || dialog?.message || '',
-          timeLabel: dialog?.timeLabel || dialog?.time || '',
-          role: 'client',
-          author: dialog?.username || 'Клиент'
+      function getAppFeatures() {
+        try {
+          return getShell()?.getAppFeatures?.() || {};
+        } catch (error) {
+          console.error('[AI CENTER][Dialogs] app features read failed', error);
+          return {};
         }
-      ];
-    }
-
-    if (!messages.length) {
-      container.innerHTML = `<div class="module-notice">${escapeHtml(
-        getText('dialogsMessageFallback', 'История сообщений пока пуста.')
-      )}</div>`;
-      return;
-    }
-
-    container.innerHTML = messages
-      .map((rawMessage) => {
-        const message = normalizeMessage(rawMessage, dialog);
-
-        const roleClass =
-          message.role === 'client'
-            ? 'chat-message-client'
-            : message.role === 'user'
-            ? 'chat-message-user'
-            : 'chat-message-agent';
-
-        return `
-          <div class="chat-message ${roleClass}">
-            <div class="chat-message-meta">
-              <span class="chat-author">${escapeHtml(message.author)}</span>
-              <span class="chat-time">${escapeHtml(message.time)}</span>
-            </div>
-            <div class="chat-bubble">
-              ${escapeHtml(message.text)}
-            </div>
-          </div>
-        `;
-      })
-      .join('');
-  }
-
-  function bindComposer(dialog) {
-    const input = document.getElementById('clientMessageInput');
-    const sendButton = document.getElementById('clientSendMessageButton');
-    const voiceButton = document.getElementById('clientVoiceButton');
-    const status = document.getElementById('clientSendMessageStatus');
-
-    if (!input || !sendButton || !voiceButton || !status) return;
-
-    const disabled = !isDialogsAvailable() || !dialog;
-    input.disabled = disabled;
-    sendButton.disabled = disabled;
-    voiceButton.disabled = disabled;
-
-    if (disabled) {
-      status.textContent = getText(
-        'dialogsComposerDisabledText',
-        'Отправка сообщений сейчас недоступна.'
-      );
-      status.className = 'connect-status-msg';
-      return;
-    }
-
-    status.textContent = '';
-    status.className = 'connect-status-msg';
-
-    sendButton.onclick = () => {
-      const text = String(input.value || '').trim();
-
-      if (!text) {
-        status.textContent = getText(
-          'dialogsComposerEmptyText',
-          'Введите сообщение перед отправкой.'
-        );
-        status.className = 'connect-status-msg error';
-        return;
       }
 
-      try {
-        window.parent?.postMessage?.(
-          {
-            type: 'agent-send-message',
-            dialogId: dialog?.id || dialog?.dialogId || '',
-            text
-          },
-          '*'
-        );
-
-        input.value = '';
-        status.textContent = getText(
-          'dialogsComposerSentText',
-          'Сообщение отправлено.'
-        );
-        status.className = 'connect-status-msg success';
-      } catch (error) {
-        console.error('[AI CENTER][Dialogs] send message failed', error);
-        status.textContent = getText(
-          'dialogsComposerErrorText',
-          'Не удалось отправить сообщение.'
-        );
-        status.className = 'connect-status-msg error';
+      function getText(key, fallback = '') {
+        return TENANTCONFIG?.texts?.[key] ?? fallback;
       }
-    };
 
-    voiceButton.onclick = () => {
-      try {
-        window.parent?.postMessage?.(
-          {
-            type: 'agent-record-voice',
-            dialogId: dialog?.id || dialog?.dialogId || ''
-          },
-          '*'
+      function navigateAgent(page) {
+        if (APPFEATURES.modules === false) {
+          console.warn('[AI CENTER][Dialogs] modules are disabled');
+          return;
+        }
+
+        try {
+          window.parent?.postMessage?.(
+            { type: 'navigate', page, tab: 'modules' },
+            '*'
+          );
+        } catch (error) {
+          console.error('[AI CENTER][Dialogs] navigate failed', error);
+        }
+      }
+
+      function isDialogsAvailable() {
+        if (APPFEATURES.modules === false) return false;
+        if (APPFEATURES.dialogs === false) return false;
+        if (APPFEATURES.agentDialogs === false) return false;
+        return true;
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function setTextContent(id, value, fallback = '') {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = value ?? fallback;
+      }
+
+      function applyTenantTexts() {
+        document.title =
+          getText('dialogsBrowserTitle', '') ||
+          getText('dialogsPageTitle', '') ||
+          'Диалоги';
+      }
+
+      function getDialogsPayload() {
+        try {
+          const shell = getShell();
+
+          const payload =
+            shell?.getAgentModuleStats?.() ||
+            shell?.getAgentStats?.() ||
+            shell?.getDialogsData?.();
+
+          const shellSelectedDialog =
+            shell?.getCurrentAgentDialog?.() ||
+            shell?.getSelectedAgentDialog?.() ||
+            null;
+
+          const dialogs =
+            Array.isArray(LOCAL_DIALOGS)
+              ? LOCAL_DIALOGS
+              : Array.isArray(payload?.dialogs)
+              ? payload.dialogs
+              : [];
+
+          return {
+            ...(payload && typeof payload === 'object' ? payload : {}),
+            dialogs,
+            activeDialog:
+              CURRENT_DIALOG || shellSelectedDialog || payload?.activeDialog || null,
+            selectedDialog:
+              CURRENT_DIALOG || shellSelectedDialog || payload?.selectedDialog || null
+          };
+        } catch (error) {
+          console.error('[AI CENTER][Dialogs] dialogs payload read failed', error);
+        }
+
+        return {
+          dialogs: Array.isArray(LOCAL_DIALOGS) ? LOCAL_DIALOGS : [],
+          stats: {},
+          activeDialog: CURRENT_DIALOG,
+          selectedDialog: CURRENT_DIALOG
+        };
+      }
+
+      function getActiveDialog(payload) {
+        const dialogs = Array.isArray(payload?.dialogs) ? payload.dialogs : [];
+
+        const selected =
+          CURRENT_DIALOG ||
+          payload?.selectedDialog ||
+          payload?.activeDialog ||
+          null;
+
+        if (selected && typeof selected === 'object') {
+          const selectedId = String(selected.id || selected.dialogId || '');
+
+          if (selectedId) {
+            const matchedById = dialogs.find(
+              (dialog) => String(dialog?.id || dialog?.dialogId || '') === selectedId
+            );
+            if (matchedById) {
+              return { ...matchedById, ...selected };
+            }
+          }
+
+          const selectedUsername = String(selected.username || '');
+          const selectedChannel = String(selected.channel || '');
+
+          if (selectedUsername && selectedChannel) {
+            const matchedByMeta = dialogs.find(
+              (dialog) =>
+                String(dialog?.username || '') === selectedUsername &&
+                String(dialog?.channel || '') === selectedChannel
+            );
+            if (matchedByMeta) {
+              return { ...matchedByMeta, ...selected };
+            }
+          }
+
+          return selected;
+        }
+
+        return dialogs[0] || null;
+      }
+
+      function getDialogStatus(dialog) {
+        return (
+          dialog?.status ||
+          dialog?.state ||
+          getText('dialogsStatusActive', 'Активен')
+        );
+      }
+
+      function renderDialogHeader(dialog) {
+        const username =
+          dialog?.username ||
+          dialog?.clientName ||
+          getText('dialogsUsernameFallback', '@username');
+
+        const channel =
+          dialog?.channel ||
+          getText('dialogsChannelFallback', 'Telegram');
+
+        const dialogId =
+          dialog?.id ||
+          dialog?.dialogId ||
+          getText('dialogsEmptyValue', '—');
+
+        const lastTime =
+          dialog?.timeLabel ||
+          dialog?.time ||
+          getText('dialogsEmptyValue', '—');
+
+        setTextContent(
+          'dialogTitle',
+          getText('dialogsCurrentDialogTitle', 'Диалог с клиентом')
         );
 
-        status.textContent = getText(
-          'dialogsVoicePendingText',
-          'Функция голосового сообщения будет доступна позже.'
+        setTextContent(
+          'dialogSubtitle',
+          `${getText('dialogsClientLabel', 'Клиент')}: ${username} • ${getText('dialogsChannelLabel', 'Канал')}: ${channel}`
         );
+
+        setTextContent('dialogIdLabel', dialogId);
+        setTextContent('dialogStatusLabel', getDialogStatus(dialog));
+        setTextContent('dialogLastClientTimeLabel', lastTime);
+      }
+
+      function normalizeMessage(message, dialog) {
+        const text =
+          message?.text ||
+          message?.message ||
+          '';
+
+        const time =
+          message?.timeLabel ||
+          message?.time ||
+          dialog?.timeLabel ||
+          dialog?.time ||
+          '';
+
+        const rawAuthor =
+          message?.author ||
+          message?.authorName ||
+          message?.from ||
+          message?.sender ||
+          '';
+
+        const username =
+          String(dialog?.username || dialog?.clientName || '').toLowerCase();
+
+        const roleRaw = String(
+          message?.role ||
+          message?.authorRole ||
+          message?.authorType ||
+          message?.type ||
+          message?.senderType ||
+          rawAuthor
+        ).toLowerCase();
+
+        const authorRaw = String(rawAuthor || '').toLowerCase();
+
+        const isUser =
+          roleRaw.includes('owner') ||
+          roleRaw.includes('operator') ||
+          roleRaw.includes('manager') ||
+          roleRaw.includes('admin') ||
+          roleRaw.includes('host') ||
+          roleRaw.includes('tenant') ||
+          roleRaw.includes('human') ||
+          authorRaw === 'вы' ||
+          authorRaw === 'пользователь' ||
+          authorRaw === 'оператор' ||
+          (roleRaw.includes('user') && !roleRaw.includes('client'));
+
+        const isClientByRole =
+          roleRaw.includes('client') ||
+          roleRaw.includes('customer') ||
+          roleRaw.includes('lead') ||
+          roleRaw.includes('prospect') ||
+          roleRaw.includes('subscriber');
+
+        const isClientByAuthor =
+          authorRaw === 'клиент' ||
+          authorRaw === 'лид' ||
+          authorRaw === 'потенциальный клиент' ||
+          (username && authorRaw.includes(username.replace('@', ''))) ||
+          authorRaw.startsWith('@');
+
+        const isAgent =
+          roleRaw.includes('agent') ||
+          roleRaw.includes('assistant') ||
+          roleRaw.includes('bot') ||
+          roleRaw.includes('ai');
+
+        let role = 'agent';
+
+        if (isUser || message?.authorType === 'operator') {
+          role = 'user';
+        } else if (isClientByRole || isClientByAuthor || message?.role === 'client') {
+          role = 'client';
+        } else if (isAgent || message?.role === 'agent') {
+          role = 'agent';
+        } else if (
+          !message?.role &&
+          !message?.authorRole &&
+          !message?.authorType
+        ) {
+          role = 'client';
+        }
+
+        let authorLabel = rawAuthor || '';
+        if (!authorLabel) {
+          if (role === 'client') authorLabel = 'Клиент';
+          else if (role === 'user') authorLabel = 'Вы';
+          else authorLabel = 'Агент';
+        }
+
+        return {
+          text,
+          time,
+          role,
+          author: authorLabel
+        };
+      }
+
+      function renderMessages(dialog) {
+        const container = document.getElementById('messagesContainer');
+        if (!container) return;
+
+        if (!isDialogsAvailable()) {
+          container.innerHTML = `<div class="module-notice">${escapeHtml(
+            getText('dialogsDisabledText', 'Модуль диалогов сейчас недоступен.')
+          )}</div>`;
+          return;
+        }
+
+        if (!dialog) {
+          container.innerHTML = `<div class="module-notice">${escapeHtml(
+            getText('dialogsEmptyText', 'Диалогов пока нет.')
+          )}</div>`;
+          return;
+        }
+
+        let messages = Array.isArray(dialog?.messages) ? dialog.messages : [];
+
+        if (!messages.length && (dialog?.lastMessage || dialog?.message)) {
+          messages = [
+            {
+              text: dialog?.lastMessage || dialog?.message || '',
+              timeLabel: dialog?.timeLabel || dialog?.time || '',
+              role: 'client',
+              author: dialog?.username || 'Клиент'
+            }
+          ];
+        }
+
+        if (!messages.length) {
+          container.innerHTML = `<div class="module-notice">${escapeHtml(
+            getText('dialogsMessageFallback', 'История сообщений пока пуста.')
+          )}</div>`;
+          return;
+        }
+
+        container.innerHTML = messages
+          .map((rawMessage) => {
+            const message = normalizeMessage(rawMessage, dialog);
+
+            const roleClass =
+              message.role === 'client'
+                ? 'chat-message-client'
+                : message.role === 'user'
+                ? 'chat-message-user'
+                : 'chat-message-agent';
+
+            return `
+              <div class="chat-message ${roleClass}">
+                <div class="chat-message-meta">
+                  <span class="chat-author">${escapeHtml(message.author)}</span>
+                  <span class="chat-time">${escapeHtml(message.time)}</span>
+                </div>
+                <div class="chat-bubble">
+                  ${escapeHtml(message.text)}
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      function bindComposer(dialog) {
+        const input = document.getElementById('clientMessageInput');
+        const sendButton = document.getElementById('clientSendMessageButton');
+        const voiceButton = document.getElementById('clientVoiceButton');
+        const status = document.getElementById('clientSendMessageStatus');
+
+        if (!input || !sendButton || !voiceButton || !status) return;
+
+        const disabled = !isDialogsAvailable() || !dialog;
+        input.disabled = disabled;
+        sendButton.disabled = disabled;
+        voiceButton.disabled = disabled;
+
+        if (disabled) {
+          status.textContent = getText(
+            'dialogsComposerDisabledText',
+            'Отправка сообщений сейчас недоступна.'
+          );
+          status.className = 'connect-status-msg';
+          return;
+        }
+
+        status.textContent = '';
         status.className = 'connect-status-msg';
-      } catch (error) {
-        console.error('[AI CENTER][Dialogs] voice message failed', error);
-        status.textContent = getText(
-          'dialogsComposerErrorText',
-          'Не удалось выполнить действие.'
-        );
-        status.className = 'connect-status-msg error';
+
+        sendButton.onclick = () => {
+          const text = String(input.value || '').trim();
+
+          if (!text) {
+            status.textContent = getText(
+              'dialogsComposerEmptyText',
+              'Введите сообщение перед отправкой.'
+            );
+            status.className = 'connect-status-msg error';
+            return;
+          }
+
+          try {
+            window.parent?.postMessage?.(
+              {
+                type: 'agent-send-message',
+                dialogId: dialog?.id || dialog?.dialogId || '',
+                text
+              },
+              '*'
+            );
+
+            input.value = '';
+            status.textContent = getText(
+              'dialogsComposerSentText',
+              'Сообщение отправлено.'
+            );
+            status.className = 'connect-status-msg success';
+          } catch (error) {
+            console.error('[AI CENTER][Dialogs] send message failed', error);
+            status.textContent = getText(
+              'dialogsComposerErrorText',
+              'Не удалось отправить сообщение.'
+            );
+            status.className = 'connect-status-msg error';
+          }
+        };
+
+        voiceButton.onclick = () => {
+          try {
+            window.parent?.postMessage?.(
+              {
+                type: 'agent-record-voice',
+                dialogId: dialog?.id || dialog?.dialogId || ''
+              },
+              '*'
+            );
+
+            status.textContent = getText(
+              'dialogsVoicePendingText',
+              'Функция голосового сообщения будет доступна позже.'
+            );
+            status.className = 'connect-status-msg';
+          } catch (error) {
+            console.error('[AI CENTER][Dialogs] voice message failed', error);
+            status.textContent = getText(
+              'dialogsComposerErrorText',
+              'Не удалось выполнить действие.'
+            );
+            status.className = 'connect-status-msg error';
+          }
+        };
       }
-    };
-  }
 
-  function renderDialogsPage() {
-    const payload = getDialogsPayload();
-    const activeDialog = getActiveDialog(payload);
+      function renderDialogsPage() {
+        const payload = getDialogsPayload();
+        const activeDialog = getActiveDialog(payload);
 
-    CURRENT_DIALOG = activeDialog || CURRENT_DIALOG;
+        CURRENT_DIALOG = activeDialog || CURRENT_DIALOG;
 
-    renderDialogHeader(activeDialog);
-    renderMessages(activeDialog);
-    bindComposer(activeDialog);
-  }
-
-  function applyAppFeatures(features) {
-    APPFEATURES = { ...APPFEATURES, ...(features || {}) };
-    renderDialogsPage();
-  }
-
-  window.navigateAgent = navigateAgent;
-
-  window.addEventListener('message', (event) => {
-    try {
-      const data = event?.data;
-      if (!data || typeof data !== 'object') return;
-
-      if (data.type === 'app-features') {
-        applyAppFeatures(data.features || {});
-        return;
+        renderDialogHeader(activeDialog);
+        renderMessages(activeDialog);
+        bindComposer(activeDialog);
       }
 
-      if (data.type === 'agent-current-dialog-set') {
-        CURRENT_DIALOG = data.dialog || null;
+      function applyAppFeatures(features) {
+        APPFEATURES = { ...APPFEATURES, ...(features || {}) };
         renderDialogsPage();
-        return;
       }
 
-      if (data.type === 'agent-dialogs-update' && Array.isArray(data.dialogs)) {
-        LOCAL_DIALOGS = data.dialogs;
+      window.navigateAgent = navigateAgent;
+
+      window.addEventListener('message', (event) => {
+        try {
+          const data = event?.data;
+          if (!data || typeof data !== 'object') return;
+
+          if (data.type === 'app-features') {
+            applyAppFeatures(data.features || {});
+            return;
+          }
+
+          if (data.type === 'agent-current-dialog-set') {
+            CURRENT_DIALOG = data.dialog || null;
+            renderDialogsPage();
+            return;
+          }
+
+          if (data.type === 'agent-dialogs-update' && Array.isArray(data.dialogs)) {
+            LOCAL_DIALOGS = data.dialogs;
+            renderDialogsPage();
+            return;
+          }
+
+          if (data.type === 'agent-open-dialog') {
+            CURRENT_DIALOG =
+              data.dialog || data.selectedDialog || data.activeDialog || null;
+            renderDialogsPage();
+            return;
+          }
+
+          if (
+            data.type === 'agent-dialog-update' ||
+            data.type === 'agent-stats-update' ||
+            data.type === 'agent-module-stats-update'
+          ) {
+            renderDialogsPage();
+          }
+        } catch (error) {
+          console.error('[AI CENTER][Dialogs] message handling failed', error);
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        TENANTCONFIG = getTenantConfig();
+        APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
+
+        applyTenantTexts();
         renderDialogsPage();
-        return;
-      }
 
-      if (data.type === 'agent-open-dialog') {
-        CURRENT_DIALOG =
-          data.dialog || data.selectedDialog || data.activeDialog || null;
-        renderDialogsPage();
-        return;
-      }
-
-      if (
-        data.type === 'agent-dialog-update' ||
-        data.type === 'agent-stats-update' ||
-        data.type === 'agent-module-stats-update'
-      ) {
-        renderDialogsPage();
-      }
-    } catch (error) {
-      console.error('[AI CENTER][Dialogs] message handling failed', error);
-    }
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    TENANTCONFIG = getTenantConfig();
-    APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
-
-    applyTenantTexts();
-    renderDialogsPage();
-
-    window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
-    window.parent?.postMessage?.({ type: 'request-agent-module-stats' }, '*');
-    window.parent?.postMessage?.({ type: 'agent-stats-request' }, '*');
-    window.parent?.postMessage?.({ type: 'request-current-agent-dialog' }, '*');
-  });
-})();
-</script>
+        window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+        window.parent?.postMessage?.({ type: 'request-agent-module-stats' }, '*');
+        window.parent?.postMessage?.({ type: 'agent-stats-request' }, '*');
+        window.parent?.postMessage?.({ type: 'request-current-agent-dialog' }, '*');
+      });
+    })();
+  </script>
 </body>
 </html>
