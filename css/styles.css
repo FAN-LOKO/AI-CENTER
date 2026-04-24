@@ -1580,6 +1580,7 @@ a {
    - в синем header только название
    - в белой части сверху: текст слева, badge справа
    - ниже кнопка
+   - для badge выделена отдельная правая колонка
 ========================================================= */
 
 .module-accordion-card {
@@ -1630,7 +1631,7 @@ a {
 
 .module-card-top-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 132px;
   align-items: start;
   column-gap: 12px;
   row-gap: 10px;
@@ -1652,8 +1653,8 @@ a {
   justify-content: center;
   justify-self: end;
   align-self: start;
-  width: max-content;
-  max-width: 100%;
+  width: 132px;
+  max-width: 132px;
   min-height: 26px;
   padding: 5px 10px;
   border-radius: 999px;
@@ -1661,7 +1662,10 @@ a {
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border: 1px solid transparent;
+  box-sizing: border-box;
 }
 
 .module-card-badge.is-base {
@@ -1761,6 +1765,8 @@ a {
 
   .module-card-top-row .module-card-badge {
     justify-self: start;
+    width: auto;
+    max-width: 100%;
     min-height: 24px;
     padding: 4px 9px;
     font-size: 11px;
