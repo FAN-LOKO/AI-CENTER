@@ -269,101 +269,106 @@
   }
 
   function normalizeMessage(message, dialog) {
-    const text =
-      message?.text ||
-      message?.message ||
-      '';
+  const text =
+    message?.text ||
+    message?.message ||
+    '';
 
-    const time =
-      message?.timeLabel ||
-      message?.time ||
-      dialog?.timeLabel ||
-      dialog?.time ||
-      '';
+  const time =
+    message?.timeLabel ||
+    message?.time ||
+    dialog?.timeLabel ||
+    dialog?.time ||
+    '';
 
-    const roleRaw = String(
-      message?.role ||
-      message?.authorRole ||
-      message?.author ||
-      message?.type ||
-      ''
-    ).toLowerCase();
+  const roleRaw = String(
+    message?.role ||
+    message?.authorRole ||
+    message?.author ||
+    message?.type ||
+    ''
+  ).toLowerCase();
 
-    const isClient =
-      roleRaw.includes('client') ||
-      roleRaw.includes('user') ||
-      roleRaw.includes('customer') ||
-      roleRaw.includes('lead');
+  // client / user / customer / lead → считаем клиентским
+  const isClient =
+    roleRaw.includes('client') ||
+    roleRaw.includes('user') ||
+    roleRaw.includes('customer') ||
+    roleRaw.includes('lead');
 
-    const isAgent =
-      roleRaw.includes('agent') ||
-      roleRaw.includes('assistant') ||
-      roleRaw.includes('bot') ||
-      roleRaw.includes('manager');
+  // agent / assistant / bot / manager → считаем агентским
+  const isAgent =
+    roleRaw.includes('agent') ||
+    roleRaw.includes('assistant') ||
+    roleRaw.includes('bot') ||
+    roleRaw.includes('manager');
 
-    return {
-      text,
-      time,
-      role: isClient ? 'client' : isAgent ? 'agent' : 'agent',
-      author: message?.author || (isClient ? 'Клиент' : 'Агент')
-    };
+  const role = isClient ? 'client' : isAgent ? 'agent' : 'agent';
+
+  return {
+    text,
+    time,
+    role,
+    author: message?.author || (role === 'client' ? 'Клиент' : 'Агент')
+  };
+}
+
+function renderMessages(dialog) {
+  const container = document.getElementById('messagesContainer');
+  if (!container) return;
+
+  if (!isDialogsAvailable()) {
+    container.innerHTML = `<div class="module-notice">${escapeHtml(
+      getText('dialogsDisabledText', 'Модуль диалогов сейчас недоступен.')
+    )}</div>`;
+    return;
   }
 
-  function renderMessages(dialog) {
-    const container = document.getElementById('messagesContainer');
-    if (!container) return;
+  if (!dialog) {
+    container.innerHTML = `<div class="module-notice">${escapeHtml(
+      getText('dialogsEmptyText', 'Диалогов пока нет.')
+    )}</div>`;
+    return;
+  }
 
-    if (!isDialogsAvailable()) {
-      container.innerHTML = `<div class="module-notice">${escapeHtml(
-        getText('dialogsDisabledText', 'Модуль диалогов сейчас недоступен.')
-      )}</div>`;
-      return;
-    }
+  let messages = Array.isArray(dialog?.messages) ? dialog.messages : [];
 
-    if (!dialog) {
-      container.innerHTML = `<div class="module-notice">${escapeHtml(
-        getText('dialogsEmptyText', 'Диалогов пока нет.')
-      )}</div>`;
-      return;
-    }
+  // fallback: если нет массива messages, но есть lastMessage
+  if (!messages.length && (dialog?.lastMessage || dialog?.message)) {
+    messages = [
+      {
+        text: dialog?.lastMessage || dialog?.message || '',
+        timeLabel: dialog?.timeLabel || dialog?.time || '',
+        role: 'client',
+        author: 'Клиент'
+      }
+    ];
+  }
 
-    let messages = Array.isArray(dialog?.messages) ? dialog.messages : [];
+  if (!messages.length) {
+    container.innerHTML = `<div class="module-notice">${escapeHtml(
+      getText('dialogsMessageFallback', 'История сообщений пока пуста.')
+    )}</div>`;
+    return;
+  }
 
-    if (!messages.length && (dialog?.lastMessage || dialog?.message)) {
-      messages = [
-        {
-          text: dialog?.lastMessage || dialog?.message || '',
-          timeLabel: dialog?.timeLabel || dialog?.time || '',
-          role: 'client',
-          author: 'Клиент'
-        }
-      ];
-    }
+  container.innerHTML = messages.map((rawMessage) => {
+    const message = normalizeMessage(rawMessage, dialog);
+    const isClient = message.role === 'client';
 
-    if (!messages.length) {
-      container.innerHTML = `<div class="module-notice">${escapeHtml(
-        getText('dialogsMessageFallback', 'История сообщений пока пуста.')
-      )}</div>`;
-      return;
-    }
-
-    container.innerHTML = messages.map((rawMessage) => {
-      const message = normalizeMessage(rawMessage, dialog);
-      const isClient = message.role === 'client';
-
-      return `
-        <div class="dialog-message ${isClient ? 'dialog-message--client' : 'dialog-message--agent'}">
-          <div class="dialog-message-bubble">
-            <div class="dialog-message-text">${escapeHtml(message.text)}</div>
-            <div class="dialog-message-meta">
-              <span class="dialog-message-author">${escapeHtml(message.author)}</span>
-              <span class="dialog-message-time">${escapeHtml(message.time)}</span>
-            </div>
-          </div>
+    return `
+      <div class="chat-message ${isClient ? 'chat-message-client' : 'chat-message-agent'}">
+        <div class="chat-message-meta">
+          <span class="chat-author">${escapeHtml(message.author)}</span>
+          <span class="chat-time">${escapeHtml(message.time)}</span>
         </div>
-      `;
-    }).join('');
-  }
+        <div class="chat-bubble">
+          ${escapeHtml(message.text)}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
   function bindComposer(dialog) {
     const input = document.getElementById('clientMessageInput');
