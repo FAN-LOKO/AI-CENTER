@@ -1599,37 +1599,25 @@ a {
 .module-card-header-main {
   flex: 1 1 auto;
   min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow: hidden;
 }
 
 .module-card-title {
-  display: inline;
+  display: block;
   margin: 0;
-  min-width: 0;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 800;
-  line-height: 1.22;
+  line-height: 1.28;
   letter-spacing: 0.01em;
   color: #ffffff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .module-card-title-ru {
-  display: inline;
-  margin: 0;
-  min-width: 0;
-  font-size: 15px;
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
   font-weight: 700;
-  line-height: 1.22;
-  color: rgba(255, 255, 255, 0.90);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.84);
 }
 
 .module-card-toggle .accordion-header-icon {
@@ -1772,13 +1760,13 @@ a {
     gap: 4px;
   }
 
-    .module-card-title {
-    font-size: 16px;
-  }
+   .module-card-title {
+  font-size: 16px;
+}
 
-  .module-card-title-ru {
-    font-size: 14px;
-  }
+.module-card-title-ru {
+  font-size: 13px;
+}
 
   .module-card-top {
     grid-template-columns: 1fr;
