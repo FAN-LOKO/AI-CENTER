@@ -462,10 +462,12 @@
     </button>
 
     <div class="card-section-body module-card-main">
-      <div class="module-card-top-row">
-        <p class="module-card-short-description">${module.shortDescription}</p>
+      <div class="module-card-top">
+        <div class="module-card-top-label">${getText('modulesCardLabel', 'Статус модуля')}</div>
         <span class="module-card-badge ${badge.cls}">${badge.text}</span>
       </div>
+
+      <p class="module-card-short-description">${module.shortDescription}</p>
 
       <button
         class="btn btn-block${buttonExtraClass}"
@@ -517,6 +519,7 @@
 
   return section;
 }
+    
     /* =========================================================
      * PAGE RENDERING
      * Что здесь:
