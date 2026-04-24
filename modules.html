@@ -453,7 +453,10 @@
       const buttonDisabledAttr = isDisabledButton ? 'disabled aria-disabled="true"' : '';
       const buttonExtraClass = isDisabledButton ? ' btn-disabled' : '';
 
-      section.innerHTML = `
+      createModuleCard(module) замени только блок section.innerHTML на этот:
+
+xml
+section.innerHTML = `
   <button class="card-section-header accordion-header module-card-toggle" type="button" aria-expanded="false">
     <span class="module-card-header-text">
       <span class="module-card-title">
@@ -465,8 +468,11 @@
   </button>
 
   <div class="card-section-body module-card-main">
-    <span class="module-card-badge ${badge.cls}">${badge.text}</span>
-    <p class="module-card-short-description">${module.shortDescription}</p>
+    <div class="module-card-top-row">
+      <p class="module-card-short-description">${module.shortDescription}</p>
+      <span class="module-card-badge ${badge.cls}">${badge.text}</span>
+    </div>
+
     <button
       class="btn btn-block${buttonExtraClass}"
       type="button"
