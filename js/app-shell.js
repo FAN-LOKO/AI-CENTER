@@ -795,23 +795,61 @@
         ) ||
         null;
 
-      const selectedDialog =
-        matchedDialog || {
-          id: data.dialogId || `dlg-${Date.now()}`,
-          username: data.username || "@unknown",
-          channel: data.channel || "Telegram",
-          timeLabel: data.timeLabel || "",
-          status: data.status || "open",
-          tags: Array.isArray(data.tags) ? data.tags : [],
-          notes: data.notes || "",
-          messages: Array.isArray(data.messages) ? data.messages : []
-        };
+      const selectedDialog = matchedDialog
+        ? {
+            ...matchedDialog,
+            messages: Array.isArray(matchedDialog.messages)
+              ? matchedDialog.messages
+              : matchedDialog.lastMessage
+                ? [
+                    {
+                      id: `msg-seed-${matchedDialog.id || Date.now()}`,
+                      role: "client",
+                      author: matchedDialog.username || "Клиент",
+                      text: matchedDialog.lastMessage,
+                      timeLabel: matchedDialog.timeLabel || "",
+                      status: "received"
+                    }
+                  ]
+                : []
+          }
+        : {
+            id: data.dialogId || `dlg-${Date.now()}`,
+            username: data.username || "@unknown",
+            channel: data.channel || "Telegram",
+            timeLabel: data.timeLabel || "",
+            status: data.status || "open",
+            tags: Array.isArray(data.tags) ? data.tags : [],
+            notes: data.notes || "",
+            messages: Array.isArray(data.messages)
+              ? data.messages
+              : data.lastMessage
+                ? [
+                    {
+                      id: `msg-seed-${Date.now()}`,
+                      role: "client",
+                      author: data.username || "Клиент",
+                      text: data.lastMessage,
+                      timeLabel: data.timeLabel || "",
+                      status: "received"
+                    }
+                  ]
+                : []
+          };
 
       setCurrentAgentDialog(selectedDialog);
 
       const dialogsPage = "modules-agent/dialogs.html";
       const dialogsTab =
         getTabByPage(dialogsPage) || currentTab || getFallbackTab();
+
+      const updatedDialogs = dialogs.some(
+        (dialog) => dialog.id === selectedDialog.id
+      )
+        ? dialogs.map((dialog) =>
+            dialog.id === selectedDialog.id ? selectedDialog : dialog
+          )
+        : [selectedDialog, ...dialogs];
 
       const postDialogState = () => {
         if (frame && frame.contentWindow) {
@@ -826,7 +864,7 @@
           frame.contentWindow.postMessage(
             {
               type: "agent-dialogs-update",
-              dialogs
+              dialogs: updatedDialogs
             },
             "*"
           );
@@ -854,11 +892,24 @@
 
         const nextMessages = Array.isArray(dialog.messages)
           ? dialog.messages.slice()
-          : [];
+          : dialog.lastMessage
+            ? [
+                {
+                  id: `msg-seed-${dialog.id || Date.now()}`,
+                  role: "client",
+                  author: dialog.username || "Клиент",
+                  text: dialog.lastMessage,
+                  timeLabel: dialog.timeLabel || "",
+                  status: "received"
+                }
+              ]
+            : [];
 
         nextMessages.push({
           id: `msg-${Date.now()}`,
-          role: "agent",
+          role: "user",
+          author: "Вы",
+          authorType: "operator",
           text: data.text || "",
           createdAt: new Date().toISOString(),
           timeLabel: "только что",
