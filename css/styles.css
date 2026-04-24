@@ -1625,20 +1625,20 @@ a {
 }
 
 .module-card-main {
-  padding-top: 0;
+  padding-top: 14px;
 }
 
 .module-card-top-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 12px;
+  row-gap: 10px;
   margin-bottom: 14px;
 }
 
 .module-card-short-description {
   margin: 0;
-  flex: 1 1 auto;
   min-width: 0;
   font-size: 14px;
   line-height: 1.55;
@@ -1650,7 +1650,10 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
+  justify-self: end;
+  align-self: start;
+  width: max-content;
+  max-width: 100%;
   min-height: 26px;
   padding: 5px 10px;
   border-radius: 999px;
@@ -1752,12 +1755,12 @@ a {
   }
 
   .module-card-top-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+    grid-template-columns: 1fr;
+    row-gap: 10px;
   }
 
   .module-card-top-row .module-card-badge {
+    justify-self: start;
     min-height: 24px;
     padding: 4px 9px;
     font-size: 11px;
