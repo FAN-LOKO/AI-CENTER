@@ -1396,21 +1396,24 @@ textarea.form-input,
    MODULE DIALOGS PAGE
    dialogs.html:
    - current dialog meta
-   - messages history
+   - messages history (3 роли: клиент / агент / оператор)
    - inline composer
 ========================================================= */
 
 .module-dialogs-page {
   display: flex;
   flex-direction: column;
-  /* отступ между card-section даёт правило card-section + .card-section */
 }
+
+/* card-section-body для рабочей карточки */
 
 .module-dialogs-page .module-workspace-card .card-section-body {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
+/* Список сообщений */
 
 .chat-messages {
   display: flex;
@@ -1421,19 +1424,29 @@ textarea.form-input,
   padding: 2px 2px 4px;
 }
 
+/* Базовый контейнер сообщения */
+
 .chat-message {
   display: flex;
   flex-direction: column;
   max-width: 86%;
 }
 
+/* Выравнивание по ролям */
+
 .chat-message-client {
   align-self: flex-start;
 }
 
 .chat-message-agent {
+  align-self: flex-start;
+}
+
+.chat-message-user {
   align-self: flex-end;
 }
+
+/* Метаданные сообщения */
 
 .chat-message-meta {
   display: flex;
@@ -1443,16 +1456,11 @@ textarea.form-input,
   padding: 0 2px;
   font-size: 11px;
   line-height: 1.3;
-}
-
-.chat-message-client .chat-message-meta {
-  justify-content: flex-start;
   color: #64748b;
 }
 
-.chat-message-agent .chat-message-meta {
+.chat-message-user .chat-message-meta {
   justify-content: flex-end;
-  color: #64748b;
 }
 
 .chat-author {
@@ -1460,8 +1468,10 @@ textarea.form-input,
 }
 
 .chat-time {
-  opacity: 0.92;
+  opacity: 0.9;
 }
+
+/* Пузырь сообщения (общие правила) */
 
 .chat-bubble {
   padding: 11px 13px;
@@ -1469,22 +1479,43 @@ textarea.form-input,
   font-size: 13px;
   line-height: 1.5;
   word-break: break-word;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 2px 6px rgba(15, 23, 42, 0.02);
 }
 
+/* Клиент: светло‑голубой пузырь */
+
 .chat-message-client .chat-bubble {
-  background: rgba(15, 23, 42, 0.055);
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(248, 250, 252, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.26);
   color: #0f172a;
   border-bottom-left-radius: 6px;
 }
 
+/* Агент: белый пузырь как в my-agent */
+
 .chat-message-agent .chat-bubble {
-  background: linear-gradient(135deg, var(--tenant-primary-dark) 0, var(--tenant-primary) 100%);
-  border: 1px solid rgba(11, 60, 120, 0.10);
-  color: #ffffff;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  color: #0f172a;
   border-bottom-right-radius: 6px;
 }
+
+/* Пользователь/оператор: зелёный акцент */
+
+.chat-message-user .chat-bubble {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.16),
+    rgba(16, 185, 129, 0.26)
+  );
+  border: 1px solid rgba(5, 150, 105, 0.42);
+  color: #064e3b;
+  border-bottom-right-radius: 6px;
+}
+
+/* Поле ввода + кнопки */
 
 .module-dialogs-page .chat-input {
   width: 100%;
@@ -1529,22 +1560,55 @@ textarea.form-input,
   border-radius: 14px;
 }
 
+/* Иконка голоса — выравниваем с my-agent */
+
 .module-dialogs-page .btn.btn-icon {
   width: 44px;
   height: 44px;
   min-width: 44px;
-  border-radius: 14px;
-  box-shadow: 0 8px 18px rgba(11, 60, 120, 0.18);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tenant-primary-dark);
+  color: #ffffff;
+  border: 1px solid rgba(11, 60, 120, 0.22);
+  box-shadow:
+    0 10px 22px rgba(11, 60, 120, 0.24),
+    0 3px 8px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease,
+    filter 0.18s ease,
+    background 0.18s ease;
+}
+
+.module-dialogs-page .btn.btn-icon:hover {
+  transform: translateY(-1px);
+  background: var(--tenant-primary);
+  box-shadow:
+    0 14px 28px rgba(11, 60, 120, 0.28),
+    0 5px 12px rgba(15, 23, 42, 0.1);
 }
 
 .module-dialogs-page .btn.btn-icon.recording {
   background: linear-gradient(135deg, #dc2626 0, #b91c1c 100%);
-  box-shadow: 0 8px 18px rgba(185, 28, 28, 0.24);
+  border-color: rgba(127, 29, 29, 0.32);
+  box-shadow:
+    0 10px 22px rgba(220, 38, 38, 0.24),
+    0 3px 8px rgba(15, 23, 42, 0.08);
+}
+
+.module-dialogs-page .btn.btn-icon .icon-mic path {
+  fill: #ffffff;
 }
 
 .module-dialogs-page .connect-status-msg {
   margin: 0;
 }
+
+/* Пустое состояние */
 
 .module-dialogs-page .module-notice {
   border-radius: 14px;
@@ -1555,6 +1619,8 @@ textarea.form-input,
   font-size: 13px;
   line-height: 1.5;
 }
+
+/* Адаптив */
 
 @media (max-width: 380px) {
   .chat-message {
@@ -1574,6 +1640,8 @@ textarea.form-input,
     min-height: 44px;
   }
 }
+
+/* Выравнивание отступов Cards для Stats + Dialogs */
 
 .module-stats-page > .card-section,
 .module-dialogs-page > .card-section {
