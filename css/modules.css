@@ -129,14 +129,17 @@
   transform: translateY(1px);
 }
 
+/* первые три таба — 1/3 строки */
 .module-tab--third {
   flex: 0 1 calc(33.333% - 8px);
 }
 
+/* последние два таба — 1/2 строки */
 .module-tab--half {
   flex: 0 1 calc(50% - 8px);
 }
 
+/* базовое активное состояние таба (может переопределяться модулем) */
 .module-tab--active,
 .agent-tabs .module-tab--active {
   background: linear-gradient(135deg, var(--module-primary), var(--module-primary-2));
@@ -149,12 +152,14 @@
    3. УНИВЕРСАЛЬНЫЕ КАРТОЧКИ И АККОРДЕОНЫ МОДУЛЕЙ
    ========================================================= */
 
+/* 3.1. Карточка-секция, которая сама является аккордеоном (Статистика, Агент, Payments) */
+
 .card-section.accordion-card {
   border-radius: var(--module-radius-lg);
   overflow: hidden;
 }
 
-/* Заголовок секции-аккордеона (Telegram, WhatsApp и т.п.) */
+/* Заголовок секции-аккордеона наследует фон из .card-section-header (синий градиент) */
 .card-section.accordion-card .card-section-header.accordion-header {
   display: flex;
   justify-content: space-between;
@@ -168,8 +173,15 @@
   flex: 1 1 auto;
 }
 
-/* Вложенные аккордеоны внутри секций (как в connect.html) */
+/* Тело секции-аккордеона (верхний уровень) */
+.card-section.accordion-card .card-section-body.accordion-body {
+  padding: 14px 16px 16px;
+  box-sizing: border-box;
+}
 
+/* 3.2. Вложенные аккордеоны внутри тела секций (Статистика, Connect и др.) */
+
+/* Внутренняя карточка-аккордеон в контексте секции */
 .card-section.accordion-card .accordion-card {
   border-radius: var(--module-radius-md);
   border: 1px solid var(--module-border);
@@ -179,7 +191,8 @@
   overflow: hidden;
 }
 
-/* Общий заголовок вложенного аккордеона */
+/* Заголовок вложенного аккордеона:
+   важно — НЕ трогаем фон/цвет, чтобы использовать общий .accordion-header */
 .card-section.accordion-card .accordion-card .accordion-header {
   width: 100%;
   min-height: 44px;
@@ -191,8 +204,6 @@
   cursor: pointer;
   border: none;
   text-align: left;
-  background: transparent;
-  color: #0f172a;
   box-sizing: border-box;
 }
 
@@ -203,8 +214,7 @@
   font-weight: 700;
 }
 
-/* Стрелка – тот же паттерн, что и в общих стилях .accordion-header-icon */
-
+/* Стрелка заголовка — используем общий паттерн .accordion-header-icon */
 .card-section.accordion-card .accordion-card .accordion-header-icon {
   position: relative;
   width: 14px;
@@ -215,6 +225,7 @@
   color: inherit;
 }
 
+/* Рисуем стрелку псевдоэлементом — начальное «вниз» */
 .card-section.accordion-card .accordion-card .accordion-header-icon::before {
   content: "";
   position: absolute;
@@ -228,25 +239,16 @@
   transition: transform 0.18s ease;
 }
 
-/* Открытая карточка: класс .open стоит на .accordion-card – поворачиваем стрелку */
-
+/* Поворот стрелки при открытой внутренней карточке */
 .card-section.accordion-card .accordion-card.open .accordion-header-icon::before {
   transform: translate(-50%, -38%) rotate(225deg);
 }
 
-/* Тело вложенного аккордеона: JS уже управляет display, мы только паддинги */
-
+/* Тело вложенного аккордеона: JS управляет display, тут только отступы и фон */
 .card-section.accordion-card .accordion-card .accordion-body {
   padding: 12px 14px 14px;
   box-sizing: border-box;
   background: #ffffff;
-}
-
-/* Сами секции-аккордеоны (Telegram и т.п.) – тело */
-
-.card-section.accordion-card .card-section-body.accordion-body {
-  padding: 14px 16px 16px;
-  box-sizing: border-box;
 }
 
 /* =========================================================
@@ -859,7 +861,7 @@ textarea.form-input,
    MODULE UI / SUMMARY ROWS + STATUS BADGES
    Общие переиспользуемые элементы для страниц модулей:
    - строки параметров в формате label/value
-   - компактные статусные бейджи
+   - компактные статусные бейджи (вариант 2)
 ========================================================= */
 
 .module-summary {
@@ -894,6 +896,8 @@ textarea.form-input,
   text-align: right;
   word-break: break-word;
 }
+
+/* Вариант статусного бейджа для summary-блоков */
 
 .status-badge {
   display: inline-flex;
@@ -966,21 +970,27 @@ textarea.form-input,
   /* отступ между card-section даёт правило card-section + .card-section */
 }
 
+/* верхний аккордеон (Telegram) */
 .module-connect-page > .accordion-card {
   margin-bottom: 0;
 }
 
+/* тело верхнего аккордеона */
 .module-connect-page > .accordion-card > .accordion-body {
   padding: 15px 16px 16px;
+}
+
+/* вложенные аккордеоны внутри тела (Как получить токен, Введите токен, Инструкции) */
+.module-connect-page > .accordion-card > .accordion-body > .accordion-card {
+  margin: 0;
 }
 
 .module-connect-page > .accordion-card > .accordion-body > .accordion-card + .accordion-card {
   margin-top: 15px;
 }
 
-.module-connect-page > .accordion-card > .accordion-body > .accordion-card {
-  margin: 0;
-}
+/* Стрелка в заголовке connect-аккордеонов:
+   используем тот же паттерн, что и в глобальных .accordion-header-icon */
 
 .module-connect-page .accordion-header-icon {
   position: relative;
@@ -988,7 +998,8 @@ textarea.form-input,
   height: 14px;
   flex: 0 0 14px;
   font-size: 0;
-  color: transparent;
+  line-height: 0;
+  color: #ffffff;
 }
 
 .module-connect-page .accordion-header-icon::before {
@@ -998,15 +1009,18 @@ textarea.form-input,
   left: 50%;
   width: 7px;
   height: 7px;
-  border-right: 1.8px solid #ffffff;
-  border-bottom: 1.8px solid #ffffff;
+  border-right: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
   transform: translate(-50%, -62%) rotate(45deg);
   transition: transform 0.18s ease;
 }
 
+/* при .open на .accordion-card поворачиваем стрелку */
 .module-connect-page .accordion-card.open > .accordion-header .accordion-header-icon::before {
   transform: translate(-50%, -38%) rotate(225deg);
 }
+
+/* блоки шагов и форм подключения */
 
 .connect-instructions-list {
   display: flex;
@@ -1146,7 +1160,9 @@ textarea.form-input,
 
 /* =========================================================
    MODULE LINKS PAGE
-   Тонкая стрелка для аккордеонов на links.html
+   links.html:
+   - аккордеоны ссылок
+   - тонкая стрелка в заголовке
 ========================================================= */
 
 .module-links-page .accordion-header-icon {
@@ -1155,7 +1171,8 @@ textarea.form-input,
   height: 14px;
   flex: 0 0 14px;
   font-size: 0;
-  color: transparent;
+  line-height: 0;
+  color: #ffffff;
 }
 
 .module-links-page .accordion-header-icon::before {
@@ -1165,8 +1182,8 @@ textarea.form-input,
   left: 50%;
   width: 7px;
   height: 7px;
-  border-right: 1.8px solid #ffffff;
-  border-bottom: 1.8px solid #ffffff;
+  border-right: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
   transform: translate(-50%, -62%) rotate(45deg);
   transition: transform 0.18s ease;
 }
@@ -1190,6 +1207,7 @@ textarea.form-input,
   /* отступ между card-section даёт правило card-section + .card-section */
 }
 
+/* верхний аккордеон (сводка/диалоги/выданные ссылки) */
 .module-stats-page > .accordion-card {
   margin-bottom: 0;
 }
@@ -1202,9 +1220,12 @@ textarea.form-input,
   margin-top: 8px;
 }
 
+/* шапки аккордеонов в статистике чуть более «многострочные» */
 .module-stats-page .accordion-header {
   align-items: flex-start;
 }
+
+/* стрелка в шапке статистики — тот же паттерн, что и в connect/links */
 
 .module-stats-page .accordion-header-icon {
   position: relative;
@@ -1212,7 +1233,8 @@ textarea.form-input,
   height: 14px;
   flex: 0 0 14px;
   font-size: 0;
-  color: transparent;
+  line-height: 0;
+  color: #ffffff;
   margin-top: 2px;
 }
 
@@ -1223,8 +1245,8 @@ textarea.form-input,
   left: 50%;
   width: 7px;
   height: 7px;
-  border-right: 1.8px solid #ffffff;
-  border-bottom: 1.8px solid #ffffff;
+  border-right: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
   transform: translate(-50%, -62%) rotate(45deg);
   transition: transform 0.18s ease;
 }
@@ -1232,6 +1254,8 @@ textarea.form-input,
 .module-stats-page .accordion-card.open > .accordion-header .accordion-header-icon::before {
   transform: translate(-50%, -38%) rotate(225deg);
 }
+
+/* текстовые блоки в шапках */
 
 .stats-accordion-head {
   display: flex;
