@@ -1618,21 +1618,18 @@ a {
   text-align: left;
 }
 
-.module-card-header-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  min-width: 0;
-  flex: 1;
-}
-
 .module-card-header-row {
   width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.module-card-header-main {
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .module-card-title {
@@ -1665,12 +1662,11 @@ a {
   text-align: left;
 }
 
-.module-card-header-row .module-card-badge {
+.module-card-header-row > .module-card-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: fit-content;
-  max-width: 100%;
+  flex: 0 0 auto;
   min-height: 26px;
   padding: 5px 10px;
   border-radius: 999px;
@@ -1678,9 +1674,9 @@ a {
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
+  margin-left: 12px;
   border: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, 0.92);
-  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .module-card-badge.is-base {
@@ -1770,18 +1766,19 @@ a {
     flex-direction: column;
   }
 
+  .module-card-header-row > .module-card-badge {
+    min-height: 24px;
+    padding: 4px 9px;
+    font-size: 11px;
+    margin-left: 0;
+  }
+
   .module-card-title {
     font-size: 16px;
   }
 
   .module-card-title-ru {
     font-size: 14px;
-  }
-
-  .module-card-header-row .module-card-badge {
-    min-height: 24px;
-    padding: 4px 9px;
-    font-size: 11px;
   }
 
   .module-card-short-description,
