@@ -1,7 +1,8 @@
 {
   "tenantId": "fitline",
-  "appName": "FitLine AI",
+  "appName": "AI FIT CENTER",
   "brandName": "FitLine",
+  "shellBrandName": "FIT",
   "features": {
     "home": true,
     "myAgent": true,
@@ -66,7 +67,7 @@
   ],
   "texts": {
     "navPayments": "Оплата",
-    "paymentsPageTitle": "Оплата — FitLine AI",
+    "paymentsPageTitle": "Оплата — AI FIT CENTER",
     "paymentsHeaderTitle": "Оплата",
     "paymentsHeaderSubtitle": "Выберите тариф для подключения модуля",
     "paymentsHeaderLead": "Стоимость на этой странице указана в долларах США. На странице оплаты сумма будет показана в валюте пользователя.",
@@ -87,7 +88,7 @@
     "paymentsDisabledText": "Раздел оплат сейчас недоступен.",
     "paymentsEmptyText": "Тарифы пока не настроены для этого бренда.",
 
-    "checkoutPageTitle": "Оформление оплаты — FitLine AI",
+    "checkoutPageTitle": "Оформление оплаты — AI FIT CENTER",
     "checkoutHeaderTitle": "Оформление оплаты",
     "checkoutHeaderSubtitle": "Проверьте выбранный тариф и способ оплаты",
     "checkoutHeaderLead": "Сумма указана в долларах США. На стороне платёжного сервиса она может быть показана в валюте пользователя.",
@@ -100,7 +101,7 @@
     "checkoutPlanFallbackName": "Тариф",
     "checkoutPlanMissingTitle": "Тариф не выбран",
     "checkoutPlanMissingText": "Вернитесь на страницу оплаты и выберите тариф.",
-    "checkoutNoMethodsText": "Для FitLine пока не настроены способы оплаты.",
+    "checkoutNoMethodsText": "Для AI FIT CENTER пока не настроены способы оплаты.",
     "checkoutMethodDescriptionFallback": "Способ оплаты будет подключён после настройки платёжного сервиса.",
     "checkoutMethodNotSelectedTitle": "Способ оплаты не выбран",
     "checkoutMethodNotSelectedText": "Выберите один из доступных способов оплаты, чтобы продолжить.",
@@ -108,10 +109,10 @@
     "checkoutMethodSelectedText": "На следующем этапе сюда будет подключён реальный платёжный сервис.",
     "checkoutPendingMessage": "Платёжный сервис будет подключён позже.",
 
-    "partnerPageTitle": "Партнёрка — FitLine AI",
+    "partnerPageTitle": "Партнёрка — AI FIT CENTER",
     "partnerTitle": "Партнёрка",
     "partnerHeaderTitle": "Партнёрка",
-    "partnerHeaderSubtitle": "Зарабатывайте вместе с FitLine AI",
+    "partnerHeaderSubtitle": "Зарабатывайте вместе с AI FIT CENTER",
     "partnerLead": "Делитесь реферальной ссылкой и получайте процент с оплат ваших партнёров.",
     "partnerReferralTitle": "Ваша реферальная ссылка",
     "partnerReferralText": "Скопируйте ссылку и отправьте её своим клиентам или партнёрам.",
