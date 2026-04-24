@@ -454,39 +454,39 @@
       const buttonExtraClass = isDisabledButton ? ' btn-disabled' : '';
 
       section.innerHTML = `
-        <button class="card-section-header accordion-header module-card-toggle" type="button" aria-expanded="false">
-          <span class="module-card-header-text">
-            <span class="module-card-title">
-              ${module.title}
-              <span class="module-card-title-ru">/ ${module.titleRu}</span>
-            </span>
-            <span class="module-card-badge ${badge.cls}">${badge.text}</span>
-          </span>
-          <span class="accordion-header-icon" aria-hidden="true"></span>
-        </button>
+  <button class="card-section-header accordion-header module-card-toggle" type="button" aria-expanded="false">
+    <span class="module-card-header-text">
+      <span class="module-card-title">
+        ${module.title}
+        <span class="module-card-title-ru">/ ${module.titleRu}</span>
+      </span>
+    </span>
+    <span class="accordion-header-icon" aria-hidden="true"></span>
+  </button>
 
-        <div class="card-section-body module-card-main">
-          <p class="module-card-short-description">${module.shortDescription}</p>
-          <button
-            class="btn btn-block${buttonExtraClass}"
-            type="button"
-            data-module-id="${module.id}"
-            data-module-page="${module.page}"
-            ${buttonDisabledAttr}
-          >
-            ${getModuleOpenButtonText(module)}
-          </button>
-        </div>
+  <div class="card-section-body module-card-main">
+    <span class="module-card-badge ${badge.cls}">${badge.text}</span>
+    <p class="module-card-short-description">${module.shortDescription}</p>
+    <button
+      class="btn btn-block${buttonExtraClass}"
+      type="button"
+      data-module-id="${module.id}"
+      data-module-page="${module.page}"
+      ${buttonDisabledAttr}
+    >
+      ${getModuleOpenButtonText(module)}
+    </button>
+  </div>
 
-        <div class="card-section-body accordion-body module-card-expanded">
-          <div class="module-card-expanded-title">
-            ${getText('modulesDetailsTitle', 'Подробнее о модуле')}
-          </div>
-          <ul class="module-card-description-list">
-            ${module.fullDescription.map(item => `<li>${item}</li>`).join('')}
-          </ul>
-        </div>
-      `;
+  <div class="card-section-body accordion-body module-card-expanded">
+    <div class="module-card-expanded-title">
+      ${getText('modulesDetailsTitle', 'Подробнее о модуле')}
+    </div>
+    <ul class="module-card-description-list">
+      ${module.fullDescription.map(item => `<li>${item}</li>`).join('')}
+    </ul>
+  </div>
+`;
 
       const toggleBtn = section.querySelector('.module-card-toggle');
       const expandedBody = section.querySelector('.module-card-expanded');
