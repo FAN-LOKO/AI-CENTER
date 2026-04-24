@@ -198,8 +198,10 @@
       return {
         ...(payload && typeof payload === 'object' ? payload : {}),
         dialogs,
-        activeDialog: CURRENT_DIALOG || shellSelectedDialog || payload?.activeDialog || null,
-        selectedDialog: CURRENT_DIALOG || shellSelectedDialog || payload?.selectedDialog || null
+        activeDialog:
+          CURRENT_DIALOG || shellSelectedDialog || payload?.activeDialog || null,
+        selectedDialog:
+          CURRENT_DIALOG || shellSelectedDialog || payload?.selectedDialog || null
       };
     } catch (error) {
       console.error('[AI CENTER][Dialogs] dialogs payload read failed', error);
@@ -310,33 +312,58 @@
       dialog?.time ||
       '';
 
+    const rawAuthor =
+      message?.author ||
+      message?.authorName ||
+      message?.from ||
+      '';
+
     const roleRaw = String(
       message?.role ||
       message?.authorRole ||
-      message?.author ||
+      message?.authorType ||
       message?.type ||
-      ''
+      rawAuthor
     ).toLowerCase();
+
+    const isUser =
+      roleRaw.includes('owner') ||
+      roleRaw.includes('operator') ||
+      roleRaw.includes('manager') ||
+      roleRaw.includes('admin') ||
+      roleRaw.includes('host') ||
+      (roleRaw.includes('user') && !roleRaw.includes('client'));
 
     const isClient =
       roleRaw.includes('client') ||
-      roleRaw.includes('user') ||
       roleRaw.includes('customer') ||
-      roleRaw.includes('lead');
+      roleRaw.includes('lead') ||
+      roleRaw.includes('prospect') ||
+      roleRaw.includes('subscriber');
 
     const isAgent =
       roleRaw.includes('agent') ||
       roleRaw.includes('assistant') ||
       roleRaw.includes('bot') ||
-      roleRaw.includes('manager');
+      roleRaw.includes('ai');
 
-    const role = isClient ? 'client' : isAgent ? 'agent' : 'agent';
+    let role = 'agent';
+    if (isUser) role = 'user';
+    else if (isClient) role = 'client';
+    else if (isAgent) role = 'agent';
+
+    let authorLabel = rawAuthor || '';
+    if (!authorLabel) {
+      if (role === 'client') authorLabel = 'Клиент';
+      else if (role === 'user') authorLabel = 'Вы';
+      else authorLabel = 'Агент';
+    }
 
     return {
       text,
       time,
       role,
-      author: message?.author || (role === 'client' ? 'Клиент' : 'Агент')
+      author: authorLabel
     };
   }
 
@@ -378,22 +405,30 @@
       return;
     }
 
-    container.innerHTML = messages.map((rawMessage) => {
-      const message = normalizeMessage(rawMessage, dialog);
-      const isClient = message.role === 'client';
+    container.innerHTML = messages
+      .map((rawMessage) => {
+        const message = normalizeMessage(rawMessage, dialog);
 
-      return `
-        <div class="chat-message ${isClient ? 'chat-message-client' : 'chat-message-agent'}">
-          <div class="chat-message-meta">
-            <span class="chat-author">${escapeHtml(message.author)}</span>
-            <span class="chat-time">${escapeHtml(message.time)}</span>
+        const roleClass =
+          message.role === 'client'
+            ? 'chat-message-client'
+            : message.role === 'user'
+            ? 'chat-message-user'
+            : 'chat-message-agent';
+
+        return `
+          <div class="chat-message ${roleClass}">
+            <div class="chat-message-meta">
+              <span class="chat-author">${escapeHtml(message.author)}</span>
+              <span class="chat-time">${escapeHtml(message.time)}</span>
+            </div>
+            <div class="chat-bubble">
+              ${escapeHtml(message.text)}
+            </div>
           </div>
-          <div class="chat-bubble">
-            ${escapeHtml(message.text)}
-          </div>
-        </div>
-      `;
-    }).join('');
+        `;
+      })
+      .join('');
   }
 
   function bindComposer(dialog) {
@@ -414,18 +449,22 @@
         'dialogsComposerDisabledText',
         'Отправка сообщений сейчас недоступна.'
       );
+      status.className = 'connect-status-msg';
       return;
     }
 
     status.textContent = '';
+    status.className = 'connect-status-msg';
 
     sendButton.onclick = () => {
       const text = String(input.value || '').trim();
+
       if (!text) {
         status.textContent = getText(
           'dialogsComposerEmptyText',
           'Введите сообщение перед отправкой.'
         );
+        status.className = 'connect-status-msg error';
         return;
       }
 
@@ -438,17 +477,20 @@
           },
           '*'
         );
+
         input.value = '';
         status.textContent = getText(
           'dialogsComposerSentText',
           'Сообщение отправлено.'
         );
+        status.className = 'connect-status-msg success';
       } catch (error) {
         console.error('[AI CENTER][Dialogs] send message failed', error);
         status.textContent = getText(
           'dialogsComposerErrorText',
           'Не удалось отправить сообщение.'
         );
+        status.className = 'connect-status-msg error';
       }
     };
 
@@ -461,12 +503,19 @@
           },
           '*'
         );
+
         status.textContent = getText(
           'dialogsVoicePendingText',
           'Функция голосового сообщения будет доступна позже.'
         );
+        status.className = 'connect-status-msg';
       } catch (error) {
         console.error('[AI CENTER][Dialogs] voice message failed', error);
+        status.textContent = getText(
+          'dialogsComposerErrorText',
+          'Не удалось выполнить действие.'
+        );
+        status.className = 'connect-status-msg error';
       }
     };
   }
@@ -512,7 +561,8 @@
       }
 
       if (data.type === 'agent-open-dialog') {
-        CURRENT_DIALOG = data.dialog || data.selectedDialog || data.activeDialog || null;
+        CURRENT_DIALOG =
+          data.dialog || data.selectedDialog || data.activeDialog || null;
         renderDialogsPage();
         return;
       }
