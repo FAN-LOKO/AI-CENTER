@@ -1,378 +1,250 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  />
   <title>Мой агент</title>
-  <link rel="stylesheet" href="css/styles.css">
-  
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <div class="page page-my-agent">
+  <div class="page page-my-agent my-agent-page">
     <section class="card-section">
       <div class="card-section-header">
-        <h2 class="card-section-title">Мой агент</h2>
-        <p class="card-section-subtitle">
+        <h2 class="card-section-title" id="myAgentTitle">Мой агент</h2>
+        <p class="card-section-subtitle" id="myAgentSubtitle">
           Напишите свой вопрос, агент ответит прямо здесь.
         </p>
       </div>
 
       <div class="card-section-body">
-        <!-- Диалоговое окно -->
-        <div class="chat-messages" id="clientChatMessages">
-          <div class="chat-message chat-message-agent">
-            <div class="chat-message-meta">
-              <span>Агент</span>
-              <span>12:00</span>
-            </div>
-            <div class="chat-bubble">
-              Привет! Чем могу помочь?
+        <p class="my-agent-lead" id="myAgentLead">
+          Текстовые сообщения и голосовые заметки отправляются агенту напрямую из мини‑приложения.
+        </p>
+
+        <div class="chat-panel">
+          <div class="chat-messages" id="clientChatMessages">
+            <div class="chat-message chat-message-agent">
+              <div class="chat-message-meta">
+                <span id="myAgentWelcomeAuthor">Агент</span>
+                <span>12:00</span>
+              </div>
+              <div class="chat-bubble" id="myAgentWelcomeMessage">
+                Привет! Чем могу помочь?
+              </div>
             </div>
           </div>
+
+          <div class="chat-composer">
+            <textarea
+              id="clientMessageInput"
+              class="chat-input"
+              rows="3"
+              placeholder="Введите сообщение..."
+            ></textarea>
+
+            <div class="chat-input-actions-row">
+              <button
+                id="clientSendMessageButton"
+                class="btn btn-send"
+                type="button"
+              >
+                Отправить
+              </button>
+
+              <button
+                id="clientVoiceButton"
+                class="btn btn-icon"
+                type="button"
+                aria-label="Записать голосовое сообщение"
+              >
+                <svg
+                  class="icon-mic"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 1 1 2 0 7 7 0 0 1-6 6.92V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.08A7 7 0 0 1 5 11a1 1 0 1 1 2 0 5 5 0 0 0 10 0z"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <p
+              id="clientSendMessageStatus"
+              class="connect-status-msg"
+            ></p>
+          </div>
         </div>
-
-        <!-- Поле ввода + кнопка отправки + глосовой -->
-        <div class="chat-messages" id="clientChatMessages">
-  <!-- сообщения -->
-</div>
-
-<!-- Поле ввода -->
-<textarea
-  id="clientMessageInput"
-  class="chat-input"
-  rows="2"
-  placeholder="Введите сообщение..."
-></textarea>
-
-<!-- Ряд кнопок под полем -->
-<div class="chat-input-actions-row">
-  <button
-    id="clientSendMessageButton"
-    class="btn btn-send"
-    type="button"
-  >
-    Отправить
-  </button>
-
-  <button
-  id="clientVoiceButton"
-  class="btn btn-icon"
-  type="button"
-  aria-label="Записать голосовое сообщение"
->
-  <svg
-    class="icon-mic"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <path
-      d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 1 1 2 0 7 7 0 0 1-6 6.92V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.08A7 7 0 0 1 5 11a1 1 0 1 1 2 0 5 5 0 0 0 10 0z"
-    />
-  </svg>
-</button>
-</div>
-
-<div
-  id="clientSendMessageStatus"
-  class="connect-status-msg"
-></div>
-
-        <div
-          id="clientSendMessageStatus"
-          class="connect-status-msg"
-        ></div>
       </div>
     </section>
   </div>
 
   <script>
-  let TENANTCONFIG = null;
-  let APPFEATURES = {
-    home: true,
-    myAgent: true,
-    modules: true,
-    sharedChat: true,
-    affiliate: true,
-    payments: true,
-    settings: true
-  };
+    let TENANTCONFIG = null;
+    let APPFEATURES = {
+      home: true,
+      myAgent: true,
+      modules: true,
+      sharedChat: true,
+      affiliate: true,
+      payments: true,
+      settings: true
+    };
 
-  const tg = window.Telegram?.WebApp || null;
+    const tg = window.Telegram?.WebApp || null;
 
-  let mediaRecorder = null;
-  let recordedChunks = [];
-  let mediaStream = null;
-  let isRecording = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let mediaStream = null;
+    let isRecording = false;
 
-  function getTenantConfig() {
-    try {
-      return window.parent?.AICAppShell?.getTenantConfig?.() || null;
-    } catch (error) {
-      console.error('[ClientChat] tenant config read failed', error);
-      return null;
-    }
-  }
-
-  function getText(key, fallback = '') {
-    return TENANTCONFIG?.texts?.[key] ?? fallback;
-  }
-
-  function getAppFeatures() {
-    try {
-      return window.parent?.AICAppShell?.getAppFeatures?.() || {};
-    } catch (error) {
-      console.error('[ClientChat] app features read failed', error);
-      return {};
-    }
-  }
-
-  function showClientStatus(message) {
-    const statusEl = document.getElementById('clientSendMessageStatus');
-    if (!statusEl) return;
-
-    statusEl.textContent = message;
-    statusEl.classList.remove('error');
-    statusEl.classList.add('success');
-  }
-
-  function showClientError(message) {
-    const statusEl = document.getElementById('clientSendMessageStatus');
-    if (!statusEl) {
-      alert(message);
-      return;
-    }
-
-    statusEl.textContent = message;
-    statusEl.classList.remove('success');
-    statusEl.classList.add('error');
-  }
-
-  function appendClientChatMessage(text) {
-    const container = document.getElementById('clientChatMessages');
-    if (!container) return;
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'chat-message chat-message-client';
-
-    const meta = document.createElement('div');
-    meta.className = 'chat-message-meta';
-
-    const author = document.createElement('span');
-    author.textContent = getText('clientChatAuthorYou', 'Вы');
-
-    const time = document.createElement('span');
-    const now = new Date();
-    time.textContent = now.toLocaleTimeString('ru-RU', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-
-    meta.appendChild(author);
-    meta.appendChild(time);
-
-    const bubble = document.createElement('div');
-    bubble.className = 'chat-bubble';
-    bubble.textContent = text;
-
-    wrapper.appendChild(meta);
-    wrapper.appendChild(bubble);
-
-    container.appendChild(wrapper);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  function appendClientVoiceMessage(label) {
-    const container = document.getElementById('clientChatMessages');
-    if (!container) return;
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'chat-message chat-message-client';
-
-    const meta = document.createElement('div');
-    meta.className = 'chat-message-meta';
-
-    const author = document.createElement('span');
-    author.textContent = getText('clientChatAuthorVoice', 'Вы (голосовое)');
-
-    const time = document.createElement('span');
-    const now = new Date();
-    time.textContent = now.toLocaleTimeString('ru-RU', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-
-    meta.appendChild(author);
-    meta.appendChild(time);
-
-    const bubble = document.createElement('div');
-    bubble.className = 'chat-bubble';
-    bubble.textContent = label || getText('clientChatVoiceLabel', 'Голосовое сообщение');
-
-    wrapper.appendChild(meta);
-    wrapper.appendChild(bubble);
-
-    container.appendChild(wrapper);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  function sendClientTextMessage() {
-    if (APPFEATURES.sharedChat === false) {
-      showClientError(getText('clientChatDisabledText', 'Чат сейчас недоступен.'));
-      return;
-    }
-
-    const input = document.getElementById('clientMessageInput');
-    if (!input) return;
-
-    const text = (input.value || '').trim();
-    if (!text) return;
-
-    appendClientChatMessage(text);
-    input.value = '';
-
-    showClientStatus(
-      getText('clientChatTextSentStatus', 'Сообщение отправлено агенту...')
-    );
-
-    try {
-      tg?.HapticFeedback?.impactOccurred?.('medium');
-    } catch (error) {
-      console.warn('[ClientChat] haptic feedback failed', error);
-    }
-
-    window.parent?.postMessage?.(
-      {
-        type: 'client-send-message',
-        text
-      },
-      '*'
-    );
-  }
-
-  function getSupportedMimeType() {
-    const candidates = [
-      'audio/webm;codecs=opus',
-      'audio/webm',
-      'audio/mp4',
-      'audio/m4a',
-      'audio/aac',
-      'audio/ogg',
-      'audio/wav'
-    ];
-
-    if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) {
-      return '';
-    }
-
-    for (const type of candidates) {
+    function getTenantConfig() {
       try {
-        if (MediaRecorder.isTypeSupported(type)) {
-          return type;
-        }
+        return window.parent?.AICAppShell?.getTenantConfig?.() || null;
       } catch (error) {
-        console.warn('[ClientChat] mime check failed', type, error);
+        console.error('[ClientChat] tenant config read failed', error);
+        return null;
       }
     }
 
-    return '';
-  }
-
-  function cleanupVoiceState() {
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-      mediaStream = null;
+    function getText(key, fallback = '') {
+      return TENANTCONFIG?.texts?.[key] ?? fallback;
     }
 
-    mediaRecorder = null;
-    recordedChunks = [];
-    isRecording = false;
-
-    const voiceBtn = document.getElementById('clientVoiceButton');
-    if (voiceBtn) {
-      voiceBtn.classList.remove('recording');
-    }
-  }
-
-  async function startVoiceRecording() {
-    if (APPFEATURES.sharedChat === false) {
-      showClientError(getText('clientChatDisabledText', 'Чат сейчас недоступен.'));
-      return;
+    function getAppFeatures() {
+      try {
+        return window.parent?.AICAppShell?.getAppFeatures?.() || {};
+      } catch (error) {
+        console.error('[ClientChat] app features read failed', error);
+        return {};
+      }
     }
 
-    if (!navigator.mediaDevices?.getUserMedia) {
-      showClientError(
-        getText(
-          'clientChatVoiceUnsupported',
-          'Запись голоса не поддерживается на этом устройстве/в этом браузере.'
-        )
+    function showClientStatus(message) {
+      const statusEl = document.getElementById('clientSendMessageStatus');
+      if (!statusEl) return;
+
+      statusEl.textContent = message || '';
+      statusEl.classList.remove('error');
+      statusEl.classList.add('success');
+    }
+
+    function showClientError(message) {
+      const statusEl = document.getElementById('clientSendMessageStatus');
+      if (!statusEl) {
+        alert(message);
+        return;
+      }
+
+      statusEl.textContent = message || '';
+      statusEl.classList.remove('success');
+      statusEl.classList.add('error');
+    }
+
+    function clearClientStatus() {
+      const statusEl = document.getElementById('clientSendMessageStatus');
+      if (!statusEl) return;
+
+      statusEl.textContent = '';
+      statusEl.classList.remove('success');
+      statusEl.classList.remove('error');
+    }
+
+    function getCurrentTimeLabel() {
+      const now = new Date();
+      return now.toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function appendClientChatMessage(text) {
+      const container = document.getElementById('clientChatMessages');
+      if (!container) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'chat-message chat-message-client';
+
+      const meta = document.createElement('div');
+      meta.className = 'chat-message-meta';
+
+      const author = document.createElement('span');
+      author.textContent = getText('clientChatAuthorYou', 'Вы');
+
+      const time = document.createElement('span');
+      time.textContent = getCurrentTimeLabel();
+
+      meta.appendChild(author);
+      meta.appendChild(time);
+
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+      bubble.textContent = text;
+
+      wrapper.appendChild(meta);
+      wrapper.appendChild(bubble);
+
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function appendClientVoiceMessage(label) {
+      const container = document.getElementById('clientChatMessages');
+      if (!container) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'chat-message chat-message-client';
+
+      const meta = document.createElement('div');
+      meta.className = 'chat-message-meta';
+
+      const author = document.createElement('span');
+      author.textContent = getText('clientChatAuthorVoice', 'Вы (голосовое)');
+
+      const time = document.createElement('span');
+      time.textContent = getCurrentTimeLabel();
+
+      meta.appendChild(author);
+      meta.appendChild(time);
+
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+      bubble.textContent =
+        label || getText('clientChatVoiceLabel', 'Голосовое сообщение');
+
+      wrapper.appendChild(meta);
+      wrapper.appendChild(bubble);
+
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function sendClientTextMessage() {
+      if (APPFEATURES.sharedChat === false) {
+        showClientError(
+          getText('clientChatDisabledText', 'Чат сейчас недоступен.')
+        );
+        return;
+      }
+
+      const input = document.getElementById('clientMessageInput');
+      if (!input) return;
+
+      const text = (input.value || '').trim();
+      if (!text) return;
+
+      appendClientChatMessage(text);
+      input.value = '';
+      clearClientStatus();
+
+      showClientStatus(
+        getText('clientChatTextSentStatus', 'Сообщение отправлено агенту...')
       );
-      return;
-    }
-
-    if (isRecording) return;
-
-    try {
-      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      recordedChunks = [];
-
-      const mimeType = getSupportedMimeType();
-      const options = mimeType ? { mimeType } : undefined;
-
-      mediaRecorder = new MediaRecorder(mediaStream, options);
-
-      mediaRecorder.addEventListener('dataavailable', event => {
-        if (event.data && event.data.size > 0) {
-          recordedChunks.push(event.data);
-        }
-      });
-
-      mediaRecorder.addEventListener('stop', () => {
-        const blobType = mimeType || 'audio/webm';
-        const blob = new Blob(recordedChunks, { type: blobType });
-
-        appendClientVoiceMessage(getText('clientChatVoiceLabel', 'Голосовое сообщение'));
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64Audio = reader.result;
-
-          window.parent?.postMessage?.(
-            {
-              type: 'client-send-voice',
-              audio: base64Audio,
-              mimeType: blob.type || blobType
-            },
-            '*'
-          );
-
-          showClientStatus(
-            getText('clientChatVoiceSentStatus', 'Голосовое отправлено агенту...')
-          );
-
-          cleanupVoiceState();
-        };
-
-        reader.onerror = () => {
-          showClientError(
-            getText(
-              'clientChatVoiceReadError',
-              'Не удалось обработать голосовое сообщение.'
-            )
-          );
-          cleanupVoiceState();
-        };
-
-        reader.readAsDataURL(blob);
-      });
-
-      mediaRecorder.start();
-      isRecording = true;
-
-      const voiceBtn = document.getElementById('clientVoiceButton');
-      if (voiceBtn) {
-        voiceBtn.classList.add('recording');
-      }
 
       try {
         tg?.HapticFeedback?.impactOccurred?.('medium');
@@ -380,131 +252,354 @@
         console.warn('[ClientChat] haptic feedback failed', error);
       }
 
-      showClientStatus(
-        getText('clientChatVoiceRecordingStatus', 'Идёт запись голосового...')
+      window.parent?.postMessage?.(
+        {
+          type: 'client-send-message',
+          text
+        },
+        '*'
       );
-    } catch (error) {
-      console.error('[ClientChat] microphone access failed', error);
-      showClientError(
-        getText(
-          'clientChatVoiceAccessError',
-          'Не удалось получить доступ к микрофону. Проверьте разрешения в Telegram/браузере.'
-        )
-      );
-      cleanupVoiceState();
     }
-  }
 
-  function stopVoiceRecording() {
-    if (!mediaRecorder || !isRecording) return;
+    function getSupportedMimeType() {
+      const candidates = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/m4a',
+        'audio/aac',
+        'audio/ogg',
+        'audio/wav'
+      ];
 
-    try {
-      mediaRecorder.stop();
+      if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) {
+        return '';
+      }
+
+      for (const type of candidates) {
+        try {
+          if (MediaRecorder.isTypeSupported(type)) {
+            return type;
+          }
+        } catch (error) {
+          console.warn('[ClientChat] mime check failed', type, error);
+        }
+      }
+
+      return '';
+    }
+
+    function cleanupVoiceState() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+
+      mediaRecorder = null;
+      recordedChunks = [];
       isRecording = false;
 
       const voiceBtn = document.getElementById('clientVoiceButton');
       if (voiceBtn) {
         voiceBtn.classList.remove('recording');
       }
-
-      showClientStatus(
-        getText('clientChatVoiceProcessingStatus', 'Обработка голосового сообщения...')
-      );
-    } catch (error) {
-      console.error('[ClientChat] voice stop failed', error);
-      showClientError(
-        getText(
-          'clientChatVoiceStopError',
-          'Не удалось завершить запись голосового сообщения.'
-        )
-      );
-      cleanupVoiceState();
-    }
-  }
-
-  function syncChatAvailability() {
-    const input = document.getElementById('clientMessageInput');
-    const sendBtn = document.getElementById('clientSendMessageButton');
-    const voiceBtn = document.getElementById('clientVoiceButton');
-    const disabled = APPFEATURES.sharedChat === false;
-
-    if (input) input.disabled = disabled;
-    if (sendBtn) sendBtn.disabled = disabled;
-    if (voiceBtn) voiceBtn.disabled = disabled;
-
-    if (disabled) {
-      showClientError(getText('clientChatDisabledText', 'Чат сейчас недоступен.'));
-    }
-  }
-
-  function bindTextMessageHandlers() {
-    const input = document.getElementById('clientMessageInput');
-    const sendBtn = document.getElementById('clientSendMessageButton');
-
-    if (sendBtn) {
-      sendBtn.addEventListener('click', sendClientTextMessage);
     }
 
-    if (input) {
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendClientTextMessage();
+    async function startVoiceRecording() {
+      if (APPFEATURES.sharedChat === false) {
+        showClientError(
+          getText('clientChatDisabledText', 'Чат сейчас недоступен.')
+        );
+        return;
+      }
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        showClientError(
+          getText(
+            'clientChatVoiceUnsupported',
+            'Запись голоса не поддерживается на этом устройстве/в этом браузере.'
+          )
+        );
+        return;
+      }
+
+      if (isRecording) return;
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recordedChunks = [];
+
+        const mimeType = getSupportedMimeType();
+        const options = mimeType ? { mimeType } : undefined;
+
+        mediaRecorder = new MediaRecorder(mediaStream, options);
+
+        mediaRecorder.addEventListener('dataavailable', event => {
+          if (event.data && event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        });
+
+        mediaRecorder.addEventListener('stop', () => {
+          const blobType = mimeType || 'audio/webm';
+          const blob = new Blob(recordedChunks, { type: blobType });
+
+          appendClientVoiceMessage(
+            getText('clientChatVoiceLabel', 'Голосовое сообщение')
+          );
+
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64Audio = reader.result;
+
+            window.parent?.postMessage?.(
+              {
+                type: 'client-send-voice',
+                audio: base64Audio,
+                mimeType: blob.type || blobType
+              },
+              '*'
+            );
+
+            showClientStatus(
+              getText(
+                'clientChatVoiceSentStatus',
+                'Голосовое отправлено агенту...'
+              )
+            );
+
+            cleanupVoiceState();
+          };
+
+          reader.onerror = () => {
+            showClientError(
+              getText(
+                'clientChatVoiceReadError',
+                'Не удалось обработать голосовое сообщение.'
+              )
+            );
+            cleanupVoiceState();
+          };
+
+          reader.readAsDataURL(blob);
+        });
+
+        mediaRecorder.start();
+        isRecording = true;
+
+        const voiceBtn = document.getElementById('clientVoiceButton');
+        if (voiceBtn) {
+          voiceBtn.classList.add('recording');
         }
+
+        try {
+          tg?.HapticFeedback?.impactOccurred?.('medium');
+        } catch (error) {
+          console.warn('[ClientChat] haptic feedback failed', error);
+        }
+
+        showClientStatus(
+          getText('clientChatVoiceRecordingStatus', 'Идёт запись голосового...')
+        );
+      } catch (error) {
+        console.error('[ClientChat] microphone access failed', error);
+        showClientError(
+          getText(
+            'clientChatVoiceAccessError',
+            'Не удалось получить доступ к микрофону. Проверьте разрешения в Telegram/браузере.'
+          )
+        );
+        cleanupVoiceState();
+      }
+    }
+
+    function stopVoiceRecording() {
+      if (!mediaRecorder || !isRecording) return;
+
+      try {
+        mediaRecorder.stop();
+        isRecording = false;
+
+        const voiceBtn = document.getElementById('clientVoiceButton');
+        if (voiceBtn) {
+          voiceBtn.classList.remove('recording');
+        }
+
+        showClientStatus(
+          getText(
+            'clientChatVoiceProcessingStatus',
+            'Обработка голосового сообщения...'
+          )
+        );
+      } catch (error) {
+        console.error('[ClientChat] voice stop failed', error);
+        showClientError(
+          getText(
+            'clientChatVoiceStopError',
+            'Не удалось завершить запись голосового сообщения.'
+          )
+        );
+        cleanupVoiceState();
+      }
+    }
+
+    function syncChatAvailability() {
+      const input = document.getElementById('clientMessageInput');
+      const sendBtn = document.getElementById('clientSendMessageButton');
+      const voiceBtn = document.getElementById('clientVoiceButton');
+      const disabled = APPFEATURES.sharedChat === false;
+
+      if (input) input.disabled = disabled;
+      if (sendBtn) sendBtn.disabled = disabled;
+      if (voiceBtn) voiceBtn.disabled = disabled;
+
+      if (disabled) {
+        showClientError(
+          getText('clientChatDisabledText', 'Чат сейчас недоступен.')
+        );
+      } else {
+        clearClientStatus();
+      }
+    }
+
+    function bindTextMessageHandlers() {
+      const input = document.getElementById('clientMessageInput');
+      const sendBtn = document.getElementById('clientSendMessageButton');
+
+      if (sendBtn) {
+        sendBtn.addEventListener('click', sendClientTextMessage);
+      }
+
+      if (input) {
+        input.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendClientTextMessage();
+          }
+        });
+      }
+    }
+
+    function bindVoiceHandlers() {
+      const voiceBtn = document.getElementById('clientVoiceButton');
+      if (!voiceBtn) return;
+
+      const startEvents = ['mousedown', 'touchstart'];
+      const stopEvents = ['mouseup', 'mouseleave', 'touchend', 'touchcancel'];
+
+      startEvents.forEach(eventName => {
+        voiceBtn.addEventListener(eventName, event => {
+          event.preventDefault();
+          if (!isRecording) {
+            startVoiceRecording();
+          }
+        });
+      });
+
+      stopEvents.forEach(eventName => {
+        voiceBtn.addEventListener(eventName, event => {
+          event.preventDefault();
+          if (isRecording) {
+            stopVoiceRecording();
+          }
+        });
       });
     }
-  }
 
-  function bindVoiceHandlers() {
-    const voiceBtn = document.getElementById('clientVoiceButton');
-    if (!voiceBtn) return;
+    function applyTenantTexts() {
+      const titleEl = document.getElementById('myAgentTitle');
+      const subtitleEl = document.getElementById('myAgentSubtitle');
+      const leadEl = document.getElementById('myAgentLead');
+      const welcomeAuthorEl = document.getElementById('myAgentWelcomeAuthor');
+      const welcomeMessageEl = document.getElementById('myAgentWelcomeMessage');
+      const inputEl = document.getElementById('clientMessageInput');
+      const sendBtnEl = document.getElementById('clientSendMessageButton');
+      const voiceBtnEl = document.getElementById('clientVoiceButton');
 
-    const startEvents = ['mousedown', 'touchstart'];
-    const stopEvents = ['mouseup', 'mouseleave', 'touchend', 'touchcancel'];
+      if (titleEl) {
+        titleEl.textContent = getText('myAgentTitle', 'Мой агент');
+      }
 
-    startEvents.forEach(eventName => {
-      voiceBtn.addEventListener(eventName, event => {
-        event.preventDefault();
-        if (!isRecording) {
-          startVoiceRecording();
-        }
-      });
+      if (subtitleEl) {
+        subtitleEl.textContent = getText(
+          'myAgentSubtitle',
+          'Напишите свой вопрос, агент ответит прямо здесь.'
+        );
+      }
+
+      if (leadEl) {
+        leadEl.textContent = getText(
+          'myAgentLead',
+          'Текстовые сообщения и голосовые заметки отправляются агенту напрямую из мини‑приложения.'
+        );
+      }
+
+      if (welcomeAuthorEl) {
+        welcomeAuthorEl.textContent = getText('myAgentWelcomeAuthor', 'Агент');
+      }
+
+      if (welcomeMessageEl) {
+        welcomeMessageEl.textContent = getText(
+          'myAgentWelcomeMessage',
+          'Привет! Чем могу помочь?'
+        );
+      }
+
+      if (inputEl) {
+        inputEl.placeholder = getText(
+          'clientChatInputPlaceholder',
+          'Введите сообщение...'
+        );
+      }
+
+      if (sendBtnEl) {
+        sendBtnEl.textContent = getText(
+          'clientChatSendButton',
+          'Отправить'
+        );
+      }
+
+      if (voiceBtnEl) {
+        voiceBtnEl.setAttribute(
+          'aria-label',
+          getText(
+            'clientChatVoiceButtonLabel',
+            'Записать голосовое сообщение'
+          )
+        );
+      }
+
+      document.title =
+        getText('myAgentPageTitle', '') ||
+        getText('navMyAgent', '') ||
+        'Мой агент';
+    }
+
+    function applyAppFeatures(features) {
+      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+      syncChatAvailability();
+    }
+
+    window.addEventListener('message', event => {
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+
+      if (data.type === 'app-features') {
+        applyAppFeatures(data.features || {});
+      }
     });
 
-    stopEvents.forEach(eventName => {
-      voiceBtn.addEventListener(eventName, event => {
-        event.preventDefault();
-        if (isRecording) {
-          stopVoiceRecording();
-        }
-      });
+    document.addEventListener('DOMContentLoaded', function () {
+      TENANTCONFIG = getTenantConfig();
+      APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
+
+      applyTenantTexts();
+      bindTextMessageHandlers();
+      bindVoiceHandlers();
+      syncChatAvailability();
+
+      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
     });
-  }
-
-  function applyAppFeatures(features) {
-    APPFEATURES = { ...APPFEATURES, ...(features || {}) };
-    syncChatAvailability();
-  }
-
-  window.addEventListener('message', event => {
-    const data = event.data;
-    if (!data || typeof data !== 'object') return;
-
-    if (data.type === 'app-features') {
-      applyAppFeatures(data.features || {});
-    }
-  });
-
-  document.addEventListener('DOMContentLoaded', function () {
-    TENANTCONFIG = getTenantConfig();
-    APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
-
-    bindTextMessageHandlers();
-    bindVoiceHandlers();
-    syncChatAvailability();
-
-    window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
-  });
-</script>
+  </script>
 </body>
 </html>
