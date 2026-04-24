@@ -223,65 +223,68 @@
     }
 
     function resolveAppName(config) {
-      const explicitAppName =
-        typeof config?.appName === 'string' ? config.appName.trim() : '';
+  const explicitAppName =
+    typeof config?.appName === 'string' ? config.appName.trim() : '';
 
-      if (explicitAppName) {
-        return explicitAppName;
-      }
+  if (explicitAppName) {
+    return explicitAppName;
+  }
 
-      const branding = config?.branding || {};
-      const pattern =
-        typeof branding.shellNamePattern === 'string' &&
-        branding.shellNamePattern.trim()
-          ? branding.shellNamePattern.trim()
-          : 'AI {brand} CENTER';
+  const branding = config?.branding || {};
+  const pattern =
+    typeof branding.shellNamePattern === 'string' &&
+    branding.shellNamePattern.trim()
+      ? branding.shellNamePattern.trim()
+      : 'AI {brand} CENTER';
 
-      const fallback =
-        typeof branding.shellNameFallback === 'string' &&
-        branding.shellNameFallback.trim()
-          ? branding.shellNameFallback.trim()
-          : 'AI CENTER';
+  const fallback =
+    typeof branding.shellNameFallback === 'string' &&
+    branding.shellNameFallback.trim()
+      ? branding.shellNameFallback.trim()
+      : 'AI CENTER';
 
-      const brandToken = resolveBrandToken(config);
+  const brandToken =
+    (typeof config?.shellBrandName === 'string' && config.shellBrandName.trim()) ||
+    (typeof config?.brandName === 'string' && config.brandName.trim()) ||
+    '';
 
-      if (!brandToken) {
-        return fallback;
-      }
+  if (!brandToken) {
+    return fallback;
+  }
 
-      return pattern.replace('{brand}', brandToken).replace(/\s+/g, ' ').trim();
-    }
+  return pattern.replace('{brand}', brandToken).replace(/\s+/g, ' ').trim();
+}
 
     function splitAppName(appName) {
-      const safeName =
-        typeof appName === 'string' && appName.trim()
-          ? appName.trim()
-          : 'AI CENTER';
+  const safeName =
+    typeof appName === 'string' && appName.trim()
+      ? appName.trim()
+      : 'AI CENTER';
 
-      const parts = safeName.split(/\s+/);
+  const parts = safeName.split(/\s+/);
 
-      if (parts.length >= 3) {
-        return {
-          top: parts[0],
-          brand: parts[1],
-          bottom: parts.slice(2).join(' ')
-        };
-      }
+  if (parts.length >= 3) {
+    return {
+      top: parts[0],
+      brand: parts[1],
+      bottom: parts.slice(2).join(' ')
+    };
+  }
 
-      if (parts.length === 2) {
-        return {
-          top: parts[0],
-          brand: parts[1],
-          bottom: ''
-        };
-      }
+  if (parts.length === 2) {
+    return {
+      top: parts[0],
+      brand: parts[1],
+      bottom: ''
+    };
+  }
 
-      return {
-        top: safeName,
-        brand: '',
-        bottom: ''
-      };
-    }
+  return {
+    top: 'AI',
+    brand: safeName,
+    bottom: 'CENTER'
+  };
+}
 
     function applyTenantTheme(theme) {
       if (!theme) return;
