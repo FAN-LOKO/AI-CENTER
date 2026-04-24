@@ -355,7 +355,7 @@
     settings: { page: "settings.html", enabled: APPFEATURES.settings },
 
     "agent-dialogs": {
-      page: "dialogs.html",
+      page: "modules-agent/dialogs.html",
       enabled: true
     }
   };
@@ -809,7 +809,7 @@
 
       setCurrentAgentDialog(selectedDialog);
 
-      const dialogsPage = "dialogs.html";
+      const dialogsPage = "modules-agent/dialogs.html";
       const dialogsTab =
         getTabByPage(dialogsPage) || currentTab || getFallbackTab();
 
