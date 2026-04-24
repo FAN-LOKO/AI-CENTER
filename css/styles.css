@@ -1600,11 +1600,9 @@ a {
    MODULES CATALOG CARDS
    Что здесь:
    - карточки модулей на странице modules.html
-   - синий header остаётся только для названия
-   - в белой части карточки верхняя строка:
-     слева короткое описание, справа badge
-   - ниже кнопка открытия / заглушка
-   - раскрывающаяся часть с полным описанием
+   - в синем header: название слева, badge справа
+   - в белой части: короткое описание и кнопка
+   - ниже раскрывающаяся часть с полным описанием
 ========================================================= */
 
 .module-accordion-card {
@@ -1628,11 +1626,21 @@ a {
   flex: 1;
 }
 
+.module-card-header-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
 .module-card-title {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 6px;
+  min-width: 0;
   font-size: 17px;
   font-weight: 700;
   line-height: 1.3;
@@ -1649,25 +1657,15 @@ a {
   padding-top: 0;
 }
 
-.module-card-top-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
 .module-card-short-description {
-  margin: 0;
-  flex: 1 1 auto;
-  min-width: 0;
+  margin: 0 0 14px;
   font-size: 14px;
   line-height: 1.55;
   color: #334155;
   text-align: left;
 }
 
-.module-card-top-row .module-card-badge {
+.module-card-header-row .module-card-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1680,26 +1678,27 @@ a {
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
-  border: 1px solid transparent;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.92);
   flex: 0 0 auto;
 }
 
 .module-card-badge.is-base {
-  background: rgba(59, 130, 246, 0.12);
   color: #1d4ed8;
-  border-color: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.22);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .module-card-badge.is-free {
-  background: rgba(16, 185, 129, 0.12);
   color: #047857;
-  border-color: rgba(16, 185, 129, 0.18);
+  border-color: rgba(16, 185, 129, 0.22);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .module-card-badge.is-optional {
-  background: rgba(148, 163, 184, 0.14);
   color: #475569;
-  border-color: rgba(148, 163, 184, 0.2);
+  border-color: rgba(148, 163, 184, 0.24);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .module-card-expanded {
@@ -1766,6 +1765,11 @@ a {
 }
 
 @media (max-width: 480px) {
+  .module-card-header-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .module-card-title {
     font-size: 16px;
   }
@@ -1774,13 +1778,7 @@ a {
     font-size: 14px;
   }
 
-  .module-card-top-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .module-card-top-row .module-card-badge {
+  .module-card-header-row .module-card-badge {
     min-height: 24px;
     padding: 4px 9px;
     font-size: 11px;
