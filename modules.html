@@ -85,66 +85,66 @@
     }
 
     function getTenantModulesRaw() {
-  const fallbackModules = [
-    {
-      id: 'ai-agent',
-      title: 'My Agent',
-      titleRu: 'Мой агент',
-      shortDescription: 'Подключение и управление ИИ-агентом для диалогов и первичной квалификации.',
-      fullDescription: [
-        'Подключение соцсетей и каналов общения, включая Telegram и другие площадки.',
-        'Готовый ИИ-агент на платформенной модели без настройки API со стороны пользователя.',
-        'Обработка входящих сообщений, первичный рекрутинг и квалификация обращений.',
-        'История диалогов и возможность ручного вмешательства в общение.',
-        'Базовая статистика по диалогам, обращениям и лидам.'
-      ],
-      page: 'modules-agent/profile.html',
-      enabled: true,
-      category: 'core',
-      requiresPayment: false
-    },
-    {
-      id: 'knowledge-hub',
-      title: 'Knowledge Hub',
-      titleRu: 'База знаний',
-      shortDescription: 'Материалы, обучение и AI-поиск по знаниям компании и продукта.',
-      fullDescription: [
-        'Материалы по продукту, бизнес-модели, скриптам, возражениям, презентациям и эфирам.',
-        'Обучающие дорожки для разных ролей: новичок, партнёр, лидер.',
-        'AI-поиск по базе знаний и быстрый доступ к нужным материалам.',
-        'Привязка материалов к другим модулям платформы.'
-      ],
-      page: 'modules-knowledge-hub.html',
-      enabled: true,
-      category: 'core',
-      requiresPayment: false
-    },
-    {
-      id: 'support-desk',
-      title: 'Support Desk',
-      titleRu: 'Поддержка',
-      shortDescription: 'Поддержка, обращения, сервисные вопросы и сопровождение пользователей.',
-      fullDescription: [
-        'Единая точка входа для сервисных запросов.',
-        'Помощь по onboarding, оплатам и доступам.',
-        'Передача обращений в поддержку и контроль статуса.',
-        'База быстрых ответов по типовым вопросам.'
-      ],
-      page: 'modules-support-desk.html',
-      enabled: true,
-      category: 'core',
-      requiresPayment: false
-    }
-  ];
+      const fallbackModules = [
+        {
+          id: 'ai-agent',
+          title: 'My Agent',
+          titleRu: 'Мой агент',
+          shortDescription: 'Подключение и управление ИИ-агентом для диалогов и первичной квалификации.',
+          fullDescription: [
+            'Подключение соцсетей и каналов общения, включая Telegram и другие площадки.',
+            'Готовый ИИ-агент на платформенной модели без настройки API со стороны пользователя.',
+            'Обработка входящих сообщений, первичный рекрутинг и квалификация обращений.',
+            'История диалогов и возможность ручного вмешательства в общение.',
+            'Базовая статистика по диалогам, обращениям и лидам.'
+          ],
+          page: 'modules-agent/profile.html',
+          enabled: true,
+          category: 'core',
+          requiresPayment: false
+        },
+        {
+          id: 'knowledge-hub',
+          title: 'Knowledge Hub',
+          titleRu: 'База знаний',
+          shortDescription: 'Материалы, обучение и AI-поиск по знаниям компании и продукта.',
+          fullDescription: [
+            'Материалы по продукту, бизнес-модели, скриптам, возражениям, презентациям и эфирам.',
+            'Обучающие дорожки для разных ролей: новичок, партнёр, лидер.',
+            'AI-поиск по базе знаний и быстрый доступ к нужным материалам.',
+            'Привязка материалов к другим модулям платформы.'
+          ],
+          page: 'modules-knowledge-hub.html',
+          enabled: true,
+          category: 'core',
+          requiresPayment: false
+        },
+        {
+          id: 'support-desk',
+          title: 'Support Desk',
+          titleRu: 'Поддержка',
+          shortDescription: 'Поддержка, обращения, сервисные вопросы и сопровождение пользователей.',
+          fullDescription: [
+            'Единая точка входа для сервисных запросов.',
+            'Помощь по onboarding, оплатам и доступам.',
+            'Передача обращений в поддержку и контроль статуса.',
+            'База быстрых ответов по типовым вопросам.'
+          ],
+          page: 'modules-support-desk.html',
+          enabled: true,
+          category: 'core',
+          requiresPayment: false
+        }
+      ];
 
-  try {
-    const raw = window.parent?.AICAppShell?.getTenantModules?.();
-    return Array.isArray(raw) && raw.length ? raw : fallbackModules;
-  } catch (error) {
-    console.error('[AI CENTER][Modules] tenant modules read failed', error);
-    return fallbackModules;
-  }
-}
+      try {
+        const raw = window.parent?.AICAppShell?.getTenantModules?.();
+        return Array.isArray(raw) && raw.length ? raw : fallbackModules;
+      } catch (error) {
+        console.error('[AI CENTER][Modules] tenant modules read failed', error);
+        return fallbackModules;
+      }
+    }
 
     /* =========================================================
      * MODULE CATALOG HELPERS
@@ -166,31 +166,31 @@
     }
 
     function getTenantModules() {
-  try {
-    const shellModules = getTenantModulesRaw();
+      try {
+        const shellModules = getTenantModulesRaw();
 
-    return shellModules
-      .filter(module => module && module.enabled !== false)
-      .map(module => ({
-        id: module.id,
-        title: module.title || module.titleRu || module.id,
-        titleRu: module.titleRu || module.title || module.id,
-        shortDescription:
-          module.shortDescription ||
-          getText('modulesDefaultShortDescription', 'Описание модуля будет заполнено в tenant-конфиге.'),
-        fullDescription:
-          Array.isArray(module.fullDescription) && module.fullDescription.length
-            ? module.fullDescription
-            : [getText('modulesDefaultFullDescription', 'Описание модуля будет добавлено позже.')],
-        page: getModuleRoute(module),
-        requiresPayment: !!module.requiresPayment,
-        category: module.category || 'core'
-      }));
-  } catch (error) {
-    console.error('[AI CENTER][Modules] tenant modules normalize failed', error);
-    return [];
-  }
-}
+        return shellModules
+          .filter(module => module && module.enabled !== false)
+          .map(module => ({
+            id: module.id,
+            title: module.title || module.titleRu || module.id,
+            titleRu: module.titleRu || module.title || module.id,
+            shortDescription:
+              module.shortDescription ||
+              getText('modulesDefaultShortDescription', 'Описание модуля будет заполнено в tenant-конфиге.'),
+            fullDescription:
+              Array.isArray(module.fullDescription) && module.fullDescription.length
+                ? module.fullDescription
+                : [getText('modulesDefaultFullDescription', 'Описание модуля будет добавлено позже.')],
+            page: getModuleRoute(module),
+            requiresPayment: !!module.requiresPayment,
+            category: module.category || 'core'
+          }));
+      } catch (error) {
+        console.error('[AI CENTER][Modules] tenant modules normalize failed', error);
+        return [];
+      }
+    }
 
     function waitForTenantModules(attempt = 0) {
       const modules = getTenantModules();
@@ -241,24 +241,24 @@
     }
 
     function getModuleOpenButtonText(module) {
-  if (!module) return getText('modulesActionOpen', 'Открыть модуль');
+      if (!module) return getText('modulesActionOpen', 'Открыть модуль');
 
-  if (module.id === 'ai-agent') {
-    return getText('modulesActionOpen', 'Открыть модуль');
-  }
+      if (module.id === 'ai-agent') {
+        return getText('modulesActionOpen', 'Открыть модуль');
+      }
 
-  if (getModuleRoute(module) === MODULE_FALLBACK_PAGE) {
-    return getText('modulesActionOpen', 'Открыть модуль');
-  }
+      if (getModuleRoute(module) === MODULE_FALLBACK_PAGE) {
+        return getText('modulesActionOpen', 'Открыть модуль');
+      }
 
-  if (!module.requiresPayment) {
-    return getText('modulesActionOpen', 'Открыть модуль');
-  }
+      if (!module.requiresPayment) {
+        return getText('modulesActionOpen', 'Открыть модуль');
+      }
 
-  return isModuleAccessible(module)
-    ? getText('modulesActionOpen', 'Открыть модуль')
-    : getText('modulesActionPay', 'Перейти к оплате');
-}
+      return isModuleAccessible(module)
+        ? getText('modulesActionOpen', 'Открыть модуль')
+        : getText('modulesActionPay', 'Перейти к оплате');
+    }
 
     /* =========================================================
      * MODULE NAVIGATION
@@ -270,38 +270,38 @@
      * ========================================================= */
 
     function openModule(module) {
-  if (!module) return;
-  if (APPFEATURES.modules === false) return;
+      if (!module) return;
+      if (APPFEATURES.modules === false) return;
 
-  const moduleRoute = getModuleRoute(module);
-  const isFallback = moduleRoute === MODULE_FALLBACK_PAGE;
-  const isDemoOpenModule = module.id === 'ai-agent';
-  const hasAccess = isFallback || isDemoOpenModule || isModuleAccessible(module);
+      const moduleRoute = getModuleRoute(module);
+      const isFallback = moduleRoute === MODULE_FALLBACK_PAGE;
+      const isDemoOpenModule = module.id === 'ai-agent';
+      const hasAccess = isFallback || isDemoOpenModule || isModuleAccessible(module);
 
-  if (hasAccess) {
-    window.parent?.postMessage?.(
-      {
-        type: 'navigate',
-        page: moduleRoute,
-        tab: 'modules'
-      },
-      '*'
-    );
-    return;
-  }
+      if (hasAccess) {
+        window.parent?.postMessage?.(
+          {
+            type: 'navigate',
+            page: moduleRoute,
+            tab: 'modules'
+          },
+          '*'
+        );
+        return;
+      }
 
-  if (APPFEATURES.payments === false) return;
+      if (APPFEATURES.payments === false) return;
 
-  window.parent?.postMessage?.(
-    {
-      type: 'navigate',
-      page: 'payments.html',
-      tab: 'payments',
-      moduleId: module.id
-    },
-    '*'
-  );
-}
+      window.parent?.postMessage?.(
+        {
+          type: 'navigate',
+          page: 'payments.html',
+          tab: 'payments',
+          moduleId: module.id
+        },
+        '*'
+      );
+    }
 
     /* =========================================================
      * ACCORDION HELPERS
@@ -359,23 +359,21 @@
 
     function createModuleCard(module) {
       const section = document.createElement('section');
-      section.className = 'card-section module-accordion-card';
+      section.className = 'card-section accordion-card module-accordion-card';
 
       const badge = getModuleStatusBadge(module);
 
       section.innerHTML = `
-        <div class="card-section-header module-card-header">
-          <button class="module-card-toggle" type="button" aria-expanded="false">
-            <div class="module-card-header-text">
-              <div class="module-card-title">
-                ${module.title}
-                <span class="module-card-title-ru">/ ${module.titleRu}</span>
-              </div>
-              <span class="module-card-badge ${badge.cls}">${badge.text}</span>
-            </div>
-            <span class="module-card-chevron">▾</span>
-          </button>
-        </div>
+        <button class="card-section-header accordion-header module-card-toggle" type="button" aria-expanded="false">
+          <span class="module-card-header-text">
+            <span class="module-card-title">
+              ${module.title}
+              <span class="module-card-title-ru">/ ${module.titleRu}</span>
+            </span>
+            <span class="module-card-badge ${badge.cls}">${badge.text}</span>
+          </span>
+          <span class="accordion-header-icon" aria-hidden="true"></span>
+        </button>
 
         <div class="card-section-body module-card-main">
           <p class="module-card-short-description">${module.shortDescription}</p>
@@ -389,7 +387,7 @@
           </button>
         </div>
 
-        <div class="card-section-body module-card-expanded">
+        <div class="card-section-body accordion-body module-card-expanded">
           <div class="module-card-expanded-title">
             ${getText('modulesDetailsTitle', 'Подробнее о модуле')}
           </div>
