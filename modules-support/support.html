@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Центр поддержки</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/modules.css" />
+  <style>
+    body.module-body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background-color: #eef2f7 !important;
+    }
+
+    body.module-body .page.page-my-agent {
+      background: transparent;
+    }
+
+    .support-page {
+      padding: 12px 16px 16px;
+    }
+
+    .support-lead {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #475569;
+    }
+
+    .support-lead + .support-lead {
+      margin-top: 10px;
+    }
+
+    .support-summary-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: linear-gradient(
+        180deg,
+        rgba(15, 23, 42, 0.035) 0%,
+        rgba(15, 23, 42, 0.055) 100%
+      );
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.42),
+        0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+
+    .support-summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+    }
+
+    .support-summary-row + .support-summary-row {
+      border-top: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .support-summary-label {
+      min-width: 0;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #64748b;
+    }
+
+    .support-summary-value {
+      min-width: 0;
+      text-align: right;
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 800;
+      color: #111827;
+      word-break: break-word;
+    }
+
+    .support-list {
+      margin: 14px 0 0;
+      padding-left: 18px;
+      color: #374151;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .support-list li + li {
+      margin-top: 8px;
+    }
+
+    .support-chat-note {
+      margin: 0 0 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #64748b;
+    }
+
+    .support-faq-note {
+      margin: 0 0 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #64748b;
+    }
+
+    .support-empty-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 10px;
+      margin-bottom: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--tenant-primary-dark), var(--tenant-primary));
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+    }
+
+    .support-faq-answer {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #374151;
+    }
+
+    .support-faq-answer + .support-faq-answer {
+      margin-top: 8px;
+    }
+
+    .support-faq-list {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: #374151;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .support-faq-list li + li {
+      margin-top: 6px;
+    }
+
+    .accordion-header {
+      width: 100%;
+      min-height: 56px;
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      border: none;
+      text-align: left;
+      background: linear-gradient(
+        135deg,
+        var(--tenant-primary-dark) 0%,
+        var(--tenant-primary) 100%
+      );
+      color: #ffffff;
+      box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .accordion-header-title {
+      min-width: 0;
+      font-size: 15px;
+      line-height: 1.3;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .accordion-header-icon {
+      position: relative;
+      width: 14px;
+      height: 14px;
+      flex: 0 0 14px;
+      font-size: 0;
+      line-height: 0;
+      color: #ffffff;
+    }
+
+    .accordion-header-icon::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 7px;
+      height: 7px;
+      border-right: 1.8px solid currentColor;
+      border-bottom: 1.8px solid currentColor;
+      transform: translate(-50%, -62%) rotate(45deg);
+      transition: transform 0.18s ease;
+    }
+
+    .accordion-card.open > .accordion-header .accordion-header-icon::before {
+      transform: translate(-50%, -38%) rotate(225deg);
+    }
+
+    .accordion-card > .accordion-body {
+      display: none;
+      padding: 14px 16px 16px;
+      background: transparent;
+      color: #374151;
+    }
+
+    .accordion-card.open > .accordion-body {
+      display: block;
+    }
+  </style>
+</head>
+<body class="module-body">
+  <div class="page page-my-agent support-page">
+
+    <!-- 1. Описание модуля -->
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Центр поддержки</h2>
+        <p class="card-section-subtitle">Помощь по работе с миниаппом, модулями и доступами</p>
+      </div>
+      <div class="card-section-body">
+        <p class="support-lead">
+          Этот модуль нужен для быстрых вопросов по работе сервиса, технических ошибок, доступов и общих организационных моментов.
+        </p>
+        <p class="support-lead">
+          Здесь пользователь может написать в поддержку, получить базовые ответы по FAQ и при необходимости передать кейс на ручную обработку.
+        </p>
+
+        <div class="support-summary-box">
+          <div class="support-summary-row">
+            <span class="support-summary-label">Формат работы</span>
+            <span class="support-summary-value">Чат + FAQ + передача сложных запросов</span>
+          </div>
+          <div class="support-summary-row">
+            <span class="support-summary-label">Для кого</span>
+            <span class="support-summary-value">Пользователь, партнёр, администратор</span>
+          </div>
+          <div class="support-summary-row">
+            <span class="support-summary-label">Основные темы</span>
+            <span class="support-summary-value">Доступы, ошибки, оплаты, модули, предложения</span>
+          </div>
+        </div>
+
+        <ul class="support-list">
+          <li>Помощь по входу, доступам и настройке профиля.</li>
+          <li>Ответы по работе модулей и навигации внутри миниаппа.</li>
+          <li>Обработка технических ошибок и нестандартных ситуаций.</li>
+          <li>Вопросы по подписке, оплате и статусу доступа.</li>
+          <li>Сбор обратной связи, предложений и пожеланий по сервису.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 2. Чат с поддержкой -->
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">Чат с поддержкой</h2>
+        <p class="card-section-subtitle">Напишите вопрос, и мы поможем разобраться</p>
+      </div>
+      <div class="card-section-body">
+        <p class="support-chat-note">
+          Используйте чат для вопросов по доступам, оплате, ошибкам в модулях и предложениям по улучшению сервиса.
+        </p>
+
+        <div id="supportChatMessages" class="chat-messages">
+          <div class="chat-message chat-message-agent">
+            <div class="chat-message-meta">
+              <span class="chat-author">Поддержка</span>
+              <span class="chat-time">10:15</span>
+            </div>
+            <div class="chat-bubble">
+              Здравствуйте! Напишите ваш вопрос, и мы постараемся помочь как можно быстрее.
+            </div>
+          </div>
+
+          <div class="chat-message chat-message-agent">
+            <div class="chat-message-meta">
+              <span class="chat-author">Поддержка</span>
+              <span class="chat-time">10:16</span>
+            </div>
+            <div class="chat-bubble">
+              Если проблема связана с конкретным модулем, укажите его название и коротко опишите ситуацию.
+            </div>
+          </div>
+        </div>
+
+        <textarea
+          id="supportMessageInput"
+          class="chat-input"
+          rows="2"
+          placeholder="Опишите вопрос или проблему..."
+        ></textarea>
+
+        <div class="chat-input-actions-row">
+          <button class="btn btn-send" type="button" id="supportSendMessageButton">
+            Отправить
+          </button>
+
+          <button
+            id="supportVoiceButton"
+            class="btn btn-icon"
+            type="button"
+            aria-label="Записать голосовое сообщение"
+          >
+            <svg class="icon-mic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 1 1 2 0 7 7 0 0 1-6 6.92V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.08A7 7 0 0 1 5 11a1 1 0 1 1 2 0 5 5 0 0 0 10 0z"></path>
+            </svg>
+          </button>
+        </div>
+
+        <p id="supportSendMessageStatus" class="connect-status-msg"></p>
+      </div>
+    </section>
+
+    <!-- 3. FAQ -->
+    <section class="card-section">
+      <div class="card-section-header">
+        <h2 class="card-section-title">FAQ</h2>
+        <p class="card-section-subtitle">Частые вопросы по работе сервиса</p>
+      </div>
+      <div class="card-section-body">
+        <p class="support-faq-note">
+          Если не нашли ответ в FAQ, просто напишите в чат поддержки выше.
+        </p>
+
+        <div class="support-empty-badge">Быстрые ответы</div>
+
+        <section class="accordion-card">
+          <button class="accordion-header" type="button">
+            <span class="accordion-header-title">Как связаться с поддержкой?</span>
+            <span class="accordion-header-icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion-body">
+            <p class="support-faq-answer">
+              Самый быстрый способ — написать сообщение прямо в чате на этой странице.
+            </p>
+            <p class="support-faq-answer">
+              Если вопрос требует уточнения, поддержка может запросить дополнительные данные: модуль, скриншот или описание ошибки.
+            </p>
+          </div>
+        </section>
+
+        <section class="accordion-card">
+          <button class="accordion-header" type="button">
+            <span class="accordion-header-title">По каким вопросам можно обращаться?</span>
+            <span class="accordion-header-icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion-body">
+            <ul class="support-faq-list">
+              <li>Проблемы с доступом и авторизацией.</li>
+              <li>Ошибки внутри модулей и некорректная работа интерфейса.</li>
+              <li>Вопросы по подписке, тарифу и оплате.</li>
+              <li>Предложения по улучшению сервиса.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="accordion-card">
+          <button class="accordion-header" type="button">
+            <span class="accordion-header-title">Что делать, если модуль не открывается?</span>
+            <span class="accordion-header-icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion-body">
+            <p class="support-faq-answer">
+              Сначала обновите страницу и проверьте, активна ли подписка или нужный доступ.
+            </p>
+            <p class="support-faq-answer">
+              Если проблема сохраняется, напишите в поддержку название модуля и что именно происходит при открытии.
+            </p>
+          </div>
+        </section>
+
+        <section class="accordion-card">
+          <button class="accordion-header" type="button">
+            <span class="accordion-header-title">Как передать баг или техническую ошибку?</span>
+            <span class="accordion-header-icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion-body">
+            <p class="support-faq-answer">
+              Отправьте в чат короткое описание: где возникла ошибка, что вы делали перед этим и повторяется ли ситуация снова.
+            </p>
+            <p class="support-faq-answer">
+              Если есть возможность, приложите скриншот или точный текст ошибки через основной канал поддержки в shell.
+            </p>
+          </div>
+        </section>
+
+        <section class="accordion-card">
+          <button class="accordion-header" type="button">
+            <span class="accordion-header-title">Куда писать по вопросам оплаты и доступа?</span>
+            <span class="accordion-header-icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion-body">
+            <p class="support-faq-answer">
+              Такие вопросы тоже можно отправлять через этот чат.
+            </p>
+            <p class="support-faq-answer">
+              Лучше сразу указать, с каким аккаунтом или модулем связан вопрос, чтобы поддержка быстрее проверила статус.
+            </p>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let mediaStream = null;
+    let isRecording = false;
+
+    function appendSupportMessage(text, from = "client", author = null) {
+      const container = document.getElementById("supportChatMessages");
+      if (!container || !text) return;
+
+      const wrapper = document.createElement("div");
+      wrapper.className = `chat-message chat-message-${from}`;
+
+      const meta = document.createElement("div");
+      meta.className = "chat-message-meta";
+
+      const authorEl = document.createElement("span");
+      authorEl.className = "chat-author";
+      authorEl.textContent = author || (from === "agent" ? "Поддержка" : "Вы");
+
+      const timeEl = document.createElement("span");
+      timeEl.className = "chat-time";
+      timeEl.textContent = new Date().toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      const bubble = document.createElement("div");
+      bubble.className = "chat-bubble";
+      bubble.textContent = text;
+
+      meta.appendChild(authorEl);
+      meta.appendChild(timeEl);
+      wrapper.appendChild(meta);
+      wrapper.appendChild(bubble);
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function showSupportStatus(message) {
+      const statusEl = document.getElementById("supportSendMessageStatus");
+      if (!statusEl) return;
+      statusEl.textContent = message;
+      statusEl.classList.remove("error");
+      statusEl.classList.add("success");
+    }
+
+    function showSupportError(message) {
+      const statusEl = document.getElementById("supportSendMessageStatus");
+      if (!statusEl) return;
+      statusEl.textContent = message;
+      statusEl.classList.remove("success");
+      statusEl.classList.add("error");
+    }
+
+    function sendSupportTextMessage() {
+      const input = document.getElementById("supportMessageInput");
+      if (!input) return;
+
+      const text = input.value.trim();
+      if (!text) {
+        showSupportError("Введите сообщение перед отправкой.");
+        return;
+      }
+
+      appendSupportMessage(text, "client", "Вы");
+      input.value = "";
+
+      try {
+        tg?.HapticFeedback?.impactOccurred?.("medium");
+      } catch (e) {
+        console.error(e);
+      }
+
+      try {
+        window.parent?.postMessage?.(
+          {
+            type: "support-send-message",
+            text
+          },
+          "*"
+        );
+      } catch (e) {
+        console.error(e);
+      }
+
+      showSupportStatus("Сообщение отправлено в поддержку.");
+    }
+
+    function appendSupportVoiceMessage(label) {
+      appendSupportMessage(label, "client", "Вы");
+    }
+
+    function getSupportedMimeType() {
+      const candidates = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4",
+        "audio/m4a",
+        "audio/aac",
+        "audio/ogg",
+        "audio/wav"
+      ];
+
+      if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) {
+        return "";
+      }
+
+      for (const type of candidates) {
+        try {
+          if (MediaRecorder.isTypeSupported(type)) return type;
+        } catch (e) {}
+      }
+
+      return "";
+    }
+
+    async function startVoiceRecording() {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        showSupportError("Запись голоса не поддерживается на этом устройстве.");
+        return;
+      }
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recordedChunks = [];
+
+        const mimeType = getSupportedMimeType();
+        mediaRecorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : undefined);
+
+        mediaRecorder.addEventListener("dataavailable", (event) => {
+          if (event.data && event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        });
+
+        mediaRecorder.addEventListener("stop", () => {
+          const blobType = mimeType || "audio/webm";
+          const blob = new Blob(recordedChunks, { type: blobType });
+
+          appendSupportVoiceMessage("Голосовое сообщение отправлено");
+
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            try {
+              window.parent?.postMessage?.(
+                {
+                  type: "support-send-voice",
+                  audio: reader.result,
+                  mimeType: blob.type || blobType
+                },
+                "*"
+              );
+            } catch (e) {
+              console.error(e);
+            }
+          };
+          reader.readAsDataURL(blob);
+
+          if (mediaStream) {
+            mediaStream.getTracks().forEach((track) => track.stop());
+            mediaStream = null;
+          }
+
+          showSupportStatus("Голосовое сообщение отправлено в поддержку.");
+        });
+
+        mediaRecorder.start();
+        isRecording = true;
+
+        const voiceBtn = document.getElementById("supportVoiceButton");
+        if (voiceBtn) voiceBtn.classList.add("recording");
+
+        try {
+          tg?.HapticFeedback?.impactOccurred?.("medium");
+        } catch (e) {
+          console.error(e);
+        }
+
+        showSupportStatus("Идёт запись голосового сообщения...");
+      } catch (err) {
+        console.error(err);
+        showSupportError("Не удалось начать запись голосового сообщения.");
+      }
+    }
+
+    function stopVoiceRecording() {
+      if (!mediaRecorder || !isRecording) return;
+
+      mediaRecorder.stop();
+      isRecording = false;
+
+      const voiceBtn = document.getElementById("supportVoiceButton");
+      if (voiceBtn) voiceBtn.classList.remove("recording");
+    }
+
+    function setupFaqAccordions() {
+      const cards = document.querySelectorAll(".accordion-card");
+
+      cards.forEach((card) => {
+        const header = card.querySelector(".accordion-header");
+        if (!header) return;
+
+        header.addEventListener("click", () => {
+          card.classList.toggle("open");
+        });
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const input = document.getElementById("supportMessageInput");
+      const sendBtn = document.getElementById("supportSendMessageButton");
+      const voiceBtn = document.getElementById("supportVoiceButton");
+
+      if (sendBtn) {
+        sendBtn.addEventListener("click", sendSupportTextMessage);
+      }
+
+      if (input) {
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendSupportTextMessage();
+          }
+        });
+      }
+
+      if (voiceBtn) {
+        const startEvents = ["mousedown", "touchstart"];
+        const stopEvents = ["mouseup", "mouseleave", "touchend", "touchcancel"];
+
+        startEvents.forEach((eventName) => {
+          voiceBtn.addEventListener(eventName, (e) => {
+            e.stopPropagation();
+            if (!isRecording) startVoiceRecording();
+          });
+        });
+
+        stopEvents.forEach((eventName) => {
+          voiceBtn.addEventListener(eventName, (e) => {
+            e.stopPropagation();
+            if (isRecording) stopVoiceRecording();
+          });
+        });
+      }
+
+      setupFaqAccordions();
+    });
+  </script>
+</body>
+</html>
