@@ -701,7 +701,7 @@ a {
   transition: transform 0.18s ease;
 }
 
-.accordion-card.open .accordion-header-icon::before {
+.accordion-card.open > .accordion-header .accordion-header-icon::before {
   transform: translate(-50%, -38%) rotate(225deg);
 }
 
