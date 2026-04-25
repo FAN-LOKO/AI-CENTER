@@ -153,15 +153,16 @@
    3. УНИВЕРСАЛЬНЫЕ КАРТОЧКИ И АККОРДЕОНЫ МОДУЛЕЙ
    ========================================================= */
 
-/* 3.1. Карточка-секция, которая сама является аккордеоном (Статистика, Агент, Payments) */
+/* 3.1. Карточка-секция, которая сама является аккордеоном
+   (Статистика, Агент, Payments и аналогичные модули) */
 
 .card-section.accordion-card {
   border-radius: var(--module-radius-lg);
   overflow: hidden;
 }
 
-/* Заголовок секции-аккордеона наследует фон из .card-section-header (синий градиент) */
-.card-section.accordion-card .card-section-header.accordion-header {
+/* Заголовок секции-аккордеона наследует фон из .card-section-header */
+.card-section.accordion-card > .card-section-header.accordion-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -170,20 +171,29 @@
   box-sizing: border-box;
 }
 
-.card-section.accordion-card .card-section-title {
+.card-section.accordion-card > .card-section-header.accordion-header .card-section-title {
   flex: 1 1 auto;
+  min-width: 0;
 }
 
-/* Тело секции-аккордеона (верхний уровень) */
-.card-section.accordion-card .card-section-body.accordion-body {
+/* Тело секции-аккордеона верхнего уровня:
+   по умолчанию скрыто, открывается только через .open на самой карточке */
+.card-section.accordion-card > .card-section-body.accordion-body {
+  display: none;
   padding: 14px 16px 16px;
   box-sizing: border-box;
 }
 
-/* 3.2. Вложенные аккордеоны внутри тела секций (Статистика, Connect и др.) */
+.card-section.accordion-card.open > .card-section-body.accordion-body {
+  display: block;
+}
+
+/* 3.2. Вложенные аккордеоны внутри тела секций
+   (Статистика, Connect, Database и др.) */
 
 /* Внутренняя карточка-аккордеон в контексте секции */
-.card-section.accordion-card .accordion-card {
+.card-section.accordion-card .accordion-body .accordion-card,
+.card-section.accordion-card .card-section-body .accordion-card {
   border-radius: var(--module-radius-md);
   border: 1px solid var(--module-border);
   background: var(--module-surface);
@@ -192,9 +202,8 @@
   overflow: hidden;
 }
 
-/* Заголовок вложенного аккордеона:
-   важно — НЕ трогаем фон/цвет, чтобы использовать общий .accordion-header */
-.card-section.accordion-card .accordion-card .accordion-header {
+/* Заголовок вложенного аккордеона */
+.card-section.accordion-card .accordion-card > .accordion-header {
   width: 100%;
   min-height: 44px;
   padding: 10px 14px;
@@ -208,15 +217,16 @@
   box-sizing: border-box;
 }
 
-.card-section.accordion-card .accordion-card .accordion-header-title {
+.card-section.accordion-card .accordion-card > .accordion-header .accordion-header-title {
+  flex: 1 1 auto;
   min-width: 0;
   font-size: 14px;
   line-height: 1.35;
   font-weight: 700;
 }
 
-/* Стрелка заголовка — используем общий паттерн .accordion-header-icon */
-.card-section.accordion-card .accordion-card .accordion-header-icon {
+/* Стрелка заголовка */
+.card-section.accordion-card .accordion-card > .accordion-header .accordion-header-icon {
   position: relative;
   width: 14px;
   height: 14px;
@@ -226,8 +236,7 @@
   color: inherit;
 }
 
-/* Рисуем стрелку псевдоэлементом — начальное «вниз» */
-.card-section.accordion-card .accordion-card .accordion-header-icon::before {
+.card-section.accordion-card .accordion-card > .accordion-header .accordion-header-icon::before {
   content: "";
   position: absolute;
   top: 50%;
@@ -241,15 +250,21 @@
 }
 
 /* Поворот стрелки при открытой внутренней карточке */
-.card-section.accordion-card .accordion-card.open .accordion-header-icon::before {
+.card-section.accordion-card .accordion-card.open > .accordion-header .accordion-header-icon::before {
   transform: translate(-50%, -38%) rotate(225deg);
 }
 
-/* Тело вложенного аккордеона: JS управляет display, тут только отступы и фон */
-.card-section.accordion-card .accordion-card .accordion-body {
+/* Тело вложенного аккордеона:
+   по умолчанию скрыто, открывается через .open на родительской карточке */
+.card-section.accordion-card .accordion-card > .accordion-body {
+  display: none;
   padding: 12px 14px 14px;
   box-sizing: border-box;
   background: #ffffff;
+}
+
+.card-section.accordion-card .accordion-card.open > .accordion-body {
+  display: block;
 }
 
 /* =========================================================
