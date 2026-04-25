@@ -15,8 +15,8 @@
     <section class="card-section database-hero-card">
       <div class="card-section-header">
         <h2 class="card-section-title">База знаний</h2>
-        <p class="card-section-subtitle">
-          Внутренние материалы по работе с AI CENTER и текущей компанией.
+        <p class="card-section-subtitle" id="databaseHeroSubtitle">
+          Внутренние материалы по работе с AI CENTER и брендом.
         </p>
       </div>
 
@@ -24,25 +24,28 @@
         <div class="database-intro">
           <p class="database-intro-text">
             Здесь собраны основные инструкции, подсказки и быстрые материалы для
-            работы. Первая база относится ко всему AI CENTER, вторая — к компании,
-            для которой сейчас открыта эта ветка.
+            работы.
           </p>
 
           <div class="database-meta-list">
             <div class="database-meta-item">
-              <span class="database-meta-label">Режим</span>
-              <span class="database-meta-value">Один shell → много компаний</span>
+              <span class="database-meta-label">Первая база</span>
+              <span class="database-meta-value">AI CENTER</span>
             </div>
+
             <div class="database-meta-item">
-              <span class="database-meta-label">Текущая компания</span>
-              <span class="database-meta-value" id="databaseTenantName">Загрузка...</span>
+              <span class="database-meta-label">Вторая база</span>
+              <span class="database-meta-value" id="databaseSecondBaseName">Загрузка...</span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="card-section accordion-card database-root-card open" data-database-root="global">
+    <section
+      class="card-section accordion-card database-root-card open"
+      data-database-root="global"
+    >
       <button
         class="card-section-header accordion-header"
         type="button"
@@ -67,7 +70,10 @@
       </div>
     </section>
 
-    <section class="card-section accordion-card database-root-card" data-database-root="tenant">
+    <section
+      class="card-section accordion-card database-root-card"
+      data-database-root="tenant"
+    >
       <button
         class="card-section-header accordion-header"
         type="button"
@@ -76,7 +82,7 @@
         <div class="database-root-header-main">
           <h2 class="card-section-title" id="databaseTenantCardTitle">База компании</h2>
           <p class="card-section-subtitle" id="databaseTenantCardSubtitle">
-            Материалы, правила и FAQ по текущей компании.
+            Материалы, правила и FAQ по текущему бренду.
           </p>
         </div>
         <span class="accordion-header-icon"></span>
@@ -84,7 +90,7 @@
 
       <div class="card-section-body accordion-body">
         <div class="database-card-note" id="databaseTenantNote">
-          Здесь появятся инструкции и материалы по текущей компании.
+          Здесь появятся инструкции и материалы по текущему бренду.
         </div>
 
         <div id="databaseTenantSections" class="database-accordion-list"></div>
@@ -107,8 +113,8 @@
             </p>
             <p>
               Пользователь работает в одном интерфейсе, а содержимое модулей,
-              доступы и бизнес-логика могут меняться в зависимости от выбранной
-              компании или tenant-конфига.
+              доступы и бизнес-логика могут меняться в зависимости от бренда
+              и tenant-конфига.
             </p>
           `
         },
@@ -122,7 +128,7 @@
             </p>
             <p>
               Часть модулей может быть обязательной, часть — бесплатной, а часть —
-              платной или доступной только для конкретных ролей и компаний.
+              платной или доступной только для конкретных ролей и брендов.
             </p>
           `
         },
@@ -136,7 +142,7 @@
               перехода между разными системами.
             </p>
             <p>
-              Если какая-то информация на странице меняется от компании к компании,
+              Если какая-то информация на странице меняется от бренда к бренду,
               значит она завязана на tenant config, а не на общий shell.
             </p>
           `
@@ -161,7 +167,7 @@
           title: "Частые ошибки и что делать",
           content: `
             <ul class="database-list">
-              <li>Если не отображается контент компании — сначала проверь tenant config.</li>
+              <li>Если не отображается контент бренда — сначала проверь tenant config.</li>
               <li>Если модуль недоступен — проверь включён ли он в доступах пользователя.</li>
               <li>Если данные не обновились — проверь обмен сообщениями между shell и iframe.</li>
               <li>Если аккордеон ведёт себя странно — проверь селекторы и вложенность карточек.</li>
@@ -172,17 +178,17 @@
     };
 
     const DATABASE_TENANT_FALLBACK = {
-      companyTitle: "Компания не определена",
-      companySubtitle: "Материалы по текущей компании пока не настроены.",
-      note: "Для этой компании ещё не заполнена база знаний. Можно добавить контент через tenant config.",
+      companyTitle: "База бренда",
+      companySubtitle: "Материалы по текущему бренду пока не настроены.",
+      note: "Для этого бренда ещё не заполнена база знаний. Можно добавить контент через tenant config.",
       sections: [
         {
           id: "tenant-empty-about",
-          title: "О компании",
+          title: "О бренде",
           content: `
             <p>
-              Здесь должна отображаться базовая информация о компании: позиционирование,
-              направление, ключевые продукты и особенности работы.
+              Здесь должна отображаться базовая информация о бренде:
+              позиционирование, направление, ключевые продукты и особенности работы.
             </p>
           `
         },
@@ -245,6 +251,16 @@
         .join("");
     }
 
+    function getTenantBrandName(tenantConfig) {
+      return (
+        tenantConfig?.brandName ||
+        tenantConfig?.companyName ||
+        tenantConfig?.tenantName ||
+        tenantConfig?.name ||
+        "бренд компании"
+      );
+    }
+
     function normalizeTenantKnowledgeBase(tenantConfig) {
       const kb =
         tenantConfig?.knowledgeBase ||
@@ -256,19 +272,19 @@
 
       const companyTitle =
         kb.companyTitle ||
-        tenantConfig?.companyName ||
         tenantConfig?.brandName ||
+        tenantConfig?.companyName ||
         tenantConfig?.tenantName ||
-        "База компании";
+        "База бренда";
 
       const companySubtitle =
         kb.companySubtitle ||
         kb.subtitle ||
-        "Материалы, правила и FAQ по текущей компании.";
+        "Материалы, правила и FAQ по текущему бренду.";
 
       const note =
         kb.note ||
-        "Эти материалы завязаны на tenant config и должны отличаться для каждой компании.";
+        "Эти материалы завязаны на tenant config и должны отличаться для каждого бренда.";
 
       const sections = Array.isArray(kb.sections) && kb.sections.length
         ? kb.sections.map((section, index) => ({
@@ -288,19 +304,25 @@
 
     function renderTenantKnowledgeBase() {
       const tenantKb = normalizeTenantKnowledgeBase(currentTenantConfig);
+      const brandName = getTenantBrandName(currentTenantConfig);
 
-      const tenantNameEl = document.getElementById("databaseTenantName");
+      const heroSubtitleEl = document.getElementById("databaseHeroSubtitle");
+      const secondBaseNameEl = document.getElementById("databaseSecondBaseName");
       const tenantTitleEl = document.getElementById("databaseTenantCardTitle");
       const tenantSubtitleEl = document.getElementById("databaseTenantCardSubtitle");
       const tenantNoteEl = document.getElementById("databaseTenantNote");
       const tenantSectionsEl = document.getElementById("databaseTenantSections");
 
-      if (tenantNameEl) {
-        tenantNameEl.textContent = tenantKb.companyTitle;
+      if (heroSubtitleEl) {
+        heroSubtitleEl.textContent = `Внутренние материалы по работе с AI CENTER и брендом ${brandName}.`;
+      }
+
+      if (secondBaseNameEl) {
+        secondBaseNameEl.textContent = brandName;
       }
 
       if (tenantTitleEl) {
-        tenantTitleEl.textContent = tenantKb.companyTitle;
+        tenantTitleEl.textContent = tenantKb.companyTitle || brandName;
       }
 
       if (tenantSubtitleEl) {
