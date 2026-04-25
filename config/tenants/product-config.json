@@ -205,7 +205,7 @@
         "AI-поиск по базе знаний.",
         "Привязка материалов к другим модулям платформы."
       ],
-      "page": "modules-knowledge-hub/index.html",
+      "page": "modules-support/support.html",
       "enabled": true,
       "category": "core",
       "requiresPayment": false,
