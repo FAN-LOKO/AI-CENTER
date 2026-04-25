@@ -16,7 +16,7 @@
       <div class="card-section-header">
         <h2 class="card-section-title">База знаний</h2>
         <p class="card-section-subtitle" id="databaseHeroSubtitle">
-          Внутренние материалы по работе с AI CENTER и брендом.
+          Внутренние материалы по работе с AI CENTER и текущей компанией.
         </p>
       </div>
 
@@ -35,7 +35,7 @@
 
             <div class="database-meta-item">
               <span class="database-meta-label">Вторая база</span>
-              <span class="database-meta-value" id="databaseSecondBaseName">Загрузка...</span>
+              <span class="database-meta-value" id="databaseSecondBaseName">Текущая компания</span>
             </div>
           </div>
         </div>
@@ -82,7 +82,7 @@
         <div class="database-root-header-main">
           <h2 class="card-section-title" id="databaseTenantCardTitle">База компании</h2>
           <p class="card-section-subtitle" id="databaseTenantCardSubtitle">
-            Материалы, правила и FAQ по текущему бренду.
+            Материалы, правила и FAQ по текущей компании.
           </p>
         </div>
         <span class="accordion-header-icon"></span>
@@ -90,7 +90,7 @@
 
       <div class="card-section-body accordion-body">
         <div class="database-card-note" id="databaseTenantNote">
-          Здесь появятся инструкции и материалы по текущему бренду.
+          Загружаем материалы по текущей компании...
         </div>
 
         <div id="databaseTenantSections" class="database-accordion-list"></div>
@@ -112,9 +112,9 @@
               сценарии работы и внутренние инструменты для разных компаний.
             </p>
             <p>
-              Пользователь работает в одном интерфейсе, а содержимое модулей,
-              доступы и бизнес-логика могут меняться в зависимости от бренда
-              и tenant-конфига.
+              Пользователь работает в одном интерфейсе, а состав модулей,
+              интерфейсные данные и бизнес-логика могут меняться в зависимости
+              от текущей компании.
             </p>
           `
         },
@@ -128,7 +128,7 @@
             </p>
             <p>
               Часть модулей может быть обязательной, часть — бесплатной, а часть —
-              платной или доступной только для конкретных ролей и брендов.
+              зависеть от роли пользователя, тарифа или компании.
             </p>
           `
         },
@@ -138,12 +138,11 @@
           content: `
             <p>
               Основная логика такая: пользователь открывает mini app в Telegram,
-              видит свои доступные модули и работает внутри единой оболочки без
-              перехода между разными системами.
+              видит свои доступные модули и работает внутри единой оболочки.
             </p>
             <p>
-              Если какая-то информация на странице меняется от бренда к бренду,
-              значит она завязана на tenant config, а не на общий shell.
+              Общие правила живут на уровне shell, а данные конкретной компании
+              должны подтягиваться отдельно внутри соответствующего модуля.
             </p>
           `
         },
@@ -152,13 +151,12 @@
           title: "Как связан Telegram-бот",
           content: `
             <p>
-              Telegram-бот — это клиентский вход и точка контакта с пользователем,
-              а mini app — рабочий интерфейс, в котором можно смотреть данные,
-              управлять модулями и выполнять действия.
+              Telegram-бот — это точка входа пользователя, а mini app —
+              рабочий интерфейс для действий, просмотра данных и управления.
             </p>
             <p>
-              Если в проекте используется бот-консультант, он может дополнять
-              знаниями, FAQ и автоматическими сценариями оператора.
+              Если используется бот-консультант, он может дополнять сценарии
+              работы ответами, FAQ и автоматическими подсказками.
             </p>
           `
         },
@@ -167,10 +165,10 @@
           title: "Частые ошибки и что делать",
           content: `
             <ul class="database-list">
-              <li>Если не отображается контент бренда — сначала проверь tenant config.</li>
-              <li>Если модуль недоступен — проверь включён ли он в доступах пользователя.</li>
-              <li>Если данные не обновились — проверь обмен сообщениями между shell и iframe.</li>
-              <li>Если аккордеон ведёт себя странно — проверь селекторы и вложенность карточек.</li>
+              <li>Если не загрузилась база компании — проверь tenant id и путь к файлу базы.</li>
+              <li>Если не отображается название компании — проверь tenant-config-response от shell.</li>
+              <li>Если модуль пустой — проверь, найден ли файл источника для текущей компании.</li>
+              <li>Если контент не обновился — проверь fetch, кэш и структуру JSON.</li>
             </ul>
           `
         }
@@ -178,17 +176,17 @@
     };
 
     const DATABASE_TENANT_FALLBACK = {
-      companyTitle: "База бренда",
-      companySubtitle: "Материалы по текущему бренду пока не настроены.",
-      note: "Для этого бренда ещё не заполнена база знаний. Можно добавить контент через tenant config.",
+      companyTitle: "База компании",
+      companySubtitle: "Материалы, правила и FAQ по текущей компании.",
+      note: "Для этой компании база знаний ещё не подключена или файл не найден.",
       sections: [
         {
           id: "tenant-empty-about",
-          title: "О бренде",
+          title: "О компании",
           content: `
             <p>
-              Здесь должна отображаться базовая информация о бренде:
-              позиционирование, направление, ключевые продукты и особенности работы.
+              Здесь должна отображаться информация по текущей компании:
+              позиционирование, продукты, процессы, правила и особенности работы.
             </p>
           `
         },
@@ -197,8 +195,8 @@
           title: "FAQ и рабочие материалы",
           content: `
             <p>
-              Здесь можно разместить ответы на частые вопросы, внутренние инструкции,
-              скрипты, регламенты и подсказки для команды.
+              Здесь можно разместить инструкции, частые вопросы, скрипты,
+              регламенты, ссылки и быстрые подсказки по работе команды.
             </p>
           `
         }
@@ -206,6 +204,7 @@
     };
 
     let currentTenantConfig = null;
+    let currentTenantDatabase = null;
 
     function toggleDatabaseAccordion(button) {
       const card = button.closest(".accordion-card");
@@ -220,6 +219,18 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+    }
+
+    function slugify(value) {
+      return String(value ?? "")
+        .trim()
+        .toLowerCase()
+        .replace(/['"`’]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/_/g, "-")
+        .replace(/[^a-z0-9а-яё-]/gi, "")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
     }
 
     function buildAccordionSection(section, nested = false) {
@@ -251,43 +262,65 @@
         .join("");
     }
 
-    function getTenantBrandName(tenantConfig) {
+    function getTenantCompanyName(tenantConfig) {
       return (
-        tenantConfig?.brandName ||
         tenantConfig?.companyName ||
+        tenantConfig?.brandName ||
         tenantConfig?.tenantName ||
         tenantConfig?.name ||
-        "бренд компании"
+        ""
       );
     }
 
-    function normalizeTenantKnowledgeBase(tenantConfig) {
-      const kb =
-        tenantConfig?.knowledgeBase ||
-        tenantConfig?.databaseKnowledgeBase ||
-        tenantConfig?.tenantKnowledgeBase ||
-        null;
+    function getTenantDatabaseCandidates(tenantConfig) {
+      const candidates = [
+        tenantConfig?.tenantId,
+        tenantConfig?.tenantSlug,
+        tenantConfig?.slug,
+        tenantConfig?.companySlug,
+        tenantConfig?.brandSlug,
+        tenantConfig?.companyName,
+        tenantConfig?.brandName,
+        tenantConfig?.tenantName,
+        tenantConfig?.name
+      ]
+        .filter(Boolean)
+        .map((value) => slugify(value))
+        .filter(Boolean);
 
-      if (!kb) return DATABASE_TENANT_FALLBACK;
+      return [...new Set(candidates)];
+    }
 
-      const companyTitle =
-        kb.companyTitle ||
-        tenantConfig?.brandName ||
-        tenantConfig?.companyName ||
-        tenantConfig?.tenantName ||
-        "База бренда";
+    async function loadTenantDatabase(tenantConfig) {
+      const candidates = getTenantDatabaseCandidates(tenantConfig);
 
-      const companySubtitle =
-        kb.companySubtitle ||
-        kb.subtitle ||
-        "Материалы, правила и FAQ по текущему бренду.";
+      for (const candidate of candidates) {
+        const path = `../config/database/${candidate}.json`;
 
-      const note =
-        kb.note ||
-        "Эти материалы завязаны на tenant config и должны отличаться для каждого бренда.";
+        try {
+          const response = await fetch(path, { cache: "no-store" });
+          if (!response.ok) continue;
 
-      const sections = Array.isArray(kb.sections) && kb.sections.length
-        ? kb.sections.map((section, index) => ({
+          const data = await response.json();
+          if (data && typeof data === "object") {
+            return data;
+          }
+        } catch (error) {
+          // ignore and continue to next candidate
+        }
+      }
+
+      return null;
+    }
+
+    function normalizeTenantDatabase(tenantConfig, databaseData) {
+      const companyName = getTenantCompanyName(tenantConfig) || "текущая компания";
+      const source = databaseData && typeof databaseData === "object"
+        ? databaseData
+        : DATABASE_TENANT_FALLBACK;
+
+      const sections = Array.isArray(source.sections) && source.sections.length
+        ? source.sections.map((section, index) => ({
             id: section.id || `tenant-section-${index + 1}`,
             title: section.title || `Раздел ${index + 1}`,
             content: section.content || "<p>Раздел пока пуст.</p>"
@@ -295,16 +328,27 @@
         : DATABASE_TENANT_FALLBACK.sections;
 
       return {
-        companyTitle,
-        companySubtitle,
-        note,
+        companyTitle:
+          source.companyTitle ||
+          source.title ||
+          companyName,
+        companySubtitle:
+          source.companySubtitle ||
+          source.subtitle ||
+          `Материалы, правила и FAQ по компании ${companyName}.`,
+        note:
+          source.note ||
+          `Здесь собраны материалы, которые относятся только к компании ${companyName}.`,
         sections
       };
     }
 
     function renderTenantKnowledgeBase() {
-      const tenantKb = normalizeTenantKnowledgeBase(currentTenantConfig);
-      const brandName = getTenantBrandName(currentTenantConfig);
+      const companyName = getTenantCompanyName(currentTenantConfig);
+      const tenantDatabase = normalizeTenantDatabase(
+        currentTenantConfig,
+        currentTenantDatabase
+      );
 
       const heroSubtitleEl = document.getElementById("databaseHeroSubtitle");
       const secondBaseNameEl = document.getElementById("databaseSecondBaseName");
@@ -314,30 +358,39 @@
       const tenantSectionsEl = document.getElementById("databaseTenantSections");
 
       if (heroSubtitleEl) {
-        heroSubtitleEl.textContent = `Внутренние материалы по работе с AI CENTER и брендом ${brandName}.`;
+        heroSubtitleEl.textContent = companyName
+          ? `Внутренние материалы по работе с AI CENTER и ${companyName}.`
+          : "Внутренние материалы по работе с AI CENTER и текущей компанией.";
       }
 
       if (secondBaseNameEl) {
-        secondBaseNameEl.textContent = brandName;
+        secondBaseNameEl.textContent = companyName || "Текущая компания";
       }
 
       if (tenantTitleEl) {
-        tenantTitleEl.textContent = tenantKb.companyTitle || brandName;
+        tenantTitleEl.textContent = tenantDatabase.companyTitle;
       }
 
       if (tenantSubtitleEl) {
-        tenantSubtitleEl.textContent = tenantKb.companySubtitle;
+        tenantSubtitleEl.textContent = tenantDatabase.companySubtitle;
       }
 
       if (tenantNoteEl) {
-        tenantNoteEl.textContent = tenantKb.note;
+        tenantNoteEl.textContent = tenantDatabase.note;
       }
 
       if (tenantSectionsEl) {
-        tenantSectionsEl.innerHTML = tenantKb.sections
+        tenantSectionsEl.innerHTML = tenantDatabase.sections
           .map((section) => buildAccordionSection(section, true))
           .join("");
       }
+    }
+
+    async function bootstrapTenantDatabase() {
+      renderTenantKnowledgeBase();
+
+      currentTenantDatabase = await loadTenantDatabase(currentTenantConfig);
+      renderTenantKnowledgeBase();
     }
 
     function requestTenantConfig() {
@@ -346,13 +399,13 @@
       }
     }
 
-    window.addEventListener("message", (event) => {
+    window.addEventListener("message", async (event) => {
       const data = event.data;
       if (!data || typeof data !== "object") return;
 
       if (data.type === "tenant-config-response") {
         currentTenantConfig = data.config || null;
-        renderTenantKnowledgeBase();
+        await bootstrapTenantDatabase();
       }
     });
 
