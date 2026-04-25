@@ -23,18 +23,14 @@
     }
 
     .support-lead {
-      margin: 0;
+      margin: 0 0 12px;
       font-size: 14px;
       line-height: 1.55;
       color: #475569;
     }
 
-    .support-lead + .support-lead {
-      margin-top: 10px;
-    }
-
     .support-summary-box {
-      margin-top: 14px;
+      margin-top: 0;
       padding: 12px 14px;
       border-radius: 14px;
       background: linear-gradient(
@@ -75,18 +71,6 @@
       font-weight: 800;
       color: #111827;
       word-break: break-word;
-    }
-
-    .support-list {
-      margin: 14px 0 0;
-      padding-left: 18px;
-      color: #374151;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .support-list li + li {
-      margin-top: 8px;
     }
 
     .support-chat-note {
@@ -212,18 +196,18 @@
 <body class="module-body">
   <div class="page page-my-agent support-page">
 
-    <!-- 1. Описание модуля -->
-    <section class="card-section">
-      <div class="card-section-header">
-        <h2 class="card-section-title">Центр поддержки</h2>
-        <p class="card-section-subtitle">Помощь по работе с миниаппом, модулями и доступами</p>
-      </div>
-      <div class="card-section-body">
+    <!-- 1. Описание модуля как аккордеон -->
+    <section class="card-section accordion-card open">
+      <button class="card-section-header accordion-header" type="button">
+        <div>
+          <h2 class="card-section-title">Центр поддержки</h2>
+          <p class="card-section-subtitle">Помощь по работе с сервисом</p>
+        </div>
+        <span class="accordion-header-icon" aria-hidden="true"></span>
+      </button>
+      <div class="card-section-body accordion-body">
         <p class="support-lead">
-          Этот модуль нужен для быстрых вопросов по работе сервиса, технических ошибок, доступов и общих организационных моментов.
-        </p>
-        <p class="support-lead">
-          Здесь пользователь может написать в поддержку, получить базовые ответы по FAQ и при необходимости передать кейс на ручную обработку.
+          Здесь вы можете написать в поддержку, получить базовые ответы по FAQ и обратиться с предложением.
         </p>
 
         <div class="support-summary-box">
@@ -240,14 +224,6 @@
             <span class="support-summary-value">Доступы, ошибки, оплаты, модули, предложения</span>
           </div>
         </div>
-
-        <ul class="support-list">
-          <li>Помощь по входу, доступам и настройке профиля.</li>
-          <li>Ответы по работе модулей и навигации внутри миниаппа.</li>
-          <li>Обработка технических ошибок и нестандартных ситуаций.</li>
-          <li>Вопросы по подписке, оплате и статусу доступа.</li>
-          <li>Сбор обратной связи, предложений и пожеланий по сервису.</li>
-        </ul>
       </div>
     </section>
 
