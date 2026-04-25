@@ -227,7 +227,7 @@
         "Поддержка по технике, оплатам и интеграциям.",
         "Канал обратной связи по продукту."
       ],
-      "page": "modules-support-desk/index.html",
+      "page": "modules-support/support.html",
       "enabled": true,
       "category": "core",
       "requiresPayment": false
