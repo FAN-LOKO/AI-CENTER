@@ -120,7 +120,6 @@
       }
 
       function getHomeConfig() {
-        // Правила home приходят из merged tenant config (product-config + overlay)
         return TENANTCONFIG?.home || {};
       }
 
@@ -160,7 +159,6 @@
       // --- Tenant modules (каталог продукта) ---
 
       function getTenantModulesRaw() {
-        // Fallback на случай, если shell/tenant-loader не отдал каталог
         const fallbackModules = [
           {
             id: 'ai-agent',
@@ -184,7 +182,7 @@
             id: 'support-desk',
             title: 'Support Desk',
             titleRu: 'Центр поддержки',
-            page: 'modules-support-desk/index.html',
+            page: 'modules-support/support.html',
             requiresPayment: false,
             enabled: true,
             category: 'core'
@@ -240,9 +238,7 @@
               150
             );
           } else {
-            console.warn(
-              '[Home] tenant modules not available after 20 attempts'
-            );
+            console.warn('[Home] tenant modules not available after 20 attempts');
             resolve([]);
           }
         });
@@ -251,7 +247,6 @@
       // --- User access ---
 
       function getDefaultUserModuleAccess() {
-        // По умолчанию считаем, что базовый модуль агента активен с небольшим запасом дней
         return {
           'ai-agent': {
             paid: true,
@@ -289,7 +284,6 @@
             const isAgent = m.id === agentId;
 
             if (isAlwaysFree) {
-              // Всегда бесплатные модули (Knowledge Hub, Support Desk)
               return {
                 id: m.id,
                 title: m.title,
@@ -308,7 +302,6 @@
             }
 
             if (isAgent) {
-              // Базовый модуль "Подключение агента"
               return {
                 id: m.id,
                 title: m.title,
@@ -329,7 +322,6 @@
               };
             }
 
-            // Остальные модули
             return {
               id: m.id,
               title: m.title,
@@ -450,6 +442,11 @@
         window.parent?.postMessage?.({ type: 'navigate', page, tab }, '*');
       }
 
+      function resolveHomeModulePage(mod) {
+        if (mod?.page) return mod.page;
+        return 'modules.html';
+      }
+
       function renderHomeModules() {
         const container = getHomeModulesListEl();
         if (!container) return;
@@ -461,7 +458,8 @@
             frozen: !!mod.frozen,
             paid: !!mod.paid,
             daysLeft:
-              typeof mod.daysLeft === 'number' ? mod.daysLeft : null
+              typeof mod.daysLeft === 'number' ? mod.daysLeft : null,
+            page: mod.page || null
           }))
         );
 
@@ -486,6 +484,7 @@
             const badge = getModuleBadge(mod);
             const status = getModuleStatusText(mod);
             const frozen = !!mod.frozen;
+            const targetPage = resolveHomeModulePage(mod);
 
             let actionText = getText(
               'homeActionOpenModule',
@@ -495,10 +494,7 @@
             if (frozen) {
               actionText =
                 mod.id === agentId
-                  ? getText(
-                      'homeActionPayModule',
-                      'Оплатить модуль'
-                    )
+                  ? getText('homeActionPayModule', 'Оплатить модуль')
                   : getText('homeActionUnavailable', 'Недоступен');
             }
 
@@ -508,9 +504,9 @@
                 <div class="home-module-title">${
                   mod.displayTitle || mod.title
                 }</div>
-                <span class="home-module-badge ${badge.cls}">${
-                  badge.text
-                }</span>
+                <span class="home-module-badge ${badge.cls}">
+                  ${badge.text}
+                </span>
               </div>
               <p class="home-module-status ${status.cls}">${status.text}</p>
               <div class="home-module-actions">
@@ -519,7 +515,7 @@
                   class="btn btn-block home-module-open-btn${
                     frozen ? ' disabled' : ''
                   }"
-                  data-module-page="${mod.page}"
+                  data-module-page="${targetPage}"
                   data-module-id="${mod.id}"
                   data-frozen="${frozen ? '1' : '0'}"
                 >
@@ -533,19 +529,18 @@
         container.querySelectorAll('[data-module-page]').forEach(btn => {
           btn.addEventListener('click', () => {
             const page = btn.getAttribute('data-module-page');
-            const moduleId = btn.getAttribute('data-module-id');
             const frozen = btn.getAttribute('data-frozen') === '1';
-            const agentId = getHomeAgentId();
-
-            if (!page) return;
 
             if (frozen) {
-              // Замороженные платные модули ведут на оплаты
               navigateFromHome('payments.html', 'payments');
               return;
             }
 
-            // Активные модули (включая базовый Agent Connect)
+            if (!page) {
+              navigateFromHome('modules.html', 'modules');
+              return;
+            }
+
             navigateFromHome(page, 'modules');
           });
         });
@@ -604,8 +599,7 @@
       }
 
       function setHomeAvatar(user, fullName) {
-        const fallbackEl =
-          document.getElementById('homeProfileAvatarFallback');
+        const fallbackEl = document.getElementById('homeProfileAvatarFallback');
         const imgEl = document.getElementById('homeProfileAvatarImage');
         const letter = (fullName || 'U').charAt(0).toUpperCase();
 
@@ -637,17 +631,11 @@
         if (!user) {
           if (nameEl) nameEl.textContent = '';
           if (usernameEl)
-            usernameEl.textContent = getText(
-              'homeGuestUsername',
-              'username'
-            );
+            usernameEl.textContent = getText('homeGuestUsername', 'username');
           if (idEl)
             idEl.textContent = getText('homeGuestId', 'ID');
           if (statusEl)
-            statusEl.textContent = getText(
-              'homeGuestStatus',
-              'GUEST'
-            );
+            statusEl.textContent = getText('homeGuestStatus', 'GUEST');
           if (noteEl)
             noteEl.textContent = getText(
               'homeDefaultNote',
@@ -662,20 +650,14 @@
         if (usernameEl) {
           usernameEl.textContent = user.username
             ? `@${user.username}`
-            : getText(
-                'homeUnknownUsername',
-                'username не указан'
-              );
+            : getText('homeUnknownUsername', 'username не указан');
         }
         if (idEl)
           idEl.textContent = user.id
             ? `ID: ${user.id}`
             : getText('homeGuestId', 'ID');
         if (statusEl)
-          statusEl.textContent = getText(
-            'homeOnlineStatus',
-            'ONLINE'
-          );
+          statusEl.textContent = getText('homeOnlineStatus', 'ONLINE');
         if (noteEl)
           noteEl.textContent = getText(
             'homeDefaultNote',
@@ -715,18 +697,13 @@
             };
           });
 
-          // Базовый модуль подключения агента всегда есть, daysLeft можем доопределять
           accessMap['ai-agent'] = {
             paid: true,
             frozen: false,
-            daysLeft:
-              accessMap['ai-agent']?.daysLeft ?? 5
+            daysLeft: accessMap['ai-agent']?.daysLeft ?? 5
           };
 
-          USERMODULES = buildHomeModulesFromTenant(
-            TENANTMODULES,
-            accessMap
-          );
+          USERMODULES = buildHomeModulesFromTenant(TENANTMODULES, accessMap);
           _modulesReady = true;
           renderHomeModules();
         } else if (data.type === 'user-profile') {
@@ -770,19 +747,9 @@
         applyTenantContent();
         renderHomeModules();
 
-        // Запрашиваем фичи, профиль и модули пользователя у shell
-        window.parent?.postMessage?.(
-          { type: 'request-app-features' },
-          '*'
-        );
-        window.parent?.postMessage?.(
-          { type: 'request-user-profile' },
-          '*'
-        );
-        window.parent?.postMessage?.(
-          { type: 'request-user-modules' },
-          '*'
-        );
+        window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+        window.parent?.postMessage?.({ type: 'request-user-profile' }, '*');
+        window.parent?.postMessage?.({ type: 'request-user-modules' }, '*');
       });
     </script>
   </body>
