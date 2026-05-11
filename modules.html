@@ -60,10 +60,10 @@
     let USERMODULEACCESS = {};
     let _modulesReady = false;
 
-    const AVAILABLE_MODULE_IDS = ['ai-agent', 'knowledge-hub', 'support-desk', 'vpn-partner'];
+    const AVAILABLE_MODULE_IDS = ['ai-agent', 'knowledge-hub', 'support-desk', 'partner-vpn'];
     const BASE_MODULE_IDS = ['ai-agent'];
     const FREE_MODULE_IDS = ['knowledge-hub', 'support-desk'];
-const EXTERNAL_MODULE_IDS = ['vpn-partner'];
+const EXTERNAL_MODULE_IDS = ['partner-vpn'];
 
     const VPN_PARTNER_CARD = {
       id: 'partner-vpn',
@@ -356,6 +356,7 @@ const EXTERNAL_MODULE_IDS = ['vpn-partner'];
 
     function isModuleAccessible(module) {
       if (!module) return false;
+      if (EXTERNAL_MODULE_IDS.includes(module.id)) return true;
       if (!isAvailableModule(module)) return false;
       if (!module.requiresPayment) return true;
 
@@ -373,6 +374,7 @@ const EXTERNAL_MODULE_IDS = ['vpn-partner'];
 
     function getModuleOpenButtonText(module) {
       if (!module) return getText('modulesActionOpen', 'Открыть модуль');
+      if (EXTERNAL_MODULE_IDS.includes(module.id)) return getText('modulesActionOpen', 'Открыть');
 
       if (!isAvailableModule(module)) {
         return getText('modulesActionSoon', 'В разработке');
@@ -382,6 +384,7 @@ const EXTERNAL_MODULE_IDS = ['vpn-partner'];
     }
 
     function isModuleButtonDisabled(module) {
+      if (EXTERNAL_MODULE_IDS.includes(module.id)) return false;
       return !isAvailableModule(module);
     }
 
@@ -395,6 +398,14 @@ const EXTERNAL_MODULE_IDS = ['vpn-partner'];
     function openModule(module) {
       if (!module) return;
       if (APPFEATURES.modules === false) return;
+
+      if (EXTERNAL_MODULE_IDS.includes(module.id)) {
+        if (module.externalUrl) {
+          window.open(module.externalUrl, '_blank', 'noopener,noreferrer');
+        }
+        return;
+      }
+
       if (!isAvailableModule(module)) return;
 
       const moduleRoute = getModuleRoute(module);
@@ -455,6 +466,13 @@ const EXTERNAL_MODULE_IDS = ['vpn-partner'];
         return {
           text: 'Бесплатный',
           cls: 'is-free'
+        };
+      }
+
+      if (EXTERNAL_MODULE_IDS.includes(module.id)) {
+        return {
+          text: 'Внешний сервис',
+          cls: 'external'
         };
       }
 
