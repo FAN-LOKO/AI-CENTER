@@ -67,6 +67,11 @@
   ],
   "texts": {
     "navPayments": "Оплата",
+
+    "myAgentAccessBlockedText": "Для получения информации от агента необходимо оплатить подписку на базовый модуль «Подключение агента».",
+    "myAgentAccessBlockedPlaceholder": "Оплатите модуль «Подключение агента», чтобы писать агенту",
+    "myAgentAccessPayButton": "Оплатить подписку",
+
     "paymentsPageTitle": "Оплата — AI FIT CENTER",
     "paymentsHeaderTitle": "Оплата",
     "paymentsHeaderSubtitle": "Выберите тариф для подключения модуля",
