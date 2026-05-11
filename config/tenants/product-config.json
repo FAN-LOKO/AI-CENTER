@@ -118,7 +118,7 @@
       "page": "modules-agent/profile.html",
       "enabled": true,
       "category": "core",
-      "requiresPayment": false
+      "requiresPayment": true
     },
     {
       "_comment": "Модуль создания и анализа контента",
