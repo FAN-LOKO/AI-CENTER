@@ -28,13 +28,34 @@
           <div class="chat-messages" id="clientChatMessages">
             <div class="chat-message chat-message-agent">
               <div class="chat-message-meta">
-                <span id="myAgentWelcomeAuthor">Агент</span>
+                <span id="myAgentWelcomeAuthor">AI-консультант</span>
                 <span>12:00</span>
               </div>
               <div class="chat-bubble" id="myAgentWelcomeMessage">
-                Привет! Чем могу помочь?
+                Здравствуйте! Чем могу помочь?
               </div>
             </div>
+          </div>
+
+          <div
+            id="agentAccessBanner"
+            class="agent-access-banner"
+            hidden
+          >
+            <div
+              class="agent-access-banner__text"
+              id="agentAccessBannerText"
+            >
+              Для получения информации от агента необходимо оплатить подписку на базовый модуль «Подключение агента».
+            </div>
+
+            <button
+              id="agentAccessPayButton"
+              class="btn btn-primary agent-access-banner__button"
+              type="button"
+            >
+              Оплатить подписку
+            </button>
           </div>
 
           <div class="chat-composer">
@@ -69,15 +90,13 @@
                 >
                   <path
                     d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 1 1 2 0 7 7 0 0 1-6 6.92V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-3.08A7 7 0 0 1 5 11a1 1 0 1 1 2 0 5 5 0 0 0 10 0z"
+                    fill="currentColor"
                   />
                 </svg>
               </button>
             </div>
 
-            <p
-              id="clientSendMessageStatus"
-              class="connect-status-msg"
-            ></p>
+            <p id="clientSendMessageStatus" class="connect-status-msg"></p>
           </div>
         </div>
       </div>
@@ -86,6 +105,7 @@
 
   <script>
     let TENANTCONFIG = null;
+    let USERMODULES = [];
     let APPFEATURES = {
       home: true,
       myAgent: true,
@@ -96,6 +116,7 @@
       settings: true
     };
 
+    const AGENT_MODULE_ID = "ai-agent";
     const tg = window.Telegram?.WebApp || null;
 
     let mediaRecorder = null;
@@ -107,83 +128,124 @@
       try {
         return window.parent?.AICAppShell?.getTenantConfig?.() || null;
       } catch (error) {
-        console.error('[ClientChat] tenant config read failed', error);
+        console.error("[My Agent] tenant config read failed", error);
         return null;
       }
     }
 
-    function getText(key, fallback = '') {
-      return TENANTCONFIG?.texts?.[key] ?? fallback;
+    function getUserModules() {
+      try {
+        return window.parent?.AICAppShell?.getUserModules?.() || [];
+      } catch (error) {
+        console.error("[My Agent] user modules read failed", error);
+        return [];
+      }
     }
 
     function getAppFeatures() {
       try {
         return window.parent?.AICAppShell?.getAppFeatures?.() || {};
       } catch (error) {
-        console.error('[ClientChat] app features read failed', error);
+        console.error("[My Agent] app features read failed", error);
         return {};
       }
     }
 
+    function getText(key, fallback) {
+      return TENANTCONFIG?.texts?.[key] ?? fallback;
+    }
+
+    function getAgentAccessBlockedText() {
+      return getText(
+        "myAgentAccessBlockedText",
+        "Для получения информации от агента необходимо оплатить подписку на базовый модуль «Подключение агента»."
+      );
+    }
+
+    function hasPaidAgentAccess() {
+      const modules = Array.isArray(USERMODULES) ? USERMODULES : [];
+      const agentModule = modules.find(
+        (mod) => String(mod?.id) === AGENT_MODULE_ID
+      );
+
+      if (!agentModule) return false;
+      return agentModule.paid === true && agentModule.frozen !== true;
+    }
+
+    function navigateToAgentPayment() {
+      try {
+        window.parent?.postMessage?.(
+          {
+            type: "navigate",
+            page: "payments.html",
+            moduleId: AGENT_MODULE_ID
+          },
+          "*"
+        );
+      } catch (error) {
+        console.error("[My Agent] payment navigation failed", error);
+      }
+    }
+
     function showClientStatus(message) {
-      const statusEl = document.getElementById('clientSendMessageStatus');
+      const statusEl = document.getElementById("clientSendMessageStatus");
       if (!statusEl) return;
 
-      statusEl.textContent = message || '';
-      statusEl.classList.remove('error');
-      statusEl.classList.add('success');
+      statusEl.textContent = message;
+      statusEl.classList.remove("error");
+      statusEl.classList.add("success");
     }
 
     function showClientError(message) {
-      const statusEl = document.getElementById('clientSendMessageStatus');
+      const statusEl = document.getElementById("clientSendMessageStatus");
       if (!statusEl) {
         alert(message);
         return;
       }
 
-      statusEl.textContent = message || '';
-      statusEl.classList.remove('success');
-      statusEl.classList.add('error');
+      statusEl.textContent = message;
+      statusEl.classList.remove("success");
+      statusEl.classList.add("error");
     }
 
     function clearClientStatus() {
-      const statusEl = document.getElementById('clientSendMessageStatus');
+      const statusEl = document.getElementById("clientSendMessageStatus");
       if (!statusEl) return;
 
-      statusEl.textContent = '';
-      statusEl.classList.remove('success');
-      statusEl.classList.remove('error');
+      statusEl.textContent = "";
+      statusEl.classList.remove("success");
+      statusEl.classList.remove("error");
     }
 
     function getCurrentTimeLabel() {
       const now = new Date();
-      return now.toLocaleTimeString('ru-RU', {
-        hour: '2-digit',
-        minute: '2-digit'
+      return now.toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit"
       });
     }
 
     function appendClientChatMessage(text) {
-      const container = document.getElementById('clientChatMessages');
+      const container = document.getElementById("clientChatMessages");
       if (!container) return;
 
-      const wrapper = document.createElement('div');
-      wrapper.className = 'chat-message chat-message-client';
+      const wrapper = document.createElement("div");
+      wrapper.className = "chat-message chat-message-client";
 
-      const meta = document.createElement('div');
-      meta.className = 'chat-message-meta';
+      const meta = document.createElement("div");
+      meta.className = "chat-message-meta";
 
-      const author = document.createElement('span');
-      author.textContent = getText('clientChatAuthorYou', 'Вы');
+      const author = document.createElement("span");
+      author.textContent = getText("clientChatAuthorYou", "Вы");
 
-      const time = document.createElement('span');
+      const time = document.createElement("span");
       time.textContent = getCurrentTimeLabel();
 
       meta.appendChild(author);
       meta.appendChild(time);
 
-      const bubble = document.createElement('div');
-      bubble.className = 'chat-bubble';
+      const bubble = document.createElement("div");
+      bubble.className = "chat-bubble";
       bubble.textContent = text;
 
       wrapper.appendChild(meta);
@@ -194,28 +256,27 @@
     }
 
     function appendClientVoiceMessage(label) {
-      const container = document.getElementById('clientChatMessages');
+      const container = document.getElementById("clientChatMessages");
       if (!container) return;
 
-      const wrapper = document.createElement('div');
-      wrapper.className = 'chat-message chat-message-client';
+      const wrapper = document.createElement("div");
+      wrapper.className = "chat-message chat-message-client";
 
-      const meta = document.createElement('div');
-      meta.className = 'chat-message-meta';
+      const meta = document.createElement("div");
+      meta.className = "chat-message-meta";
 
-      const author = document.createElement('span');
-      author.textContent = getText('clientChatAuthorVoice', 'Вы (голосовое)');
+      const author = document.createElement("span");
+      author.textContent = getText("clientChatAuthorVoice", "Вы");
 
-      const time = document.createElement('span');
+      const time = document.createElement("span");
       time.textContent = getCurrentTimeLabel();
 
       meta.appendChild(author);
       meta.appendChild(time);
 
-      const bubble = document.createElement('div');
-      bubble.className = 'chat-bubble';
-      bubble.textContent =
-        label || getText('clientChatVoiceLabel', 'Голосовое сообщение');
+      const bubble = document.createElement("div");
+      bubble.className = "chat-bubble";
+      bubble.textContent = label || getText("clientChatVoiceLabel", "Голосовое сообщение");
 
       wrapper.appendChild(meta);
       wrapper.appendChild(bubble);
@@ -224,100 +285,153 @@
       container.scrollTop = container.scrollHeight;
     }
 
+    function renderAgentAccessState() {
+      const hasAccess = hasPaidAgentAccess();
+
+      const banner = document.getElementById("agentAccessBanner");
+      const bannerText = document.getElementById("agentAccessBannerText");
+      const payBtn = document.getElementById("agentAccessPayButton");
+      const input = document.getElementById("clientMessageInput");
+      const sendBtn = document.getElementById("clientSendMessageButton");
+      const voiceBtn = document.getElementById("clientVoiceButton");
+
+      const blockedText = getAgentAccessBlockedText();
+      const placeholderAllowed = getText(
+        "clientChatInputPlaceholder",
+        "Введите сообщение..."
+      );
+      const placeholderBlocked = getText(
+        "myAgentAccessBlockedPlaceholder",
+        "Оплатите модуль «Подключение агента», чтобы писать агенту"
+      );
+
+      if (banner) {
+        banner.hidden = hasAccess;
+      }
+
+      if (bannerText) {
+        bannerText.textContent = blockedText;
+      }
+
+      if (payBtn) {
+        payBtn.hidden = hasAccess;
+      }
+
+      if (input) {
+        input.disabled = !hasAccess;
+        input.placeholder = hasAccess ? placeholderAllowed : placeholderBlocked;
+      }
+
+      if (sendBtn) {
+        sendBtn.disabled = !hasAccess;
+      }
+
+      if (voiceBtn) {
+        voiceBtn.disabled = !hasAccess;
+      }
+    }
+
     function sendClientTextMessage() {
       if (APPFEATURES.sharedChat === false) {
         showClientError(
-          getText('clientChatDisabledText', 'Чат сейчас недоступен.')
+          getText("clientChatDisabledText", "Чат сейчас недоступен.")
         );
         return;
       }
 
-      const input = document.getElementById('clientMessageInput');
+      if (!hasPaidAgentAccess()) {
+        showClientError(getAgentAccessBlockedText());
+        return;
+      }
+
+      const input = document.getElementById("clientMessageInput");
       if (!input) return;
 
-      const text = (input.value || '').trim();
+      const text = input.value.trim();
       if (!text) return;
 
       appendClientChatMessage(text);
-      input.value = '';
+      input.value = "";
       clearClientStatus();
-
       showClientStatus(
-        getText('clientChatTextSentStatus', 'Сообщение отправлено агенту...')
+        getText("clientChatTextSentStatus", "Сообщение отправлено.")
       );
 
       try {
-        tg?.HapticFeedback?.impactOccurred?.('medium');
+        tg?.HapticFeedback?.impactOccurred?.("medium");
       } catch (error) {
-        console.warn('[ClientChat] haptic feedback failed', error);
+        console.warn("[My Agent] haptic feedback failed", error);
       }
 
       window.parent?.postMessage?.(
         {
-          type: 'client-send-message',
+          type: "client-send-message",
           text
         },
-        '*'
+        "*"
       );
     }
 
     function getSupportedMimeType() {
       const candidates = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/mp4',
-        'audio/m4a',
-        'audio/aac',
-        'audio/ogg',
-        'audio/wav'
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4",
+        "audio/m4a",
+        "audio/aac",
+        "audio/ogg",
+        "audio/wav"
       ];
 
-      if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) {
-        return '';
+      if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) {
+        return "";
       }
 
       for (const type of candidates) {
         try {
-          if (MediaRecorder.isTypeSupported(type)) {
-            return type;
-          }
+          if (MediaRecorder.isTypeSupported(type)) return type;
         } catch (error) {
-          console.warn('[ClientChat] mime check failed', type, error);
+          console.warn("[My Agent] mime check failed", type, error);
         }
       }
 
-      return '';
+      return "";
     }
 
     function cleanupVoiceState() {
       if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-        mediaStream = null;
+        mediaStream.getTracks().forEach((track) => track.stop());
       }
 
+      mediaStream = null;
       mediaRecorder = null;
       recordedChunks = [];
       isRecording = false;
 
-      const voiceBtn = document.getElementById('clientVoiceButton');
+      const voiceBtn = document.getElementById("clientVoiceButton");
       if (voiceBtn) {
-        voiceBtn.classList.remove('recording');
+        voiceBtn.classList.remove("recording");
       }
     }
 
     async function startVoiceRecording() {
       if (APPFEATURES.sharedChat === false) {
         showClientError(
-          getText('clientChatDisabledText', 'Чат сейчас недоступен.')
+          getText("clientChatDisabledText", "Чат сейчас недоступен.")
         );
+        return;
+      }
+
+      if (!hasPaidAgentAccess()) {
+        showClientError(getAgentAccessBlockedText());
         return;
       }
 
       if (!navigator.mediaDevices?.getUserMedia) {
         showClientError(
           getText(
-            'clientChatVoiceUnsupported',
-            'Запись голоса не поддерживается на этом устройстве/в этом браузере.'
+            "clientChatVoiceUnsupported",
+            "Запись голосовых сообщений не поддерживается на этом устройстве."
           )
         );
         return;
@@ -334,37 +448,38 @@
 
         mediaRecorder = new MediaRecorder(mediaStream, options);
 
-        mediaRecorder.addEventListener('dataavailable', event => {
+        mediaRecorder.addEventListener("dataavailable", (event) => {
           if (event.data && event.data.size > 0) {
             recordedChunks.push(event.data);
           }
         });
 
-        mediaRecorder.addEventListener('stop', () => {
-          const blobType = mimeType || 'audio/webm';
+        mediaRecorder.addEventListener("stop", () => {
+          const blobType = mimeType || "audio/webm";
           const blob = new Blob(recordedChunks, { type: blobType });
 
           appendClientVoiceMessage(
-            getText('clientChatVoiceLabel', 'Голосовое сообщение')
+            getText("clientChatVoiceLabel", "Голосовое сообщение")
           );
 
           const reader = new FileReader();
+
           reader.onloadend = () => {
             const base64Audio = reader.result;
 
             window.parent?.postMessage?.(
               {
-                type: 'client-send-voice',
+                type: "client-send-voice",
                 audio: base64Audio,
                 mimeType: blob.type || blobType
               },
-              '*'
+              "*"
             );
 
             showClientStatus(
               getText(
-                'clientChatVoiceSentStatus',
-                'Голосовое отправлено агенту...'
+                "clientChatVoiceSentStatus",
+                "Голосовое сообщение отправлено."
               )
             );
 
@@ -374,8 +489,8 @@
           reader.onerror = () => {
             showClientError(
               getText(
-                'clientChatVoiceReadError',
-                'Не удалось обработать голосовое сообщение.'
+                "clientChatVoiceReadError",
+                "Не удалось обработать голосовое сообщение."
               )
             );
             cleanupVoiceState();
@@ -387,26 +502,29 @@
         mediaRecorder.start();
         isRecording = true;
 
-        const voiceBtn = document.getElementById('clientVoiceButton');
+        const voiceBtn = document.getElementById("clientVoiceButton");
         if (voiceBtn) {
-          voiceBtn.classList.add('recording');
+          voiceBtn.classList.add("recording");
         }
 
         try {
-          tg?.HapticFeedback?.impactOccurred?.('medium');
+          tg?.HapticFeedback?.impactOccurred?.("medium");
         } catch (error) {
-          console.warn('[ClientChat] haptic feedback failed', error);
+          console.warn("[My Agent] haptic feedback failed", error);
         }
 
         showClientStatus(
-          getText('clientChatVoiceRecordingStatus', 'Идёт запись голосового...')
+          getText(
+            "clientChatVoiceRecordingStatus",
+            "Идёт запись голосового сообщения..."
+          )
         );
       } catch (error) {
-        console.error('[ClientChat] microphone access failed', error);
+        console.error("[My Agent] microphone access failed", error);
         showClientError(
           getText(
-            'clientChatVoiceAccessError',
-            'Не удалось получить доступ к микрофону. Проверьте разрешения в Telegram/браузере.'
+            "clientChatVoiceAccessError",
+            "Не удалось получить доступ к микрофону. Проверьте разрешения в Telegram."
           )
         );
         cleanupVoiceState();
@@ -420,23 +538,23 @@
         mediaRecorder.stop();
         isRecording = false;
 
-        const voiceBtn = document.getElementById('clientVoiceButton');
+        const voiceBtn = document.getElementById("clientVoiceButton");
         if (voiceBtn) {
-          voiceBtn.classList.remove('recording');
+          voiceBtn.classList.remove("recording");
         }
 
         showClientStatus(
           getText(
-            'clientChatVoiceProcessingStatus',
-            'Обработка голосового сообщения...'
+            "clientChatVoiceProcessingStatus",
+            "Обрабатываем голосовое сообщение..."
           )
         );
       } catch (error) {
-        console.error('[ClientChat] voice stop failed', error);
+        console.error("[My Agent] voice stop failed", error);
         showClientError(
           getText(
-            'clientChatVoiceStopError',
-            'Не удалось завершить запись голосового сообщения.'
+            "clientChatVoiceStopError",
+            "Не удалось завершить запись голосового сообщения."
           )
         );
         cleanupVoiceState();
@@ -444,35 +562,46 @@
     }
 
     function syncChatAvailability() {
-      const input = document.getElementById('clientMessageInput');
-      const sendBtn = document.getElementById('clientSendMessageButton');
-      const voiceBtn = document.getElementById('clientVoiceButton');
-      const disabled = APPFEATURES.sharedChat === false;
+      const input = document.getElementById("clientMessageInput");
+      const sendBtn = document.getElementById("clientSendMessageButton");
+      const voiceBtn = document.getElementById("clientVoiceButton");
+
+      const disabledByFeature = APPFEATURES.sharedChat === false;
+      const disabledByAccess = !hasPaidAgentAccess();
+      const disabled = disabledByFeature || disabledByAccess;
 
       if (input) input.disabled = disabled;
       if (sendBtn) sendBtn.disabled = disabled;
       if (voiceBtn) voiceBtn.disabled = disabled;
 
-      if (disabled) {
+      renderAgentAccessState();
+
+      if (disabledByFeature) {
         showClientError(
-          getText('clientChatDisabledText', 'Чат сейчас недоступен.')
+          getText("clientChatDisabledText", "Чат сейчас недоступен.")
         );
-      } else {
-        clearClientStatus();
+        return;
       }
+
+      if (disabledByAccess) {
+        showClientError(getAgentAccessBlockedText());
+        return;
+      }
+
+      clearClientStatus();
     }
 
     function bindTextMessageHandlers() {
-      const input = document.getElementById('clientMessageInput');
-      const sendBtn = document.getElementById('clientSendMessageButton');
+      const input = document.getElementById("clientMessageInput");
+      const sendBtn = document.getElementById("clientSendMessageButton");
 
       if (sendBtn) {
-        sendBtn.addEventListener('click', sendClientTextMessage);
+        sendBtn.addEventListener("click", sendClientTextMessage);
       }
 
       if (input) {
-        input.addEventListener('keydown', function (event) {
-          if (event.key === 'Enter' && !event.shiftKey) {
+        input.addEventListener("keydown", function (event) {
+          if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
             sendClientTextMessage();
           }
@@ -481,124 +610,145 @@
     }
 
     function bindVoiceHandlers() {
-      const voiceBtn = document.getElementById('clientVoiceButton');
+      const voiceBtn = document.getElementById("clientVoiceButton");
       if (!voiceBtn) return;
 
-      const startEvents = ['mousedown', 'touchstart'];
-      const stopEvents = ['mouseup', 'mouseleave', 'touchend', 'touchcancel'];
+      const startEvents = ["mousedown", "touchstart"];
+      const stopEvents = ["mouseup", "mouseleave", "touchend", "touchcancel"];
 
-      startEvents.forEach(eventName => {
-        voiceBtn.addEventListener(eventName, event => {
+      startEvents.forEach((eventName) => {
+        voiceBtn.addEventListener(eventName, (event) => {
           event.preventDefault();
-          if (!isRecording) {
-            startVoiceRecording();
-          }
+          if (!isRecording) startVoiceRecording();
         });
       });
 
-      stopEvents.forEach(eventName => {
-        voiceBtn.addEventListener(eventName, event => {
+      stopEvents.forEach((eventName) => {
+        voiceBtn.addEventListener(eventName, (event) => {
           event.preventDefault();
-          if (isRecording) {
-            stopVoiceRecording();
-          }
+          if (isRecording) stopVoiceRecording();
         });
+      });
+    }
+
+    function bindAccessBannerHandlers() {
+      const payBtn = document.getElementById("agentAccessPayButton");
+      if (!payBtn) return;
+
+      payBtn.addEventListener("click", () => {
+        navigateToAgentPayment();
       });
     }
 
     function applyTenantTexts() {
-      const titleEl = document.getElementById('myAgentTitle');
-      const subtitleEl = document.getElementById('myAgentSubtitle');
-      const leadEl = document.getElementById('myAgentLead');
-      const welcomeAuthorEl = document.getElementById('myAgentWelcomeAuthor');
-      const welcomeMessageEl = document.getElementById('myAgentWelcomeMessage');
-      const inputEl = document.getElementById('clientMessageInput');
-      const sendBtnEl = document.getElementById('clientSendMessageButton');
-      const voiceBtnEl = document.getElementById('clientVoiceButton');
+      const titleEl = document.getElementById("myAgentTitle");
+      const subtitleEl = document.getElementById("myAgentSubtitle");
+      const leadEl = document.getElementById("myAgentLead");
+      const welcomeAuthorEl = document.getElementById("myAgentWelcomeAuthor");
+      const welcomeMessageEl = document.getElementById("myAgentWelcomeMessage");
+      const inputEl = document.getElementById("clientMessageInput");
+      const sendBtnEl = document.getElementById("clientSendMessageButton");
+      const voiceBtnEl = document.getElementById("clientVoiceButton");
+      const payBtnEl = document.getElementById("agentAccessPayButton");
 
-      if (titleEl) {
-        titleEl.textContent = getText('myAgentTitle', 'Мой агент');
-      }
-
+      if (titleEl) titleEl.textContent = getText("myAgentTitle", "Мой агент");
       if (subtitleEl) {
         subtitleEl.textContent = getText(
-          'myAgentSubtitle',
-          'Напишите свой вопрос, агент ответит прямо здесь.'
+          "myAgentSubtitle",
+          "Напишите свой вопрос, агент ответит прямо здесь."
         );
       }
-
       if (leadEl) {
         leadEl.textContent = getText(
-          'myAgentLead',
-          'Текстовые сообщения и голосовые заметки отправляются агенту напрямую из мини‑приложения.'
+          "myAgentLead",
+          "Текстовые сообщения и голосовые заметки отправляются агенту напрямую из мини‑приложения."
         );
       }
-
       if (welcomeAuthorEl) {
-        welcomeAuthorEl.textContent = getText('myAgentWelcomeAuthor', 'Агент');
+        welcomeAuthorEl.textContent = getText(
+          "myAgentWelcomeAuthor",
+          "AI-консультант"
+        );
       }
-
       if (welcomeMessageEl) {
         welcomeMessageEl.textContent = getText(
-          'myAgentWelcomeMessage',
-          'Привет! Чем могу помочь?'
+          "myAgentWelcomeMessage",
+          "Здравствуйте! Чем могу помочь?"
         );
       }
-
       if (inputEl) {
-        inputEl.placeholder = getText(
-          'clientChatInputPlaceholder',
-          'Введите сообщение...'
-        );
+        inputEl.placeholder = hasPaidAgentAccess()
+          ? getText("clientChatInputPlaceholder", "Введите сообщение...")
+          : getText(
+              "myAgentAccessBlockedPlaceholder",
+              "Оплатите модуль «Подключение агента», чтобы писать агенту"
+            );
       }
-
       if (sendBtnEl) {
-        sendBtnEl.textContent = getText(
-          'clientChatSendButton',
-          'Отправить'
-        );
+        sendBtnEl.textContent = getText("clientChatSendButton", "Отправить");
       }
-
       if (voiceBtnEl) {
         voiceBtnEl.setAttribute(
-          'aria-label',
-          getText(
-            'clientChatVoiceButtonLabel',
-            'Записать голосовое сообщение'
-          )
+          "aria-label",
+          getText("clientChatVoiceButtonLabel", "Записать голосовое сообщение")
+        );
+      }
+      if (payBtnEl) {
+        payBtnEl.textContent = getText(
+          "myAgentAccessPayButton",
+          "Оплатить подписку"
         );
       }
 
-      document.title =
-        getText('myAgentPageTitle', '') ||
-        getText('navMyAgent', '') ||
-        'Мой агент';
+      document.title = getText(
+        "myAgentPageTitle",
+        getText("navMyAgent", "Мой агент")
+      );
+
+      renderAgentAccessState();
     }
 
     function applyAppFeatures(features) {
-      APPFEATURES = { ...APPFEATURES, ...(features || {}) };
+      APPFEATURES = { ...APPFEATURES, ...features };
       syncChatAvailability();
     }
 
-    window.addEventListener('message', event => {
+    window.addEventListener("message", (event) => {
       const data = event.data;
-      if (!data || typeof data !== 'object') return;
+      if (!data || typeof data !== "object") return;
 
-      if (data.type === 'app-features') {
-        applyAppFeatures(data.features || {});
+      if (data.type === "app-features") {
+        applyAppFeatures(data.features);
+        return;
+      }
+
+      if (data.type === "tenant-config") {
+        TENANTCONFIG = data.config || TENANTCONFIG;
+        applyTenantTexts();
+        renderAgentAccessState();
+        return;
+      }
+
+      if (data.type === "user-modules") {
+        USERMODULES = Array.isArray(data.modules) ? data.modules : [];
+        syncChatAvailability();
       }
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener("DOMContentLoaded", function () {
       TENANTCONFIG = getTenantConfig();
+      USERMODULES = getUserModules();
       APPFEATURES = { ...APPFEATURES, ...getAppFeatures() };
 
       applyTenantTexts();
       bindTextMessageHandlers();
       bindVoiceHandlers();
+      bindAccessBannerHandlers();
       syncChatAvailability();
 
-      window.parent?.postMessage?.({ type: 'request-app-features' }, '*');
+      window.parent?.postMessage?.({ type: "request-app-features" }, "*");
+      window.parent?.postMessage?.({ type: "request-tenant-config" }, "*");
+      window.parent?.postMessage?.({ type: "request-user-modules" }, "*");
     });
   </script>
 </body>
